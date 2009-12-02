@@ -20,7 +20,7 @@
 		<property
 			name="uuid"
 		/>
-		
+		<property name="entityId" column="typedlist_id" insert="false" update="false"/>
 		
 		<list 
 			name="properties" 
@@ -47,12 +47,14 @@
 		        	name="propertyValue"
 		        	type="java.lang.String"
 		        	length="30000"/>
-		
+				<!--
 				<many-to-one 
 					name="parent"
 					class="Entity"
-					fetch="join"
+					fetch="select"
 					 />
+				-->	 
+					 
 			</composite-element>
 				
 		</list>

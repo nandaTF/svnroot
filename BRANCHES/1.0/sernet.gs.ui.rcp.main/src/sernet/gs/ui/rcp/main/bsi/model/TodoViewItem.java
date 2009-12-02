@@ -19,8 +19,27 @@ package sernet.gs.ui.rcp.main.bsi.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Hashtable;
+import java.util.Map;
+
+import sernet.gs.ui.rcp.main.ImageCache;
 
 public class TodoViewItem implements Serializable, IMassnahmeUmsetzung {
+	
+	private static final Map<String, String> umsetzungImageMap = new Hashtable<String, String>();
+	
+	static {
+		umsetzungImageMap.put(MassnahmenUmsetzung.P_UMSETZUNG_ENTBEHRLICH, ImageCache.MASSNAHMEN_UMSETZUNG_ENTBEHRLICH);
+		umsetzungImageMap.put(MassnahmenUmsetzung.P_UMSETZUNG_JA, ImageCache.MASSNAHMEN_UMSETZUNG_JA);
+		umsetzungImageMap.put(MassnahmenUmsetzung.P_UMSETZUNG_NEIN, ImageCache.MASSNAHMEN_UMSETZUNG_NEIN);
+		umsetzungImageMap.put(MassnahmenUmsetzung.P_UMSETZUNG_TEILWEISE, ImageCache.MASSNAHMEN_UMSETZUNG_TEILWEISE);
+		umsetzungImageMap.put(MassnahmenUmsetzung.P_UMSETZUNG_UNBEARBEITET, ImageCache.MASSNAHMEN_UMSETZUNG_UNBEARBEITET);
+		umsetzungImageMap.put(MassnahmenUmsetzung.P_UMSETZUNG_ESTABLISHED, ImageCache.MASSNAHMEN_UMSETZUNG_TEILWEISE);
+		umsetzungImageMap.put(MassnahmenUmsetzung.P_UMSETZUNG_MANAGED, ImageCache.MASSNAHMEN_UMSETZUNG_JA);
+		umsetzungImageMap.put(MassnahmenUmsetzung.P_UMSETZUNG_OPTIMIZING, ImageCache.MASSNAHMEN_UMSETZUNG_TEILWEISE);
+		umsetzungImageMap.put(MassnahmenUmsetzung.P_UMSETZUNG_PERFORMED, ImageCache.MASSNAHMEN_UMSETZUNG_JA);
+		umsetzungImageMap.put(MassnahmenUmsetzung.P_UMSETZUNG_PREDICTABLE, ImageCache.MASSNAHMEN_UMSETZUNG_ENTBEHRLICH);
+	}
 	
 	private String titel;
 	private String umsetzung;
@@ -42,6 +61,13 @@ public class TodoViewItem implements Serializable, IMassnahmeUmsetzung {
 
 	public String getUmsetzung() {
 		return umsetzung;
+	}
+	
+	public String getUmsetzungIcon() {
+		// ISO 27001
+		//return umsetzungImageMap.get(getStand());
+		// Grundschutz
+		return umsetzungImageMap.get(getUmsetzung());
 	}
 
 	public Date getUmsetzungBis() {

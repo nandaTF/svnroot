@@ -44,6 +44,7 @@ import sernet.gs.ui.rcp.main.bsi.views.TodoView;
 import sernet.gs.ui.rcp.main.common.model.ChangeLogEntry;
 import sernet.gs.ui.rcp.main.common.model.CnATreeElement;
 import sernet.gs.ui.rcp.main.connect.IBaseDao;
+import sernet.gs.ui.rcp.main.connect.RetrieveInfo;
 import sernet.gs.ui.rcp.main.service.commands.CommandException;
 import sernet.gs.ui.rcp.main.service.commands.GenericCommand;
 import sernet.gs.ui.rcp.main.service.commands.RuntimeCommandException;
@@ -70,6 +71,10 @@ public class FindMassnahmenForITVerbund extends GenericCommand {
 
 	private Integer massnahmeId = null;
 	
+	private Set<String> executionSet;
+	
+	private Set<String> sealSet;
+	
 	@SuppressWarnings("serial")
 	private class FindMassnahmenForITVerbundCallback implements
 			HibernateCallback, Serializable {
@@ -88,6 +93,7 @@ public class FindMassnahmenForITVerbund extends GenericCommand {
 					"from MassnahmenUmsetzung mn " +
 					"join fetch mn.entity " +
 					"join fetch mn.parent.parent.entity " +
+					"join fetch mn.parent.parent.parent.parent.entity " +
 					"where mn.parent.parent.parent.parent = :id " +
 					"or mn.parent.parent = :id2")
 					.setInteger("id", itverbundID)
@@ -112,7 +118,7 @@ public class FindMassnahmenForITVerbund extends GenericCommand {
 
 	public void execute() {
 		try {
-			
+			long start = System.currentTimeMillis();
 			List<MassnahmenUmsetzung> list = new ArrayList<MassnahmenUmsetzung>();
 			IBaseDao<MassnahmenUmsetzung, Serializable> dao = getDaoFactory().getDAO(
 					MassnahmenUmsetzung.class);
@@ -121,7 +127,10 @@ public class FindMassnahmenForITVerbund extends GenericCommand {
 			
 			// create display items:
 			fillList(list);
-			
+			if(log.isDebugEnabled()) {
+				long runtime = System.currentTimeMillis() - start;
+				log.debug("FindMassnahmenForITVerbund runtime: " + runtime + " ms.");
+			}
 		} catch (CommandException e) {
 			throw new RuntimeCommandException(e);
 		}
@@ -136,41 +145,52 @@ public class FindMassnahmenForITVerbund extends GenericCommand {
 	private void fillList(List<MassnahmenUmsetzung> alleMassnahmen) throws CommandException {
 		int count = 0;
 		Set<UnresolvedItem> unresolvedItems = new HashSet<UnresolvedItem>();
+		Set<MassnahmenUmsetzung> unresolvedMeasures = new HashSet<MassnahmenUmsetzung>();
 		
 		for (MassnahmenUmsetzung mn : alleMassnahmen) {
 //			log.debug("Processing Massnahme: " + count);
 //			hydrate(mn);
 			
-			TodoViewItem item = new TodoViewItem();
-
-			if (mn.getParent() instanceof GefaehrdungsUmsetzung)
-				item.setParentTitle( // risikoanalyse.getparent()
-						mn.getParent().getParent().getParent().getTitel());
-			else
-				item.setParentTitle(
-						mn.getParent().getParent().getTitel());
+			String umsetzung = mn.getUmsetzung();
+			String siegelStufe = String.valueOf(mn.getStufe());
 			
-			item.setTitel(mn.getTitel());
-			item.setUmsetzung(mn.getUmsetzung());
-			item.setUmsetzungBis(mn.getUmsetzungBis());
-			item.setNaechsteRevision(mn.getNaechsteRevision());
-			item.setRevisionDurch(mn.getRevisionDurch());
+			if((getExecutionSet()==null || getExecutionSet().contains(umsetzung)) &&
+			   (getSealSet()==null || getSealSet().contains(siegelStufe))) {
 			
-			item.setStufe(mn.getStufe());
-			item.setUrl(mn.getUrl());
-			item.setStand(mn.getStand());
-			item.setDbId(mn.getDbId());
+				TodoViewItem item = new TodoViewItem();
+	
+				if (mn.getParent() instanceof GefaehrdungsUmsetzung)
+					item.setParentTitle( // risikoanalyse.getparent()
+							mn.getParent().getParent().getParent().getTitel());
+				else
+					item.setParentTitle(
+							mn.getParent().getParent().getTitel());
+				
+				item.setTitel(mn.getTitel());
+				item.setUmsetzung(umsetzung);
+				item.setUmsetzungBis(mn.getUmsetzungBis());
+				item.setNaechsteRevision(mn.getNaechsteRevision());
+				
+				item.setStufe(siegelStufe.charAt(0));
+				item.setUrl(mn.getUrl());
+				item.setStand(mn.getStand());
+				item.setDbId(mn.getDbId());
 			
-			if (mn.getUmsetzungDurch() != null && mn.getUmsetzungDurch().length()>0) {
-				item.setUmsetzungDurch(mn.getUmsetzungDurch());
-				all.add(item);
+				unresolvedItems.add(new UnresolvedItem(item, mn.getDbId(), 
+						mn.getEntity().getProperties(MassnahmenUmsetzung.P_UMSETZUNGDURCH_LINK),
+						mn.getEntity().getProperties(MassnahmenUmsetzung.P_NAECHSTEREVISIONDURCH_LINK)));
+				
 			}
-			else {
-				unresolvedItems.add(new UnresolvedItem(item, mn.getDbId()));
-			}
-			
-			
 		}
+
+		// find persons linked directly:
+		FindLinkedPersons findCommand = new FindLinkedPersons(unresolvedItems);
+		findCommand = this.getCommandService().executeCommand(findCommand);
+		all.addAll(findCommand.getResolvedItems());
+		unresolvedItems = findCommand.getUnresolvedItems();
+		
+		
+		
 		// find persons according to roles and relation:
 		FindResponsiblePersons command = new FindResponsiblePersons(unresolvedItems, 
 				MassnahmenUmsetzung.P_VERANTWORTLICHE_ROLLEN_UMSETZUNG);
@@ -179,18 +199,6 @@ public class FindMassnahmenForITVerbund extends GenericCommand {
 		for (UnresolvedItem resolvedItem : unresolvedItems) {
 			all.add(resolvedItem.getItem());
 		}
-	}
-
-	/**
-	 * @param unresolvedItems
-	 */
-	private void resolve(Map<MassnahmenUmsetzung, TodoViewItem> unresolvedItems) {
-	// FIXME server findpersons	
-//		FindResponsiblePersons command = new FindResponsiblePersons(unresolvedItems, MassnahmenUmsetzung.P_VERANTWORTLICHE_ROLLEN_UMSETZUNG);
-//		command = FindMassnahmenForITVerbund.this.getCommandService().executeCommand(command);
-		
-		
-		
 	}
 
 	private String getNames(List<Person> persons) {
@@ -211,6 +219,22 @@ public class FindMassnahmenForITVerbund extends GenericCommand {
 
 	public List<TodoViewItem> getAll() {
 		return all;
+	}
+
+	public Set<String> getExecutionSet() {
+		return executionSet;
+	}
+
+	public void setExecutionSet(Set<String> umsetzungSet) {
+		this.executionSet = umsetzungSet;
+	}
+
+	public Set<String> getSealSet() {
+		return sealSet;
+	}
+
+	public void setSealSet(Set<String> sealSet) {
+		this.sealSet = sealSet;
 	}
 
 }
