@@ -457,16 +457,6 @@ Library.
          fragment="true"/>
 
    <plugin
-         id="org.eclipse.equinox.launcher.win32.win32.ia64"
-         os="win32"
-         ws="win32"
-         arch="ia64"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
          id="org.eclipse.equinox.launcher.win32.win32.x86"
          os="win32"
          ws="win32"
@@ -1014,15 +1004,6 @@ Library.
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.security.win32.x86"
-         os="win32"
-         download-size="0"
-         install-size="0"
-         version="1.0.100.v20090520-1800"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.core.commands.nl-de"
          download-size="0"
          install-size="0"
@@ -1162,6 +1143,124 @@ Library.
          download-size="0"
          install-size="0"
          version="2.7.6"
+         unpack="false"/>
+
+   <plugin
+         id="org.junit4"
+         download-size="0"
+         install-size="0"
+         version="4.3.1"/>
+
+   <plugin
+         id="org.eclipse.core.filebuffers"
+         download-size="0"
+         install-size="0"
+         version="3.5.0.v20090526-2000"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.core.databinding.observable"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.M20090902-0800"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.core.databinding.property"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.M20090819-0800"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.update.scheduler"
+         download-size="0"
+         install-size="0"
+         version="3.2.200.v20081127"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.p2.engine"
+         download-size="0"
+         install-size="0"
+         version="1.0.102.R35x_v20091117"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.p2.core"
+         download-size="0"
+         install-size="0"
+         version="1.0.101.R35x_v20090819"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.p2.repository"
+         download-size="0"
+         install-size="0"
+         version="1.0.1.R35x_v20100105"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.filetransfer"
+         download-size="0"
+         install-size="0"
+         version="3.0.0.v20090831-1906"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf"
+         download-size="0"
+         install-size="0"
+         version="3.0.0.v20090831-1906"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.filetransfer"
+         download-size="0"
+         install-size="0"
+         version="3.0.1.v20090831-1906"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.identity"
+         download-size="0"
+         install-size="0"
+         version="3.0.0.v20090831-1906"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.p2.metadata"
+         download-size="0"
+         install-size="0"
+         version="1.0.101.R35x_v20100112"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.p2.metadata.repository"
+         download-size="0"
+         install-size="0"
+         version="1.0.101.R35x_v20090812"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.p2.artifact.repository"
+         download-size="0"
+         install-size="0"
+         version="1.0.101.R35x_v20090721"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.p2.jarprocessor"
+         download-size="0"
+         install-size="0"
+         version="1.0.100.v20090520-1905"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.compare.core"
+         download-size="0"
+         install-size="0"
+         version="3.5.0.I20090430-0408"
          unpack="false"/>
 
 </feature>
