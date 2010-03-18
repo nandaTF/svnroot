@@ -7,7 +7,7 @@
 	xmlns:pp="http://www.eclipse.org/buckminster/PDEMapProvider-1.0">
 	<searchPath name="default">
 		<provider readerType="svn" componentTypes="osgi.bundle,eclipse.feature,buckminster" source="true">
-			<uri format="svn+ssh://{0}:{1}@localhost:10024/data/subversion/svnroot/BRANCHES/rcp-3.5/{3}">
+			<uri format="svn+ssh://{0}:{1}@localhost:10024/data/subversion/svnroot/BRANCHES/rcp-3.5/{2}">
 				<bc:propertyRef key="svn.user" />
 				<bc:propertyRef key="svn.password" />
 				<bc:propertyRef key="buckminster.component" />
