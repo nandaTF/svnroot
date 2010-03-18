@@ -171,4 +171,5 @@ Import-Package: au.com.bytecode.opencsv,
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Eclipse-RegisterBuddy: sernet.springclient
 Require-Bundle: org.eclipse.ui.intro,
- org.eclipse.ui;bundle-version="3.5.2"
+ org.eclipse.ui;bundle-version="3.5.2",
+ sernet.gs.service;bundle-version="1.11.0"
