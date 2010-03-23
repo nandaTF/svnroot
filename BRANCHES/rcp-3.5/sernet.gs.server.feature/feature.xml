@@ -618,11 +618,10 @@ Library.
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.update.core.win32"
+         id="org.eclipse.update.core"
          download-size="0"
          install-size="0"
-         version="3.2.100.v20080107"
-         fragment="true"
+         version="3.2.300.v20090525"
          unpack="false"/>
 
 </feature>
