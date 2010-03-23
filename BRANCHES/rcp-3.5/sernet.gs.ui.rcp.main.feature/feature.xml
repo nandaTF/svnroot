@@ -1263,4 +1263,11 @@ Library.
          version="3.5.0.I20090430-0408"
          unpack="false"/>
 
+   <plugin
+         id="com.springsource.org.aspectj.runtime"
+         download-size="0"
+         install-size="0"
+         version="1.6.5.RELEASE"
+         unpack="false"/>
+
 </feature>
