@@ -1305,4 +1305,18 @@ Library.
          version="1.6.5.RELEASE"
          unpack="false"/>
 
+   <plugin
+         id="org.springframework.context.support"
+         download-size="0"
+         install-size="0"
+         version="2.5.6.SEC01"
+         unpack="false"/>
+
+   <plugin
+         id="com.springsource.org.quartz"
+         download-size="0"
+         install-size="0"
+         version="1.6.2"
+         unpack="false"/>
+
 </feature>
