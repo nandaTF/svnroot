@@ -88,7 +88,7 @@ This variant:
 		<property name="hibernateProperties">
 			<props>
                 <prop key="hibernate.dialect">${jdbc.hibernate.dialect}</prop>
-                <prop key="hibernate.cglib.use_reflection_optimizer">false</prop>
+                <prop key="hibernate.bytecode.use_reflection_optimizer">true</prop>
 			</props>
 		</property>
 

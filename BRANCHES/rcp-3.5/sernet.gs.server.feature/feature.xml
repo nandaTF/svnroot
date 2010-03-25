@@ -331,13 +331,6 @@ Library.
          unpack="false"/>
 
    <plugin
-         id="com.springsource.org.hibernate"
-         download-size="0"
-         install-size="0"
-         version="3.2.6.ga"
-         unpack="false"/>
-
-   <plugin
          id="com.springsource.org.mortbay.jetty.server"
          download-size="0"
          install-size="0"
