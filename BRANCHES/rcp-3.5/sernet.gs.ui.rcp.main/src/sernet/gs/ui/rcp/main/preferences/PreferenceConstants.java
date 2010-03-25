@@ -60,7 +60,8 @@ public class PreferenceConstants {
 	public static final String DB_URL_MYSQL = "jdbc:mysql://127.0.0.1:3306/verinicedb"; //$NON-NLS-1$
 
 	public static final String DB_DIALECT = "cna_dbdialect"; //$NON-NLS-1$
-	public static final String DB_DIALECT_derby = "sernet.verinice.hibernate.ByteArrayDerbyDialect"; //$NON-NLS-1$
+	public static final String DB_DIALECT_derby = "org.hibernate.dialect.DerbyDialect"; //$NON-NLS-1$
+	//public static final String DB_DIALECT_derby = "sernet.verinice.hibernate.ByteArrayDerbyDialect"; //$NON-NLS-1$
 	public static final String DB_DIALECT_postgres= "org.hibernate.dialect.PostgreSQLDialect"; //$NON-NLS-1$
 	public static final String DB_DIALECT_mysql = "org.hibernate.dialect.MySQLInnoDBDialect"; //$NON-NLS-1$
 	
