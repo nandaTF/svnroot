@@ -14,8 +14,7 @@ Bundle-ClassPath: .,
 Bundle-Activator: sernet.gs.server.Activator
 Export-Package: sernet.gs.server
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Require-Bundle: com.springsource.org.hibernate;bundle-version="3.2.6",
- org.apache.commons.httpclient;bundle-version="3.1.0",
+Require-Bundle: org.apache.commons.httpclient;bundle-version="3.1.0",
  com.springsource.org.apache.log4j;bundle-version="1.2.15",
  org.springframework.beans;bundle-version="2.5.6",
  org.springframework.orm;bundle-version="2.5.6",
@@ -35,6 +34,7 @@ Require-Bundle: com.springsource.org.hibernate;bundle-version="3.2.6",
  com.springsource.org.aspectj.weaver;bundle-version="1.6.5",
  org.eclipse.equinox.app;bundle-version="1.2.1",
  org.springframework.osgi.web;bundle-version="1.2.0",
+ com.springsource.org.hibernate;bundle-version="3.2.6",
  sernet.hui.common;bundle-version="1.1.0",
  sernet.gs.service;bundle-version="1.11.0",
  sernet.gs.ui.rcp.main;bundle-version="1.1.0",
