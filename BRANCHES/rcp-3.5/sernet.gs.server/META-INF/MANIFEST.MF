@@ -4,6 +4,7 @@ Bundle-Name: Server
 Bundle-SymbolicName: sernet.gs.server;singleton:=true
 Bundle-Version: 1.1.0
 Bundle-ClassPath: .,
+ lib/hibernate3-cglib-fix.jar,
  WebContent/WEB-INF/classes,
  WebContent/WEB-INF/lib/gnumail-1.1.2.jar,
  lib/jsf-api-1.2_12.jar,
