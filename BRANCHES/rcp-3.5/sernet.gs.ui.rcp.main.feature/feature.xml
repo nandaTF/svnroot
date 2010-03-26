@@ -1323,7 +1323,7 @@ Library.
          id="com.springsource.org.hibernate"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.2.6.ga"
          unpack="false"/>
 
 </feature>
