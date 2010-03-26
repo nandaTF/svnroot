@@ -13,7 +13,7 @@
 		</provider>
 	</searchPath>
 
-	<locator searchPathRef="default" pattern="^update-site*" />
+	<locator searchPathRef="default" pattern="^update*" />
 	<locator searchPathRef="default" pattern="^sernet\..*" />
 	<redirect href="http://www.eclipse.org/buckminster/samples/rmaps/dogfood2.rmap" pattern=".*"/>
 </rmap>
