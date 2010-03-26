@@ -603,14 +603,6 @@ Library.
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.update.core.linux"
-         download-size="0"
-         install-size="0"
-         version="3.2.100.v20081008"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.update.core"
          download-size="0"
          install-size="0"
