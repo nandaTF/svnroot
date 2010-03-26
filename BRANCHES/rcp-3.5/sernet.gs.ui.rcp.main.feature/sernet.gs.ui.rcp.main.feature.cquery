@@ -4,5 +4,5 @@
 	properties="http://www.verinice.org/svnroot/BRANCHES/rcp-3.5/sernet.gs.ui.rcp.main.feature/buckminster.properties">
     <cq:rootRequest name="sernet.gs.ui.rcp.main.feature" 
     	componentType="eclipse.feature" 
-    	versionDesignator="[1.1.0,1.1.0]"/>
+    	versionDesignator="[1.1.1,1.1.1]"/>
 </cq:componentQuery>

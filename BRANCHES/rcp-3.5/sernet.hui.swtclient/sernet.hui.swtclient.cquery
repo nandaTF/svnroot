@@ -3,5 +3,5 @@
 	resourceMap="http://www.verinice.org/svnroot/BRANCHES/rcp-3.5/sernet.hui.swtclient/verinice.rmap" >
 	<cq:rootRequest name="sernet.hui.swtclient" 
     	componentType="osgi.bundle" 
-    	versionDesignator="[1.1.0,1.1.0]"/>
+    	versionDesignator="[1.1.1,1.1.1]"/>
 </cq:componentQuery>
