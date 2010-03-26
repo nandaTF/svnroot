@@ -2,6 +2,5 @@
 <cq:componentQuery xmlns:cq="http://www.eclipse.org/buckminster/CQuery-1.0" 
 	resourceMap="http://www.verinice.org/svnroot/BRANCHES/rcp-3.5/Verinice-Update-Site/verinice.rmap">
     <cq:rootRequest name="Verinice-Update-Site" 
-    	componentType="buckminster" 
-    	versionDesignator="[1.1.1,1.1.1]"/>
+    	componentType="buckminster"/>
 </cq:componentQuery>
