@@ -1039,21 +1039,21 @@ Library.
          id="sernet.hui.common"
          download-size="0"
          install-size="0"
-         version="1.1.0"
+         version="1.1.1"
          unpack="false"/>
 
    <plugin
          id="sernet.hui.swtclient"
          download-size="0"
          install-size="0"
-         version="1.1.0"
+         version="1.1.1"
          unpack="false"/>
 
    <plugin
          id="sernet.gs.service"
          download-size="0"
          install-size="0"
-         version="1.11.0"
+         version="1.11.1"
          unpack="false"/>
 
    <plugin
@@ -1068,7 +1068,7 @@ Library.
          id="sernet.gs.log4j.fragment"
          download-size="0"
          install-size="0"
-         version="1.1.0"
+         version="1.1.1"
          fragment="true"
          unpack="false"/>
 
@@ -1076,7 +1076,7 @@ Library.
          id="sernet.gs.springweb.fragment"
          download-size="0"
          install-size="0"
-         version="1.1.0"
+         version="1.1.1"
          fragment="true"
          unpack="false"/>
 
@@ -1084,7 +1084,7 @@ Library.
          id="sernet.hui.server"
          download-size="0"
          install-size="0"
-         version="1.1.0"
+         version="1.1.1"
          unpack="false"/>
 
    <plugin
@@ -1099,14 +1099,14 @@ Library.
          id="sernet.gs.reveng"
          download-size="0"
          install-size="0"
-         version="1.1.0"
+         version="1.1.1"
          unpack="false"/>
 
    <plugin
          id="sernet.springclient"
          download-size="0"
          install-size="0"
-         version="1.2.0"
+         version="1.2.1"
          unpack="false"/>
 
    <plugin
@@ -1127,7 +1127,7 @@ Library.
          id="sernet.gs.ui.rcp.main"
          download-size="60"
          install-size="188"
-         version="1.1.0"
+         version="1.1.1"
          unpack="false"/>
 
    <plugin
