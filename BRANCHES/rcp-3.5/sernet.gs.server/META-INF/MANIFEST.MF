@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Server
 Bundle-SymbolicName: sernet.gs.server;singleton:=true
-Bundle-Version: 1.1.0
+Bundle-Version: 1.1.1
 Bundle-ClassPath: .,
  lib/hibernate3-cglib-fix.jar,
  WebContent/WEB-INF/classes,
@@ -36,9 +36,9 @@ Require-Bundle: org.apache.commons.httpclient;bundle-version="3.1.0",
  com.springsource.org.aspectj.weaver;bundle-version="1.6.5",
  org.eclipse.equinox.app;bundle-version="1.2.1",
  org.springframework.osgi.web;bundle-version="1.2.0",
- sernet.hui.common;bundle-version="1.1.0",
+ sernet.hui.common;bundle-version="1.1.1",
  sernet.gs.service;bundle-version="1.11.0",
- sernet.gs.ui.rcp.main;bundle-version="1.1.0",
+ sernet.gs.ui.rcp.main;bundle-version="1.1.1",
  com.springsource.com.mchange.v2.c3p0;bundle-version="0.9.1"
 Import-Package: org.apache.derby.jdbc,
  org.eclipse.core.runtime;version="3.4.0",

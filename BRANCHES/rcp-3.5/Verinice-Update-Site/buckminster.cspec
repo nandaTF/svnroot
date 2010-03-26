@@ -15,7 +15,7 @@
                 <cs:property key="targets" value="create.legacy.site"/>
             </cs:actorProperties>
             <cs:properties>
-                <cs:property key="site.name" value="verinice.archivedsite"/>
+                <cs:property key="site.name" value="verinice-update-site"/>
             </cs:properties>
             <cs:prerequisites>
                 <cs:attribute name="bundle.jars" alias="plugins"/>
