@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?pde version="3.4"?>
+<?pde version="3.5"?>
 
-<product name="verinice" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.1.0" useFeatures="true">
+<product name="verinice" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.1.1" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="icons/product_lg.gif"/>
@@ -45,7 +45,6 @@ See the LICENSE.txt contained in the program folder, the verinice Plugin-Details
 
    <windowImages i16="/sernet.gs.ui.rcp.main/icons/window16.gif" i32="/sernet.gs.ui.rcp.main/icons/window32.gif"/>
 
-
    <launcher name="verinice">
       <linux icon="/sernet.gs.ui.rcp.main/wxcas.xpm"/>
       <macosx icon="/sernet.gs.ui.rcp.main/icons/v_logo_mac.icns"/>
@@ -68,7 +67,7 @@ See the LICENSE.txt contained in the program folder, the verinice Plugin-Details
    </vm>
 
    <plugins>
-      <plugin id="SpringClient"/>
+      <plugin id="SpringClient" fragment=""/>
       <plugin id="com.ibm.icu"/>
       <plugin id="com.ibm.icu.source"/>
       <plugin id="org.apache.lucene"/>
@@ -124,10 +123,10 @@ See the LICENSE.txt contained in the program folder, the verinice Plugin-Details
       <plugin id="org.eclipse.ui.win32" fragment="true"/>
       <plugin id="org.eclipse.ui.workbench"/>
       <plugin id="org.eclipse.ui.workbench.texteditor"/>
-      <plugin id="sernet.gs.log4j"/>
-      <plugin id="sernet.gs.saxon9"/>
+      <plugin id="sernet.gs.log4j" fragment=""/>
+      <plugin id="sernet.gs.saxon9" fragment=""/>
       <plugin id="sernet.gs.service"/>
-      <plugin id="sernet.gs.tagsoup_ak"/>
+      <plugin id="sernet.gs.tagsoup_ak" fragment=""/>
       <plugin id="sernet.gs.ui.rcp.main"/>
       <plugin id="verinice.nl1.org.eclipse.jface" fragment="true"/>
       <plugin id="verinice.nl1.org.eclipse.swt" fragment="true"/>
@@ -140,5 +139,6 @@ See the LICENSE.txt contained in the program folder, the verinice Plugin-Details
       <feature id="sernet.gs.server.feature" version="1.1.0"/>
       <feature id="sernet.gs.ui.rcp.main.feature" version="1.1.0"/>
    </features>
+
 
 </product>
