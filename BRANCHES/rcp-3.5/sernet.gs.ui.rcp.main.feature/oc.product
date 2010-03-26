@@ -46,7 +46,7 @@ See the LICENSE.txt contained in the program folder, the verinice Plugin-Details
    <windowImages i16="/sernet.gs.ui.rcp.main.feature/icons/window16.gif" i32="/sernet.gs.ui.rcp.main.feature/icons/window32.gif"/>
 
    <splash
-      location="sernet.gs.ui.rcp.main.feature" />
+      location="sernet.gs.ui.rcp.main" />
    <launcher name="verinice">
       <linux icon="/sernet.gs.ui.rcp.main.feature/wxcas.xpm"/>
       <macosx icon="/sernet.gs.ui.rcp.main.feature/icons/v_logo_mac.icns"/>
