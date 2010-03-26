@@ -523,7 +523,7 @@ Library.
          id="sernet.gs.ehcache.fragment"
          download-size="0"
          install-size="0"
-         version="1.1.0"
+         version="1.1.1"
          fragment="true"
          unpack="false"/>
 
@@ -531,7 +531,7 @@ Library.
          id="sernet.hui.server"
          download-size="0"
          install-size="0"
-         version="1.1.0"/>
+         version="1.1.1"/>
 
    <plugin
          id="org.junit4"
@@ -550,7 +550,7 @@ Library.
          id="sernet.gs.server"
          download-size="4000"
          install-size="8600"
-         version="1.1.0"
+         version="1.1.1"
          unpack="false"/>
 
    <plugin
@@ -578,14 +578,14 @@ Library.
          id="sernet.hui.common"
          download-size="0"
          install-size="0"
-         version="1.1.0"
+         version="1.1.1"
          unpack="false"/>
 
    <plugin
          id="sernet.gs.ui.rcp.main"
          download-size="0"
          install-size="0"
-         version="1.1.0"
+         version="1.1.1"
          unpack="false"/>
 
    <plugin
