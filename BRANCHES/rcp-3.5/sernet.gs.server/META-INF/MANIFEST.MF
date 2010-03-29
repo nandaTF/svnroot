@@ -39,7 +39,6 @@ Require-Bundle: org.apache.commons.httpclient;bundle-version="3.1.0",
  sernet.gs.service;bundle-version="1.11.0",
  sernet.gs.ui.rcp.main;bundle-version="1.1.1",
  com.springsource.com.mchange.v2.c3p0;bundle-version="0.9.1"
-Import-Package: org.apache.derby.jdbc,
- org.eclipse.core.runtime;version="3.4.0",
+Import-Package: org.eclipse.core.runtime;version="3.4.0",
  org.eclipse.osgi.util;version="1.1.0",
  org.osgi.framework;version="1.5.0"
