@@ -501,13 +501,6 @@ Library.
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.simpleconfigurator"
-         download-size="0"
-         install-size="0"
-         version="1.0.101.R35x_v20090807-1100"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.help"
          download-size="0"
          install-size="0"
