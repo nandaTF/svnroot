@@ -8,10 +8,6 @@
 	<classpathentry kind="lib" path="lib/richfaces-api-3.3.2.SR1.jar"/>
 	<classpathentry kind="lib" path="lib/richfaces-ui-3.3.2.SR1.jar"/>
 	<classpathentry kind="lib" path="lib/richfaces-impl-3.3.2.SR1.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.6.0_16">
-		<attributes>
-			<attribute name="owner.project.facets" value="jst.java"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="WebContent/WEB-INF/classes"/>
 </classpath>
