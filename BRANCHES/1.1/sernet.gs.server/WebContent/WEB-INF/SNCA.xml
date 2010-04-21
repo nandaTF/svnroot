@@ -3422,8 +3422,6 @@ Template:
                	required="false"
 				inputtype="numericoption" 
 				min="0" max="9">
-				
-			
 			</huiproperty>
 	        
 	        <huiproperty

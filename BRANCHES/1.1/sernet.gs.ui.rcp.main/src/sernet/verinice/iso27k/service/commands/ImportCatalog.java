@@ -91,7 +91,7 @@ public class ImportCatalog extends GenericCommand implements ICatalogImporter {
 	/* (non-Javadoc)
 	 * @see sernet.verinice.iso27k.service.ICatalogImporter#importCatalog()
 	 */
-	public void importCatalog() {
+	public void importCatalog() { 
 		try {
 			CSVReader reader = new CSVReader(
 					new BufferedReader(
