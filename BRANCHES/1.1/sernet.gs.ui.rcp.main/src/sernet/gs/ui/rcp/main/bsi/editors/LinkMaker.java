@@ -131,7 +131,7 @@ public class LinkMaker extends Composite implements IRelationTable {
 		formData3.left = new FormAttachment(combo, 5);
 		buttonLink.setLayoutData(formData3);
 		buttonLink.setText("Verknüpfen...");
-		buttonLink.setVisible(true);
+		buttonLink.setVisible(false);
 		buttonLink.pack();
 		
 		buttonCreateAndLink = new Button(this, SWT.PUSH | SWT.BORDER);
@@ -140,7 +140,7 @@ public class LinkMaker extends Composite implements IRelationTable {
 		formData4.left = new FormAttachment(buttonLink, 5);
 		buttonCreateAndLink.setLayoutData(formData4);
 		buttonCreateAndLink.setText("Anlegen & verknüpfen...");
-		buttonCreateAndLink.setVisible(true);
+		buttonCreateAndLink.setVisible(false);
 		buttonCreateAndLink.pack();
 
 		buttonUnlink = new Button(this, SWT.PUSH | SWT.BORDER);
@@ -149,7 +149,7 @@ public class LinkMaker extends Composite implements IRelationTable {
 		formData5.left = new FormAttachment(buttonCreateAndLink, 5);
 		buttonUnlink.setLayoutData(formData5);
 		buttonUnlink.setText("Verknüpfung lösen...");
-		buttonUnlink.setVisible(true);
+		buttonUnlink.setVisible(false);
 		buttonUnlink.pack();
 		
 		viewer = new RelationTableViewer(this, this, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
