@@ -209,18 +209,18 @@ public class GSImportRestorePreferencePage extends FieldEditorPreferencePage
 									} catch (SQLException e) {
 										ExceptionUtil.log(e,
 												"Konnte Datenbankdatei nicht anhängen "
-														+ fileName);
+														+ fileName + ", " +  e.getLocalizedMessage());
 									} catch (ClassNotFoundException e) {
 										ExceptionUtil.log(e,
 												"Konnte Datenbankdatei nicht anhängen "
-														+ fileName);
+														+ fileName + ", " +  e.getLocalizedMessage());
 									}
 								}
 							});
 				} catch (InvocationTargetException e1) {
-					ExceptionUtil.log(e1, "Fehler beim Wiederherstellen der Datenbank");
+					ExceptionUtil.log(e1, "Fehler beim Wiederherstellen der Datenbank: " + e1.getLocalizedMessage());
 				} catch (InterruptedException e1) {
-					ExceptionUtil.log(e1, "Fehler beim Wiederherstellen der Datenbank");
+					ExceptionUtil.log(e1, "Fehler beim Wiederherstellen der Datenbank: " + e1.getLocalizedMessage());
 				}
 			}
 		});
