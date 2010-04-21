@@ -3,8 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Reveng
 Bundle-SymbolicName: sernet.gs.reveng
 Bundle-Version: 1.1.0
-Export-Package: sernet.gs.reveng;version="1.1.0",
- sernet.gs.reveng.importData;version="1.1.0"
+Export-Package: sernet.gs.reveng;version="1.1.0",sernet.gs.reveng.impo
+ rtData;version="1.1.0"
 Import-Package: antlr,
  com.healthmarketscience.jackcess,
  net.sf.cglib.proxy,
@@ -15,7 +15,9 @@ Import-Package: antlr,
  org.hibernate.criterion,
  org.hibernate.hql.ast,
  org.hibernate.proxy,
+ org.hibernate.type,
  org.springframework.core.io,
  org.springframework.orm.hibernate3
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: .
+
