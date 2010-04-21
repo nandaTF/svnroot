@@ -48,43 +48,50 @@ import sernet.gs.ui.rcp.main.StatusLine;
 import sernet.gs.ui.rcp.main.bsi.model.ITVerbund;
 import sernet.gs.ui.rcp.main.bsi.views.GenericMassnahmenView;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
+import sernet.gs.ui.rcp.main.reports.ISMReport;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.commands.CommandException;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnATreeElementTitles;
+import sernet.verinice.iso27k.model.Organization;
 
 /**
- * Wizard page to allow the user to choose the ITVerbund for the report about to be created.
+ * Wizard page to allow the user to choose the ITVerbund or organization
+ * for the report about to be created.
  * 
  * @author koderman[at]sernet[dot]de
  *
  */
-public class ChooseITVerbundPage extends WizardPage {
+public class ChooseRootObjectPage extends WizardPage {
 
 
-
-	
-	
-	
 	private Combo itverbundCombo;
 	private List<ITVerbund> itverbuende;
+	private List<Organization> scopes;
 	private ITVerbund selectedITVerbund = null;
+	private Organization selectedScope = null;
+	private Combo scopeCombo;
 	
+	public Organization getSelectedOrganization() {
+		return selectedScope;
+	}
+
+
 	public ITVerbund getSelectedITVerbund() {
 		return selectedITVerbund;
 	}
 
 
-	protected ChooseITVerbundPage() {
+	protected ChooseRootObjectPage() {
 		super("chooseITVerbund");
-		setTitle("Informationsverbund auswählen");
-		setDescription("Wählen Sie den Informationsverbund, für den der Report erstellt werden soll.");
+		setTitle("Geltungsbereich auswählen");
+		setDescription("Wählen Sie den Informationsverbund oder den Scope, für den der Report erstellt werden soll.");
 	}
 	
 	
 	public void createControl(Composite parent) {
 		Composite container = new Composite(parent, SWT.NULL);
 		final GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 3;
+		gridLayout.numColumns = 2;
 		container.setLayout(gridLayout);
 		setControl(container);
 
@@ -110,13 +117,54 @@ public class ChooseITVerbundPage extends WizardPage {
 			}
 
 		});
+		
+		final Label label3 = new Label(container, SWT.NULL);
+		GridData gridData8 = new GridData(GridData.HORIZONTAL_ALIGN_END);
+		label3.setLayoutData(gridData8);
+		label3.setText("Scope:");
+
+		scopeCombo = new Combo(container, SWT.DROP_DOWN | SWT.READ_ONLY);
+		scopeCombo.setEnabled(false);
+		
+		scopeCombo.addSelectionListener(new SelectionListener() {
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+
+			public void widgetSelected(SelectionEvent e) {
+				int s = scopeCombo.getSelectionIndex();
+				selectedScope = scopes.get(s);
+				updatePageComplete();
+			}
+
+		});
 
 		loadITVerbuende();
+		loadScopes();
 	}
 
+	private void loadScopes() {
+		LoadCnATreeElementTitles<Organization> compoundLoader = new LoadCnATreeElementTitles<Organization>(
+				Organization.class);
+		try {
+			compoundLoader = ServiceFactory.lookupCommandService()
+					.executeCommand(compoundLoader);
+		} catch (Exception e) {
+			ExceptionUtil.log(e, "Fehler beim Laden der Scopes.");
+		}
+		
+		this.scopes = compoundLoader
+				.getElements();
+		
+			scopeCombo.removeAll();
+
+			for (Organization c : scopes)
+				scopeCombo.add(c.getTitle());
+			scopeCombo.setEnabled(true);
+			scopeCombo.pack();
 	
-	
-	
+	}
 
 
 	/**
@@ -151,7 +199,8 @@ public class ChooseITVerbundPage extends WizardPage {
 	
 
 	private void updatePageComplete() {
-		boolean complete = selectedITVerbund != null;
+		disableWrongCombo();
+		boolean complete = selectedITVerbund != null || selectedScope != null;
 		if ( !complete) {
 			setMessage(null);
 			setPageComplete(false);
@@ -166,6 +215,18 @@ public class ChooseITVerbundPage extends WizardPage {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		updatePageComplete();
+	}
+
+
+	private void disableWrongCombo() {
+		if (getExportWizard().getReport() instanceof ISMReport) {
+			scopeCombo.setEnabled(true);
+			itverbundCombo.setEnabled(false);
+		}
+		else {
+			itverbundCombo.setEnabled(true);
+			scopeCombo.setEnabled(false);
+		}
 	}
 	
 }

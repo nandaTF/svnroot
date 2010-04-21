@@ -41,6 +41,7 @@ import sernet.gs.ui.rcp.main.service.taskcommands.ReportGetRowsCommand;
 import sernet.gs.ui.rcp.office.IOOTableRow;
 import sernet.gs.ui.rcp.office.OOWrapper;
 import sernet.snutils.ExceptionHandlerFactory;
+import sernet.verinice.iso27k.model.Organization;
 
 /**
  * Wizard to create different kinds of reports using OpenOffice as backend.
@@ -61,7 +62,9 @@ public class ExportWizard extends Wizard implements IExportWizard {
 
 	private PropertySelection shownPropertyTypes;
 	private String textTemplatePath;
-	private ChooseITVerbundPage chooseITverbundPage;
+	private ChooseRootObjectPage chooseITverbundPage;
+
+	private ChooseElementTypePage chooseElementTypePage;
 
 	
 	public void resetShownPropertyTypes() {
@@ -99,8 +102,11 @@ public class ExportWizard extends Wizard implements IExportWizard {
 		chooseReportPage = new ChooseReportPage();
 		addPage(chooseReportPage);
 		
-		chooseITverbundPage = new ChooseITVerbundPage();
+		chooseITverbundPage = new ChooseRootObjectPage();
 		addPage(chooseITverbundPage);
+		
+		chooseElementTypePage = new ChooseElementTypePage();
+		addPage(chooseElementTypePage);
 		
 		chooseExportMethodPage = new ChooseExportMethodPage();
 		addPage(chooseExportMethodPage);
@@ -215,5 +221,12 @@ public class ExportWizard extends Wizard implements IExportWizard {
 	public ITVerbund getITVerbund() {
 		return chooseITverbundPage.getSelectedITVerbund();
 	}
+
+    /**
+     * @return
+     */
+    public Organization getOrganization() {
+        return chooseITverbundPage.getSelectedOrganization();
+    }
 
 }
