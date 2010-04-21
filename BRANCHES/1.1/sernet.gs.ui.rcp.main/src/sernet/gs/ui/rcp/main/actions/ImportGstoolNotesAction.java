@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -38,9 +39,9 @@ import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
 import sernet.gs.ui.rcp.main.common.model.IModelLoadListener;
 
 
-public class ImportGstoolAction extends Action {
+public class ImportGstoolNotesAction extends Action {
 	
-	public static final String ID = "sernet.gs.ui.rcp.main.importgstoolaction";
+	public static final String ID = "sernet.gs.ui.rcp.main.importgstoolnotesaction";
 	private final IWorkbenchWindow window;
 	
 	private IModelLoadListener loadListener = new IModelLoadListener() {
@@ -61,7 +62,7 @@ public class ImportGstoolAction extends Action {
 		}
 	};
 	
-	public ImportGstoolAction(IWorkbenchWindow window, String label) {
+	public ImportGstoolNotesAction(IWorkbenchWindow window, String label) {
 		this.window = window;
         setText(label);
 		setId(ID);
@@ -72,8 +73,8 @@ public class ImportGstoolAction extends Action {
 	
 	public void run() {
 		try {
-			final GSImportDialog dialog = new GSImportDialog(Display.getCurrent().getActiveShell());
-			if (dialog.open() != InputDialog.OK)
+			boolean confirm = MessageDialog.openConfirm(window.getShell(), "Nachträglicher Notizimport", "Notizen werden aus der GSTOOL-Datenbank (siehe \"Bearbeiten\" -> \"Einstellungen\") in vorhandene IT-Verbünde angehängt. Fortfahren?");
+			if (!confirm)
 				return;
 			
 			PlatformUI.getWorkbench().getProgressService().
@@ -81,15 +82,7 @@ public class ImportGstoolAction extends Action {
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					Activator.inheritVeriniceContextState();
 					
-					ImportTask importTask = new ImportTask(
-							dialog.isBausteine(),
-							dialog.isMassnahmenPersonen(),
-							dialog.isZielObjekteZielobjekte(),
-							dialog.isSchutzbedarf(),
-							dialog.isRollen(),
-							dialog.isKosten(),
-							dialog.isUmsetzung(),
-							dialog.isBausteinPersonen());
+					ImportNotesTask importTask = new ImportNotesTask();
 					try {
 						importTask.execute(ImportTask.TYPE_SQLSERVER, new IProgress() {
 							public void done() {
@@ -110,39 +103,10 @@ public class ImportGstoolAction extends Action {
 					}
 				}
 			});
-			
-			if (dialog.isNotizen()) {
-			    PlatformUI.getWorkbench().getProgressService().
-			    busyCursorWhile(new IRunnableWithProgress() {
-			        public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-			            Activator.inheritVeriniceContextState();
-			            
-			            ImportNotesTask importTask = new ImportNotesTask();
-			            try {
-			                importTask.execute(ImportTask.TYPE_SQLSERVER, new IProgress() {
-			                    public void done() {
-			                        monitor.done();
-			                    }
-			                    public void worked(int work) {
-			                        monitor.worked(work);
-			                    }
-			                    public void beginTask(String name, int totalWork) {
-			                        monitor.beginTask(name, totalWork);
-			                    }
-			                    public void subTask(String name) {
-			                        monitor.subTask(name);
-			                    }
-			                });
-			            } catch (Exception e) {
-			                ExceptionUtil.log(e, "Fehler beim Importieren.");
-			            }
-			        }
-			    });
-			}
 		} catch (InvocationTargetException e) {
-			ExceptionUtil.log(e.getCause(), "Import aus dem Gstool fehlgeschlagen.");
+			ExceptionUtil.log(e.getCause(), "Notiz-Import aus dem Gstool fehlgeschlagen.");
 		} catch (InterruptedException e) {
-			ExceptionUtil.log(e, "Import aus dem Gstool fehlgeschlagen.");
+			ExceptionUtil.log(e, "Notiz-Import aus dem Gstool fehlgeschlagen.");
 		}
 	}
 	
