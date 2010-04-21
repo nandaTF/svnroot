@@ -74,8 +74,8 @@ public class AddElement implements IObjectActionDelegate {
 		TITLE_FOR_TYPE.put(EvidenceGroup.TYPE_ID, "Add Evidence...");
 		TITLE_FOR_TYPE.put(ExceptionGroup.TYPE_ID, "Add Exception...");
 		TITLE_FOR_TYPE.put(FindingGroup.TYPE_ID, "Add Improvement Note...");
-		TITLE_FOR_TYPE.put(IncidentGroup.TYPE_ID, "Add Incident...");
-		TITLE_FOR_TYPE.put(IncidentScenarioGroup.TYPE_ID, "Add Incident Scenario...");
+		TITLE_FOR_TYPE.put(IncidentGroup.TYPE_ID, "Add IS-Incident...");
+		TITLE_FOR_TYPE.put(IncidentScenarioGroup.TYPE_ID, "Add Scenario...");
 		TITLE_FOR_TYPE.put(InterviewGroup.TYPE_ID, "Add Interview...");
 		TITLE_FOR_TYPE.put(PersonGroup.TYPE_ID, "Add Person...");
 		TITLE_FOR_TYPE.put(ProcessGroup.TYPE_ID, "Add Process...");

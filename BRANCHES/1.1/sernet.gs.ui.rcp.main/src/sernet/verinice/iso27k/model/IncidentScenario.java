@@ -44,7 +44,7 @@ public class IncidentScenario extends CnATreeElement implements IISO27kElement {
 	public IncidentScenario(CnATreeElement parent) {
 		super(parent);
 		setEntity(new Entity(TYPE_ID));
-		getEntity().createNewProperty(getEntityType().getPropertyType(PROP_NAME), "New Incident Scenario");
+		getEntity().createNewProperty(getEntityType().getPropertyType(PROP_NAME), "New Scenario");
 	}
 	
 	/* (non-Javadoc)
