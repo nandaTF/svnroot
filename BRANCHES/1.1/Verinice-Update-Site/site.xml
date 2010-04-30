@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <description url="http://updates.verinice.org/pub/verinice/Verinice-Update-Site">
+   <description url="http://updates.verinice.org/pub/verinice/Verinice-Update-Site-1.0">
       Alle Updates und neue Feature-Komponenten für Verinice, das Open Source ISMS Tool.
    </description>
-   <feature url="features/sernet.gs.ui.rcp.main.feature_1.1.0.jar" id="sernet.gs.ui.rcp.main.feature" version="1.1.0"/>
-   <feature url="features/sernet.gs.server.feature_1.1.0.jar" id="sernet.gs.server.feature" version="1.1.0"/>
+   <feature url="features/sernet.gs.server.feature_1.1.1.jar" id="sernet.gs.server.feature" version="1.1.1">
+      <category name="Verinice Komponenten"/>
+   </feature>
+   <feature url="features/sernet.gs.ui.rcp.main.feature_1.1.1.jar" id="sernet.gs.ui.rcp.main.feature" version="1.1.1">
+      <category name="Verinice Komponenten"/>
+   </feature>
    <category-def name="Verinice Komponenten" label="Verinice Komponenten">
       <description>
          Alle Verinice Komponenten
