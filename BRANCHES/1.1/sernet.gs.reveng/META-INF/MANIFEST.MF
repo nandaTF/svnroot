@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Reveng
 Bundle-SymbolicName: sernet.gs.reveng
-Bundle-Version: 1.1.0
-Export-Package: sernet.gs.reveng;version="1.1.0",sernet.gs.reveng.impo
- rtData;version="1.1.0"
+Bundle-Version: 1.1.1
+Export-Package: sernet.gs.reveng;version="1.1.1",
+ sernet.gs.reveng.importData;version="1.1.1"
 Import-Package: antlr,
  com.healthmarketscience.jackcess,
  net.sf.cglib.proxy,
