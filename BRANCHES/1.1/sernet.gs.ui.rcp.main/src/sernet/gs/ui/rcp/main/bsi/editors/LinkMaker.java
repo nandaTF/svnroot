@@ -122,7 +122,7 @@ public class LinkMaker extends Composite implements IRelationTable {
 		formData2.top = new FormAttachment(0, 5);
 		formData2.left = new FormAttachment(label1, 5);
 		combo.setLayoutData(formData2);
-		combo.setVisible(true);
+		combo.setVisible(false);
 		combo.pack();
 		
 		buttonLink = new Button(this, SWT.PUSH | SWT.BORDER);
@@ -265,7 +265,7 @@ public class LinkMaker extends Composite implements IRelationTable {
 		
 		// relations are always modelled from one side of the relation. We will allow the user to create links both FROM the current element
 		// as well as TO the current element (because he doesn't know, from which side a relation is modelled):
-		// FIXME akoderman still to do
+		// FIXME akoderman still to do, see ismview where this already woirks (dragndrop)
 		
 	}
 
