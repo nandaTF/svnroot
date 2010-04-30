@@ -169,9 +169,9 @@ public class ImportCatalog extends GenericCommand implements ICatalogImporter {
 	 * @param nextLine
 	 */
 	private void fillMaturityLevels(Item item, String[] nextLine) {
-		item.setMaturity(nextLine[4]);
-		item.setWeight1(nextLine[5]);
-		item.setWeight2(nextLine[6]);
+	    item.setWeight1(nextLine[4]);
+	    item.setWeight2(nextLine[5]);
+		item.setMaturity(nextLine[6]);
 		item.setThreshold1(nextLine[7]);
 		item.setThreshold2(nextLine[8]);
 		item.setMaturityLevelSupport(true);
