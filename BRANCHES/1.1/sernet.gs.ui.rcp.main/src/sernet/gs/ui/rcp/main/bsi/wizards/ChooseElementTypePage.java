@@ -79,6 +79,7 @@ public class ChooseElementTypePage extends WizardPage {
         GridData gd9 = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         relationsBtn.setLayoutData(gd9);
         relationsBtn.setText("Inklusive Relationen");
+        relationsBtn.setVisible(false);
         relationsBtn.pack();
 
         loadEntityTypes();
@@ -88,12 +89,13 @@ public class ChooseElementTypePage extends WizardPage {
 	 * 
 	 */
     private void loadEntityTypes() {
-        Collection<EntityType> entityTypes = HitroUtil.getInstance().getTypeFactory().getAllEntityTypes();
-
-        // remove group types:
+        Collection<EntityType> entityTypes = new ArrayList<EntityType>(); 
+        entityTypes.addAll(HitroUtil.getInstance().getTypeFactory().getAllEntityTypes());
+        
+        // remove everything but group types:
         for (Iterator iterator = entityTypes.iterator(); iterator.hasNext();) {
             EntityType entityType = (EntityType) iterator.next();
-            if (entityType.getId().indexOf("group") > -1) {
+            if (entityType.getId().indexOf("group") < 0) {
                 iterator.remove();
             }
         }
