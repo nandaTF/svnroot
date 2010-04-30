@@ -19,6 +19,10 @@
  ******************************************************************************/
 package sernet.verinice.iso27k.model;
 
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+
 import sernet.gs.ui.rcp.main.common.model.CnATreeElement;
 import sernet.hui.common.connect.Entity;
 
@@ -28,6 +32,8 @@ import sernet.hui.common.connect.Entity;
  */
 @SuppressWarnings("serial")
 public class ControlGroup extends Group<Control> {
+    
+    private static final Logger LOG = Logger.getLogger(ControlGroup.class);
 
 	public static final String TYPE_ID = "controlgroup"; //$NON-NLS-1$
 	public static final String TITLE_DEFAULT = "Controls"; //$NON-NLS-1$
@@ -45,8 +51,10 @@ public class ControlGroup extends Group<Control> {
 		setEntity(new Entity(TYPE_ID));
 		getEntity().createNewProperty(getEntityType().getPropertyType(PROP_NAME), TITLE_DEFAULT);
 	}
+	
 
-	/* (non-Javadoc)
+
+    /* (non-Javadoc)
 	 * @see sernet.gs.ui.rcp.main.common.model.CnATreeElement#getTypeId()
 	 */
 	@Override
