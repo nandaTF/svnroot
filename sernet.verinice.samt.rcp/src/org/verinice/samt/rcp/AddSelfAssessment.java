@@ -32,30 +32,29 @@ import org.verinice.samt.service.CreateSelfAssessment;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.bsi.editors.EditorFactory;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
-import sernet.gs.ui.rcp.main.common.model.CnATreeElement;
 import sernet.gs.ui.rcp.main.service.ICommandService;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
-import sernet.gs.ui.rcp.main.service.commands.GenericCommand;
 import sernet.verinice.iso27k.model.ISO27KModel;
 import sernet.verinice.iso27k.model.Organization;
 import sernet.verinice.iso27k.service.commands.CsvFile;
 import sernet.verinice.iso27k.service.commands.LoadModel;
 
 /**
- * @author Daniel Murygin <dm@sernet.de>
- *
+ * @author Daniel Murygin <dm@sernet.de> // TODO: Externalize Strings
  */
 public class AddSelfAssessment implements IViewActionDelegate {
-    
+
     private static final Logger LOG = Logger.getLogger(AddSelfAssessment.class);
-    
+
     public static final String TITEL = "Self Assessment";
-    
+
     private ICommandService commandService;
 
     private CsvFile csvFile;
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.eclipse.ui.IViewActionDelegate#init(org.eclipse.ui.IViewPart)
      */
     @Override
@@ -64,7 +63,9 @@ public class AddSelfAssessment implements IViewActionDelegate {
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
      */
     @Override
@@ -73,7 +74,7 @@ public class AddSelfAssessment implements IViewActionDelegate {
             LoadModel loadModel = new LoadModel();
             loadModel = getCommandService().executeCommand(loadModel);
             ISO27KModel model = loadModel.getModel();
-            CreateSelfAssessment command = new CreateSelfAssessment(model,TITEL);
+            CreateSelfAssessment command = new CreateSelfAssessment(model, TITEL);
             command.setCsvFile(getCsvFile());
             command = getCommandService().executeCommand(command);
             Organization organization = command.getSelfAssessment();
@@ -85,17 +86,17 @@ public class AddSelfAssessment implements IViewActionDelegate {
         } catch (Exception e) {
             LOG.error("Could not create self-assessment", e);
             ExceptionUtil.log(e, "Could not create self-assessment.");
-        }   
+        }
 
     }
 
     /**
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     private CsvFile getCsvFile() throws IOException {
-        if(csvFile==null) {
-            final String fullSamtCatalogPath = getFullSamtCatalogPath(); 
+        if (csvFile == null) {
+            final String fullSamtCatalogPath = getFullSamtCatalogPath();
             try {
                 csvFile = new CsvFile(fullSamtCatalogPath);
             } catch (RuntimeException e) {
@@ -107,7 +108,7 @@ public class AddSelfAssessment implements IViewActionDelegate {
             } catch (Exception e) {
                 final String message = "Error while reading samt catalog file from path: " + fullSamtCatalogPath;
                 LOG.error(message, e);
-                throw new RuntimeException(message,e);
+                throw new RuntimeException(message, e);
             }
         }
         return csvFile;
@@ -117,22 +118,26 @@ public class AddSelfAssessment implements IViewActionDelegate {
         return new StringBuffer(SamtWorkspace.getInstance().getConfDir()).append(File.separatorChar).append(SamtWorkspace.SAMT_CATALOG_FILE_NAME).toString();
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action
+     * .IAction, org.eclipse.jface.viewers.ISelection)
      */
     @Override
     public void selectionChanged(IAction action, ISelection selection) {
         // TODO Auto-generated method stub
 
     }
-    
+
     public ICommandService getCommandService() {
         if (commandService == null) {
             commandService = createCommandServive();
         }
         return commandService;
     }
-    
+
     private ICommandService createCommandServive() {
         return ServiceFactory.lookupCommandService();
     }

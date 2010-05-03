@@ -27,53 +27,48 @@ import org.apache.log4j.Logger;
 import sernet.gs.ui.rcp.main.CnAWorkspace;
 
 /**
- * @author Daniel Murygin <dm@sernet.de>
- *
+ * @author Daniel Murygin <dm@sernet.de> // TODO dm: Externalize Strings
  */
 public class SamtWorkspace extends CnAWorkspace {
 
     private static final Logger LOG = Logger.getLogger(SamtWorkspace.class);
-    
+
     private static SamtWorkspace instance;
 
     /**
-     * Classloader-relative path to the resources folder of this bundle
-     * without a path separator in the beginning and in the end
+     * Classloader-relative path to the resources folder of this bundle without
+     * a path separator in the beginning and in the end
      */
     public static final String RESOURCES_PATH = "resources";
-    
+
     /**
-     * Workspace-relative path to the verinice conf folder
-     * without a path separator in the beginning and in the end
+     * Workspace-relative path to the verinice conf folder without a path
+     * separator in the beginning and in the end
      */
     public static final String CONF_PATH = "conf";
-    
+
     /**
      * File name of the self-assessment CSV catalog
      */
     public static final String SAMT_CATALOG_FILE_NAME = "samt-catalog.csv";
-   
-    
+
     private SamtWorkspace() {
         // use getInstance
     }
-    
+
     public static SamtWorkspace getInstance() {
         if (instance == null) {
             instance = new SamtWorkspace();
         }
         return instance;
     }
-    
+
     public synchronized void createSelfAssessmemtCatalog() throws NullPointerException, IOException {
-        final String inputPath = RESOURCES_PATH + File.separatorChar + SAMT_CATALOG_FILE_NAME; 
-        final String ouputPath = CONF_PATH + File.separatorChar + SAMT_CATALOG_FILE_NAME; //$NON-NLS-1$ 
-        
-        try { 
-            createTextFile(inputPath, 
-                           getWorkdir(), 
-                           ouputPath, 
-                           null);
+        final String inputPath = RESOURCES_PATH + File.separatorChar + SAMT_CATALOG_FILE_NAME;
+        final String ouputPath = CONF_PATH + File.separatorChar + SAMT_CATALOG_FILE_NAME;
+
+        try {
+            createTextFile(inputPath, getWorkdir(), ouputPath, null);
         } catch (RuntimeException e) {
             LOG.error("Error while saving samt catalog file in conf dir. Input path: " + inputPath + ", output path: " + ouputPath, e);
             throw e;

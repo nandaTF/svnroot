@@ -22,12 +22,8 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.verinice.samt.service.CreateSelfAssessment;
 
-import sernet.gs.ui.rcp.main.service.ICommandService;
-import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.verinice.iso27k.rcp.ISMView;
 import sernet.verinice.iso27k.rcp.JobScheduler;
 import sernet.verinice.iso27k.rcp.action.HideEmptyFilter;
@@ -35,32 +31,34 @@ import sernet.verinice.iso27k.rcp.action.HideEmptyFilter;
 /**
  * 
  * 
- * @author Daniel Murygin <dm[at]sernet[dot]de>
+ * @author Daniel Murygin <dm[at]sernet[dot]de> // TODO dm: Externalize Strings
  */
 public class SamtView extends ISMView {
 
     private static final Logger LOG = Logger.getLogger(SamtView.class);
-    
-	/**
-	 * The ID of the view as specified by the extension.
-	 */
-	public static final String ID = "org.verinice.samt.rcp.views.SamtView";
 
-	
-	/**
-	 * The constructor.
-	 */
-	public SamtView() {
-	    super();
-	}
+    /**
+     * The ID of the view as specified by the extension.
+     */
+    public static final String ID = "org.verinice.samt.rcp.views.SamtView";
 
-	/* (non-Javadoc)
-	 * @see sernet.verinice.iso27k.rcp.ISMView#initData()
-	 */
-	@Override
-	protected void initData() { 
-	    super.initData();    
-	    WorkspaceJob initDataJob = new WorkspaceJob("Expanding Self Assessment Tree") {
+    /**
+     * The constructor.
+     */
+    public SamtView() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sernet.verinice.iso27k.rcp.ISMView#initData()
+     */
+    @Override
+    protected void initData() {
+        super.initData();
+        WorkspaceJob initDataJob = new WorkspaceJob("Expanding Self Assessment Tree") {
+            @Override
             public IStatus runInWorkspace(final IProgressMonitor monitor) {
                 IStatus status = Status.OK_STATUS;
                 try {
@@ -72,7 +70,7 @@ public class SamtView extends ISMView {
                     });
                 } catch (Exception e) {
                     LOG.error("Error while expanding tree", e); //$NON-NLS-1$
-                    status= new Status(Status.ERROR, "sernet.gs.ui.rcp.main", "Error while expanding tree",e);
+                    status = new Status(IStatus.ERROR, "sernet.gs.ui.rcp.main", "Error while expanding tree", e);
                 } finally {
                     monitor.done();
                 }
@@ -80,16 +78,18 @@ public class SamtView extends ISMView {
             }
         };
         JobScheduler.scheduleInitJob(initDataJob);
-	}
-	
-	/* (non-Javadoc)
-	 * @see sernet.verinice.iso27k.rcp.ISMView#createHideEmptyFilter()
-	 */
-	@Override
-	protected HideEmptyFilter createHideEmptyFilter() {
-	    HideEmptyFilter filter = new HideEmptyFilter(viewer);
-	    filter.setHideEmpty(true);
-	    return filter;
-	}
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sernet.verinice.iso27k.rcp.ISMView#createHideEmptyFilter()
+     */
+    @Override
+    protected HideEmptyFilter createHideEmptyFilter() {
+        HideEmptyFilter filter = new HideEmptyFilter(viewer);
+        filter.setHideEmpty(true);
+        return filter;
+    }
 
 }

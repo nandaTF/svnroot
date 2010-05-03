@@ -19,30 +19,26 @@
  ******************************************************************************/
 package org.verinice.samt.rcp;
 
-import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 
-import sernet.gs.ui.rcp.main.bsi.views.FileView;
-import sernet.gs.ui.rcp.main.bsi.views.NoteView;
-import sernet.gs.ui.rcp.main.bsi.views.RelationView;
-import sernet.verinice.iso27k.rcp.CatalogView;
-import sernet.verinice.iso27k.rcp.ISMView;
-
 /**
- * @author Daniel Murygin <dm@sernet.de>
- *
+ * @author Daniel Murygin <dm@sernet.de> // TODO dm: Externalize Strings
  */
 public class SamtPerspective implements IPerspectiveFactory {
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IPerspectiveFactory#createInitialLayout(org.eclipse.ui.IPageLayout)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.eclipse.ui.IPerspectiveFactory#createInitialLayout(org.eclipse.ui
+     * .IPageLayout)
      */
     @Override
     public void createInitialLayout(IPageLayout layout) {
         String editorArea = layout.getEditorArea();
-        layout.setEditorAreaVisible(true);    
-        layout.addView(SamtView.ID,  IPageLayout.LEFT, 0.3f, editorArea);  
+        layout.setEditorAreaVisible(true);
+        layout.addView(SamtView.ID, IPageLayout.LEFT, 0.3f, editorArea);
         layout.getViewLayout(SamtView.ID).setCloseable(false);
 
     }
