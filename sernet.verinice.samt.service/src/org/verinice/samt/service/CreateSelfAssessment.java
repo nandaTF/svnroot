@@ -19,12 +19,10 @@
  ******************************************************************************/
 package org.verinice.samt.service;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -44,31 +42,21 @@ import sernet.gs.ui.rcp.main.service.commands.GenericCommand;
 import sernet.gs.ui.rcp.main.service.commands.IAuthAwareCommand;
 import sernet.gs.ui.rcp.main.service.commands.IChangeLoggingCommand;
 import sernet.gs.ui.rcp.main.service.commands.RuntimeCommandException;
-import sernet.gs.ui.rcp.main.service.crudcommands.CreateElement;
-import sernet.gs.ui.rcp.main.service.crudcommands.SaveElement;
-import sernet.verinice.iso27k.model.Control;
 import sernet.verinice.iso27k.model.ControlGroup;
-import sernet.verinice.iso27k.model.Group;
 import sernet.verinice.iso27k.model.ISO27KModel;
 import sernet.verinice.iso27k.model.Organization;
-import sernet.verinice.iso27k.service.ControlTransformService;
-import sernet.verinice.iso27k.service.DummyModelUpdater;
-import sernet.verinice.iso27k.service.DummyProgressObserver;
 import sernet.verinice.iso27k.service.IItem;
-import sernet.verinice.iso27k.service.IModelUpdater;
-import sernet.verinice.iso27k.service.IProgressObserver;
 import sernet.verinice.iso27k.service.ItemControlTransformer;
 import sernet.verinice.iso27k.service.commands.CsvFile;
 import sernet.verinice.iso27k.service.commands.ImportCatalog;
 
 /**
- * @author Daniel Murygin <dm@sernet.de>
- *
+ * @author Daniel Murygin <dm@sernet.de> // TODO dm: Externalize Strings
  */
-public class CreateSelfAssessment extends GenericCommand implements IChangeLoggingCommand, IAuthAwareCommand  {
+public class CreateSelfAssessment extends GenericCommand implements IChangeLoggingCommand, IAuthAwareCommand {
 
     private transient Logger log = Logger.getLogger(CreateSelfAssessment.class);
-    
+
     public Logger getLog() {
         if (log == null) {
             log = Logger.getLogger(CreateSelfAssessment.class);
@@ -81,64 +69,64 @@ public class CreateSelfAssessment extends GenericCommand implements IChangeLoggi
     private ISO27KModel model;
     private Organization selfAssessment;
     private String stationId;
-    
+
     private transient IAuthService authService;
-    
-    
-    
+
     public CreateSelfAssessment(ISO27KModel model, String title) {
         super();
         this.title = title;
         this.model = model;
         this.stationId = ChangeLogEntry.STATION_ID;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see sernet.gs.ui.rcp.main.service.commands.ICommand#execute()
      */
     @Override
     public void execute() {
         try {
             selfAssessment = new Organization(model);
-            if(title!=null) {
+            if (title != null) {
                 selfAssessment.setTitel(title);
             }
             model.addChild(selfAssessment);
-          
+
             // We use the name of the currently
             // logged in user as a role which has read and write permissions for
-            // the new Organization. 
+            // the new Organization.
             HashSet<Permission> newperms = new HashSet<Permission>();
-            newperms.add(Permission.createPermission( selfAssessment, authService.getUsername(),true, true));
+            newperms.add(Permission.createPermission(selfAssessment, authService.getUsername(), true, true));
             selfAssessment.setPermissions(newperms);
-            
+
             // read the control items from a the csv file
             Collection<IItem> itemCollection = getItemCollection();
             ControlGroup controlGroup = getControlGroup(selfAssessment);
-            importCatalogItems(controlGroup, itemCollection);  
-       
-            IBaseDao<Organization, Serializable> dao = (IBaseDao<Organization, Serializable>) getDaoFactory().getDAO(Organization.class);
-            dao.saveOrUpdate(selfAssessment);          
-        } catch( Exception e ) {
+            importCatalogItems(controlGroup, itemCollection);
+
+            IBaseDao<Organization, Serializable> dao = getDaoFactory().getDAO(Organization.class);
+            dao.saveOrUpdate(selfAssessment);
+        } catch (Exception e) {
             getLog().error("Error while creating self assesment", e);
             throw new RuntimeCommandException("Error while creating self assesment: " + e.getMessage());
         }
     }
-    
+
     private void importCatalogItems(CnATreeElement group, Collection<IItem> itemCollection) {
         for (Iterator<IItem> iterator = itemCollection.iterator(); iterator.hasNext();) {
             IItem item = iterator.next();
             CnATreeElement element = null;
-            if(item.getItems()!=null && item.getItems().size()>0) {
+            if (item.getItems() != null && item.getItems().size() > 0) {
                 // create a group
-                element = ItemControlTransformer.transformToGroup(item); 
+                element = ItemControlTransformer.transformToGroup(item);
                 importCatalogItems(element, item.getItems());
             } else {
                 // create an element
                 element = ItemControlTransformer.transform(item);
             }
             group.addChild(element);
-            element.setParent(group);    
+            element.setParent(group);
         }
     }
 
@@ -146,17 +134,20 @@ public class CreateSelfAssessment extends GenericCommand implements IChangeLoggi
      * Imports the control items from a the CSV file
      * 
      * @return A collection of control items
-     * @throws FileNotFoundException if CSV file can not be found
-     * @throws IOException if reading of the CSV file fails
-     * @throws CommandException if executing of CSV import command fails
+     * @throws FileNotFoundException
+     *             if CSV file can not be found
+     * @throws IOException
+     *             if reading of the CSV file fails
+     * @throws CommandException
+     *             if executing of CSV import command fails
      */
     private Collection<IItem> getItemCollection() throws FileNotFoundException, IOException, CommandException {
         // if csvFile was not passed to this command as parameter, read it here
-        if(csvFile==null) {
-            // read the CSV file which contains the self assessment controls 
+        if (csvFile == null) {
+            // read the CSV file which contains the self assessment controls
             String relativePath = "resources/add/real/path/to/samt-catalog.csv";
             InputStream is = this.getClass().getClassLoader().getResourceAsStream(relativePath);
-            if(is==null) {
+            if (is == null) {
                 throw new FileNotFoundException("Relative path: " + relativePath + " not found by ..getClassLoader().getResource(..)");
             }
             csvFile = new CsvFile(is);
@@ -176,9 +167,9 @@ public class CreateSelfAssessment extends GenericCommand implements IChangeLoggi
         Set<CnATreeElement> elementSet = selfAssessment.getChildren();
         for (Iterator iterator = elementSet.iterator(); iterator.hasNext();) {
             CnATreeElement element = (CnATreeElement) iterator.next();
-            if(element instanceof ControlGroup) {
-                controlGroup = (ControlGroup)element;
-            }         
+            if (element instanceof ControlGroup) {
+                controlGroup = (ControlGroup) element;
+            }
         }
         return controlGroup;
     }
@@ -195,44 +186,62 @@ public class CreateSelfAssessment extends GenericCommand implements IChangeLoggi
         this.csvFile = csvFile;
     }
 
-    /* (non-Javadoc)
-     * @see sernet.gs.ui.rcp.main.service.commands.IChangeLoggingCommand#getChangeType()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * sernet.gs.ui.rcp.main.service.commands.IChangeLoggingCommand#getChangeType
+     * ()
      */
     @Override
     public int getChangeType() {
         return ChangeLogEntry.TYPE_INSERT;
     }
 
-    /* (non-Javadoc)
-     * @see sernet.gs.ui.rcp.main.service.commands.IChangeLoggingCommand#getChangedElements()
+    /*
+     * (non-Javadoc)
+     * 
+     * @seesernet.gs.ui.rcp.main.service.commands.IChangeLoggingCommand#
+     * getChangedElements()
      */
     @Override
     public List<CnATreeElement> getChangedElements() {
-        return Arrays.asList((CnATreeElement)selfAssessment);
+        return Arrays.asList((CnATreeElement) selfAssessment);
     }
 
-    /* (non-Javadoc)
-     * @see sernet.gs.ui.rcp.main.service.commands.IChangeLoggingCommand#getStationId()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * sernet.gs.ui.rcp.main.service.commands.IChangeLoggingCommand#getStationId
+     * ()
      */
     @Override
     public String getStationId() {
         return stationId;
     }
 
-    /* (non-Javadoc)
-     * @see sernet.gs.ui.rcp.main.service.commands.IAuthAwareCommand#getAuthService()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * sernet.gs.ui.rcp.main.service.commands.IAuthAwareCommand#getAuthService()
      */
     @Override
     public IAuthService getAuthService() {
         return authService;
     }
 
-    /* (non-Javadoc)
-     * @see sernet.gs.ui.rcp.main.service.commands.IAuthAwareCommand#setAuthService(sernet.gs.ui.rcp.main.service.IAuthService)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * sernet.gs.ui.rcp.main.service.commands.IAuthAwareCommand#setAuthService
+     * (sernet.gs.ui.rcp.main.service.IAuthService)
      */
     @Override
     public void setAuthService(IAuthService service) {
-        this.authService = service;    
+        this.authService = service;
     }
 
 }
