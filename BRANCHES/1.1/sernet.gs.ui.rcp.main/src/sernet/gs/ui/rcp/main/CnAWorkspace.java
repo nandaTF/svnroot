@@ -83,9 +83,8 @@ public class CnAWorkspace {
 
 	private static final Object LOCAL_UPDATE_SITE_URL = "/Verinice-Update-Site-1.0";
 
-	private static CnAWorkspace instance;
+    private static CnAWorkspace instance;
 	
-
 	private final IPropertyChangeListener prefChangeListener = new IPropertyChangeListener() {
 		private boolean modechangeWarning = true;
 

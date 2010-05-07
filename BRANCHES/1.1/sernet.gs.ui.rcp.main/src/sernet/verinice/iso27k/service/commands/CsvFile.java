@@ -19,8 +19,11 @@ package sernet.verinice.iso27k.service.commands;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 
+import sernet.gs.ui.rcp.main.VeriniceCharset;
 import sernet.verinice.iso27k.service.FileUtil;
 
 /**
@@ -29,25 +32,50 @@ import sernet.verinice.iso27k.service.FileUtil;
  */
 public class CsvFile implements Serializable{
 	
-	String filePath;
+    public final static Charset CHARSET_DEFAULT = VeriniceCharset.CHARSET_UTF_8;
+	
+    String filePath;
 	
 	byte[] fileContent;
 	
+	public CsvFile(InputStream is) throws IOException {
+	    this(is,CHARSET_DEFAULT);
+	}
+	
+	public CsvFile(InputStream is, Charset charset) throws IOException {
+        super();
+        this.filePath = "unknown";
+        byte[] content = FileUtil.getBytesFromInputstream(is);
+        if(!VeriniceCharset.CHARSET_UTF_8.equals(charset)) {
+            content = FileUtil.changeEncoding(content, charset, VeriniceCharset.CHARSET_UTF_8);
+        }
+        setFileContent(content);
+    }
+	
 	public CsvFile(String filePath) throws IOException {
+        this(filePath,CHARSET_DEFAULT);
+    }
+	
+	public CsvFile(String filePath, Charset charset) throws IOException {
 		super();
 		this.filePath = filePath;
-		readFile();
+		readFile(charset);
 	}
+
 	
 	public CsvFile(byte[] fileContent) throws IOException {
 		super();
 		setFileContent(fileContent);
 	}
 
-	public void readFile() throws IOException {
+	public void readFile(Charset charset) throws IOException {
 		if( getFilePath()!=null) {
 			File file = new File(getFilePath());
-			setFileContent(FileUtil.getBytesFromFile(file));
+			byte[] content = FileUtil.getBytesFromFile(file);
+			if(!VeriniceCharset.CHARSET_UTF_8.equals(charset)) {
+			    content = FileUtil.changeEncoding(content, charset, VeriniceCharset.CHARSET_UTF_8);
+			}
+			setFileContent(content);
 		}
 	}
 	
