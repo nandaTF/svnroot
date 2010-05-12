@@ -37,21 +37,21 @@ public class FindRelationsFor extends GenericCommand {
 
 	private Integer dbId;
 	private CnATreeElement elmt;
-	private Class<? extends CnATreeElement> clazz;
+	private String typeId;
 
 	/**
 	 * @param dbId
 	 */
 	public FindRelationsFor(CnATreeElement elmt) {
 		this.dbId = elmt.getDbId();
-		this.clazz = elmt.getClass();
+		this.typeId = elmt.getTypeId();
 	}
 
 	/* (non-Javadoc)
 	 * @see sernet.gs.ui.rcp.main.service.commands.ICommand#execute()
 	 */
 	public void execute() {
-		IBaseDao<? extends CnATreeElement, Serializable> dao = getDaoFactory().getDAO(clazz);
+		IBaseDao<? extends CnATreeElement, Serializable> dao = getDaoFactory().getDAO(typeId);
 		RetrieveInfo ri = new RetrieveInfo();
 		ri.setLinksDown(true).setLinksUp(true);
 		elmt = dao.retrieve(dbId, ri);

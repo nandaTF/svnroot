@@ -34,6 +34,7 @@ import sernet.gs.ui.rcp.main.bsi.model.Schutzbedarf;
 import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.EntityType;
 import sernet.hui.common.connect.HUITypeFactory;
+import sernet.hui.common.connect.ITypedElement;
 import sernet.hui.common.connect.PropertyList;
 
 /**
@@ -50,7 +51,7 @@ import sernet.hui.common.connect.PropertyList;
  * 
  */
 @SuppressWarnings("serial")
-public abstract class CnATreeElement implements Serializable, IBSIModelListener {
+public abstract class CnATreeElement implements Serializable, IBSIModelListener, ITypedElement {
 
 	public static final String PERSON = "person";
 	public static final String BAUSTEIN_UMSETZUNG = "baustein-umsetzung";

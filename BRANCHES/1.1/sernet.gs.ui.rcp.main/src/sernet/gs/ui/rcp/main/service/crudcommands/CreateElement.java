@@ -67,7 +67,7 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand
 	public void execute() {
 		IBaseDao<T, Serializable> dao 
 			= (IBaseDao<T, Serializable>) getDaoFactory().getDAO(type);
-		IBaseDao<Object, Serializable> containerDAO = getDaoFactory().getDAOForObject(container);
+		IBaseDao<Object, Serializable> containerDAO = getDaoFactory().getDAOforTypedElement(container);
 		
 		try {
 			containerDAO.reload(container, container.getDbId());

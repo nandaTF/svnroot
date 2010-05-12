@@ -225,7 +225,7 @@ public class ToDoBean {
 			ICommandService service = (ICommandService) VeriniceContext.get(VeriniceContext.COMMAND_SERVICE);
 			if(getSelectedItem()!=null) {
 				massnahmeId = getSelectedItem().getdbId();
-				LoadCnAElementById command = new LoadCnAElementById(MassnahmenUmsetzung.class,massnahmeId);
+				LoadCnAElementById command = new LoadCnAElementById(MassnahmenUmsetzung.TYPE_ID, massnahmeId);
 				
 					service.executeCommand(command);
 					MassnahmenUmsetzung result = (MassnahmenUmsetzung) command.getFound();

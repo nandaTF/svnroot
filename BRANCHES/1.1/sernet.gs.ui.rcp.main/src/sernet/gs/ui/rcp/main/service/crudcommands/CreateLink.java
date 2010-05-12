@@ -19,6 +19,8 @@ package sernet.gs.ui.rcp.main.service.crudcommands;
 
 import java.io.Serializable;
 
+import org.apache.log4j.Logger;
+
 import sernet.gs.ui.rcp.main.bsi.model.BSIModel;
 import sernet.gs.ui.rcp.main.common.model.CnALink;
 import sernet.gs.ui.rcp.main.common.model.CnATreeElement;
@@ -38,6 +40,15 @@ import sernet.gs.ui.rcp.main.service.commands.GenericCommand;
  */
 public class CreateLink<T extends CnALink, U extends CnATreeElement, V extends CnATreeElement> 
 extends GenericCommand {
+    
+    private transient Logger log = Logger.getLogger(CreateLink.class);
+
+    public Logger getLog() {
+        if (log == null) {
+            log = Logger.getLogger(CreateLink.class);
+        }
+        return log;
+    }
 
 	private U dragged;
 	private V target;
@@ -61,24 +72,34 @@ extends GenericCommand {
 	}
 	
 	public void execute() {
+	    if (getLog().isDebugEnabled()) {
+            getLog().debug("Creating link from " + dragged.getTypeId() + " to " + target.getTypeId());
+        }
+	    
 		IBaseDao<CnALink, Serializable> linkDao 
 			= (IBaseDao<CnALink, Serializable>) getDaoFactory().getDAO(CnALink.class);
 		
 		IBaseDao<U, Serializable> draggedDao 
-		= (IBaseDao<U, Serializable>) getDaoFactory().getDAO(dragged.getClass());
+		= (IBaseDao<U, Serializable>) getDaoFactory().getDAO(dragged.getTypeId());
 
 		IBaseDao<V, Serializable> targetDao 
-		= (IBaseDao<V, Serializable>) getDaoFactory().getDAO(target.getClass());
+		= (IBaseDao<V, Serializable>) getDaoFactory().getDAO(target.getTypeId());
 
-		// if dragged or target are cglib enhanced, we won't get a DAO, but in this case we don't need to reload
-		// because we're already inside the session:
-		if (draggedDao != null && targetDao != null) {
-			draggedDao.reload(dragged, dragged.getDbId());
-			targetDao.reload(target, target.getDbId());
-		}
+//		// if dragged or target are cglib enhanced, we won't get a DAO, but in this case we don't need to reload
+//		// because we're already inside the session:
+//		if (draggedDao != null && targetDao != null) {
+//			draggedDao.reload(dragged, dragged.getDbId());
+//			targetDao.reload(target, target.getDbId());
+//		}
+		dragged = draggedDao.findById(dragged.getDbId());
+		target = targetDao.findById(target.getDbId());
 		
 		link = new CnALink(target, dragged, typeId, comment);
-		linkDao.merge(link, true);
+		try {
+		    linkDao.merge(link, true);
+        } catch (Exception e) {
+            getLog().error("Could not create link from " + dragged.getTypeId() + " to " + target.getTypeId() );
+        }
 		
 	}
 

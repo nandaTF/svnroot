@@ -45,7 +45,6 @@ import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnAElementById;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnAElementByType;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadCurrentUserConfiguration;
 import sernet.gs.ui.rcp.main.service.crudcommands.RefreshElement;
-import sernet.gs.ui.rcp.main.service.crudcommands.RefreshMultipleElements;
 import sernet.gs.ui.rcp.main.service.crudcommands.RemoveElement;
 import sernet.gs.ui.rcp.main.service.crudcommands.RemoveLink;
 import sernet.gs.ui.rcp.main.service.crudcommands.SaveElement;
@@ -203,11 +202,6 @@ public class CnAElementHome {
 		command = getCommandService().executeCommand(command);
 	}
 
-	public void refresh(List<? extends CnATreeElement> elements) throws CommandException {
-		RefreshMultipleElements command = new RefreshMultipleElements(elements);
-		command = getCommandService().executeCommand(command);
-	}
-
 	/**
 	 * Load object with given ID for given class.
 	 * 
@@ -217,8 +211,8 @@ public class CnAElementHome {
 	 * @throws CommandException 
 	 */
 	@SuppressWarnings("unchecked")
-	public CnATreeElement loadById(Class<? extends CnATreeElement> clazz, int id) throws CommandException {
-		LoadCnAElementById command = new LoadCnAElementById(clazz, id);
+	public CnATreeElement loadById(String typeId, int id) throws CommandException {
+		LoadCnAElementById command = new LoadCnAElementById(typeId, id);
 		command = getCommandService().executeCommand(command);
 		return command.getFound();
 	}

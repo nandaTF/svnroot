@@ -19,6 +19,8 @@ package sernet.gs.ui.rcp.main.service.crudcommands;
 
 import java.io.Serializable;
 
+import org.apache.log4j.Logger;
+
 import sernet.gs.ui.rcp.main.bsi.model.BSIModel;
 import sernet.gs.ui.rcp.main.common.model.CnALink;
 import sernet.gs.ui.rcp.main.common.model.CnATreeElement;
@@ -41,6 +43,15 @@ import sernet.gs.ui.rcp.main.service.commands.GenericCommand;
 public class ChangeLinkType extends GenericCommand {
 
 	private CnALink link;
+	
+	private transient Logger log = Logger.getLogger(ChangeLinkType.class);
+
+    public Logger getLog() {
+        if (log == null) {
+            log = Logger.getLogger(ChangeLinkType.class);
+        }
+        return log;
+    }
 	
 	public CnALink getLink() {
 		return link;
@@ -76,13 +87,17 @@ public class ChangeLinkType extends GenericCommand {
 	 * @see sernet.gs.ui.rcp.main.service.commands.ICommand#execute()
 	 */
 	public void execute() {
+	    if (getLog().isDebugEnabled()) {
+            getLog().debug("Changing link type.");
+        }
+	    
 		try {
 			IBaseDao<CnALink, Serializable> dao = getDaoFactory().getDAO(CnALink.class);
-			dao.reload(link, link.getId());
+			link = dao.findById(link.getId());
 
-			
 			CnATreeElement dependant = link.getDependant();
 			CnATreeElement dependency = link.getDependency();
+			
 			// links are immutable, so we have to recreate the link:
 			RemoveLink<CnALink> command3 = new RemoveLink<CnALink>(link);
 			command3 = getCommandService().executeCommand(command3);

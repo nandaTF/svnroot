@@ -46,7 +46,6 @@ public class SubtypenZielobjekte {
 					.error("Fehler beim Laden der Zuordnung von Zielobjekt-Typen zu Bausteinen", e);
 			}
 
-			// TODO server test if this works
 			Set<Entry<Object, Object>> entrySet = properties.entrySet();
 			for (Entry<Object, Object> entry : entrySet) {
 				String name = entry.getKey().toString();
