@@ -132,7 +132,7 @@ public class RelationView extends ViewPart implements IRelationTable {
 		contentProvider = new RelationViewContentProvider(this, viewer);
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(new RelationViewLabelProvider(this));
-		viewer.setSorter(new RelationByNameSorter(COLUMN_TITLE, this));
+		viewer.setSorter(new RelationByNameSorter(this, COLUMN_TITLE, COLUMN_TYPE_IMG));
 
 		// try to add listeners once on startup, and register for model changes:
 		addModelListeners();
@@ -385,8 +385,8 @@ public class RelationView extends ViewPart implements IRelationTable {
 			inputElmt.addLinkUp(newLink);
 		if (removedLinkDown)
 			inputElmt.addLinkDown(newLink);
-		viewer.refresh();
 		
+            viewer.refresh();
 	}
 
 	/* (non-Javadoc)

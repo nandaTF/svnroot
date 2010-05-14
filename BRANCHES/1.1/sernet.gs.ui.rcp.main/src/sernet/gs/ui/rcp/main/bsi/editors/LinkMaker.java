@@ -164,7 +164,7 @@ public class LinkMaker extends Composite implements IRelationTable {
 		contentProvider = new RelationViewContentProvider(this, viewer);
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(new RelationViewLabelProvider(this));
-		viewer.setSorter(new RelationByNameSorter(IRelationTable.COLUMN_TITLE, this));
+		viewer.setSorter(new RelationByNameSorter(this, IRelationTable.COLUMN_TITLE, IRelationTable.COLUMN_TYPE_IMG));
 		
 		CnAElementFactory.getInstance().getLoadedModel().addBSIModelListener(contentProvider);
 		CnAElementFactory.getInstance().getISO27kModel().addISO27KModelListener(contentProvider);
@@ -289,6 +289,7 @@ public class LinkMaker extends Composite implements IRelationTable {
 			inputElmt.addLinkUp(newLink);
 		if (removedLinkDown)
 			inputElmt.addLinkDown(newLink);
+
 		viewer.refresh();
 	}
 

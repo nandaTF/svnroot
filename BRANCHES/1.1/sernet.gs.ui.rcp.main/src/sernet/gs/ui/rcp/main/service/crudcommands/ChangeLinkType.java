@@ -18,6 +18,7 @@
 package sernet.gs.ui.rcp.main.service.crudcommands;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -34,6 +35,8 @@ import sernet.gs.ui.rcp.main.service.commands.GenericCommand;
 /**
  * Changes the link type. Because links are immutable, the link will be deleted and inserted again with new link type.
  * The newly created link will be in the command after execution and requested using the getLink() method.
+ * Because the created link is directly used to refresh the view, this command hydrates the newly created link 
+ * before returning it to the view layer.
  * 
  * @author koderman[at]sernet[dot]de
  * @version $Rev$ $LastChangedDate$ 
@@ -94,6 +97,13 @@ public class ChangeLinkType extends GenericCommand {
 		try {
 			IBaseDao<CnALink, Serializable> dao = getDaoFactory().getDAO(CnALink.class);
 			link = dao.findById(link.getId());
+			
+			if (link == null) {
+			    if (getLog().isDebugEnabled()) {
+                    getLog().warn("Could not find link to change.");
+                }
+			    return;
+			}
 
 			CnATreeElement dependant = link.getDependant();
 			CnATreeElement dependency = link.getDependency();
@@ -107,9 +117,12 @@ public class ChangeLinkType extends GenericCommand {
 			command4 = getCommandService().executeCommand(command4);
 			link = command4.getLink();
 			
+			HydratorUtil.hydrateElement(dao, link.getDependency(), false);
+			HydratorUtil.hydrateElement(dao, link.getDependant(), false);
 			
 		} catch (CommandException e) {
 		}
 	}
+
 
 }

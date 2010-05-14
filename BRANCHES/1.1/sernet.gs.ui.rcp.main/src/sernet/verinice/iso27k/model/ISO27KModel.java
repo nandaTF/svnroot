@@ -128,9 +128,9 @@ public class ISO27KModel extends CnATreeElement implements IISO27kRoot {
 	}
 	
 	@Override
-	public void linkChanged(CnALink old, CnALink link) {
+	public void linkChanged(CnALink old, CnALink link, Object source) {
 		for (IISO27KModelListener listener : getListeners()) {
-			listener.linkChanged(old, link);
+			listener.linkChanged(old, link, source);
 		}
 	}
 	
