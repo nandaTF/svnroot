@@ -84,18 +84,25 @@ public class RelationView extends ViewPart implements IRelationTable {
 	 */
 	public void loadLinks(final CnATreeElement elmt) {
 
-		if (!CnAElementHome.getInstance().isOpen()) {
+		if (!CnAElementHome.getInstance().isOpen()
+		        || inputElmt == null) {
 			return;
 		}
 
-		viewer.setInput(new PlaceHolder("Lade Relationen..."));
 
 		WorkspaceJob job = new WorkspaceJob("Lade Relationen...") {
 			public IStatus runInWorkspace(final IProgressMonitor monitor) {
 				Activator.inheritVeriniceContextState();
 
 				try {
-					monitor.setTaskName("Lade Relationen...");
+
+                    Display.getDefault().asyncExec(new Runnable() {
+                        public void run() {
+                            viewer.setInput(new PlaceHolder("Lade Relationen..."));
+                        }
+                    });
+
+                    monitor.setTaskName("Lade Relationen...");
 
 					FindRelationsFor command = new FindRelationsFor(elmt);
 					command = ServiceFactory.lookupCommandService()

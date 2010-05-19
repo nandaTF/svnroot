@@ -73,14 +73,14 @@ public class ControlTransformService {
 			this.numberOfControls = 0;
 			List<IItem> itemList = createInsertList(DNDItems.getItems());
 			StringBuilder sb = new StringBuilder();
-			sb.append("Transforming ").append(numberOfControls).append(" catalog items to controls.");
+			sb.append("Transforming ").append(numberOfControls).append(" catalog items.");
 			progressObserver.beginTask(sb.toString(), numberOfControls);
 			numberProcessed = 0;
 			for (IItem item : itemList) {				
 				insertItem(progressObserver, selectedGroup, item);
 			}		
 		} catch (Exception e) {
-			log.error("Error while transforming to control", e);
+			log.error("Error while transforming item", e);
 		} finally {
 			progressObserver.done();
 		}
@@ -101,19 +101,23 @@ public class ControlTransformService {
 		CnATreeElement element = null;
 		if(item.getItems()!=null && item.getItems().size()>0) {
 			// create a group
-			element = ItemControlTransformer.transformToGroup(item);
+			element = GenericItemTransformer.transformToGroup(item);
 			monitor.setTaskName(getText(numberOfControls,numberProcessed,element.getTitle()));
-			group.addChild(element);
-			element.setParent(group);
-			command = new SaveElement<ControlGroup>((ControlGroup) element);
-			
+			if (group.canContain(element)) {
+			    group.addChild(element);
+			    element.setParent(group);
+			    command = new SaveElement( element);
+			}
 		} else {
 			// create a control
-			element = ItemControlTransformer.transform(item);
+			element = GenericItemTransformer.transform(item);
 			monitor.setTaskName(getText(numberOfControls,numberProcessed,element.getTitle()));
-			group.addChild(element);
-			element.setParent(group);
-			command = new SaveElement<Control>((Control) element);
+			
+			if (group.canContain(element)) {
+			    group.addChild(element);
+			    element.setParent(group);
+			    command = new SaveElement( element);
+			}
 		}
 
 		try {

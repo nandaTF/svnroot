@@ -237,7 +237,8 @@ public class SchutzbedarfAdapter implements ISchutzbedarfProvider, Serializable 
 		try {
 			downwardsTA.enter(downwardElement);
 		} catch (TransactionAbortedException e) {
-			Logger.getLogger(this.getClass()).error("Aborted while determining bottom node for protection requirements on object: " + downwardElement.getTitle(), e);
+			Logger.getLogger(this.getClass()).error("Aborted while determining bottom node for protection requirements on object: " 
+			        + downwardElement.getTitle(), e);
 			return;
 		}
 
@@ -273,5 +274,28 @@ public class SchutzbedarfAdapter implements ISchutzbedarfProvider, Serializable 
 	public void updateVertraulichkeit(CascadingTransaction ta) {
 		fireVertraulichkeitChanged(ta);
 	}
+
+   
+
+    /* (non-Javadoc)
+     * @see sernet.gs.ui.rcp.main.bsi.model.ISchutzbedarfProvider#isCalculatedAvailability()
+     */
+    public boolean isCalculatedAvailability() {
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see sernet.gs.ui.rcp.main.bsi.model.ISchutzbedarfProvider#isCalculatedConfidentiality()
+     */
+    public boolean isCalculatedConfidentiality() {
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see sernet.gs.ui.rcp.main.bsi.model.ISchutzbedarfProvider#isCalculatedIntegrity()
+     */
+    public boolean isCalculatedIntegrity() {
+        return false;
+    }
 
 }

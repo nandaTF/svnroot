@@ -62,7 +62,7 @@ import sernet.snutils.DBException;
  * 
  */
 public class HUITypeFactory {
-	private static final Logger log = Logger.getLogger(HUITypeFactory.class);
+	private static final Logger LOG = Logger.getLogger(HUITypeFactory.class);
 
 	private static Document doc;
 
@@ -131,12 +131,12 @@ public class HUITypeFactory {
 			parser = factory.newDocumentBuilder();
 
 		} catch (ParserConfigurationException e) {
-			log.error("Unrecognized parser feature.", e);
+			LOG.error("Unrecognized parser feature.", e);
 			throw new RuntimeException(e);
 		}
 
 		try {
-			log.debug("Getting XML property definition from " + xmlFile);
+			LOG.debug("Getting XML property definition from " + xmlFile);
 			parser.setErrorHandler(new ErrorHandler() {
 				public void error(SAXParseException exception)
 						throws SAXException {
@@ -157,7 +157,7 @@ public class HUITypeFactory {
 			readAllEntities();
 
 		} catch (IOException ie) {
-			log.error(ie);
+			LOG.error(ie);
 			throw new DBException(
 					"Die XML Datei mit der Definition der Formularfelder konnte nicht "
 							+ "geladen werden! Bitte Pfad und Erreichbarkeit laut Konfigurationsfile"
@@ -228,33 +228,33 @@ public class HUITypeFactory {
 
 				if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
 					connection.disconnect();
-					log.debug("Remote PropertyType file not modified.");
+					LOG.debug("Remote PropertyType file not modified.");
 					return false;
 				}
 				lastModified = connection.getHeaderField("Last-Modified");
 				connection.disconnect();
-				log.debug("CHANGED: Remote PropertyType file modified.");
+				LOG.debug("CHANGED: Remote PropertyType file modified.");
 				return true;
 			} catch (MalformedURLException e) {
-				log.error(e);
-				log.error(e);
+				LOG.error(e);
+				LOG.error(e);
 			} catch (ProtocolException e) {
-				log.error(e);
+				LOG.error(e);
 			} catch (UnsupportedEncodingException e) {
-				log.error(e);
+				LOG.error(e);
 			} catch (IOException e) {
-				log.error(e);
+				LOG.error(e);
 			}
 		} else {
 			// check local :
 			File xml = new File(xmlFile);
 			Date fileNow = new Date(xml.lastModified());
 			if (fileDate == null || fileNow.after(fileDate)) {
-				log.debug("CHANGED: Local PropertyType file was modified.");
+				LOG.debug("CHANGED: Local PropertyType file was modified.");
 				fileDate = fileNow;
 				return true;
 			}
-			log.debug("Local PropertyType file was not modified.");
+			LOG.debug("Local PropertyType file was not modified.");
 			return false;
 		}
 		return true;
@@ -421,7 +421,22 @@ public class HUITypeFactory {
 			PropertyOption dv = new PropertyOption();
 			dv.setId(value.getAttribute("id"));
 			dv.setName(value.getAttribute("name"));
-			possibleValues.add(dv);
+		
+			if (value.getAttribute("value") != null && value.getAttribute("value").length()>0) {
+			    try {
+			        dv.setValue( Integer.parseInt(value.getAttribute("value")) );
+			    } catch (Exception e) {
+			        if (LOG.isDebugEnabled()) {
+			            LOG.debug("Not a valid number for option " + value.getAttribute("value"));
+			        }
+			        dv.setValue(null);
+			    }
+			}
+			else {
+			    dv.setValue(null);
+			}
+			
+            possibleValues.add(dv);
 		}
 		return possibleValues;
 	}

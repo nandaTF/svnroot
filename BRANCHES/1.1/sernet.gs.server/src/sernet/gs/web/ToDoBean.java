@@ -250,7 +250,7 @@ public class ToDoBean {
 		boolean enabled = false;
 		if(getMassnahmeUmsetzung()!=null) {
 			// causes NoClassDefFoundError: org/eclipse/ui/plugin/AbstractUIPlugin
-			// TODO: fix this dependency to eclipse related classes.
+			// FIXME: fix this dependency to eclipse related classes.
 			enabled = CnAElementHome.getInstance().isWriteAllowed(getMassnahmeUmsetzung());
 		}
 		

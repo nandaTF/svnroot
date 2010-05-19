@@ -37,6 +37,7 @@ public class ThreatGroup extends Group<Asset> {
 	
 	public ThreatGroup() {
 		super();
+		setEntity(new Entity(TYPE_ID));
 	}
 	
 	public ThreatGroup(CnATreeElement parent) {

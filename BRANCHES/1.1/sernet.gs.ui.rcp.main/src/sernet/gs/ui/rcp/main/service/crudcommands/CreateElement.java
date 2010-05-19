@@ -58,11 +58,18 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand
 	
 	private transient IAuthService authService;
 
-	public CreateElement(CnATreeElement container, Class<T> type) {
+    private boolean skipReload;
+
+	public CreateElement(CnATreeElement container, Class<T> type, boolean skipReload) {
 		this.container = container;
 		this.type = type;
 		this.stationId = ChangeLogEntry.STATION_ID;
+		this.skipReload = skipReload;
 	}
+	
+	public CreateElement(CnATreeElement container, Class<T> type) {
+	    this(container, type, false);
+	}	
 	
 	public void execute() {
 		IBaseDao<T, Serializable> dao 
@@ -70,7 +77,8 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand
 		IBaseDao<Object, Serializable> containerDAO = getDaoFactory().getDAOforTypedElement(container);
 		
 		try {
-			containerDAO.reload(container, container.getDbId());
+		    if (!skipReload)
+		        containerDAO.reload(container, container.getDbId());
 			
 			// get constructor with parent-parameter and create new object:
 			child = type.getConstructor(CnATreeElement.class).newInstance(container);

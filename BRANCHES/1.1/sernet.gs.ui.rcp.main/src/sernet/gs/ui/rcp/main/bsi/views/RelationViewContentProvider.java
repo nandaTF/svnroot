@@ -65,6 +65,10 @@ public class RelationViewContentProvider implements IStructuredContentProvider, 
 			return new Object[] { obj };
 		}
 
+		if (view == null || view.getInputElmt() == null) {
+		    return new Object[] {};
+		}
+		
 		HashSet<CnALink> result = new HashSet<CnALink>();
 		result.addAll(view.getInputElmt().getLinksDown());
 		result.addAll(view.getInputElmt().getLinksUp());

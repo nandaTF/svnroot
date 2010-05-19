@@ -32,6 +32,7 @@ public class Property implements Serializable, ITypedElement {
 	private String propertyValue;
 	private Entity parent;
     public static final String TYPE_ID = "huiproperty";
+    private static final int UNDEF = Integer.MIN_VALUE;
 
 	public Property(Entity ent) {
 		parent = ent;
@@ -46,6 +47,18 @@ public class Property implements Serializable, ITypedElement {
 	 */
 	public String getPropertyValue() {
 		return propertyValue;
+	}
+	
+	/**
+	 * Returns the value as an integer.
+	 * @return
+	 */
+	public int getNumericPropertyValue() {
+	    try {
+	        return Integer.parseInt(propertyValue);
+        } catch (NumberFormatException e) {
+            return UNDEF;
+        }
 	}
 	
 	 /* (non-Javadoc)

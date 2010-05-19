@@ -321,11 +321,16 @@ public class LinkMaker extends Composite implements IRelationTable {
 	private void reloadLinks() {
 
 
-		if (!CnAElementHome.getInstance().isOpen()) {
+		if (!CnAElementHome.getInstance().isOpen()
+		        || inputElmt == null) {
 			return;
 		}
 
-		viewer.setInput(new PlaceHolder("Lade Relationen..."));
+		Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+                viewer.setInput(new PlaceHolder("Lade Relationen..."));
+            }
+        });
 
 		WorkspaceJob job = new WorkspaceJob("Lade Relationen...") {
 			public IStatus runInWorkspace(final IProgressMonitor monitor) {

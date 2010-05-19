@@ -20,6 +20,8 @@
 package sernet.verinice.iso27k.rcp.action;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
@@ -32,10 +34,14 @@ import org.eclipse.ui.progress.IProgressService;
 
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
+import sernet.gs.ui.rcp.main.bsi.dnd.DNDItems;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.verinice.iso27k.model.Control;
 import sernet.verinice.iso27k.model.Group;
+import sernet.verinice.iso27k.model.Threat;
+import sernet.verinice.iso27k.model.Vulnerability;
 import sernet.verinice.iso27k.rcp.ControlTransformOperation;
+import sernet.verinice.iso27k.service.IItem;
 
 /**
  * @author Daniel Murygin <dm[at]sernet[dot]de>
@@ -61,7 +67,12 @@ public class ControlDropPerformer implements DropPerformer {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("performDrop...");
 		}
-		boolean success = isActive();
+		
+		if (!validateDropObjects(target)) {
+		    return false;
+		}
+		
+		boolean success =  isActive();
 		if(isActive()) {
 			// because of validateDrop only Groups can be a target
 			ControlTransformOperation operation = new ControlTransformOperation((Group) target);
@@ -73,7 +84,7 @@ public class ControlDropPerformer implements DropPerformer {
 				if(!dontShow) {
 					MessageDialogWithToggle dialog = MessageDialogWithToggle.openInformation(PlatformUI.getWorkbench().getDisplay().getActiveShell(), 
 							"Status Information", 
-							operation.getNumberOfControls() + " controls added to group " + ((Group) target).getTitle(),
+							operation.getNumberOfControls() + " items added to group " + ((Group) target).getTitle(),
 							"Don't show this message again (You can change this in the preferences)",
 							dontShow,
 							preferenceStore,
@@ -87,23 +98,72 @@ public class ControlDropPerformer implements DropPerformer {
 		}
 		return success;
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ViewerDropAdapter#validateDrop(java.lang.Object, int, org.eclipse.swt.dnd.TransferData)
-	 */
-	@SuppressWarnings("unchecked")
+	
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("validateDrop, target: " + target);
+        }
+        boolean valid = false;
+        if(target instanceof Group) {
+            valid = Arrays.asList(((Group)target).getChildTypes()).contains(Control.TYPE_ID)
+            || Arrays.asList(((Group)target).getChildTypes()).contains(Threat.TYPE_ID)
+            || Arrays.asList(((Group)target).getChildTypes()).contains(Vulnerability.TYPE_ID);
+        }
+        return isActive=valid;
+    }
+
+	public boolean validateDropObjects(Object target) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("validateDrop, target: " + target);
 		}
 		boolean valid = false;
+		
+		List items = DNDItems.getItems();
+
+        if(items==null || items.isEmpty()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("No items in drag list");
+            }
+            return isActive=false;
+        }
+		
 		if(target instanceof Group) {
-			valid = Arrays.asList(((Group)target).getChildTypes()).contains(Control.TYPE_ID);
+			if (Arrays.asList(((Group)target).getChildTypes()).contains(Control.TYPE_ID)) {
+			    valid = isCorrectItemsForGroup(items, IItem.CONTROL);
+			}
+			if (Arrays.asList(((Group)target).getChildTypes()).contains(Threat.TYPE_ID)) {
+			    valid = isCorrectItemsForGroup(items, IItem.THREAT);
+			}
+			if (Arrays.asList(((Group)target).getChildTypes()).contains(Vulnerability.TYPE_ID)) {
+			    valid = isCorrectItemsForGroup(items, IItem.VULNERABILITY);
+			}
 		}
 		return isActive=valid;
 	}
 
-	/* (non-Javadoc)
+	/**
+     * @param items
+     * @param control
+     * @return
+     */
+    private boolean isCorrectItemsForGroup(Collection<IItem> items, int type) {
+        boolean valid = true;
+        for (IItem item : items) {
+            // only check leaf nodes for type:
+            if (item.getItems() != null && item.getItems().size()>0) {
+                valid = isCorrectItemsForGroup(item.getItems(), type);
+            }
+            else if(item.getTypeId() != type) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Item did not pass inspection for drop: " + item);
+                }
+                return false;
+            }
+        }
+        return valid;
+    }
+
+    /* (non-Javadoc)
 	 * @see sernet.verinice.iso27k.rcp.action.DropPerformer#isActive()
 	 */
 	public boolean isActive() {
