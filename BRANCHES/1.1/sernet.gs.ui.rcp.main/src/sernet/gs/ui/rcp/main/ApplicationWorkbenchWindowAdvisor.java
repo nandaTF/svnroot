@@ -87,11 +87,58 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 			"und installiert nichts ohne Ihre ausdrückliche Zustimmung!\n\n" +
 			"Kurzfassung: \nVerinice telefoniert nicht nach Hause und installiert keinen Bundestrojaner. ;-)");
 		}
-		
-		
+		Preferences prefs = Activator.getDefault().getPluginPreferences();
+		String message = getMessage(prefs);
+		MessageDialog.openWarning(Display.getCurrent().getActiveShell(), 
+				"Neue Version verfügbar", 
+				message);
 		
 		showFirstSteps();
 		preloadDBMapper();
+	}
+
+	private String getMessage(Preferences prefs) {
+		boolean operationModeServer = prefs.getString(PreferenceConstants.OPERATION_MODE).equals(PreferenceConstants.OPERATION_MODE_REMOTE_SERVER);
+		String message = null;
+		if(operationModeServer) {
+			message = getServerMessage(prefs);
+		} else {
+			message = getClientMessage(prefs);
+		}
+		return message;
+	}
+
+	private String getServerMessage(Preferences prefs) {
+		String message = null;
+		String clientsUrl = prefs.getString(PreferenceConstants.VNSERVER_URI);
+		if(clientsUrl!=null && !clientsUrl.endsWith("/")) {
+			clientsUrl = clientsUrl + "/";
+		}
+		clientsUrl = clientsUrl + "clients/";
+		message = "Eine neue Version von verinice ist verfügbar. " +
+				  "Die neue Version kann nicht automatisch installiert werden. " +
+				  "Bitte laden Sie die neue Version mit Ihrem Browser vom verinice Server herunter. " +
+				  "Sie finden die neue Version unter der Adresse: \n\n" +
+				  clientsUrl +
+				  "\n\nSie benutzen verinice zusammen mit dem verinice Server im Mehrbenutzer-Betrieb. " +
+				  "Auf dem verinice Server ist die neue Version installiert. " +
+				  "Sie können diesen Client nicht zusammen mit dem neuen Server benutzen.";
+		
+		return message;
+	}
+	
+	private String getClientMessage(Preferences prefs) {
+		String message = null;
+		message = "Eine neue Version von verinice ist verfügbar. " +
+		  "Die neue Version kann nicht automatisch installiert werden. " +
+		  "Sie finden die neue Version auf der verinice Webseite unter der Adresse: \n\nhttp://www.verinice.org/Downloads.48.0.html" +
+		  "\n\nNach Download und Installation können Sie die neue Version parallel mit der alten Version nutzen.\n" +
+		  "So kopieren Sie die Daten aus der alten Version in die neue Version:\n\n" +
+		  "1. Beenden Sie die beide Versionen.\n" +
+		  "2. Kopieren Sie den Ordner <VERINICE_ALT>/workspace/verinicedb in den Ordner <BENUTZER>/verinice/workspace/\n\n" +
+		  "Ordner <BENUTZER> unter Windows 7: C:\\Benutzer\\<NAME>\n" +
+		  "Ordner <BENUTZER> unter Windows XP: C:\\Dokumente und Einstellungen\\<NAME>";
+		return message;
 	}
 
 	private void preloadDBMapper() {
