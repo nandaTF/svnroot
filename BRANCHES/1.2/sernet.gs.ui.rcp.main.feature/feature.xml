@@ -2385,18 +2385,10 @@ Library.
          fragment="true"/>
 
    <plugin
-         id="org.eclipse.equinox.launcher.cocoa.macosx.nl_de"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.equinox.launcher.cocoa.macosx.x86"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.0.1.R35x_v20090707"
          fragment="true"/>
 
 </feature>
