@@ -4,4 +4,7 @@
 	<cq:rootRequest name="sernet.hui.swtclient" 
     	componentType="osgi.bundle" 
     	versionDesignator="[1.1.1,1.1.1]"/>
+   	<cq:property key="target.arch" value="*"/>
+	<cq:property key="target.os" value="*"/>
+	<cq:property key="target.ws" value="*"/>
 </cq:componentQuery>

@@ -4,4 +4,7 @@
 	<cq:rootRequest name="sernet.gs.ui.rcp.main" 
     	componentType="osgi.bundle" 
     	versionDesignator="[1.2.0.qualifier,1.2.1]"/>
+   	<cq:property key="target.arch" value="*"/>
+	<cq:property key="target.os" value="*"/>
+	<cq:property key="target.ws" value="*"/>
 </cq:componentQuery>
