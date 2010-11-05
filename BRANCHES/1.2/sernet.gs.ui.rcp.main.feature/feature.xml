@@ -451,39 +451,6 @@ Library.
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.swt.gtk.linux.ppc"
-         os="linux"
-         ws="gtk"
-         arch="ppc"
-         download-size="0"
-         install-size="0"
-         version="3.5.2.v3557f"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.swt.gtk.linux.s390"
-         os="linux"
-         ws="gtk"
-         arch="s390"
-         download-size="0"
-         install-size="0"
-         version="3.5.0.v3550b"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.swt.gtk.linux.s390x"
-         os="linux"
-         ws="gtk"
-         arch="s390x"
-         download-size="0"
-         install-size="0"
-         version="3.5.0.v3550b"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.swt.gtk.linux.x86"
          os="linux"
          ws="gtk"
@@ -532,17 +499,6 @@ Library.
          os="win32"
          ws="win32"
          arch="x86_64"
-         download-size="0"
-         install-size="0"
-         version="3.5.2.v3557f"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.swt.wpf.win32.x86"
-         os="win32"
-         ws="wpf"
-         arch="x86"
          download-size="0"
          install-size="0"
          version="3.5.2.v3557f"
@@ -2348,6 +2304,9 @@ Library.
 
    <plugin
          id="org.eclipse.swt.cocoa.macosx"
+         os="macosx"
+         ws="cocoa"
+         arch="ppc,x86"
          download-size="0"
          install-size="0"
          version="3.5.2.v3557f"
@@ -2364,9 +2323,44 @@ Library.
 
    <plugin
          id="org.eclipse.equinox.launcher.cocoa.macosx"
+         os="macosx"
+         ws="cocoa"
+         arch="ppc,x86"
          download-size="0"
          install-size="0"
          version="1.0.1.R35x_v20090707"
          fragment="true"/>
+
+   <plugin
+         id="org.eclipse.equinox.launcher.cocoa.macosx.x86_64"
+         os="macosx"
+         ws="cocoa"
+         arch="x86_64"
+         download-size="0"
+         install-size="0"
+         version="1.0.1.R35x_v20090707"
+         fragment="true"/>
+
+   <plugin
+         id="org.eclipse.swt.cocoa.macosx.x86_64"
+         os="macosx"
+         ws="cocoa"
+         arch="x86_64"
+         download-size="0"
+         install-size="0"
+         version="3.5.2.v3557f"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.launcher.cocoa.macosx.nl_de"
+         os="macosx"
+         ws="cocoa"
+         nl="de_DE"
+         download-size="0"
+         install-size="0"
+         version="3.5.0.v20091121043401"
+         fragment="true"
+         unpack="false"/>
 
 </feature>
