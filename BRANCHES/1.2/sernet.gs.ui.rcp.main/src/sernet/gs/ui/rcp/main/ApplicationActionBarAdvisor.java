@@ -274,7 +274,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
         showCheatSheetListAction = new CheatSheetCategoryBasedSelectionAction(Messages.ApplicationActionBarAdvisor_20);
         
-        //testAction = new TestAction(window, "test command");
+        //testAction = new TestAction(window, "test command", "asset", 32796);
         
         register(openDocumentViewAction);
 
