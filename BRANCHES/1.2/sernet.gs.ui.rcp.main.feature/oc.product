@@ -63,7 +63,7 @@ VDA und das VDA Logo sind eingetragene Markenzeichen des Verband der Automobilin
    <splash
       location="sernet.gs.ui.rcp.main"
       startupProgressRect="5,5,300,15" />
-   <launcher>
+   <launcher name="verinice">
       <linux icon="wxcas.xpm"/>
       <macosx icon="v_logo_mac.icns"/>
       <solaris/>
