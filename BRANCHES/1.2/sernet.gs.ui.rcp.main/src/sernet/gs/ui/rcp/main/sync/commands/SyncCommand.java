@@ -156,7 +156,14 @@ public class SyncCommand extends GenericCommand implements IChangeLoggingCommand
             throw new IllegalStateException("Command serialized but " + SyncRequest.class.getName() + " not provided pre-serialized. Check constructor usage!");
         }
 
-        SyncInsertUpdateCommand cmdInsertUpdate = new SyncInsertUpdateCommand(sourceId, syncData, syncMapping, insert, update, errors);
+        SyncInsertUpdateCommand cmdInsertUpdate = new SyncInsertUpdateCommand(
+        		sourceId, 
+        		syncData, 
+        		syncMapping,
+        		getAuthService().getUsername(),
+        		insert, 
+        		update, 
+        		errors);
 
         try {
             cmdInsertUpdate = getCommandService().executeCommand(cmdInsertUpdate);

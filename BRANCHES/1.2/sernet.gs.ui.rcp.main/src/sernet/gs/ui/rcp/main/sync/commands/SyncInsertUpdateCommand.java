@@ -72,6 +72,7 @@ import sernet.verinice.model.bsi.risikoanalyse.GefaehrdungsUmsetzung;
 import sernet.verinice.model.bsi.risikoanalyse.RisikoMassnahmenUmsetzung;
 import sernet.verinice.model.common.CnALink;
 import sernet.verinice.model.common.CnATreeElement;
+import sernet.verinice.model.common.Permission;
 import sernet.verinice.model.ds.Datenverarbeitung;
 import sernet.verinice.model.ds.Personengruppen;
 import sernet.verinice.model.ds.StellungnahmeDSB;
@@ -212,8 +213,9 @@ public class SyncInsertUpdateCommand extends GenericCommand {
     private String sourceId;
     private SyncMapping syncMapping;
     private SyncData syncData;
+    private String userName;
 
-    private boolean insert, update;
+	private boolean insert, update;
     private List<String> errorList;
 
     private int inserted = 0, updated = 0;
@@ -236,10 +238,18 @@ public class SyncInsertUpdateCommand extends GenericCommand {
         return errorList;
     }
 
-    public SyncInsertUpdateCommand(String sourceId, SyncData syncData, SyncMapping syncMapping, boolean insert, boolean update, List<String> errorList) {
+    public SyncInsertUpdateCommand(
+    		String sourceId, 
+    		SyncData syncData, 
+    		SyncMapping syncMapping,
+    		String userName,
+    		boolean insert, 
+    		boolean update, 
+    		List<String> errorList) {
         this.sourceId = sourceId;
         this.syncData = syncData;
         this.syncMapping = syncMapping;
+        this.userName = userName;
         this.insert = insert;
         this.update = update;
         this.errorList = errorList;
@@ -577,6 +587,7 @@ public class SyncInsertUpdateCommand extends GenericCommand {
         BSIModel model = cmdLoadModel.getModel();
         try {
             ImportBsiGroup holder = new ImportBsiGroup(model);
+            addPermissions(holder);
             getDaoFactory().getDAO(ImportBsiGroup.class).saveOrUpdate(holder);
             container = holder;
         } catch (Exception e1) {
@@ -596,12 +607,22 @@ public class SyncInsertUpdateCommand extends GenericCommand {
         ISO27KModel model = cmdLoadModel.getModel();
         try {
             ImportIsoGroup holder = new ImportIsoGroup(model);
+            addPermissions(holder);
             getDaoFactory().getDAO(ImportIsoGroup.class).saveOrUpdate(holder);
             container = holder;
         } catch (Exception e1) {
             throw new RuntimeCommandException("Fehler beim Anlegen des Behälters für importierte Objekte.");
         }
         return container;
+    }
+    
+    private void addPermissions(CnATreeElement element) {
+        // We use the name of the currently
+        // logged in user as a role which has read and write permissions for
+        // the new Organization.
+        HashSet<Permission> auditPerms = new HashSet<Permission>();
+        auditPerms.add(Permission.createPermission(element, getUserName(), true, true));
+        element.setPermissions(auditPerms);
     }
 
     /**
@@ -626,5 +647,13 @@ public class SyncInsertUpdateCommand extends GenericCommand {
     public Set<CnATreeElement> getElementSet() {
         return elementSet;
     }
+
+    protected String getUserName() {
+		return userName;
+	}
+
+	protected void setUserName(String userName) {
+		this.userName = userName;
+	}
 
 }
