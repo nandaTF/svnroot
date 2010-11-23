@@ -209,9 +209,7 @@ public class DeleteActionDelegate implements IObjectActionDelegate {
         Object sel = ((IStructuredSelection) selection).getFirstElement();
         if (sel instanceof CnATreeElement) {
         	CnATreeElement element = (CnATreeElement) sel;
-            boolean b = !ImportBsiGroup.TYPE_ID.equals(element.getTypeId())
-            	&& !ImportIsoGroup.TYPE_ID.equals(element.getTypeId())
-            	&& CnAElementHome.getInstance().isDeleteAllowed(element);
+            boolean b = CnAElementHome.getInstance().isDeleteAllowed(element);
 
             // Only change state when it is enabled, since we do not want to
             // trash the enablement settings of plugin.xml

@@ -386,7 +386,7 @@ public class SyncInsertUpdateCommand extends GenericCommand {
 
             } // for <syncAttribute>
             IBaseDao<CnATreeElement, Serializable> dao = (IBaseDao<CnATreeElement, Serializable>) getDaoFactory().getDAO(elementInDB.getTypeId());
-            dao.merge(elementInDB);
+            elementInDB = dao.merge(elementInDB);
         } // if( null != ... )
 
         idElementMap.put(elementInDB.getExtId(), elementInDB);
@@ -441,7 +441,7 @@ public class SyncInsertUpdateCommand extends GenericCommand {
                dependency = resultList.get(0);
             }
             if(dependency==null) {
-                getLog().error("Can not impor tlink. dependency not found in xml file and db, dependency ext-id: " + dependencyId + " dependant ext-id: " + dependantId);
+                getLog().error("Can not import link. dependency not found in xml file and db, dependency ext-id: " + dependencyId + " dependant ext-id: " + dependantId);
                 return;
             } else if (getLog().isDebugEnabled()) {
                 getLog().debug("dependency not found in XML file but in db, ext-id: " + dependencyId);
@@ -450,6 +450,17 @@ public class SyncInsertUpdateCommand extends GenericCommand {
         CnALink link = new CnALink(dependant,dependency,syncLink.getRelationId(),syncLink.getComment());
         dependant.addLinkDown(link);
         dependency.addLinkUp(link);
+        if (getLog().isDebugEnabled()) {
+        	String titleDependant = "unknown";
+        	String titleDependency = "unknown";
+			try { 
+				titleDependant = dependant.getTitle();
+				titleDependency = dependency.getTitle();
+			} catch(Exception e) {
+				getLog().debug("Error while reading title.", e);
+			}
+        	getLog().debug("Creating new link from: " + titleDependant + " to: " + titleDependency + "...");
+		}
         getDaoFactory().getDAO(CnALink.class).saveOrUpdate(link);
         
     }

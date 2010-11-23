@@ -48,6 +48,7 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
 
 import org.apache.log4j.Logger;
+import org.hibernate.property.Dom4jAccessor.ElementGetter;
 
 import sernet.gs.service.RetrieveInfo;
 import sernet.gs.service.VeriniceCharset;
@@ -116,6 +117,8 @@ public class ExportCommand extends GenericCommand
 	private HashMap<String,String> entityTypesToBeExported;
 	
 	private Map<String,String> entityTypesBlackList;
+	
+	private Map<Class,Class> entityClassBlackList;
     
 	private byte[] result;
 	
@@ -252,10 +255,10 @@ public class ExportCommand extends GenericCommand
 		 *++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 		
 		String typeId = element.getTypeId();
-		if ((exportedObjectIDs.get( element.getId()) == null )
-				&& (entityTypesToBeExported == null || entityTypesToBeExported.get(typeId) != null)
-				&& (getEntityTypesBlackList() == null || getEntityTypesBlackList().get(typeId) == null) )
-		{
+		if( (exportedObjectIDs.get( element.getId()) == null )
+			 && (entityTypesToBeExported == null || entityTypesToBeExported.get(typeId) != null)
+			 && (getEntityTypesBlackList() == null || getEntityTypesBlackList().get(typeId) == null)
+			 && (getEntityClassBlackList() == null || getEntityClassBlackList().get(element.getClass()) == null) ) {
 			SyncObject syncObject = new SyncObject();
 			syncObject.setExtId(element.getId());
 			syncObject.setExtObjectType(typeId);
@@ -305,6 +308,14 @@ public class ExportCommand extends GenericCommand
 			list.add(syncObject);
 			childList = syncObject.getChildren();
 			exportedObjectIDs.put( element.getId(), new String() );
+		} else if(getLog().isDebugEnabled()) {
+			String title = "unknown";
+			try { 
+				title = element.getTitle();
+			} catch(Exception e) {
+				getLog().debug("Error while reading title.", e);
+			}
+			getLog().debug("Element is not exported: Type " + typeId + ", title: " + title + ", uuid: " + element.getUuid());
 		}
 		
 		/*++++
@@ -352,6 +363,13 @@ public class ExportCommand extends GenericCommand
         return entityTypesBlackList;
     }
     
+    private Map<Class,Class> getEntityClassBlackList() {
+        if(entityClassBlackList==null) {
+        	entityClassBlackList = createDefaultEntityClassBlackList();
+        }
+        return entityClassBlackList;
+    }
+    
     /**
      * @return
      */
@@ -359,8 +377,12 @@ public class ExportCommand extends GenericCommand
         Map<String, String> blacklist = new HashMap<String, String>();
         // BSI Risk analyses will not be imported or exported(Bug 194)
         blacklist.put(FinishedRiskAnalysis.TYPE_ID, FinishedRiskAnalysis.TYPE_ID);
-        blacklist.put(GefaehrdungsUmsetzung.TYPE_ID, GefaehrdungsUmsetzung.TYPE_ID);
-        blacklist.put(RisikoMassnahmenUmsetzung.TYPE_ID, RisikoMassnahmenUmsetzung.TYPE_ID);
+        return blacklist;
+    }
+    
+    private Map<Class, Class> createDefaultEntityClassBlackList() {
+        Map<Class, Class> blacklist = new HashMap<Class, Class>();
+        blacklist.put(RisikoMassnahmenUmsetzung.class, RisikoMassnahmenUmsetzung.class);
         return blacklist;
     }
 
