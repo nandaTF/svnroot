@@ -19,7 +19,7 @@
 			<key-property name="dependencyId"
 				access="field"
 				column="DEPENDENCY_ID"/>
-			<key-property name="relationId" access="field">
+			<key-property name="typeId" access="field" >
 				<column name="TYPE_ID" default="''"/>
 			</key-property>
 				
