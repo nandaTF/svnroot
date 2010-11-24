@@ -19,28 +19,21 @@
 package sernet.gs.ui.rcp.main.service.taskcommands;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.bind.DataBindingException;
-import javax.xml.bind.JAXB;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.namespace.QName;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -48,22 +41,19 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
 
 import org.apache.log4j.Logger;
-import org.hibernate.property.Dom4jAccessor.ElementGetter;
 
 import sernet.gs.service.RetrieveInfo;
 import sernet.gs.service.VeriniceCharset;
-import sernet.gs.ui.rcp.main.common.model.HydratorUtil;
+import sernet.hui.common.VeriniceContext;
 import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.EntityType;
 import sernet.hui.common.connect.HUITypeFactory;
-import sernet.hui.common.connect.Property;
 import sernet.hui.common.connect.PropertyList;
 import sernet.hui.common.connect.PropertyType;
 import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.model.bsi.BausteinUmsetzung;
 import sernet.verinice.model.bsi.risikoanalyse.FinishedRiskAnalysis;
-import sernet.verinice.model.bsi.risikoanalyse.GefaehrdungsUmsetzung;
 import sernet.verinice.model.bsi.risikoanalyse.RisikoMassnahmenUmsetzung;
 import sernet.verinice.model.common.CnALink;
 import sernet.verinice.model.common.CnATreeElement;
@@ -275,19 +265,22 @@ public class ExportCommand extends GenericCommand
 			if (entity != null) {
 				Map<String, PropertyList> properties = entity.getTypedPropertyLists();
 
-				for (String s : properties.keySet()) {
+				for (String propertyTypeId : properties.keySet()) {
 					
-					SyncAttribute syncAttribute = new SyncAttribute();
-					// Add <syncAttribute> to this <syncObject>:
-					syncAttribute.setName(s);
-					
-					int noOfValues = entity.exportProperties(s, syncAttribute.getValue());
-
-					// Only if any value for the attribute could be found the whole
-					// attribute instance is being added to the SyncObject's attribute
-					// list.
-					if (noOfValues > 0) {
-						attributes.add(syncAttribute);
+					PropertyType propertyType = getHuiTypeFactory().getPropertyType(typeId, propertyTypeId);
+					if(propertyType.isReportable()) {
+						SyncAttribute syncAttribute = new SyncAttribute();
+						// Add <syncAttribute> to this <syncObject>:
+						syncAttribute.setName(propertyTypeId);
+						
+						int noOfValues = entity.exportProperties(propertyTypeId, syncAttribute.getValue());
+	
+						// Only if any value for the attribute could be found the whole
+						// attribute instance is being added to the SyncObject's attribute
+						// list.
+						if (noOfValues > 0) {
+							attributes.add(syncAttribute);
+						}
 					}
 				}
 				
@@ -470,5 +463,9 @@ public class ExportCommand extends GenericCommand
         manager.addCache(cache);
         return cache;
 	}
+	
+	protected HUITypeFactory getHuiTypeFactory() {
+        return (HUITypeFactory) VeriniceContext.get(VeriniceContext.HUI_TYPE_FACTORY);
+    }
 	
 }
