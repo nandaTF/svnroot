@@ -27,13 +27,12 @@
 		
 		<property name="linkType"/>
 
-		<property name="comment"
-            column='"comment"'/> 
-            
-		<property name="riskConfidentiality" /> 
-		<property name="riskIntegrity" /> 
-		<property name="riskAvailability" /> 
-            
+		<property name="comment" column='"comment"'/>
+
+		<property name="riskConfidentiality" />
+		<property name="riskIntegrity" />
+		<property name="riskAvailability" />
+		
 		<many-to-one name="dependant"
 			column="DEPENDANT_ID"
 			not-null="true"

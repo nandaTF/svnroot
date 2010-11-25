@@ -255,7 +255,10 @@ public class ExportCommand extends GenericCommand implements IChangeLoggingComma
 		if(checkElement(element)) {
 			element = hydrate( element );
 			
-			final String extId = element.getId();
+			String extId = element.getExtId();
+			if(extId==null || extId.isEmpty()) {
+				extId = element.getId();
+			}
 			SyncObject syncObject = new SyncObject();
 			syncObject.setExtId(extId);
 			syncObject.setExtObjectType(typeId);

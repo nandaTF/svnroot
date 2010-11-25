@@ -198,6 +198,7 @@ public class XMLImportDialog extends Dialog {
         updateText.setText(Messages.XMLImportDialog_9);
         updateText.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 1, 1));
 
+        /* 
         final Button deleteCheck = new Button(operationGroup, SWT.CHECK);
         deleteCheck.setText(Messages.XMLImportDialog_27);
         deleteCheck.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1));
@@ -211,6 +212,7 @@ public class XMLImportDialog extends Dialog {
         Label deleteText = new Label(operationGroup, SWT.LEFT);
         deleteText.setText(Messages.XMLImportDialog_10);
         deleteText.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 1, 1));
+		*/
 
         // decryption
         

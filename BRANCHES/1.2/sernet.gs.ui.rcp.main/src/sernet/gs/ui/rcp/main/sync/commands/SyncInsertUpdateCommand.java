@@ -299,18 +299,9 @@ public class SyncInsertUpdateCommand extends GenericCommand {
         // how the associated properties have to be mapped!
         String veriniceObjectType = mot.getIntId();
 
-        CnATreeElement elementInDB = null;
-
-        try {
-            elementInDB = findDbElement(sourceId, extId);
-        } catch (CommandException e1) {
-            throw new RuntimeCommandException(e1);
-        }
-
-        if (elementInDB != null) // object found!
-        {
-            if (update) // this object should be updated!
-            {
+        CnATreeElement elementInDB = findDbElement(sourceId, extId);
+        if (elementInDB != null) {
+            if (update) {
                 /*** UPDATE: ***/
                 if (getLog().isDebugEnabled()) {
                     getLog().debug("Element found in db: updating, uuid: " + elementInDB.getUuid());
@@ -405,22 +396,14 @@ public class SyncInsertUpdateCommand extends GenericCommand {
     
     /**
      * @param syncLink
+     * @throws CommandException 
      */
     private void importLink(SyncLink syncLink) {
         String dependantId = syncLink.getDependant();
         String dependencyId = syncLink.getDependency();
         CnATreeElement dependant = idElementMap.get(dependantId);
-        if(dependant==null) {          
-            DetachedCriteria crit = DetachedCriteria.forClass(CnATreeElement.class);
-            crit.add(Restrictions.eq("extId", dependantId));
-            List<CnATreeElement> resultList = getDaoFactory().getDAO(CnATreeElement.class).findByCriteria(crit);
-            if(resultList!=null && !resultList.isEmpty()) {
-               if(resultList.size()>1) {
-                   getLog().error("Can not import link. Found more than one dependant element, dependant ext-id: " + dependencyId + " dependency ext-id: " + dependencyId);
-                   return;
-               }
-               dependant = resultList.get(0);
-            }
+        if(dependant==null) {     
+        	dependant = findDbElement(this.sourceId, dependantId);
             if(dependant==null) {
                 getLog().error("Can not import link. dependant not found in xml file and db, dependant ext-id: " + dependantId + " dependency ext-id: " + dependencyId);
                 return;
@@ -429,17 +412,8 @@ public class SyncInsertUpdateCommand extends GenericCommand {
             }
         }
         CnATreeElement dependency = idElementMap.get(dependencyId);
-        if(dependency==null) {    
-            DetachedCriteria crit = DetachedCriteria.forClass(CnATreeElement.class);
-            crit.add(Restrictions.eq("extId", dependencyId));
-            List<CnATreeElement> resultList = getDaoFactory().getDAO(CnATreeElement.class).findByCriteria(crit);
-            if(resultList!=null && !resultList.isEmpty()) {
-               if(resultList.size()>1) {
-                   getLog().error("Can not import link. Found more than one dependency element, dependency ext-id: " + dependencyId + " dependant ext-id: " + dependantId);
-                   return;
-               }
-               dependency = resultList.get(0);
-            }
+        if(dependency==null) { 
+        	dependency = findDbElement(this.sourceId, dependencyId);
             if(dependency==null) {
                 getLog().error("Can not import link. dependency not found in xml file and db, dependency ext-id: " + dependencyId + " dependant ext-id: " + dependantId);
                 return;
@@ -447,25 +421,53 @@ public class SyncInsertUpdateCommand extends GenericCommand {
                 getLog().debug("dependency not found in XML file but in db, ext-id: " + dependencyId);
             }
         }
+        
         CnALink link = new CnALink(dependant,dependency,syncLink.getRelationId(),syncLink.getComment());
-        dependant.addLinkDown(link);
-        dependency.addLinkUp(link);
-        if (getLog().isDebugEnabled()) {
-        	String titleDependant = "unknown";
-        	String titleDependency = "unknown";
+        
+        String titleDependant = "unknown";
+    	String titleDependency = "unknown";
+    	if (getLog().isDebugEnabled()) {     	
 			try { 
 				titleDependant = dependant.getTitle();
 				titleDependency = dependency.getTitle();
 			} catch(Exception e) {
 				getLog().debug("Error while reading title.", e);
 			}
-        	getLog().debug("Creating new link from: " + titleDependant + " to: " + titleDependency + "...");
+    	}
+    	
+        if(isNew(link)) {
+	        dependant.addLinkDown(link);
+	        dependency.addLinkUp(link);
+	        if (getLog().isDebugEnabled()) {
+	        	getLog().debug("Creating new link from: " + titleDependant + " to: " + titleDependency + "...");
+			}
+	        getDaoFactory().getDAO(CnALink.class).saveOrUpdate(link);
+        } else if (getLog().isDebugEnabled()) {
+        	getLog().debug("Link exists: " + titleDependant + " to: " + titleDependency);
 		}
-        getDaoFactory().getDAO(CnALink.class).saveOrUpdate(link);
         
     }
 
-    private MapObjectType getMap(String extObjectType) {
+    private boolean isNew(CnALink link) {
+    	String hql = "from CnALink as link where link.id.dependantId=? and link.id.dependencyId=? and (link.id.typeId=? or link.id.typeId=?)";
+    	String relationId = link.getRelationId();
+    	String relationId2 = relationId;
+    	if(CnALink.Id.NO_TYPE.equals(relationId)) {
+    		relationId2 = "";
+    	}
+    	if(relationId!=null && relationId.isEmpty()) {
+    		relationId2 = CnALink.Id.NO_TYPE;
+    	}
+    	Object[] paramArray = new Object[]{
+    			link.getDependant().getDbId(),
+    			link.getDependency().getDbId(),
+    			relationId,
+    			relationId2};
+    	List result = getDaoFactory().getDAO(CnALink.class).findByQuery(hql, paramArray); 	
+		return result==null || result.isEmpty();
+	}
+
+	private MapObjectType getMap(String extObjectType) {
         for (MapObjectType mot : syncMapping.getMapObjectType()) {
             if (extObjectType.equals(mot.getExtId())) {
                 return mot;
@@ -485,52 +487,57 @@ public class SyncInsertUpdateCommand extends GenericCommand {
         return null;
     }
 
-    /************************************************************
-     * findDbElement()
-     * 
+    /**
      * Query element (by externalID) from DB, which has been previously
      * synchronized from the given sourceID.
      * 
-     * @param sourceID
-     * @param externalID
+     * @param sourceId
+     * @param externalId
      * @return the CnATreeElement from the query or null, if nothing was found
-     * @throws CommandException
-     ************************************************************/
-    private CnATreeElement findDbElement(String sourceID, String externalID) throws CommandException {
-        // use a new crudCommand (load by external, source id):
-        LoadCnAElementByExternalID command = new LoadCnAElementByExternalID(sourceID, externalID);
-        command = getCommandService().executeCommand(command);
-
+     * @throws RuntimeException if more than one element is found
+     */
+    private CnATreeElement findDbElement(String sourceId, String externalId) {
+    	CnATreeElement result = null;
+    	// use a new crudCommand (load by external, source id):
+        LoadCnAElementByExternalID command = new LoadCnAElementByExternalID(sourceId, externalId);
+        try {
+			command = getCommandService().executeCommand(command);
+		} catch (CommandException e) {
+			final String message = "Error while loading element by source and externeal id";
+    		log.error(message,e);
+			throw new RuntimeCommandException(message,e);
+		}
         List<CnATreeElement> foundElements = command.getElements();
-
-        if (foundElements == null || foundElements.size() == 0) {
-            return null;
-        } else {
-            return foundElements.get(0);
+        if (foundElements != null) {
+        	if(foundElements.size()==1) {  
+        		result = foundElements.get(0);
+        	}
+        	if(foundElements.size()>1) {  
+        		final String message = "Found more than one element with source-id: " + sourceId + " and externeal-id: " + externalId;
+        		log.error(message);
+    			throw new RuntimeCommandException(message);
+        	}
         }
+        return result;
     }
 
-    /************************************************************
-     * findContainerFor()
-     * 
+    /**
      * Find appropriate Category within the tree for a given object type.
      * 
      * @param verbund
      * @param veriniceObjectType
      * @return the Category - CnATreeElement
-     ************************************************************/
+     */
     private CnATreeElement findContainerFor(CnATreeElement root, String veriniceObjectType) {
 
         // If in doubt the root for imported objects should always be used.
         return root;
     }
 
-    /************************************************************
-     * getClassFromTypeId()
-     * 
+    /**
      * @param typeId
      * @return the corresponding Class
-     ************************************************************/
+     */
     @SuppressWarnings("unchecked")
     private Class<CnATreeElement> getClassFromTypeId(String typeId) {
         Class<CnATreeElement> klass = (Class<CnATreeElement>) typeIdClass.get(typeId);
@@ -583,8 +590,7 @@ public class SyncInsertUpdateCommand extends GenericCommand {
             return createBsiContainer();
         } else {
             return createIsoContainer();
-        }
-       
+        }     
     }
     
     private CnATreeElement createBsiContainer() {

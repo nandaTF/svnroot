@@ -75,6 +75,7 @@ public class ExportDialog extends TitleAreaDialog {
     private String filePath;
     private String sourceId;
     
+    private Text sourceIdText;
     private Text txtLocation;
     
     public ExportDialog(Shell activeShell) {
@@ -145,6 +146,7 @@ public class ExportDialog extends TitleAreaDialog {
                     filePath = selectedElement.getTitle() + ".xml"; //$NON-NLS-1$
                     txtLocation.setText(filePath);
                 }
+                setSourceId(selectedElement);
                 super.widgetSelected(e);
             }
         };
@@ -166,6 +168,7 @@ public class ExportDialog extends TitleAreaDialog {
             if (organizationList.size() == 1) {
                 radioOrganization.setSelection(true);
                 selectedElement = organization;
+                setSourceId(selectedElement);
             }
         }
         
@@ -219,7 +222,7 @@ public class ExportDialog extends TitleAreaDialog {
         
         final Label sourceIdLabel = new Label(sourceIdComposite, SWT.NONE);
         sourceIdLabel.setText(Messages.SamtExportDialog_14);
-        final Text sourceIdText = new Text(sourceIdComposite, SWT.BORDER);
+        sourceIdText = new Text(sourceIdComposite, SWT.BORDER);
         gd = new GridData(GridData.GRAB_HORIZONTAL);
         gd.horizontalSpan = 2;
         gd.minimumWidth = 150;
@@ -246,9 +249,7 @@ public class ExportDialog extends TitleAreaDialog {
             @Override
             public void keyReleased(KeyEvent e) {
                 filePath = txtLocation.getText();
-
             }
-
             @Override
             public void keyPressed(KeyEvent e) {
                 // nothing to do
@@ -319,7 +320,21 @@ public class ExportDialog extends TitleAreaDialog {
         return composite;
     }
     
-    private String getFileNameFromPath(String path) {
+    private void setSourceId(CnATreeElement element) {
+		if(element!=null && element.getSourceId()!=null) {
+			this.sourceId = element.getSourceId();
+			if(sourceIdText!=null) {
+				sourceIdText.setText(element.getSourceId());
+			}
+		} else {
+			this.sourceId = null;
+			if(sourceIdText!=null) {
+				sourceIdText.setText("");
+			}
+		}
+	}
+
+	private String getFileNameFromPath(String path) {
         if(path!=null && path.indexOf(File.separatorChar)!=-1) {
             path = path.substring(path.lastIndexOf(File.separatorChar)+1);
         }
