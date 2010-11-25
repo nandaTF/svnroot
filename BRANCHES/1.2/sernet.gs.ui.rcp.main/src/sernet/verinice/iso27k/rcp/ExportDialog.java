@@ -70,6 +70,7 @@ public class ExportDialog extends TitleAreaDialog {
      * Indicates if the output should be encrypted.
      */
     private boolean encryptOutput = false;
+    private boolean reImport = true;
     private CnATreeElement selectedElement;
     private String filePath;
     private String sourceId;
@@ -92,8 +93,7 @@ public class ExportDialog extends TitleAreaDialog {
     @Override
     protected Control createDialogArea(Composite parent) {
         /*
-         * ++++ Dialog title, message and layout:
-         * ++++++++++++++++++++++++++++++++++
+         * Dialog title, message and layout:
          */
 
         setTitle(Messages.SamtExportDialog_0);
@@ -108,8 +108,7 @@ public class ExportDialog extends TitleAreaDialog {
         composite.setLayoutData(gd);
         
         /*
-         * ++++ Widgets for selection of an IT network:
-         * ++++++++++++++++++++++++++++++++++++++++
+         * Widgets for selection of an IT network:
          */
 
         LoadCnAElementByType<Organization> cmdLoadOrganization = new LoadCnAElementByType<Organization>(Organization.class);
@@ -137,8 +136,6 @@ public class ExportDialog extends TitleAreaDialog {
         gd = new GridData(GridData.GRAB_HORIZONTAL);
         gd.minimumWidth = 662;
         groupOrganization.setLayoutData(gd);
-
-        
 
         SelectionListener organizationListener = new SelectionAdapter() {
             @Override
@@ -190,17 +187,35 @@ public class ExportDialog extends TitleAreaDialog {
             }
         }
         
-        /*
-         * ++++ Widgets for source-id
-         * ++++++++++++++++++++++++++++++++++++++
-         */
-        
         final Composite sourceIdComposite = new Composite(composite, SWT.NONE);
         sourceIdComposite.setLayout(new GridLayout(3,false));
         ((GridLayout) sourceIdComposite.getLayout()).marginTop = 15;
         gd = new GridData(GridData.GRAB_HORIZONTAL);
         gd.grabExcessHorizontalSpace=true;
         sourceIdComposite.setLayoutData(gd);
+        
+        /*
+         * Widgets for re-import
+         */
+        
+        final Button reImportCheckbox = new Button(sourceIdComposite, SWT.CHECK);
+        reImportCheckbox.setText("Prepare for re-import");
+        gd = new GridData();
+        gd.horizontalSpan = 3;
+        reImportCheckbox.setLayoutData(gd);
+        reImportCheckbox.setSelection(true);
+        reImportCheckbox.setEnabled(true);
+        reImportCheckbox.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                Button checkBox = (Button) e.getSource();
+                reImport = checkBox.getSelection();
+            }
+        });
+        
+        /*
+         * Widgets for source-id
+         */
         
         final Label sourceIdLabel = new Label(sourceIdComposite, SWT.NONE);
         sourceIdLabel.setText(Messages.SamtExportDialog_14);
@@ -217,8 +232,7 @@ public class ExportDialog extends TitleAreaDialog {
         });      
 
         /*
-         * +++++ Widgets to browse for storage location:
-         * ++++++++++++++++++++++++++++++++++++++++
+         * Widgets to browse for storage location:
          */
 
         final Label labelLocation = new Label(sourceIdComposite, SWT.NONE);
@@ -273,15 +287,10 @@ public class ExportDialog extends TitleAreaDialog {
                     filePath = ""; //$NON-NLS-1$
                 }
             }
-
-            
-
         });
         
-        
         /*
-         * ++++ Widgets to enable/disable encryption:
-         * ++++++++++++++++++++++++++++++++++++++
+         *  Widgets to enable/disable encryption:
          */
 
         final Button encryptionCheckbox = new Button(sourceIdComposite, SWT.CHECK);
@@ -361,6 +370,9 @@ public class ExportDialog extends TitleAreaDialog {
         return encryptOutput;
     }
 
+    public boolean getReImport() {
+        return reImport;
+    }
     public String getSourceId() {
         return sourceId;
     }
