@@ -343,11 +343,6 @@ public class CnAElementHome {
             return false;
         }
 
-        // first level ISO 27k groups cannot be deleted
-        if (cte instanceof IISO27kGroup && cte.getParent() instanceof Organization) {
-            return false;
-        }
-
         // ITVerbund instances can be removed when
         // one has write access to it (There is no parent to check).
         if (cte instanceof ITVerbund) {
