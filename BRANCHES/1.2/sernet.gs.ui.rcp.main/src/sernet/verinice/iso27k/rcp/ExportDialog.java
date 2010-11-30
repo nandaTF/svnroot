@@ -20,13 +20,16 @@
 package sernet.verinice.iso27k.rcp;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.LayoutStyle;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.aspectj.weaver.ast.HasAnnotation;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.CellEditor.LayoutData;
@@ -72,6 +75,7 @@ public class ExportDialog extends TitleAreaDialog {
     private boolean encryptOutput = false;
     private boolean reImport = true;
     private CnATreeElement selectedElement;
+    private Set<CnATreeElement> selectedElementSet;
     private String filePath;
     private String sourceId;
     
@@ -142,6 +146,7 @@ public class ExportDialog extends TitleAreaDialog {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 selectedElement = (CnATreeElement) ((Button) e.getSource()).getData();
+                selectedElementSet.add((CnATreeElement) ((Button) e.getSource()).getData());
                 if(txtLocation!=null) {
                     filePath = selectedElement.getTitle() + ".xml"; //$NON-NLS-1$
                     txtLocation.setText(filePath);
@@ -153,21 +158,24 @@ public class ExportDialog extends TitleAreaDialog {
 
         CnATreeElement oldSelectedElement = selectedElement;
         selectedElement = null;
+        selectedElementSet = new HashSet<CnATreeElement>();
         List<Organization> organizationList = cmdLoadOrganization.getElements();
         Iterator<Organization> organizationIter = organizationList.iterator();
         while (organizationIter.hasNext()) {
-            final Button radioOrganization = new Button(groupOrganization, SWT.RADIO);
+            final Button radioOrganization = new Button(groupOrganization, SWT.CHECK);
             Organization organization = organizationIter.next();
             radioOrganization.setText(organization.getTitle());
             radioOrganization.setData(organization);
             radioOrganization.addSelectionListener(organizationListener);
             if (oldSelectedElement != null && oldSelectedElement.equals(organization)) {
                 radioOrganization.setSelection(true);
-                selectedElement = organization;              
+                selectedElement = organization; 
+                selectedElementSet.add(organization);             
             }
             if (organizationList.size() == 1) {
                 radioOrganization.setSelection(true);
                 selectedElement = organization;
+                selectedElementSet.add(organization);
                 setSourceId(selectedElement);
             }
         }
@@ -175,7 +183,7 @@ public class ExportDialog extends TitleAreaDialog {
         List<ITVerbund> itVerbundList = cmdItVerbund.getElements();
         Iterator<ITVerbund> itVerbundIter = itVerbundList.iterator();
         while (itVerbundIter.hasNext()) {
-            final Button radio = new Button(groupOrganization, SWT.RADIO);
+            final Button radio = new Button(groupOrganization, SWT.CHECK);
             ITVerbund verbund = itVerbundIter.next();
             radio.setText(verbund.getTitle());
             radio.setData(verbund);
@@ -377,7 +385,11 @@ public class ExportDialog extends TitleAreaDialog {
         return selectedElement;
     }
 
-    public String getFilePath() {
+    public Set<CnATreeElement> getSelectedElementSet() {
+		return selectedElementSet;
+	}
+
+	public String getFilePath() {
         return filePath;
     }
 

@@ -24,6 +24,7 @@ package sernet.gs.ui.rcp.main.sync.commands;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -73,7 +74,7 @@ public class SyncCommand extends GenericCommand implements IChangeLoggingCommand
 
     private List<String> errors = new ArrayList<String>();
 
-    private CnATreeElement importRootObject;
+    private Set<CnATreeElement> importRootObject;
 
     private Set<CnATreeElement> elementSet = null;
 
@@ -172,7 +173,7 @@ public class SyncCommand extends GenericCommand implements IChangeLoggingCommand
             return;
         }
 
-        importRootObject = cmdInsertUpdate.getContainer();
+        importRootObject = new HashSet<CnATreeElement>(cmdInsertUpdate.getContainerMap().values());
         elementSet = cmdInsertUpdate.getElementSet();
 
         inserted += cmdInsertUpdate.getInserted();
@@ -214,7 +215,7 @@ public class SyncCommand extends GenericCommand implements IChangeLoggingCommand
      * 
      * @return
      */
-    public CnATreeElement getImportRootObject() {
+    public Set<CnATreeElement> getImportRootObject() {
         return importRootObject;
     }
 
@@ -242,7 +243,7 @@ public class SyncCommand extends GenericCommand implements IChangeLoggingCommand
     public List<CnATreeElement> getChangedElements() {
         List<CnATreeElement> changedElements = new LinkedList<CnATreeElement>();
         if (importRootObject != null) {
-            changedElements.add(importRootObject);
+            changedElements.addAll(importRootObject);
         }
         if (elementSet != null) {
             changedElements.addAll(elementSet);

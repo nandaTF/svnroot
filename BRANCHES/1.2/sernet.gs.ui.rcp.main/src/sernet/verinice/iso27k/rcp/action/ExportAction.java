@@ -29,6 +29,7 @@ import java.security.cert.CertificateNotYetValidException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -55,6 +56,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.actions.ActionDelegate;
+import org.eclipse.ui.internal.ViewPluginAction;
 
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ServiceComponent;
@@ -125,6 +127,9 @@ public class ExportAction extends ActionDelegate implements IViewActionDelegate,
     @Override
     public void run(IAction action) {
 		final ExportDialog dialog = new ExportDialog(Display.getCurrent().getActiveShell(), selectedOrganization);
+		if(action instanceof ViewPluginAction) {
+			
+		}
 		if( dialog.open() == Dialog.OK )
 		{	     
 		    if(dialog.getEncryptOutput()) {
@@ -153,7 +158,7 @@ public class ExportAction extends ActionDelegate implements IViewActionDelegate,
                     IStatus status = Status.OK_STATUS;
                     try {
                         monitor.beginTask(NLS.bind(Messages.getString("ExportAction_4"), new Object[] {dialog.getFilePath()}), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
-                        export( dialog.getSelectedElement(),
+                        export( dialog.getSelectedElementSet(),
                         		filePath,
                         		dialog.getReImport(),
                         		dialog.getSourceId(),
@@ -176,6 +181,21 @@ public class ExportAction extends ActionDelegate implements IViewActionDelegate,
             
 		}
 	}
+    
+    private void export(Set<CnATreeElement> elementSet, String path, boolean reImport, String sourceId, char[] exportPassword, File x509CertificateFile) {
+        if(elementSet!=null && elementSet.size()>0) {
+            sourceId = UUID.randomUUID().toString();
+            Activator.inheritVeriniceContextState();
+        	ExportCommand exportCommand = new ExportCommand(new LinkedList<CnATreeElement>(elementSet), sourceId, reImport);
+        	try {
+        		exportCommand = ServiceFactory.lookupCommandService().executeCommand(exportCommand);
+        		FileUtils.writeByteArrayToFile(new File(path), encrypt(exportCommand.getResult(),exportPassword, x509CertificateFile));
+        		updateModel(exportCommand.getChangedElements());
+        	} catch (Exception e) {
+        		throw new IllegalStateException(e);
+        	}      	
+        }
+    }
 
     private void export(CnATreeElement element, String path, boolean reImport, String sourceId, char[] exportPassword, File x509CertificateFile) {
         LinkedList<CnATreeElement> exportElements = new LinkedList<CnATreeElement>();

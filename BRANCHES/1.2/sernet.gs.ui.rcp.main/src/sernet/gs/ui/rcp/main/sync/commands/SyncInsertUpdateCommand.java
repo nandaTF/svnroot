@@ -220,7 +220,7 @@ public class SyncInsertUpdateCommand extends GenericCommand {
 
     private int inserted = 0, updated = 0;
 
-    private CnATreeElement container = null;
+    private Map<Class,CnATreeElement> containerMap = new HashMap<Class,CnATreeElement>(2);
 
     private Set<CnATreeElement> elementSet = new HashSet<CnATreeElement>();
     
@@ -566,7 +566,8 @@ public class SyncInsertUpdateCommand extends GenericCommand {
     private CnATreeElement accessContainer(Class clazz) {
         // Create the importRootObject if it does not exist yet
         // and set the 'importRootObject' variable.
-        if (container == null) {
+    	CnATreeElement container = containerMap.get(clazz);
+        if (container==null) {
             LoadImportObjectsHolder cmdLoadContainer = new LoadImportObjectsHolder(clazz);
             try {
                 cmdLoadContainer = ServiceFactory.lookupCommandService().executeCommand(cmdLoadContainer);
@@ -577,11 +578,11 @@ public class SyncInsertUpdateCommand extends GenericCommand {
             container = cmdLoadContainer.getHolder();
             if(container==null) {
                 container = createContainer(clazz);
-            }
+            }    
             // load the parent
             container.getParent().getTitle();
-        }
-
+            containerMap.put(clazz,container);
+        } 
         return container;
     }
 
@@ -602,15 +603,15 @@ public class SyncInsertUpdateCommand extends GenericCommand {
             throw new RuntimeCommandException("Fehler beim Anlegen des Behaelters für importierte Objekte.");
         }
         BSIModel model = cmdLoadModel.getModel();
+        ImportBsiGroup holder = null;
         try {
-            ImportBsiGroup holder = new ImportBsiGroup(model);
+            holder = new ImportBsiGroup(model);
             addPermissions(holder);
             getDaoFactory().getDAO(ImportBsiGroup.class).saveOrUpdate(holder);
-            container = holder;
         } catch (Exception e1) {
             throw new RuntimeCommandException("Fehler beim Anlegen des Behaelters für importierte Objekte.");
         }
-        return container;
+        return holder;
     }
     
     private CnATreeElement createIsoContainer() {
@@ -622,15 +623,15 @@ public class SyncInsertUpdateCommand extends GenericCommand {
             throw new RuntimeCommandException("Fehler beim Anlegen des Behaelters für importierte Objekte.");
         }
         ISO27KModel model = cmdLoadModel.getModel();
+        ImportIsoGroup holder = null;
         try {
-            ImportIsoGroup holder = new ImportIsoGroup(model);
+            holder = new ImportIsoGroup(model);
             addPermissions(holder);
             getDaoFactory().getDAO(ImportIsoGroup.class).saveOrUpdate(holder);
-            container = holder;
         } catch (Exception e1) {
             throw new RuntimeCommandException("Fehler beim Anlegen des Behälters für importierte Objekte.");
         }
-        return container;
+        return holder;
     }
     
     private void addPermissions(CnATreeElement element) {
@@ -640,16 +641,6 @@ public class SyncInsertUpdateCommand extends GenericCommand {
         HashSet<Permission> auditPerms = new HashSet<Permission>();
         auditPerms.add(Permission.createPermission(element, getUserName(), true, true));
         element.setPermissions(auditPerms);
-    }
-
-    /**
-     * Returns the 'import root object'. May be null if it was not created
-     * during the import.
-     * 
-     * @return
-     */
-    public CnATreeElement getContainer() {
-        return container;
     }
     
     protected void addElement(CnATreeElement element) {
@@ -661,7 +652,11 @@ public class SyncInsertUpdateCommand extends GenericCommand {
         elementSet.add(element);
     }
 
-    public Set<CnATreeElement> getElementSet() {
+    public Map<Class, CnATreeElement> getContainerMap() {
+		return containerMap;
+	}
+
+	public Set<CnATreeElement> getElementSet() {
         return elementSet;
     }
 
