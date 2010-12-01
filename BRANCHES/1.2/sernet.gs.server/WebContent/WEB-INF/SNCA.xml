@@ -845,6 +845,11 @@ the value between <param></param> will be used directly if no string is found fo
             name="Organisation"
             id="itverbund_organisation" />
         <huiproperty
+            id="itverbund_tag"
+            name="Tags"
+            tooltip="List of tags, separated by comma or space" 
+            />
+        <huiproperty
             name="Anzahl Mitarbeiter"
             id="itverbund_mitarbeiter" />
         <huiproperty

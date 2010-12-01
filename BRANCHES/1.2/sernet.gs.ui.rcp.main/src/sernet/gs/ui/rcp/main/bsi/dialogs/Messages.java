@@ -46,7 +46,8 @@ public class Messages extends NLS {
     public static String AutoBausteinDialog_7;
     public static String AutoBausteinDialog_8;
     public static String AutoBausteinDialog_9;
-    public static String BSIModelFilterDialog_10;
+    public static String BSIModelFilterDialog_0;
+	public static String BSIModelFilterDialog_10;
     public static String BSIModelFilterDialog_11;
     public static String BSIModelFilterDialog_12;
     public static String BSIModelFilterDialog_13;
