@@ -34,6 +34,7 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.CellEditor.LayoutData;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
@@ -41,6 +42,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowData;
@@ -113,7 +115,7 @@ public class ExportDialog extends TitleAreaDialog {
         composite.setLayoutData(gd);
         
         /*
-         * Widgets for selection of an IT network:
+         * Widgets for selection of an IT network or organization:
          */
 
         LoadCnAElementByType<Organization> cmdLoadOrganization = new LoadCnAElementByType<Organization>(Organization.class);
@@ -132,26 +134,42 @@ public class ExportDialog extends TitleAreaDialog {
             LOG.error("Error while loading organizations", ex); //$NON-NLS-1$
             setMessage(Messages.SamtExportDialog_4, IMessageProvider.ERROR);
             return null;
-        }
-
-        final Group groupOrganization = new Group(composite, SWT.NONE);
+        } 
+        
+        final Group groupOrganization = new Group(composite, SWT.NONE);    
         groupOrganization.setText(Messages.SamtExportDialog_2);
         GridLayout groupOrganizationLayout = new GridLayout(1, true);
         groupOrganization.setLayout(groupOrganizationLayout);
         gd = new GridData(GridData.GRAB_HORIZONTAL);
         gd.minimumWidth = 662;
+        gd.heightHint = 200; 
         groupOrganization.setLayoutData(gd);
 
+        ScrolledComposite scrolledComposite = new ScrolledComposite(groupOrganization, SWT.V_SCROLL);
+        scrolledComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+        scrolledComposite.setExpandHorizontal(true);
+        
+        Composite innerComposite = new Composite (scrolledComposite, SWT.NONE); 
+        scrolledComposite.setContent(innerComposite); 
+        innerComposite.setLayoutData(new GridData (SWT.FILL, SWT.FILL,true, false)); 
+        innerComposite.setLayout(new GridLayout (1, false));
+        
+        
         SelectionListener organizationListener = new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                selectedElement = (CnATreeElement) ((Button) e.getSource()).getData();
-                selectedElementSet.add((CnATreeElement) ((Button) e.getSource()).getData());
-                if(txtLocation!=null) {
-                    filePath = selectedElement.getTitle() + ".xml"; //$NON-NLS-1$
-                    txtLocation.setText(filePath);
+            	Button checkbox = (Button) e.getSource();
+                selectedElement = (CnATreeElement) checkbox.getData();
+                if(checkbox.getSelection()) {
+	                selectedElementSet.add(selectedElement);
+	                if(txtLocation!=null) {
+	                    filePath = selectedElement.getTitle() + ".xml"; //$NON-NLS-1$
+	                    txtLocation.setText(filePath);
+	                }
+	                setSourceId(selectedElement);
+                } else {
+                	selectedElementSet.remove(selectedElement);
                 }
-                setSourceId(selectedElement);
                 super.widgetSelected(e);
             }
         };
@@ -162,7 +180,7 @@ public class ExportDialog extends TitleAreaDialog {
         List<Organization> organizationList = cmdLoadOrganization.getElements();
         Iterator<Organization> organizationIter = organizationList.iterator();
         while (organizationIter.hasNext()) {
-            final Button radioOrganization = new Button(groupOrganization, SWT.CHECK);
+            final Button radioOrganization = new Button(innerComposite, SWT.CHECK);
             Organization organization = organizationIter.next();
             radioOrganization.setText(organization.getTitle());
             radioOrganization.setData(organization);
@@ -183,7 +201,7 @@ public class ExportDialog extends TitleAreaDialog {
         List<ITVerbund> itVerbundList = cmdItVerbund.getElements();
         Iterator<ITVerbund> itVerbundIter = itVerbundList.iterator();
         while (itVerbundIter.hasNext()) {
-            final Button radio = new Button(groupOrganization, SWT.CHECK);
+            final Button radio = new Button(innerComposite, SWT.CHECK);
             ITVerbund verbund = itVerbundIter.next();
             radio.setText(verbund.getTitle());
             radio.setData(verbund);
@@ -197,6 +215,11 @@ public class ExportDialog extends TitleAreaDialog {
                 selectedElement = verbund;
             }
         }
+        scrolledComposite.setVisible(true);
+        Point size = innerComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT); 
+        size.y += (organizationList.size() + itVerbundList.size()) * 2;
+        innerComposite.setSize(size); 
+        groupOrganization.layout(); 
         
         final Composite sourceIdComposite = new Composite(composite, SWT.NONE);
         sourceIdComposite.setLayout(new GridLayout(3,false));

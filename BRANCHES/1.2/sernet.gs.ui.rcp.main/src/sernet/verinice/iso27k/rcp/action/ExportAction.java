@@ -184,7 +184,10 @@ public class ExportAction extends ActionDelegate implements IViewActionDelegate,
     
     private void export(Set<CnATreeElement> elementSet, String path, boolean reImport, String sourceId, char[] exportPassword, File x509CertificateFile) {
         if(elementSet!=null && elementSet.size()>0) {
-            sourceId = UUID.randomUUID().toString();
+        	if(sourceId==null || sourceId.isEmpty()) {
+        		// if source id is not set by user the first 6 char. of an uuid is used
+        		sourceId = UUID.randomUUID().toString().substring(0, 6);
+        	}
             Activator.inheritVeriniceContextState();
         	ExportCommand exportCommand = new ExportCommand(new LinkedList<CnATreeElement>(elementSet), sourceId, reImport);
         	try {
