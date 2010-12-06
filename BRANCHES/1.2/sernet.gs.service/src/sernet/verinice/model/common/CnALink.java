@@ -297,9 +297,6 @@ public class CnALink implements Serializable, ITypedElement {
 	}
 
 	public void setId(Id id) {
-		if(id!=null && "".equals(id.typeId)) {
-			id.typeId = Id.NO_TYPE;
-		}
 		this.id = id;
 	}
 
