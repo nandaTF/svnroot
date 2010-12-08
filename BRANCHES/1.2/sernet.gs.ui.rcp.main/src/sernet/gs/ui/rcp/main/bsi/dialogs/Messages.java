@@ -91,6 +91,7 @@ public class Messages extends NLS {
     public static String BSIModelFilterDialog_9;
     public static String BulkEditDialog_0;
     public static String BulkEditDialog_1;
+	public static String BulkEditDialog_2;
     public static String CnATreeElementSelectionDialog_0;
     public static String CnATreeElementSelectionDialog_2;
     public static String CnATreeElementSelectionDialog_3;

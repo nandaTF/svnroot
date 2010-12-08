@@ -117,7 +117,7 @@ public class Configuration implements Serializable, ITypedElement {
 	}
 
 	public void setPass(String pass) {
-		PropertyType type = getTypeFactory().getPropertyType(Configuration.TYPE_ID, PROP_USERNAME);
+		PropertyType type = getTypeFactory().getPropertyType(Configuration.TYPE_ID, PROP_PASSWORD);
 		entity.setSimpleValue(type, pass);
 	}
 

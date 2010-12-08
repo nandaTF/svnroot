@@ -109,6 +109,7 @@ public class AccessControlEditDialog extends TitleAreaDialog {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
+		newShell.setText(Messages.AccessControlEditDialog_6);
 		newShell.setSize(460, 600);
 	}
 
@@ -222,9 +223,9 @@ public class AccessControlEditDialog extends TitleAreaDialog {
 
 	protected void showInformation() {
 		if(isOverride()) {
-			setMessage(INFORMATION_OVERRIDE_MODE, IMessageProvider.INFORMATION);
+			setMessage(INFORMATION_OVERRIDE_MODE);
 		} else {
-			setMessage(INFORMATION_ADD_MODE, IMessageProvider.INFORMATION);
+			setMessage(INFORMATION_ADD_MODE);
 		}
 		
 	}

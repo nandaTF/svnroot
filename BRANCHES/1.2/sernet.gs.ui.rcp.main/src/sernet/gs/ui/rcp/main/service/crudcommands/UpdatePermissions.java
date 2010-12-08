@@ -42,8 +42,6 @@ import sernet.verinice.model.common.Permission;
  */
 @SuppressWarnings("serial")
 public class UpdatePermissions extends GenericCommand implements IChangeLoggingCommand {
-
-	private static final Logger log = Logger.getLogger(UpdatePermissions.class);
 	
 	private String cteTypeId;
 
