@@ -151,7 +151,7 @@ public class ConfigurationAction implements IObjectActionDelegate {
 						handleException(e, logMessage, messageTitle, userMessage);	
 					} catch (final PasswordException e) {
 						final String logMessage = "Configuration can not be saved. " + e.getMessage(); //$NON-NLS-1$
-						final String messageTitle = "Configuration can not be saved"; 
+						final String messageTitle = Messages.ConfigurationAction_6; 
 						final String userMessage = e.getMessage();		
 						handleException(e, logMessage, messageTitle, userMessage);	
 					} catch (Exception e) {
@@ -195,13 +195,13 @@ public class ConfigurationAction implements IObjectActionDelegate {
 		final String oldName = configuration.getUser();
 		if(isNewName(oldName,name) && (newPassword==null || newPassword.isEmpty())) {
 			// Exception message must be translated here
-			throw new PasswordException("Please enter and retype a password.");
+			throw new PasswordException(Messages.ConfigurationAction_9);
 		}	
 		configuration.setUser(name);
 		if(newPassword!=null && !newPassword.isEmpty()) {
 			if(!newPassword.equals(newPassword2)) {
 				// Exception message must be translated here
-				throw new PasswordException("Passwords does not match.");
+				throw new PasswordException(Messages.ConfigurationAction_10);
 			}
 			configuration.setPass(newPassword);
 			updated=true;

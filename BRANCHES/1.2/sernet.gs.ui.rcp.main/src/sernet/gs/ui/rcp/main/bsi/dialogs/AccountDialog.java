@@ -17,11 +17,9 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main.bsi.dialogs;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -37,7 +35,6 @@ import sernet.gs.ui.rcp.main.bsi.editors.InputHelperFactory;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.EntityType;
-import sernet.hui.common.connect.Property;
 import sernet.hui.swt.widgets.HitroUIComposite;
 import sernet.snutils.DBException;
 import sernet.verinice.model.common.configuration.Configuration;
@@ -83,7 +80,7 @@ public class AccountDialog extends TitleAreaDialog {
     protected Control createDialogArea(Composite parent) {
         try {
         	setTitle(title);
-        	setMessage("verinice user account settings");
+        	setMessage(Messages.AccountDialog_0);
         	
             Composite container = (Composite) super.createDialogArea(parent);
             GridLayout layoutRoot = (GridLayout) container.getLayout();
@@ -130,7 +127,7 @@ public class AccountDialog extends TitleAreaDialog {
 		compositePassword.setLayoutData(gd);
 		
 		Label labelName = new Label(compositePassword, SWT.NONE);
-		labelName.setText("Login name");
+		labelName.setText(Messages.AccountDialog_1);
 		
 		textName = new Text(compositePassword, SWT.BORDER | SWT.SINGLE);
 		GridData gdText = new GridData(GridData.GRAB_HORIZONTAL);
@@ -139,13 +136,13 @@ public class AccountDialog extends TitleAreaDialog {
 		textName.setLayoutData(gdText);
 		
 		Label labelPassword = new Label(compositePassword, SWT.NONE);
-		labelPassword.setText("Password");
+		labelPassword.setText(Messages.AccountDialog_2);
 		
 		textPassword = new Text(compositePassword, SWT.BORDER | SWT.SINGLE | SWT.PASSWORD);
 		textPassword.setLayoutData(gdText);
 		
 		Label labelPassword2 = new Label(compositePassword, SWT.NONE);
-		labelPassword2.setText("Retype Password");
+		labelPassword2.setText(Messages.AccountDialog_3);
 		
 		textPassword2 = new Text(compositePassword, SWT.BORDER | SWT.SINGLE | SWT.PASSWORD);
 		textPassword2.setLayoutData(gdText);
