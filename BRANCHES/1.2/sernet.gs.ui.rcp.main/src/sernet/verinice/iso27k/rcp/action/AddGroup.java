@@ -27,7 +27,9 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
@@ -35,6 +37,7 @@ import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.gs.ui.rcp.main.bsi.editors.EditorFactory;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
+import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Asset;
 import sernet.verinice.model.iso27k.AssetGroup;
@@ -160,11 +163,16 @@ public class AddGroup extends Action implements IObjectActionDelegate {
 	public void selectionChanged(IAction action, ISelection selection) {
 		if(selection instanceof IStructuredSelection) {
 			Object sel = ((IStructuredSelection) selection).getFirstElement();
+			boolean allowed = false;
+			boolean enabled = false;
+			if (sel instanceof CnATreeElement) {
+				allowed = CnAElementHome.getInstance().isNewChildAllowed((CnATreeElement) sel);
+			}
 			if(sel instanceof Audit) {
-                action.setEnabled(false);
+				enabled = false;
                 action.setText(Messages.getString("AddGroup.19"));
             } else if(sel instanceof IISO27kGroup) {
-                action.setEnabled(true);
+            	enabled = true;
 			    IISO27kGroup group = (IISO27kGroup) sel;
 			    String typeId = group.getChildTypes()[0];
                 if(group instanceof Asset) {
@@ -172,7 +180,13 @@ public class AddGroup extends Action implements IObjectActionDelegate {
                 }
 				action.setImageDescriptor(ImageDescriptor.createFromImage(ImageCache.getInstance().getISO27kTypeImage(typeId)));	
 				action.setText( TITLE_FOR_TYPE.get(group.getTypeId())!=null ? TITLE_FOR_TYPE.get(group.getTypeId()) : Messages.getString("AddGroup.19") ); //$NON-NLS-1$
-			}		
+			}
+			// Only change state when it is enabled, since we do not want to
+            // trash the enablement settings of plugin.xml
+            if (action.isEnabled()) {
+                action.setEnabled(allowed && enabled);
+            }
 		}
 	}
+
 }

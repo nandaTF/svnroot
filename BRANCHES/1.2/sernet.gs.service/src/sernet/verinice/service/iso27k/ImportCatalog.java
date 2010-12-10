@@ -119,11 +119,14 @@ public class ImportCatalog extends GenericCommand implements ICatalogImporter {
                 	String heading = nextLine[1];
                 	String type = nextLine[2];
                 	String text = nextLine[3];
-                	String weight1 = nextLine[4];
-                	String weight2 = nextLine[5];
-                	String maturity = nextLine[6];
-                	String threshold1 = nextLine[7];
-                	String threshold2 = nextLine[8];
+                	String weight1=null, weight2=null,maturity=null,threshold1=null,threshold2=null;
+                	if (hasMaturityLevels(nextLine)) {
+	                	weight1 = nextLine[4];
+	                	weight2 = nextLine[5];
+	                	maturity = nextLine[6];
+	                	threshold1 = nextLine[7];
+	                	threshold2 = nextLine[8];
+                	}
                     if (isNewTopic(nextLine)) {             	
                         if (getLog().isDebugEnabled()) {
                             getLog().debug("#: " + number);

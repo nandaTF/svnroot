@@ -49,12 +49,10 @@ import sernet.gs.ui.rcp.main.service.crudcommands.UpdateElementEntity;
 import sernet.gs.ui.rcp.main.service.crudcommands.UpdateMultipleElements;
 import sernet.gs.ui.rcp.main.service.taskcommands.CreateScenario;
 import sernet.gs.ui.rcp.main.service.taskcommands.FindAllTags;
-import sernet.hui.common.connect.HUITypeFactory;
 import sernet.hui.common.connect.HitroUtil;
 import sernet.hui.common.connect.HuiRelation;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ICommandService;
-import sernet.verinice.iso27k.service.Retriever;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.bsi.BausteinUmsetzung;
 import sernet.verinice.model.bsi.IBSIStrukturElement;
@@ -66,12 +64,10 @@ import sernet.verinice.model.common.CnALink;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.Permission;
 import sernet.verinice.model.common.configuration.Configuration;
-import sernet.verinice.model.iso27k.Asset;
 import sernet.verinice.model.iso27k.IISO27kElement;
-import sernet.verinice.model.iso27k.IISO27kGroup;
+import sernet.verinice.model.iso27k.ISO27KModel;
 import sernet.verinice.model.iso27k.ImportIsoGroup;
 import sernet.verinice.model.iso27k.IncidentScenario;
-import sernet.verinice.model.iso27k.Organization;
 import sernet.verinice.model.iso27k.Threat;
 import sernet.verinice.model.iso27k.Vulnerability;
 import sernet.verinice.service.commands.CreateLink;
@@ -378,7 +374,7 @@ public class CnAElementHome {
      * @return
      */
     public boolean isNewChildAllowed(CnATreeElement cte) {
-        return cte instanceof BSIModel || isWriteAllowed(cte);
+        return cte instanceof BSIModel || cte instanceof ISO27KModel || isWriteAllowed(cte);
     }
 
     /**

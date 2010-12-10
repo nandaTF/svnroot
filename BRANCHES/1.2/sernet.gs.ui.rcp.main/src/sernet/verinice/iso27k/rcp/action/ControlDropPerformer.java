@@ -36,9 +36,11 @@ import org.eclipse.ui.progress.IProgressService;
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.bsi.dnd.DNDItems;
+import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.verinice.interfaces.iso27k.IItem;
 import sernet.verinice.iso27k.rcp.ControlTransformOperation;
+import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Control;
 import sernet.verinice.model.iso27k.Group;
 import sernet.verinice.model.iso27k.Threat;
@@ -77,19 +79,24 @@ public class ControlDropPerformer implements DropPerformer {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("performDrop..."); //$NON-NLS-1$
 			}
-			// because of validateDrop only Groups can be a target
-			ControlTransformOperation operation = new ControlTransformOperation((Group) target);
 			try {
-				IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-				progressService.run(true, true, operation);
-				IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
-				boolean dontShow = preferenceStore.getBoolean(PreferenceConstants.INFO_CONTROLS_ADDED);
-				if (!dontShow) {
-					MessageDialogWithToggle dialog = MessageDialogWithToggle.openInformation(PlatformUI.getWorkbench().getDisplay().getActiveShell(), Messages.getString("ControlDropPerformer.1"), //$NON-NLS-1$
-							NLS.bind(Messages.getString("ControlDropPerformer.2"), operation.getNumberOfControls(), ((Group) target).getTitle()), //$NON-NLS-1$
-							Messages.getString("ControlDropPerformer.3"), //$NON-NLS-1$
-							dontShow, preferenceStore, PreferenceConstants.INFO_CONTROLS_ADDED);
-					preferenceStore.setValue(PreferenceConstants.INFO_CONTROLS_ADDED, dialog.getToggleState());
+				// because of validateDrop only Groups can be a target
+				Group group = (Group) target;
+				if(CnAElementHome.getInstance().isNewChildAllowed(group)) {
+					ControlTransformOperation operation = new ControlTransformOperation(group);
+					IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+					progressService.run(true, true, operation);
+					IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+					boolean dontShow = preferenceStore.getBoolean(PreferenceConstants.INFO_CONTROLS_ADDED);
+					if (!dontShow) {
+						MessageDialogWithToggle dialog = MessageDialogWithToggle.openInformation(PlatformUI.getWorkbench().getDisplay().getActiveShell(), Messages.getString("ControlDropPerformer.1"), //$NON-NLS-1$
+								NLS.bind(Messages.getString("ControlDropPerformer.2"), operation.getNumberOfControls(), ((Group) target).getTitle()), //$NON-NLS-1$
+								Messages.getString("ControlDropPerformer.3"), //$NON-NLS-1$
+								dontShow, preferenceStore, PreferenceConstants.INFO_CONTROLS_ADDED);
+						preferenceStore.setValue(PreferenceConstants.INFO_CONTROLS_ADDED, dialog.getToggleState());
+					}
+				} else if (LOG.isDebugEnabled()) {
+					LOG.debug("User is not allowed to add elements to this group"); //$NON-NLS-1$
 				}
 			} catch (Exception e) {
 				LOG.error("Error while transforming items to controls", e); //$NON-NLS-1$
