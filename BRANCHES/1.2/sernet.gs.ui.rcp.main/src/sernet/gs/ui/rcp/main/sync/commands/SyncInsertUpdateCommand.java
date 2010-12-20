@@ -220,7 +220,8 @@ public class SyncInsertUpdateCommand extends GenericCommand {
 
     private int inserted = 0, updated = 0;
 
-    private Map<Class,CnATreeElement> containerMap = new HashMap<Class,CnATreeElement>(2);
+    @SuppressWarnings("unchecked")
+	private Map<Class,CnATreeElement> containerMap = new HashMap<Class,CnATreeElement>(2);
 
     private Set<CnATreeElement> elementSet = new HashSet<CnATreeElement>();
     

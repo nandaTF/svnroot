@@ -222,7 +222,7 @@ Library.
       <import plugin="org.springframework.context.support"/>
       <import plugin="org.junit4"/>
       <import plugin="org.springframework.security.core"/>
-      <import plugin="sernet.hui.common" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="sernet.hui.common"/>
       <import plugin="sernet.gs.ui.rcp.main"/>
       <import plugin="org.eclipse.core.runtime" version="3.4.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.equinox.app"/>
@@ -531,7 +531,7 @@ Library.
          id="sernet.hui.server"
          download-size="0"
          install-size="0"
-         version="1.1.1"/>
+         version="1.1.2.qualifier"/>
 
    <plugin
          id="org.junit4"
