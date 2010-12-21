@@ -17,8 +17,12 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main.bsi.dialogs;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -51,6 +55,8 @@ public class AccountDialog extends TitleAreaDialog {
 	private String password;
 	private Text textName;
 	private String name;
+	
+	 private Color oldBackground;
 
     private AccountDialog(Shell parent, EntityType entType) {
         super(parent);
@@ -146,6 +152,25 @@ public class AccountDialog extends TitleAreaDialog {
 		
 		textPassword2 = new Text(compositePassword, SWT.BORDER | SWT.SINGLE | SWT.PASSWORD);
 		textPassword2.setLayoutData(gdText);
+		oldBackground = textPassword2.getBackground();
+		
+		textPassword2.addKeyListener(new KeyListener() {
+	            
+	            @Override
+	            public void keyReleased(KeyEvent e) {
+	                if (!textPassword.getText().equals(textPassword2.getText())) {
+	                    //yellow:
+	                    textPassword2.setBackground(new Color(Display.getCurrent(), 250,250,120));
+	                } else {
+	                    textPassword2.setBackground(oldBackground);
+	                }
+	            }
+	            
+	            @Override
+	            public void keyPressed(KeyEvent e) {
+	               
+	            }
+	        });
 		
 		if(getEntity()!=null 
 			&& getEntity().getProperties(Configuration.PROP_USERNAME)!=null
@@ -156,10 +181,15 @@ public class AccountDialog extends TitleAreaDialog {
 	
 	@Override
 	protected void okPressed() {
-		password=textPassword.getText();
-		password2=textPassword2.getText();
-		name=textName.getText();
-		super.okPressed();
+		 if (textPassword.getText().equals(textPassword2.getText())) {
+	            password=textPassword.getText();
+	            password2=textPassword2.getText();
+	            name=textName.getText();
+	            super.okPressed();
+	        } 
+	        else {
+	            MessageDialog.openWarning(this.getShell(), Messages.PasswordDialog_3, Messages.PasswordDialog_4);
+	        }
 	}
 	
 	public String getPassword() {
