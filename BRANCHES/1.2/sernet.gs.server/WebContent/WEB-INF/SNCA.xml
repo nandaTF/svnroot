@@ -1472,6 +1472,8 @@ the value between <param></param> will be used directly if no string is found fo
 					id="person_anrede_none"
 					name="" />
 				<option
+					id="person_anrede_herr"/>
+				<option
 					id="person_anrede_frau"
 					name="Frau" />
 				<option
