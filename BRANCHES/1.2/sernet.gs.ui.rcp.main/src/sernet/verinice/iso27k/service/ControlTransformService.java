@@ -124,7 +124,7 @@ public class ControlTransformService {
 		CnATreeElement element = null;
 		if(item.getItems()!=null && item.getItems().size()>0) {
 			// create a group
-			element = GenericItemTransformer.transformToGroup(item);
+			element = GenericItemTransformer.transformToGroup(item,group.getTypeId());
 			monitor.setTaskName(getText(numberOfControls,numberProcessed,element.getTitle()));
 			if (group.canContain(element)) {
 				group.addChild(element);

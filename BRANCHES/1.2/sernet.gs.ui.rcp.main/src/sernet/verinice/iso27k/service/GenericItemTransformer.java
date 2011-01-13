@@ -23,6 +23,8 @@ import sernet.verinice.interfaces.iso27k.IItem;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Control;
 import sernet.verinice.model.iso27k.ControlGroup;
+import sernet.verinice.model.iso27k.ThreatGroup;
+import sernet.verinice.model.iso27k.VulnerabilityGroup;
 import sernet.verinice.model.samt.SamtTopic;
 import sernet.verinice.service.iso27k.ItemControlTransformer;
 
@@ -64,6 +66,20 @@ public class GenericItemTransformer {
 	    } 
         return elmt;
     
+	}
+
+	public static CnATreeElement transformToGroup(IItem item, String typeId) {
+		CnATreeElement elmt = null;
+        if(ControlGroup.TYPE_ID.equals(typeId)) { 
+		    elmt = ItemControlTransformer.transformToGroup(item, new ControlGroup());
+        } else if(ThreatGroup.TYPE_ID.equals(typeId)) {
+		    elmt = ItemThreatTransformer.transformToGroup(item);
+        } else if(VulnerabilityGroup.TYPE_ID.equals(typeId)) {
+		    elmt = ItemVulnerabilityTransformer.transformToGroup(item);
+        } else {
+		    throw new RuntimeException("Can not transform item " + item.getName() + " to group of type: " + typeId);
+	    } 
+        return elmt;
 	}
 	
 	

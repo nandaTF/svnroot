@@ -179,6 +179,9 @@ public class ControlDropPerformer implements DropPerformer {
 			} else {
 				valid = (item.getTypeId() == type);
 			}
+			if(!valid) {
+				break;
+			}
 		}
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("isCorrectItemsForGroup result: " + valid);
