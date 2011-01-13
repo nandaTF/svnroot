@@ -47,7 +47,7 @@ public class Property implements Serializable, ITypedElement {
 	 * @return Returns the propertyValue.
 	 */
 	public String getPropertyValue() {
-		return propertyValue;
+		return (propertyValue == null) ? "" : propertyValue;
 	}
 	
 	/**
