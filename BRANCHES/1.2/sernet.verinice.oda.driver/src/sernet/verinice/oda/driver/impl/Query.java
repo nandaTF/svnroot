@@ -54,6 +54,8 @@ import sernet.verinice.model.bsi.risikoanalyse.GefaehrdungsUmsetzung;
 import sernet.verinice.interfaces.oda.IVeriniceOdaDriver;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.oda.driver.Activator;
+import sernet.verinice.service.commands.LoadEntityValues;
+import sernet.verinice.service.commands.MapEntityValues;
 import bsh.EvalError;
 import bsh.Interpreter;
 

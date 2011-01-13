@@ -15,7 +15,7 @@
  * Contributors:
  *     Robert Schuster <rschuster[at]tarent[dot]de> - initial API and implementation
  ******************************************************************************/
-package sernet.verinice.oda.driver.impl;
+package sernet.verinice.service.commands;
 
 import java.io.Serializable;
 import java.util.ArrayList;
