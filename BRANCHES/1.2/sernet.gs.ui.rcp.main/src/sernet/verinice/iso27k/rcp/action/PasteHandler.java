@@ -104,7 +104,7 @@ public class PasteHandler extends AbstractHandler {
 	}
 
 	private void handlePermissionException(PermissionException e) {
-		MessageDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+		MessageDialog.openInformation(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
 				Messages.getString("PasteHandler.2"), //$NON-NLS-1$
 				e.getMessage());
 	}
