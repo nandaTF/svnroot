@@ -90,7 +90,7 @@ public class CutService extends PasteService implements IProgressTask {
 			Activator.inheritVeriniceContextState();
 			this.numberOfElements = 0;
 			List<CnATreeElement> elementList = createInsertList(elements);		
-			progressObserver.beginTask(Messages.getString("CutService.1",numberOfElements), numberOfElements);
+			progressObserver.beginTask(Messages.getString("CutService.1",numberOfElements), numberOfElements); //$NON-NLS-1$
 			numberProcessed = 0;
 			Map<String, String> sourceDestMap = new Hashtable<String, String>();
 			checkPermissions(elementList);
@@ -111,11 +111,11 @@ public class CutService extends PasteService implements IProgressTask {
 			}
 			throw e;
 		} catch (RuntimeException e) {
-			log.error("RuntimeException while copying element", e);
+			log.error("RuntimeException while copying element", e); //$NON-NLS-1$
 			throw e;
 		} catch (Throwable e) {
-			log.error("Error while copying element", e);
-			throw new RuntimeException("Error while copying element", e);
+			log.error("Error while copying element", e); //$NON-NLS-1$
+			throw new RuntimeException("Error while copying element", e); //$NON-NLS-1$
 		} finally {
 			progressObserver.done();
 		}
@@ -126,20 +126,19 @@ public class CutService extends PasteService implements IProgressTask {
 		for (CnATreeElement element : elementList) {
 			if(!CnAElementHome.getInstance().isDeleteAllowed(element)) {
 				ok = false;
-				// FIXME: externalize Strings
 				// this message must be multi lingual			
-				throw new PermissionException("No permission to move elment: " + getTitle(element));
+				throw new PermissionException(Messages.getString("CutService.3",getTitle(element))); //$NON-NLS-1$
 			}
 		}
 		return ok;
 	}
 
 	private String getTitle(CnATreeElement element) {
-		String title = "unknown";
+		String title = "unknown"; //$NON-NLS-1$
 		try {
 			title = element.getTitle();
 		} catch(Throwable t) {
-			log.error("Error while reading title.", t);
+			log.error("Error while reading title.", t); //$NON-NLS-1$
 		}
 		return title;
 	}
@@ -153,7 +152,7 @@ public class CutService extends PasteService implements IProgressTask {
 	@SuppressWarnings("unchecked")
 	private CnATreeElement move(IProgressObserver monitor, CnATreeElement group, CnATreeElement element) throws Exception {
 		if(monitor.isCanceled()) {
-			log.warn("Copying canceled. " + numberProcessed + " of " + numberOfElements + " elements copied.");
+			log.warn("Copying canceled. " + numberProcessed + " of " + numberOfElements + " elements copied."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return null;
 		}
 		monitor.setTaskName(getText(numberOfElements,numberProcessed,element.getTitle()));
@@ -194,7 +193,7 @@ public class CutService extends PasteService implements IProgressTask {
 	 * @param title
 	 */
 	private String getText(int n, int i, String title) {
-		return Messages.getString("CutService.2", i, n, title);
+		return Messages.getString("CutService.2", i, n, title); //$NON-NLS-1$
 	}
 
 }
