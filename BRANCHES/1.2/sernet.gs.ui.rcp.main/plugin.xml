@@ -1123,7 +1123,7 @@
              id="sernet.gs.ui.rcp.main.decorator1"
              label="ISA-Topic"
              lightweight="true"
-             location="TOP_RIGHT"
+             location="BOTTOM_RIGHT"
              state="true">
           <enablement>
              <objectClass
