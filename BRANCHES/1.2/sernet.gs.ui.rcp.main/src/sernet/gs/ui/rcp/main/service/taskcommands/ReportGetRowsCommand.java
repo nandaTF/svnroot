@@ -27,7 +27,6 @@ import sernet.gs.ui.rcp.main.reports.ICnaItemRow;
 import sernet.gs.ui.rcp.main.reports.ISMReport;
 import sernet.gs.ui.rcp.main.reports.PropertySelection;
 import sernet.gs.ui.rcp.main.reports.BsiReport;
-import sernet.gs.ui.rcp.main.service.crudcommands.LoadBSIModel;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnAElementById;
 import sernet.gs.ui.rcp.office.IOOTableRow;
 import sernet.verinice.interfaces.CommandException;
@@ -37,6 +36,7 @@ import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.bsi.ITVerbund;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Organization;
+import sernet.verinice.service.commands.LoadBSIModel;
 
 public class ReportGetRowsCommand extends GenericCommand {
 

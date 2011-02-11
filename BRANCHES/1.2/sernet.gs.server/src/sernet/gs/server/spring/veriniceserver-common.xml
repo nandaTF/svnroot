@@ -225,6 +225,7 @@ This variant:
 		<property name="daoFactory" ref="daoFactory" />
 		<property name="exceptionHandler" ref="serverExceptionHandler" />
 		<property name="authService" ref="authService" />
+		<property name="ldapService" ref="ldapService" />
 	</bean>
 
 	<bean id="commandService" parent="baseTxProxy">

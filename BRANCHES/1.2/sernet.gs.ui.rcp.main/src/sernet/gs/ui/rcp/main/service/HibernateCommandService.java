@@ -32,7 +32,6 @@ import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.gs.common.ApplicationRoles;
-import sernet.gs.ui.rcp.main.service.commands.INoAccessControl;
 import sernet.gs.ui.rcp.main.service.commands.UsernameExistsRuntimeException;
 import sernet.hui.common.VeriniceContext;
 import sernet.verinice.interfaces.CommandException;
@@ -42,6 +41,9 @@ import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.interfaces.IChangeLoggingCommand;
 import sernet.verinice.interfaces.ICommand;
 import sernet.verinice.interfaces.ICommandService;
+import sernet.verinice.interfaces.INoAccessControl;
+import sernet.verinice.interfaces.ldap.ILdapCommand;
+import sernet.verinice.interfaces.ldap.ILdapService;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.common.ChangeLogEntry;
 import sernet.verinice.model.common.CnATreeElement;
@@ -65,6 +67,8 @@ public class HibernateCommandService implements ICommandService, IHibernateComma
 	private ICommandExceptionHandler exceptionHandler;
 	
 	private IAuthService authService;
+	
+	private ILdapService ldapService;
 	
 	private boolean dbOpen = false;
 	
@@ -108,6 +112,15 @@ public class HibernateCommandService implements ICommandService, IHibernateComma
 			if (command instanceof IAuthAwareCommand) {
 				IAuthAwareCommand authCommand = (IAuthAwareCommand) command;
 				authCommand.setAuthService(authService);
+			}
+			
+			// inject ldap service if command is aware of it:
+			if (command instanceof ILdapCommand) {
+				ILdapCommand ldapCommand = (ILdapCommand) command;
+				if(getLdapService()==null) {
+					log.warn("LDAP service is not configured.");
+				}
+				ldapCommand.setLdapService(getLdapService());
 			}
 			
 			// When a command is being executed that should be subject to access
@@ -199,6 +212,14 @@ public class HibernateCommandService implements ICommandService, IHibernateComma
 
 	public void setAuthService(IAuthService authService) {
 		this.authService = authService;
+	}
+
+	public ILdapService getLdapService() {
+		return ldapService;
+	}
+
+	public void setLdapService(ILdapService ldapService) {
+		this.ldapService = ldapService;
 	}
 
 	public void setWorkObjects(VeriniceContext.State workObjects) {

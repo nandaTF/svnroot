@@ -9,6 +9,7 @@ import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.bsi.BausteinUmsetzung;
 import sernet.verinice.model.common.CnATreeElement;
+import sernet.verinice.service.commands.LoadBSIModel;
 
 public class LoadBSIModelComplete extends GenericCommand {
 

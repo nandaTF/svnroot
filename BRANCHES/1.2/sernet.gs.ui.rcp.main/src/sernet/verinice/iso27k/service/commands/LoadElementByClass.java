@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Set;
 
 import sernet.gs.service.RetrieveInfo;
-import sernet.gs.ui.rcp.main.service.commands.INoAccessControl;
 import sernet.verinice.interfaces.GenericCommand;
+import sernet.verinice.interfaces.INoAccessControl;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.ISO27KModel;
 
