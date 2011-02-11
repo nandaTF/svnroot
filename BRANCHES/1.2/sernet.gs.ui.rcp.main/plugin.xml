@@ -93,14 +93,6 @@
             id="sernet.gs.ui.rcp.main.bsi.views.auditview"
             name="%view.name.5"/>
       <view
-            allowMultiple="true"
-            category="sernet.gs.ui.rcp.main.views"
-            class="sernet.gs.ui.rcp.main.bsi.views.chart.ChartView"
-            icon="icons/chart_pie.png"
-            id="sernet.gs.ui.rcp.main.chartview"
-            name="%view.name.6">
-      </view>
-      <view
             allowMultiple="false"
             category="sernet.gs.ui.rcp.main.views"
             class="sernet.gs.ui.rcp.main.bsi.views.DocumentView"
