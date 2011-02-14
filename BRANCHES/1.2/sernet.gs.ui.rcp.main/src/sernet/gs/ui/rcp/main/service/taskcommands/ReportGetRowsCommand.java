@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import sernet.gs.service.RuntimeCommandException;
-import sernet.gs.ui.rcp.main.common.model.HydratorUtil;
 import sernet.gs.ui.rcp.main.reports.IBSIReport;
 import sernet.gs.ui.rcp.main.reports.ICnaItemRow;
 import sernet.gs.ui.rcp.main.reports.ISMReport;
@@ -35,6 +34,7 @@ import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.bsi.ITVerbund;
 import sernet.verinice.model.common.CnATreeElement;
+import sernet.verinice.model.common.HydratorUtil;
 import sernet.verinice.model.iso27k.Organization;
 import sernet.verinice.service.commands.LoadBSIModel;
 

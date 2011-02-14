@@ -44,6 +44,7 @@ public class GeneralSettingsPage extends FieldEditorPreferencePage implements IW
 	private BooleanFieldEditor infoDialogTransformCatalogItems;
 	private BooleanFieldEditor infoDialogCopy;
 	private BooleanFieldEditor infoDialogCut;
+	private BooleanFieldEditor infoDialogLdapImport;
 	private BooleanFieldEditor switchPerspectiveIsmView;
 	private BooleanFieldEditor switchPerspectiveCatalogView;
 	
@@ -90,6 +91,10 @@ public class GeneralSettingsPage extends FieldEditorPreferencePage implements IW
 		infoDialogCut = new BooleanFieldEditor(PreferenceConstants.INFO_ELEMENTS_CUT, Messages.getString("GeneralSettingsPage.InfoCut"), //$NON-NLS-1$
 				getFieldEditorParent());
 		addField(infoDialogCut);
+		
+		infoDialogLdapImport = new BooleanFieldEditor(PreferenceConstants.INFO_IMPORT_LDAP, Messages.getString("GeneralSettingsPage.InfoLdapImport"), //$NON-NLS-1$
+				getFieldEditorParent());
+		addField(infoDialogLdapImport);
 
 		switchPerspectiveIsmView = new BooleanFieldEditor(PreferenceConstants.getDontAskBeforeSwitch(ISMView.class), Messages.getString("GeneralSettingsPage.SwitchPerspectiveIsm"), //$NON-NLS-1$
 				getFieldEditorParent());

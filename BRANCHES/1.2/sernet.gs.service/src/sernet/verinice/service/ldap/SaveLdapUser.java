@@ -22,10 +22,13 @@ import sernet.verinice.model.bsi.ImportBsiGroup;
 import sernet.verinice.model.common.ChangeLogEntry;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.Permission;
+import sernet.verinice.model.common.configuration.Configuration;
 import sernet.verinice.model.iso27k.ISO27KModel;
 import sernet.verinice.model.iso27k.ImportIsoGroup;
 import sernet.verinice.model.iso27k.PersonIso;
+import sernet.verinice.service.commands.CreateConfiguration;
 import sernet.verinice.service.commands.LoadBSIModel;
+import sernet.verinice.service.commands.SaveConfiguration;
 import sernet.verinice.service.iso27k.LoadImportObjectsHolder;
 import sernet.verinice.service.iso27k.LoadModel;
 
@@ -44,9 +47,11 @@ public class SaveLdapUser extends GenericCommand implements IChangeLoggingComman
 	
     private transient IAuthService authService;
 	
-	Set<PersonIso> personSet;
+	Set<PersonInfo> personSet;
 	
 	List<CnATreeElement> savedPersonList;
+	
+	CnATreeElement importRootObject;
 	
 	@SuppressWarnings("unchecked")
 	private Map<Class,CnATreeElement> containerMap = new HashMap<Class,CnATreeElement>(2);
@@ -56,7 +61,7 @@ public class SaveLdapUser extends GenericCommand implements IChangeLoggingComman
         this.stationId = ChangeLogEntry.STATION_ID;
 	}
 
-	public SaveLdapUser(Set<PersonIso> personSet) {
+	public SaveLdapUser(Set<PersonInfo> personSet) {
 		this();
 		this.personSet = personSet;
 	}
@@ -65,11 +70,31 @@ public class SaveLdapUser extends GenericCommand implements IChangeLoggingComman
 	public void execute() {
 		if(getPersonSet()!=null) {
 			savedPersonList = new ArrayList<CnATreeElement>();
-			for (PersonIso person : getPersonSet()) {
+			for (PersonInfo personInfo : getPersonSet()) {
+				// create person
+				PersonIso person = personInfo.getPerson();
 				person.setParent(loadContainer(person.getClass()));
+				setImportRootObject(person.getParent());
 				IBaseDao<PersonIso, Integer> dao = getDaoFactory().getDAO(person.getTypeId());
 				person = dao.merge(person);
 				savedPersonList.add(person);
+				// create configuration for person
+				CreateConfiguration createConfiguration = new CreateConfiguration(person);
+				try {
+					createConfiguration = getCommandService().executeCommand(createConfiguration);
+				} catch (CommandException e) {
+					getLog().error("Error while creating configuration for user: " + personInfo.getLoginName(), e);
+				}
+				// save username in person
+				Configuration configuration = createConfiguration.getConfiguration();
+				configuration.setUser(personInfo.getLoginName());
+				configuration.setAdminUser(false);
+				SaveConfiguration<Configuration> saveConfiguration = new SaveConfiguration<Configuration>(configuration, false);
+				try {
+					saveConfiguration = getCommandService().executeCommand(saveConfiguration);
+				} catch (CommandException e) {
+					getLog().error("Error while saving username in configuration for user: " + personInfo.getLoginName(), e);
+				}
 			}
 		}
 	}
@@ -185,12 +210,20 @@ public class SaveLdapUser extends GenericCommand implements IChangeLoggingComman
 		return stationId;
 	}
 
-	public Set<PersonIso> getPersonSet() {
+	public Set<PersonInfo> getPersonSet() {
 		return personSet;
 	}
 
-	public void setPersonSet(Set<PersonIso> personSet) {
+	public void setPersonSet(Set<PersonInfo> personSet) {
 		this.personSet = personSet;
+	}
+
+	public CnATreeElement getImportRootObject() {
+		return importRootObject;
+	}
+
+	public void setImportRootObject(CnATreeElement importRootObject) {
+		this.importRootObject = importRootObject;
 	}
 
 	@Override

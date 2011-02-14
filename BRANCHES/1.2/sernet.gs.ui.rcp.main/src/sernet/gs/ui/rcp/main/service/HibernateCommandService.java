@@ -32,7 +32,6 @@ import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.gs.common.ApplicationRoles;
-import sernet.gs.ui.rcp.main.service.commands.UsernameExistsRuntimeException;
 import sernet.hui.common.VeriniceContext;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.IAuthAwareCommand;
@@ -48,6 +47,7 @@ import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.common.ChangeLogEntry;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.configuration.Configuration;
+import sernet.verinice.service.commands.UsernameExistsRuntimeException;
 
 /**
  * Command service that executes commands using hibernate DAOs to access the

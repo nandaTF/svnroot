@@ -40,6 +40,8 @@ import sernet.verinice.model.bsi.risikoanalyse.GefaehrdungsUmsetzung;
 import sernet.verinice.model.common.ChangeLogEntry;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.configuration.Configuration;
+import sernet.verinice.model.iso27k.PersonIso;
+import sernet.verinice.service.commands.LoadConfiguration;
 
 @SuppressWarnings("serial")
 public class RemoveElement<T extends CnATreeElement> extends GenericCommand
@@ -63,8 +65,8 @@ public class RemoveElement<T extends CnATreeElement> extends GenericCommand
 				// load element from DB:
 				this.element = (T) getDaoFactory().getDAO(typeId).findById(elementId);
 				
-				if (element instanceof Person)
-					removeConfiguration((Person) element);
+				if (element instanceof Person || element instanceof PersonIso)
+					removeConfiguration(element);
 				
 				int listsDbId = 0;
 				if (element instanceof GefaehrdungsUmsetzung) {
@@ -158,7 +160,7 @@ public class RemoveElement<T extends CnATreeElement> extends GenericCommand
 		lists.removeGefaehrdungCompletely(gef);
 	}
 
-	private void removeConfiguration(Person person) throws CommandException {
+	private void removeConfiguration(CnATreeElement person) throws CommandException {
 		LoadConfiguration command = new LoadConfiguration(person);
 		command = getCommandService().executeCommand(command);
 		Configuration conf = command.getConfiguration();

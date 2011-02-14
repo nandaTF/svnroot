@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -31,6 +33,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -46,11 +49,16 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
+import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
+import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ldap.PersonParameter;
+import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.Permission;
 import sernet.verinice.model.iso27k.PersonIso;
+import sernet.verinice.rcp.InfoDialogWithShowToggle;
+import sernet.verinice.service.commands.CreateConfiguration;
 import sernet.verinice.service.ldap.LoadLdapUser;
 import sernet.verinice.service.ldap.PersonInfo;
 import sernet.verinice.service.ldap.SaveLdapUser;
@@ -82,14 +90,14 @@ public class LdapImportDialog extends TitleAreaDialog {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText("Active Directory Import");
+		newShell.setText(Messages.LdapImportDialog_28);
 		newShell.setSize(460, 600);
 	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
 
-		setTitle("Active Directory Import");
+		setTitle(Messages.LdapImportDialog_30);
 
 		final Composite composite = (Composite) super.createDialogArea(parent);
 		GridLayout layoutRoot = (GridLayout) composite.getLayout();
@@ -112,35 +120,35 @@ public class LdapImportDialog extends TitleAreaDialog {
 		containerRoles.setLayoutData(gd);
 		
 		Label nameLabel = new Label(containerRoles, SWT.NONE);
-		nameLabel.setText("Surname");
+		nameLabel.setText(Messages.LdapImportDialog_31);
 		surname = new Text(containerRoles, SWT.BORDER);
 		GridData gridData = new GridData();
 		gridData.horizontalAlignment = GridData.FILL;
 		surname.setLayoutData(gridData);
 		
 		Label titleLabel = new Label(containerRoles, SWT.NONE);
-		titleLabel.setText("Title");
+		titleLabel.setText(Messages.LdapImportDialog_32);
 		title = new Text(containerRoles, SWT.BORDER);
 		gridData = new GridData();
 		gridData.horizontalAlignment = GridData.FILL;
 		title.setLayoutData(gridData);
 		
 		Label departmentLabel = new Label(containerRoles, SWT.NONE);
-		departmentLabel.setText("Department");
+		departmentLabel.setText(Messages.LdapImportDialog_33);
 		department = new Text(containerRoles, SWT.BORDER);
 		gridData = new GridData();
 		gridData.horizontalAlignment = GridData.FILL;
 		department.setLayoutData(gridData);
 		
 		Label companyLabel = new Label(containerRoles, SWT.NONE);
-		companyLabel.setText("Company");
+		companyLabel.setText(Messages.LdapImportDialog_34);
 		company = new Text(containerRoles, SWT.BORDER);	
 		gridData = new GridData();
 		gridData.horizontalAlignment = GridData.FILL;
 		company.setLayoutData(gridData);
 		
 		Button buttonAdd = new Button(containerRoles, SWT.PUSH | SWT.BORDER);
-		buttonAdd.setText("Load accounts");
+		buttonAdd.setText(Messages.LdapImportDialog_35);
 		gridData = new GridData();
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.horizontalAlignment = SWT.RIGHT;
@@ -160,7 +168,7 @@ public class LdapImportDialog extends TitleAreaDialog {
 		createViewer(containerRoles);
 		
 		buttonRemove = new Button(containerRoles, SWT.PUSH | SWT.BORDER);
-		buttonRemove.setText("Remove");
+		buttonRemove.setText(Messages.LdapImportDialog_36);
 		buttonRemove.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -178,9 +186,18 @@ public class LdapImportDialog extends TitleAreaDialog {
 
 		return containerRoles;
 	}
+	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+	    super.createButtonsForButtonBar(parent);
+
+	    Button ok = getButton(IDialogConstants.OK_ID);
+	    ok.setText(Messages.LdapImportDialog_37);
+	    setButtonLayoutData(ok);  
+	}
 
 	protected void showInformation() {
-		setMessage("Load accounts from Active Directory (AD). Import account data as persons.");
+		setMessage(Messages.LdapImportDialog_38);
 
 	}
 
@@ -247,7 +264,7 @@ public class LdapImportDialog extends TitleAreaDialog {
 	}
 
 	private void createColumns(final Composite parent, final TableViewer viewer) {
-		String[] titles = { "Login", "Name", "Surname" };
+		String[] titles = { Messages.LdapImportDialog_39, Messages.LdapImportDialog_40, Messages.LdapImportDialog_41 };
 		int[] bounds = { 70, 170, 170 };
 
 		// First column: login name
@@ -290,20 +307,44 @@ public class LdapImportDialog extends TitleAreaDialog {
 	}
 
 	@Override
-	protected void okPressed() {	
-		Set<PersonIso> personIsoSet = new HashSet<PersonIso>(personSet.size());
-		for (PersonInfo personInfo : personSet) {
-			personIsoSet.add(personInfo.getPerson());
-		}
-		SaveLdapUser saveLdapUser = new SaveLdapUser(personIsoSet);
+	protected void okPressed() {
+		SaveLdapUser saveLdapUser = new SaveLdapUser(personSet);
 		try {
 			saveLdapUser = ServiceFactory.lookupCommandService().executeCommand(saveLdapUser);
 		} catch (CommandException e) {
 			throw new RuntimeException(e);
 		}
+		updateModel(saveLdapUser.getImportRootObject(), saveLdapUser.getChangedElements());
 		super.okPressed();
+		InfoDialogWithShowToggle.openInformation(
+				Messages.LdapImportDialog_42,
+				NLS.bind(Messages.LdapImportDialog_43, saveLdapUser.getChangedElements().size()),
+				Messages.LdapImportDialog_44, 
+				PreferenceConstants.INFO_IMPORT_LDAP);
 	}
 
-	
+	private void updateModel(CnATreeElement importRootObject, List<CnATreeElement> changedElement) {
+        if(changedElement!=null && changedElement.size()>9) {
+            // if more than 9 elements changed or added do a complete reload
+            CnAElementFactory.getInstance().reloadModelFromDatabase();
+        } else {
+            if (importRootObject != null) {   				
+                CnAElementFactory.getModel(importRootObject).childAdded(importRootObject.getParent(), importRootObject);
+                CnAElementFactory.getModel(importRootObject).databaseChildAdded(importRootObject);
+                if (changedElement != null) {
+                    for (CnATreeElement cnATreeElement : changedElement) {
+                        CnAElementFactory.getModel(cnATreeElement).childAdded(cnATreeElement.getParent(), cnATreeElement);
+                        CnAElementFactory.getModel(cnATreeElement).databaseChildAdded(cnATreeElement);
+                    }
+                }
+            }    
+            if (changedElement != null) {
+                for (CnATreeElement cnATreeElement : changedElement) {
+                    CnAElementFactory.getModel(cnATreeElement).childChanged(cnATreeElement.getParent(), cnATreeElement);
+                    CnAElementFactory.getModel(cnATreeElement).databaseChildChanged(cnATreeElement);
+                }
+            }
+        }
+    }
 
 }

@@ -46,9 +46,6 @@ import sernet.gs.ui.rcp.main.service.AuthenticationHelper;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.commands.PasswordException;
 import sernet.gs.ui.rcp.main.service.commands.UsernameExistsException;
-import sernet.gs.ui.rcp.main.service.crudcommands.CreateConfiguration;
-import sernet.gs.ui.rcp.main.service.crudcommands.LoadConfiguration;
-import sernet.gs.ui.rcp.main.service.crudcommands.SaveConfiguration;
 import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.EntityType;
 import sernet.hui.common.connect.HitroUtil;
@@ -56,7 +53,12 @@ import sernet.hui.common.connect.Property;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ICommandService;
 import sernet.verinice.model.bsi.Person;
+import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.configuration.Configuration;
+import sernet.verinice.model.iso27k.PersonIso;
+import sernet.verinice.service.commands.CreateConfiguration;
+import sernet.verinice.service.commands.LoadConfiguration;
+import sernet.verinice.service.commands.SaveConfiguration;
 
 public class ConfigurationAction implements IObjectActionDelegate {
 
@@ -100,26 +102,24 @@ public class ConfigurationAction implements IObjectActionDelegate {
 		for (Iterator iter = selection.iterator(); iter.hasNext();) {
 			try {
 				Object o = iter.next();
-				if (o == null || !(o instanceof Person)) {
-					continue;
-				}
+				if( o instanceof CnATreeElement) {
 
-				Person elmt = null;
-				if (o instanceof Person) {
-					elmt = (Person) o;
-				}
-
-				LOG.debug("Loading configuration for user " + elmt.getTitle()); //$NON-NLS-1$
-				LoadConfiguration command = new LoadConfiguration(elmt);
-				command = ServiceFactory.lookupCommandService().executeCommand(command);
-				configuration = command.getConfiguration();
-
-				if (configuration == null) {
-					// create new configuration
-					LOG.debug("No config found, creating new configuration object."); //$NON-NLS-1$
-					CreateConfiguration command2 = new CreateConfiguration(elmt);
-					command2 = ServiceFactory.lookupCommandService().executeCommand(command2);
-					configuration = command2.getConfiguration();
+    				CnATreeElement elmt = (CnATreeElement) o;
+    
+    				LOG.debug("Loading configuration for user " + elmt.getTitle()); //$NON-NLS-1$
+    				LoadConfiguration command = new LoadConfiguration(elmt);
+    				command = ServiceFactory.lookupCommandService().executeCommand(command);
+    				configuration = command.getConfiguration();
+    
+    				if (configuration == null) {
+    					// create new configuration
+    					LOG.debug("No config found, creating new configuration object."); //$NON-NLS-1$
+    					CreateConfiguration command2 = new CreateConfiguration(elmt);
+    					command2 = ServiceFactory.lookupCommandService().executeCommand(command2);
+    					configuration = command2.getConfiguration();
+    				}
+    
+    				entType = HitroUtil.getInstance().getTypeFactory().getEntityType(configuration.getEntity().getEntityType());
 				}
 
 				entType = HitroUtil.getInstance().getTypeFactory().getEntityType(configuration.getEntity().getEntityType());
