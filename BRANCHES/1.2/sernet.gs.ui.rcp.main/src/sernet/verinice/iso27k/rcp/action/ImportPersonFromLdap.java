@@ -9,7 +9,7 @@ import sernet.verinice.iso27k.rcp.LdapImportDialog;
 
 public class ImportPersonFromLdap extends Action {
 
-	public static final String ID = "sernet.verinice.iso27k.rcp.action.ImportPersonFromLdap";
+	public static final String ID = "sernet.verinice.iso27k.rcp.action.ImportPersonFromLdap"; //$NON-NLS-1$
 	private final IWorkbenchWindow window;
 
 	public ImportPersonFromLdap(IWorkbenchWindow window, String label) {
@@ -17,8 +17,8 @@ public class ImportPersonFromLdap extends Action {
 		setText(label);
 		setId(ID);
 		setActionDefinitionId(ID);
-		setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.SECURITY));
-		setToolTipText("Load and import accounts from Active Directory");
+		setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.PERSON));
+		setToolTipText(Messages.getString("ImportPersonFromLdap.1")); //$NON-NLS-1$
 	}
 
 	public void run() {

@@ -7,8 +7,8 @@ import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.ldap.ILdapCommand;
 import sernet.verinice.interfaces.ldap.ILdapService;
 import sernet.verinice.interfaces.ldap.PersonParameter;
-import sernet.verinice.model.iso27k.PersonIso;
 
+@SuppressWarnings("serial")
 public class LoadLdapUser extends GenericCommand implements ILdapCommand,Serializable {
 
 	private transient ILdapService ldapService;

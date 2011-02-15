@@ -62,13 +62,13 @@ public class PersonDaoImpl implements IPersonDao {
 				sb.append("(sn=").append(parameter.getSurname()).append("*)");
 			}
 			if(parameter.getTitle()!=null && !parameter.getTitle().isEmpty()) {
-				sb.append("(title=").append(parameter.getTitle()).append(")");
+				sb.append("(title=").append(parameter.getTitle()).append("*)");
 			}
 			if(parameter.getDepartment()!=null && !parameter.getDepartment().isEmpty()) {
-				sb.append("(department=").append(parameter.getDepartment()).append(")");
+				sb.append("(department=").append(parameter.getDepartment()).append("*)");
 			}
 			if(parameter.getCompany()!=null && !parameter.getCompany().isEmpty()) {
-				sb.append("(company=").append(parameter.getCompany()).append(")");
+				sb.append("(company=").append(parameter.getCompany()).append("*)");
 			}
 			sb.append(")");
 		}

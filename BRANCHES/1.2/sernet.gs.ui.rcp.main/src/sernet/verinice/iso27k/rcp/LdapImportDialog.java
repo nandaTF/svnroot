@@ -18,6 +18,8 @@
 package sernet.verinice.iso27k.rcp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -52,6 +55,7 @@ import org.eclipse.swt.widgets.Text;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
+import sernet.gs.ui.rcp.main.service.commands.UsernameExistsException;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ldap.PersonParameter;
 import sernet.verinice.model.common.CnATreeElement;
@@ -59,6 +63,7 @@ import sernet.verinice.model.common.Permission;
 import sernet.verinice.model.iso27k.PersonIso;
 import sernet.verinice.rcp.InfoDialogWithShowToggle;
 import sernet.verinice.service.commands.CreateConfiguration;
+import sernet.verinice.service.commands.UsernameExistsRuntimeException;
 import sernet.verinice.service.ldap.LoadLdapUser;
 import sernet.verinice.service.ldap.PersonInfo;
 import sernet.verinice.service.ldap.SaveLdapUser;
@@ -225,15 +230,15 @@ public class LdapImportDialog extends TitleAreaDialog {
 			} catch (CommandException e) {
 				throw new RuntimeException(e);
 			}
-			List<PersonInfo> roleList  = new ArrayList<PersonInfo>(loadLdapUser.getPersonList());
-			//Collections.sort(roleList);
-			personSet.clear();
-			personSet.addAll(roleList);
+			List<PersonInfo> accountList  = new ArrayList<PersonInfo>(loadLdapUser.getPersonList());
 			
+			personSet.clear();
+			personSet.addAll(accountList);
 			// Get the content for the viewer, setInput will call getElements in the
 			// contentProvider
-		
-			viewer.setInput(personSet.toArray());
+			Object[] personArray = personSet.toArray();
+			Arrays.sort(personArray);	
+			viewer.setInput(personArray);
 		} catch (Throwable t) {
 			log.error("Error while setting table data", t); //$NON-NLS-1$
 		}
@@ -311,6 +316,15 @@ public class LdapImportDialog extends TitleAreaDialog {
 		SaveLdapUser saveLdapUser = new SaveLdapUser(personSet);
 		try {
 			saveLdapUser = ServiceFactory.lookupCommandService().executeCommand(saveLdapUser);
+		} catch (UsernameExistsException e) {
+			log.error(e.getMessage());
+			if (log.isDebugEnabled()) {
+				log.debug("Stacktrace: ", e);
+			}
+			MessageDialog.openError(this.getShell(), 
+					Messages.LdapImportDialog_45,
+					NLS.bind(Messages.LdapImportDialog_46, e.getUsername()));
+			return;
 		} catch (CommandException e) {
 			throw new RuntimeException(e);
 		}

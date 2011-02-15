@@ -245,7 +245,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         importCSVAction = new ImportCSVAction(window, Messages.ApplicationActionBarAdvisor_30);
         register(importCSVAction);
         
-        importPersonFromLdap = new ImportPersonFromLdap(window,"Import persons from Active Directory");
+        importPersonFromLdap = new ImportPersonFromLdap(window,Messages.ApplicationActionBarAdvisor_32);
         register(importPersonFromLdap);
 
 		importGSNotesAction = new ImportGstoolNotesAction(window, Messages.ApplicationActionBarAdvisor_27);

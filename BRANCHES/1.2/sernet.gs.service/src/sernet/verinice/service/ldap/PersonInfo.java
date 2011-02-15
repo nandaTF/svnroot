@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import sernet.verinice.model.iso27k.PersonIso;
 
-public class PersonInfo implements Serializable{
+public class PersonInfo implements Serializable, Comparable<PersonInfo>{
 	
 	private PersonIso person;
 	private String loginName;
@@ -29,6 +29,20 @@ public class PersonInfo implements Serializable{
 
 	public void setLoginName(String loginName) {
 		this.loginName = loginName;
+	}
+	
+	@Override
+	public int compareTo(PersonInfo o) {
+		int result;
+		if(this.getPerson()!=null && this.getPerson().getTitle()!=null && !this.getPerson().getTitle().trim().isEmpty()
+		   && o.getPerson()!=null && o.getPerson().getTitle()!=null && !o.getPerson().getTitle().trim().isEmpty() ) {
+			result = this.getPerson().getTitle().compareTo(o.getPerson().getTitle());
+		} else if(this.getPerson()!=null && this.getPerson().getTitle()!=null && !this.getPerson().getTitle().trim().isEmpty() ) {
+			result = -1;
+		} else {
+			result = 1;
+		}
+		return result;
 	}
 
 	@Override
@@ -55,9 +69,5 @@ public class PersonInfo implements Serializable{
 			return false;
 		return true;
 	}
-	
-	
-	
-	
 	
 }

@@ -8,8 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 
 import sernet.gs.service.RuntimeCommandException;
+import sernet.hui.common.connect.Property;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IAuthAwareCommand;
@@ -29,6 +32,7 @@ import sernet.verinice.model.iso27k.PersonIso;
 import sernet.verinice.service.commands.CreateConfiguration;
 import sernet.verinice.service.commands.LoadBSIModel;
 import sernet.verinice.service.commands.SaveConfiguration;
+import sernet.verinice.service.commands.UsernameExistsRuntimeException;
 import sernet.verinice.service.iso27k.LoadImportObjectsHolder;
 import sernet.verinice.service.iso27k.LoadModel;
 
@@ -71,6 +75,8 @@ public class SaveLdapUser extends GenericCommand implements IChangeLoggingComman
 		if(getPersonSet()!=null) {
 			savedPersonList = new ArrayList<CnATreeElement>();
 			for (PersonInfo personInfo : getPersonSet()) {
+				// check username
+				checkUsername(personInfo.getLoginName());
 				// create person
 				PersonIso person = personInfo.getPerson();
 				person.setParent(loadContainer(person.getClass()));
@@ -194,6 +200,30 @@ public class SaveLdapUser extends GenericCommand implements IChangeLoggingComman
         auditPerms.add(Permission.createPermission(element, getAuthService().getUsername(), true, true));
         element.setPermissions(auditPerms);
     }
+    
+    /**
+	 * Checks if the username in a {@link Configuration} is unique in the database.
+	 * Throws {@link UsernameExistsRuntimeException} if username is not available.
+	 * If username is not set or null no exception is thrown
+	 * 
+	 * @param element a {@link Configuration}
+	 * @throws UsernameExistsRuntimeException if username is not available
+	 */
+	private void checkUsername(String username) throws UsernameExistsRuntimeException {	
+		if(username!=null) {
+			DetachedCriteria criteria = DetachedCriteria.forClass(Property.class);
+			criteria.add(Restrictions.eq("propertyType", Configuration.PROP_USERNAME));
+			criteria.add(Restrictions.like("propertyValue", username));
+			IBaseDao<Property, Integer> dao = getDaoFactory().getDAO(Property.TYPE_ID);
+			List<Property>resultList = dao.findByCriteria(criteria);
+			if(resultList!=null && !resultList.isEmpty()) {
+				if (getLog().isDebugEnabled()) {
+					getLog().debug("Username exists: " + username);
+				}
+				throw new UsernameExistsRuntimeException(username,"Username already exists: " + username);
+			}
+		}
+	}
 	
 	@Override
 	public int getChangeType() {

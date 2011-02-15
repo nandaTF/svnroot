@@ -6,17 +6,16 @@
 <!--
 	Spring LDAP / ActiveDirectory configuration
 	
-	This file is referenced in the web.xml . 
+	This file is referenced in the web.xml. 
  -->
-   <bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource">
+   <bean id="contextSourceImport" class="org.springframework.ldap.core.support.LdapContextSource">
       <property name="url" value="ldap://${ldap.server}:${ldap.port}/" />
-      <property name="userDn" value="Administrator@windomain.verinice.org" />
-      <property name="password" value="cW71tUw6" />
-	  <!-- <property name="referral" value="follow"/>-->
+      <property name="userDn" value="${ldap.import.user}" />
+      <property name="password" value="${ldap.import.password}" />
    </bean>
 
    <bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
-      <constructor-arg ref="contextSource" />
+      <constructor-arg ref="contextSourceImport" />
 	  <property name="ignorePartialResultException" value="true"/>
    </bean>
 
