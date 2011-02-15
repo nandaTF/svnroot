@@ -228,7 +228,10 @@ public class LdapImportDialog extends TitleAreaDialog {
 			try {
 				loadLdapUser = ServiceFactory.lookupCommandService().executeCommand(loadLdapUser);
 			} catch (CommandException e) {
-				throw new RuntimeException(e);
+				log.error("Error while loading accounts", e); //$NON-NLS-1$
+				MessageDialog.openError(this.getShell(), 
+						Messages.LdapImportDialog_45,
+						Messages.LdapImportDialog_1);
 			}
 			List<PersonInfo> accountList  = new ArrayList<PersonInfo>(loadLdapUser.getPersonList());
 			
@@ -319,7 +322,7 @@ public class LdapImportDialog extends TitleAreaDialog {
 		} catch (UsernameExistsException e) {
 			log.error(e.getMessage());
 			if (log.isDebugEnabled()) {
-				log.debug("Stacktrace: ", e);
+				log.debug("Stacktrace: ", e); //$NON-NLS-1$
 			}
 			MessageDialog.openError(this.getShell(), 
 					Messages.LdapImportDialog_45,
