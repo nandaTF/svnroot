@@ -215,7 +215,7 @@ public class LdapImportDialog extends TitleAreaDialog {
 				this.personSet.remove(permission);
 			}
 			try {
-				viewer.setInput(this.personSet.toArray());
+				refreshTable();
 			} catch (Throwable t) {
 				log.error("Error while setting table data", t); //$NON-NLS-1$
 			}
@@ -239,12 +239,16 @@ public class LdapImportDialog extends TitleAreaDialog {
 			personSet.addAll(accountList);
 			// Get the content for the viewer, setInput will call getElements in the
 			// contentProvider
-			Object[] personArray = personSet.toArray();
-			Arrays.sort(personArray);	
-			viewer.setInput(personArray);
+			refreshTable();
 		} catch (Throwable t) {
 			log.error("Error while setting table data", t); //$NON-NLS-1$
 		}
+	}
+
+	private void refreshTable() {
+		Object[] personArray = personSet.toArray();
+		Arrays.sort(personArray);	
+		viewer.setInput(personArray);
 	}
 	
 	private PersonParameter getParameter() {
@@ -273,7 +277,7 @@ public class LdapImportDialog extends TitleAreaDialog {
 
 	private void createColumns(final Composite parent, final TableViewer viewer) {
 		String[] titles = { Messages.LdapImportDialog_39, Messages.LdapImportDialog_40, Messages.LdapImportDialog_41 };
-		int[] bounds = { 70, 170, 170 };
+		int[] bounds = { 70, 150, 150 };
 
 		// First column: login name
 		TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);

@@ -436,6 +436,9 @@ public class CatalogView extends ViewPart implements IAttachedToPerspective  {
 			else if(item.getDescription()!=null && item.getTypeId()==IItem.CONTROL) {
 				image = ImageCache.STUFE_NONE;
 			}
+			else if(item.getDescription()!=null && item.getTypeId()==IItem.ISA_TOPIC) {
+				image = ImageCache.ISA_TOPIC;
+			}
 			else if(item.getDescription()!=null && item.getTypeId()==IItem.THREAT) {
 				image = ImageCache.ISO27K_THREAT;
 			}
