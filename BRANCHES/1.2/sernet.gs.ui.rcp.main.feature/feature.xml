@@ -2301,67 +2301,19 @@ Library.
          download-size="0"
          install-size="0"
          version="1.1.2"/>
-   <!--
+
    <plugin
-         id="org.eclipse.swt.cocoa.macosx"
-         os="macosx"
-         ws="cocoa"
-         arch="ppc,x86"
+         id="com.springsource.org.apache.commons.logging"
          download-size="0"
          install-size="0"
-         version="3.5.2.v3557f"
-         fragment="true"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.ui.cocoa"
-         ws="cocoa"
+         id="com.springsource.org.apache.commons.lang"
          download-size="0"
          install-size="0"
-         version="1.0.0.I20090525-2000"
-         fragment="true"
+         version="2.4.0"
          unpack="false"/>
 
-   <plugin
-         id="org.eclipse.equinox.launcher.cocoa.macosx"
-         os="macosx"
-         ws="cocoa"
-         arch="ppc,x86"
-         download-size="0"
-         install-size="0"
-         version="1.0.1.R35x_v20090707"
-         fragment="true"/>
-
-   <plugin
-         id="org.eclipse.equinox.launcher.cocoa.macosx.x86_64"
-         os="macosx"
-         ws="cocoa"
-         arch="x86_64"
-         download-size="0"
-         install-size="0"
-         version="1.0.1.R35x_v20090707"
-         fragment="true"/>
-
-   <plugin
-         id="org.eclipse.swt.cocoa.macosx.x86_64"
-         os="macosx"
-         ws="cocoa"
-         arch="x86_64"
-         download-size="0"
-         install-size="0"
-         version="3.5.2.v3557f"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.launcher.cocoa.macosx.nl_de"
-         os="macosx"
-         ws="cocoa"
-         nl="de_DE"
-         download-size="0"
-         install-size="0"
-         version="3.5.0.v20091121043401"
-         fragment="true"
-         unpack="false"/>
-	-->
 </feature>
