@@ -630,6 +630,21 @@
                tooltip="%action.tooltip.12">
          </action>
       </objectContribution>
+      <objectContribution
+            adaptable="false"
+            id="sernet.gs.ui.rcp.main.auditreport"
+            objectClass="sernet.verinice.model.iso27k.Audit">
+         <action
+               class="sernet.gs.ui.rcp.main.actions.AuditReportAction"
+               enablesFor="1"
+               icon="icons/report.png"
+               id="sernet.gs.ui.rcp.main.actions.AuditReportAction.action"
+               label="%action.label.27"
+               menubarPath="additions"
+               style="push"
+               tooltip="%action.tooltip.26">
+         </action>
+      </objectContribution>
    </extension>
    <extension point="org.eclipse.ui.menus">
    	  <menuContribution locationURI="popup:sernet.verinice.iso27k.rcp.ISMView?after=additions">
@@ -915,7 +930,7 @@
          point="org.eclipse.ui.actionSets">
       <actionSet
             id="sernet.verinice.report.ActionSet"
-            label="Report Actions"
+            label="%actionSet.label"
             visible="true">
          <action
                class="sernet.verinice.report.rcp.GenerateReportAction"
