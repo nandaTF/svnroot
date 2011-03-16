@@ -17,7 +17,15 @@
  ******************************************************************************/
 package sernet.verinice.report.service.commands;
 
+import java.util.List;
+
+import sernet.gs.service.RuntimeCommandException;
+import sernet.gs.ui.rcp.main.service.crudcommands.LoadReportElements;
+import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.GenericCommand;
+import sernet.verinice.model.common.CnATreeElement;
+import sernet.verinice.model.iso27k.Audit;
+import sernet.verinice.model.iso27k.Organization;
 
 /**
  * Loads and returns the report's title.
@@ -33,14 +41,40 @@ import sernet.verinice.interfaces.GenericCommand;
  */
 @SuppressWarnings("serial")
 public class LoadReportTitleCommand extends GenericCommand {
+    
+    private Integer root;
+    private List<CnATreeElement> elements;
+    private String orgName="";
+
+    public LoadReportTitleCommand(Integer root) {
+        this.root = root;
+    }
 
 	public String getResult() {
-		return "<h1>Information Technologie (IT)</h1><h1>Security Assessment at VW TEST - Company 1</h1><h1>Final Report</h1>";
+//		return "<h1>Information Technologie (IT)</h1><h1>Security Assessment at VW TEST - Company 1</h1><h1>Final Report</h1>";
+		return "<h1>Information Technology (IT)</h1><h1>" + elements.get(0).getTitle() + " at " + orgName+ "</h1><h1>Final Report</h1>";
 	}
 
 	@Override
 	public void execute() {
-		// TODO: Implement me.
+	    try {
+	        LoadReportElements command = new LoadReportElements(Audit.TYPE_ID, root);
+            command = getCommandService().executeCommand(command);
+            elements = command.getElements();
+            if (elements == null)
+                return;
+            
+            LoadReportParentOrgForObject command2 = new LoadReportParentOrgForObject(elements.get(0));
+            command2 = getCommandService().executeCommand(command2);
+            if (command2.getOrg() != null)
+                orgName = command2.getOrg().getTitle();
+            
+        } catch (CommandException e) {
+            throw new RuntimeCommandException(e);
+        }
 	}
+
+    
+
 
 }

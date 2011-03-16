@@ -34,6 +34,9 @@ import sernet.verinice.model.bsi.SonstIT;
 import sernet.verinice.model.bsi.TelefonKomponente;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.HydratorUtil;
+import sernet.verinice.model.iso27k.Asset;
+import sernet.verinice.model.iso27k.AssetValueAdapter;
+import sernet.verinice.model.iso27k.Process;
 
 /**
  * Load elements for reports. All properties  will be initialized to avoid lazy initialization exceptions.
@@ -50,6 +53,8 @@ public class LoadReportElements extends GenericCommand {
 
     private transient Logger log = Logger.getLogger(LoadReportElements.class);
     
+   
+    
     public Logger getLog() {
         if(log==null) {
             log = Logger.getLogger(LoadReportElements.class);
@@ -60,12 +65,15 @@ public class LoadReportElements extends GenericCommand {
 	private String typeId;
     private Integer rootElement;
     private ArrayList<CnATreeElement> elements;
+
     
     public LoadReportElements(String typeId, Integer rootElement) {
 	    this.typeId = typeId;
 	    this.rootElement = rootElement;
 	}
-	
+
+   
+    
 	public void execute() {
 	    getLog().debug("LoadReportElements for root_object " + rootElement);
 	    
@@ -92,6 +100,7 @@ public class LoadReportElements extends GenericCommand {
 	        this.elements = items;
 	    }
 	    
+	    
 	    Collections.sort(elements, new Comparator<CnATreeElement>() {
             @Override
             public int compare(CnATreeElement o1, CnATreeElement o2) {
@@ -99,6 +108,8 @@ public class LoadReportElements extends GenericCommand {
                 return comparator.compare(o1.getTitle(), o2.getTitle());
             }
         });
+
+	    
 	    
 //	    IBaseDao<BSIModel, Serializable> dao = getDaoFactory().getDAO(BSIModel.class);
 //	    RetrieveInfo ri = new RetrieveInfo();
@@ -113,6 +124,8 @@ public class LoadReportElements extends GenericCommand {
 	}
 
 	
+
+  
 
     /**
      * @return the elements

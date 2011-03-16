@@ -181,36 +181,56 @@ else {row["samt_topic_maturity"]}</expression>
             </list-property>
             <list-property name="columnHints">
                 <structure>
-                    <property name="columnName">samt_topic_externalnote</property>
-                    <text-property name="displayName">samt_topic_externalnote</text-property>
+                    <property name="columnName">samt_topic_audit_devi</property>
+                    <text-property name="displayName">samt_topic_audit_devi</text-property>
                 </structure>
                 <structure>
-                    <property name="columnName">samt_topic_maturity</property>
-                    <text-property name="displayName">samt_topic_maturity</text-property>
+                    <property name="columnName">samt_topic_isaauditnote</property>
+                    <text-property name="displayName">samt_topic_isaauditnote</text-property>
                 </structure>
                 <structure>
-                    <property name="columnName">samt_topic_ownweight</property>
-                    <text-property name="displayName">samt_topic_ownweight</text-property>
+                    <property name="columnName">samt_topic_audit_findings</property>
+                    <text-property name="displayName">samt_topic_audit_findings</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">samt_topic_tag</property>
                     <text-property name="displayName">samt_topic_tag</text-property>
                 </structure>
                 <structure>
+                    <property name="columnName">samt_topic_ownweight</property>
+                    <text-property name="displayName">samt_topic_ownweight</text-property>
+                </structure>
+                <structure>
                     <property name="columnName">samt_topic_internalnote</property>
                     <text-property name="displayName">samt_topic_internalnote</text-property>
                 </structure>
                 <structure>
-                    <property name="columnName">samt_topic_desc</property>
-                    <text-property name="displayName">samt_topic_desc</text-property>
-                </structure>
-                <structure>
-                    <property name="columnName">samt_topic_name</property>
-                    <text-property name="displayName">samt_topic_name</text-property>
+                    <property name="columnName">samt_topic_audit_compluntil</property>
+                    <text-property name="displayName">samt_topic_audit_compluntil</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">samt_topic_weight</property>
                     <text-property name="displayName">samt_topic_weight</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">samt_topic_externalnote</property>
+                    <text-property name="displayName">samt_topic_externalnote</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">samt_topicimplemented</property>
+                    <text-property name="displayName">samt_topicimplemented</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">samt_topic_maturity</property>
+                    <text-property name="displayName">samt_topic_maturity</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">samt_topic_audit_ra</property>
+                    <text-property name="displayName">samt_topic_audit_ra</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">samt_topic_name</property>
+                    <text-property name="displayName">samt_topic_name</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">samt_topic_min1</property>
@@ -223,6 +243,10 @@ else {row["samt_topic_maturity"]}</expression>
                 <structure>
                     <property name="columnName">samt_topic_min2</property>
                     <text-property name="displayName">samt_topic_min2</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">samt_topic_desc</property>
+                    <text-property name="displayName">samt_topic_desc</text-property>
                 </structure>
             </list-property>
             <list-property name="parameters">
@@ -243,17 +267,17 @@ else {row["samt_topic_maturity"]}</expression>
                 <list-property name="resultSet">
                     <structure>
                         <property name="position">1</property>
-                        <property name="name">samt_topic_externalnote</property>
+                        <property name="name">samt_topic_audit_devi</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
                         <property name="position">2</property>
-                        <property name="name">samt_topic_maturity</property>
+                        <property name="name">samt_topic_isaauditnote</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
                         <property name="position">3</property>
-                        <property name="name">samt_topic_ownweight</property>
+                        <property name="name">samt_topic_audit_findings</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
@@ -263,17 +287,17 @@ else {row["samt_topic_maturity"]}</expression>
                     </structure>
                     <structure>
                         <property name="position">5</property>
-                        <property name="name">samt_topic_internalnote</property>
+                        <property name="name">samt_topic_ownweight</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
                         <property name="position">6</property>
-                        <property name="name">samt_topic_desc</property>
+                        <property name="name">samt_topic_internalnote</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
                         <property name="position">7</property>
-                        <property name="name">samt_topic_name</property>
+                        <property name="name">samt_topic_audit_compluntil</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
@@ -283,21 +307,51 @@ else {row["samt_topic_maturity"]}</expression>
                     </structure>
                     <structure>
                         <property name="position">9</property>
-                        <property name="name">samt_topic_min1</property>
+                        <property name="name">samt_topic_externalnote</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
                         <property name="position">10</property>
-                        <property name="name">samt_topic_abbr</property>
+                        <property name="name">samt_topicimplemented</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
                         <property name="position">11</property>
-                        <property name="name">samt_topic_min2</property>
+                        <property name="name">samt_topic_maturity</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
                         <property name="position">12</property>
+                        <property name="name">samt_topic_audit_ra</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">13</property>
+                        <property name="name">samt_topic_name</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">14</property>
+                        <property name="name">samt_topic_min1</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">15</property>
+                        <property name="name">samt_topic_abbr</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">16</property>
+                        <property name="name">samt_topic_min2</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">17</property>
+                        <property name="name">samt_topic_desc</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">18</property>
                         <property name="name">maturitytext</property>
                         <property name="dataType">string</property>
                     </structure>
@@ -307,22 +361,22 @@ else {row["samt_topic_maturity"]}</expression>
             <list-property name="resultSet">
                 <structure>
                     <property name="position">1</property>
-                    <property name="name">samt_topic_externalnote</property>
-                    <property name="nativeName">samt_topic_externalnote</property>
+                    <property name="name">samt_topic_audit_devi</property>
+                    <property name="nativeName">samt_topic_audit_devi</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
-                    <property name="name">samt_topic_maturity</property>
-                    <property name="nativeName">samt_topic_maturity</property>
+                    <property name="name">samt_topic_isaauditnote</property>
+                    <property name="nativeName">samt_topic_isaauditnote</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
-                    <property name="name">samt_topic_ownweight</property>
-                    <property name="nativeName">samt_topic_ownweight</property>
+                    <property name="name">samt_topic_audit_findings</property>
+                    <property name="nativeName">samt_topic_audit_findings</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
@@ -335,22 +389,22 @@ else {row["samt_topic_maturity"]}</expression>
                 </structure>
                 <structure>
                     <property name="position">5</property>
+                    <property name="name">samt_topic_ownweight</property>
+                    <property name="nativeName">samt_topic_ownweight</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
                     <property name="name">samt_topic_internalnote</property>
                     <property name="nativeName">samt_topic_internalnote</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
                 <structure>
-                    <property name="position">6</property>
-                    <property name="name">samt_topic_desc</property>
-                    <property name="nativeName">samt_topic_desc</property>
-                    <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
-                </structure>
-                <structure>
                     <property name="position">7</property>
-                    <property name="name">samt_topic_name</property>
-                    <property name="nativeName">samt_topic_name</property>
+                    <property name="name">samt_topic_audit_compluntil</property>
+                    <property name="nativeName">samt_topic_audit_compluntil</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
@@ -363,22 +417,64 @@ else {row["samt_topic_maturity"]}</expression>
                 </structure>
                 <structure>
                     <property name="position">9</property>
+                    <property name="name">samt_topic_externalnote</property>
+                    <property name="nativeName">samt_topic_externalnote</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">10</property>
+                    <property name="name">samt_topicimplemented</property>
+                    <property name="nativeName">samt_topicimplemented</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">11</property>
+                    <property name="name">samt_topic_maturity</property>
+                    <property name="nativeName">samt_topic_maturity</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">12</property>
+                    <property name="name">samt_topic_audit_ra</property>
+                    <property name="nativeName">samt_topic_audit_ra</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">13</property>
+                    <property name="name">samt_topic_name</property>
+                    <property name="nativeName">samt_topic_name</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">14</property>
                     <property name="name">samt_topic_min1</property>
                     <property name="nativeName">samt_topic_min1</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
                 <structure>
-                    <property name="position">10</property>
+                    <property name="position">15</property>
                     <property name="name">samt_topic_abbr</property>
                     <property name="nativeName">samt_topic_abbr</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
                 <structure>
-                    <property name="position">11</property>
+                    <property name="position">16</property>
                     <property name="name">samt_topic_min2</property>
                     <property name="nativeName">samt_topic_min2</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">17</property>
+                    <property name="name">samt_topic_desc</property>
+                    <property name="nativeName">samt_topic_desc</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
@@ -405,28 +501,7 @@ elements = helper.execute(c2).getElements();
 return helper.map(
 	elements,
 	cols
-);
-
-
-/*
-
-c = helper.execute(new sernet.verinice.samt.service.LoadAllSamtTopics(sag));
-
-return helper.map(
-	c.getAllSamtTopics(),
-	new String[] {
-		"samt_topic_name",
-		"samt_topic_ownweight",
-		"samt_topic_min2",
-		"samt_topic_maturity",
-		samt_topic_externalnote },
-	new Class[] {
-		String.class,
-		Integer.class,
-		Integer.class,
-		Integer.class,
-		String.class });
-*/]]></xml-property>
+);]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>1.0</Version>
@@ -458,12 +533,7 @@ return helper.map(
 
 cols = helper.getAllPropertyTypes("samt_topic");
 inParameters(new String[] { "root_object" });
-columns(cols);
-
-/*
-columns(new String[] { "title", "weight", "threshold", "maturity", "Note" });
-inParameters(new String[] { "root_object" });
-*/</value>
+columns(cols);</value>
                 </ex-property>
             </list-property>
         </oda-data-set>
@@ -1051,14 +1121,8 @@ if (myroot != null &amp;&amp; myroot != -1) {
 	root = myroot;
 }
 
-/*
-htf = VeriniceContext.get(VeriniceContext.HUI_TYPE_FACTORY);
-cols = htf.getEntityType("org")
-	.getAllPropertyTypeIDsIncludingGroups();
-*/
-
 cols = helper.getAllPropertyTypes("org");
-c2 = new LoadReportElements("org", root);
+c2 = new LoadReportParentOrgForObject(root);
 elements = helper.execute(c2).getElements();
 return helper.map(
 	elements,

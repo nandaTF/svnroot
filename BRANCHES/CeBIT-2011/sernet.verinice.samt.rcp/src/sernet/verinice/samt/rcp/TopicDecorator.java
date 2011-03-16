@@ -36,15 +36,10 @@ public class TopicDecorator extends LabelProvider implements ILightweightLabelDe
 				}
 				if(IControl.IMPLEMENTED_YES.equals(state)) {
 					decoration.addOverlay(ImageCache.getInstance().getImageDescriptor(IMAGE_YES));
-				}			
-				
-	            decoration.addSuffix( new StringBuilder().append(" [")
-	                    .append(maturityService.getWeightedMaturity(control))
-	                    .append("]").toString() );
+				}
 			}
 		} catch(Throwable t) {
 			LOG.error("Error while loading maturity value", t);
-			decoration.addSuffix( new StringBuilder().append(" [?]").toString() );
 		}
 	}
 
