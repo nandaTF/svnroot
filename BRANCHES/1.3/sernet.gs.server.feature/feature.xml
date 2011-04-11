@@ -550,7 +550,7 @@ Library.
          id="sernet.gs.server"
          download-size="4000"
          install-size="8600"
-         version="1.1.1"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
