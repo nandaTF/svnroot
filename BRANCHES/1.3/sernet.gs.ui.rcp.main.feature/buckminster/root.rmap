@@ -107,7 +107,8 @@
 		    <uri format="http://download.eclipse.org/tools/orbit/downloads/drops/R20090529135407/updateSite?importType=binary"/>
 			<!-- The following update site was used before
 				 It's offline since April 26th 2011, *Sigh*
-			--<				
+			-->
+			<!--			
 			<uri format="http://download.eclipse.org/tools/orbit/downloads/drops/S20090426201227/updateSite?importType=binary"/>
 			-->
 		</provider>
