@@ -9,7 +9,7 @@ Require-Bundle: sernet.gs.service,
  org.eclipse.core.runtime,
  inetlib;bundle-version="1.1.1",
  gnumail;bundle-version="1.1.2",
- bouncycastle;bundle-version="1.46.0"
+ bouncycastle_1.45.0;bundle-version="1.45.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  bin
