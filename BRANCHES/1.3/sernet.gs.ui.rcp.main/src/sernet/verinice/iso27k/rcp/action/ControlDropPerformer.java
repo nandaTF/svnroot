@@ -152,13 +152,13 @@ public class ControlDropPerformer implements DropPerformer {
 			if(childTypeList.contains(Control.TYPE_ID)) {
 				valid = isCorrectItemsForGroup(items, IItem.CONTROL);			
 			}
-			if(childTypeList.contains(SamtTopic.TYPE_ID)) {
+			if(!valid && childTypeList.contains(SamtTopic.TYPE_ID)) {
 				valid = isCorrectItemsForGroup(items, IItem.ISA_TOPIC);
 			}
-			if(childTypeList.contains(Threat.TYPE_ID)) {
+			if(!valid && childTypeList.contains(Threat.TYPE_ID)) {
 				valid = isCorrectItemsForGroup(items, IItem.THREAT);
 			}
-			if(childTypeList.contains(Vulnerability.TYPE_ID)) {
+			if(!valid && childTypeList.contains(Vulnerability.TYPE_ID)) {
 				valid = isCorrectItemsForGroup(items, IItem.VULNERABILITY);
 			}
 		}
