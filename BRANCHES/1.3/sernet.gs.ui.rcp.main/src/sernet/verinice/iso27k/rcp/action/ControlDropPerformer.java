@@ -121,8 +121,8 @@ public class ControlDropPerformer implements DropPerformer {
 	}
 
     private void showException(ItemTransformException e) {
-        final String message = "Error while transforming catalog items to verinice elements. Reason: " + e.getMessage();
-        MessageDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), "Error", message);
+        final String message = Messages.getString("ControlDropPerformer.0") + e.getMessage(); //$NON-NLS-1$
+        MessageDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), Messages.getString("ControlDropPerformer.4"), message); //$NON-NLS-1$
     }
 
 	/*
@@ -142,7 +142,7 @@ public class ControlDropPerformer implements DropPerformer {
 			|| childTypeList.contains(SamtTopic.TYPE_ID);
 		}
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("validateDrop, target: " + target + " result: " + valid);
+			LOG.debug("validateDrop, target: " + target + " result: " + valid); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return isActive = valid;
 	}
@@ -153,7 +153,7 @@ public class ControlDropPerformer implements DropPerformer {
 	 */
 	public boolean validateDropObjects(Object target) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("validateDrop, target: " + target);
+			LOG.debug("validateDrop, target: " + target); //$NON-NLS-1$
 		}
 		boolean valid = false;
 
@@ -161,7 +161,7 @@ public class ControlDropPerformer implements DropPerformer {
 
 		if (items == null || items.isEmpty()) {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("No items in drag list");
+				LOG.debug("No items in drag list"); //$NON-NLS-1$
 			}
 			return isActive = false;
 		}
@@ -200,7 +200,7 @@ public class ControlDropPerformer implements DropPerformer {
 			}
 		}
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("isCorrectItemsForGroup result: " + valid);
+			LOG.debug("isCorrectItemsForGroup result: " + valid); //$NON-NLS-1$
 		}
 		return valid;
 	}
