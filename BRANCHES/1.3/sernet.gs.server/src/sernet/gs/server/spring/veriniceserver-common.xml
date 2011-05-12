@@ -202,7 +202,8 @@ This variant:
 
         <!-- Miscellaneous DAOs -->
         <property name="importIsoDAO" ref="importIsoDAO" /> 
-        <property name="importBsiDAO" ref="importBsiDAO" />  
+        <property name="importBsiDAO" ref="importBsiDAO" />   
+        <property name="elementEntityDao" ref="elementEntityDao" />  
 	</bean>
 
 	<bean id="txManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">

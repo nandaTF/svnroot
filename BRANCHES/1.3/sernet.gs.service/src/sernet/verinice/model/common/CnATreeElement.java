@@ -40,6 +40,7 @@ import sernet.verinice.model.bsi.LinkKategorie;
 import sernet.verinice.model.bsi.Schutzbedarf;
 import sernet.verinice.model.iso27k.AssetValueService;
 import sernet.verinice.model.iso27k.IISO27kGroup;
+import sernet.verinice.model.iso27k.InheritLogger;
 
 /**
  * This is the base class for all model classes of this application.
@@ -58,6 +59,8 @@ import sernet.verinice.model.iso27k.IISO27kGroup;
 public abstract class CnATreeElement implements Serializable, IBSIModelListener, ITypedElement {
 
     private transient Logger log = Logger.getLogger(CnATreeElement.class);
+    
+    private static final InheritLogger LOG_INHERIT = InheritLogger.getLogger(CnATreeElement.class);
 
     private Logger getLog() {
         if (log == null) {
@@ -193,11 +196,11 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
 	 * 
 	 */
 	public void remove() {
-		if (getParent() != null)
+		if (getParent() != null) {
 			getParent().removeChild(this);
+		}
 		
-		CopyOnWriteArrayList<CnALink> list2 = new CopyOnWriteArrayList<CnALink>(
-				getLinksDown());
+		CopyOnWriteArrayList<CnALink> list2 = new CopyOnWriteArrayList<CnALink>(getLinksDown());
 		for (CnALink link : list2) {
 			link.remove();
 		}
@@ -523,16 +526,25 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
 
 	public void fireVertraulichkeitChanged(CascadingTransaction ta) {
 		if (isSchutzbedarfProvider()) {
+		    if(LOG_INHERIT.isInfo()) {
+	            LOG_INHERIT.info(this.getTypeId() + " is provider, update confidentiality");
+	        }
 			getSchutzbedarfProvider().updateVertraulichkeit(ta);
 		}
 	}
 	public void fireVerfuegbarkeitChanged(CascadingTransaction ta) {
 		if (isSchutzbedarfProvider()) {
+            if(LOG_INHERIT.isInfo()) {
+                LOG_INHERIT.info(this.getTypeId() + " is provider, update availability");
+            }
 			getSchutzbedarfProvider().updateVerfuegbarkeit(ta);
 		}
 	}
 	public void fireIntegritaetChanged(CascadingTransaction ta) {
 		if (isSchutzbedarfProvider()) {
+            if(LOG_INHERIT.isInfo()) {
+                LOG_INHERIT.info(this.getTypeId() + " is provider, update integrity of: " + this.getTitle());
+            }
 			getSchutzbedarfProvider().updateIntegritaet(ta);
 		}
 	}

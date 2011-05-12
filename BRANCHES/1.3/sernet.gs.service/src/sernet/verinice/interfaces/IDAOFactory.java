@@ -453,6 +453,16 @@ public interface IDAOFactory {
 	
 	public abstract void setImportBsiDAO(IBaseDao<SamtTopic, Integer> daoToSet);
 
+	/**
+     * Returns a special Dao for use 
+     * in command {@link UpdateElementEntity}
+     * 
+     * @return a UpdateElementEntity Dao
+     */
+    public IElementEntityDao getElementEntityDao();
+
+    public void setElementEntityDao(IElementEntityDao elementEntityDao);
+	
 	@SuppressWarnings("unchecked")
 	/**
 	 *  Tries to find a DAO by class.

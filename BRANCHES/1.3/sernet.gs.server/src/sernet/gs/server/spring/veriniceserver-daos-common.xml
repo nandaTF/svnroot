@@ -568,6 +568,12 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
     
+    <!-- Special dao to save CnaTreeElment entities in command UpdateElementEntity -->
+    <!-- See: sernet.gs.ui.rcp.main.service.crudcommands.UpdateElementEntity -->
+	<bean id="elementEntityDao" class="sernet.verinice.hibernate.ElementEntityDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+    
 	<!-- END dao definitions ============================================================================ -->
 
 </beans>
