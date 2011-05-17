@@ -5226,10 +5226,10 @@ the value between <param></param> will be used directly if no string is found fo
             inputtype="text"
             tags="VDA-ISA"
             report="false" />          
-           <huiproperty
-	           id="samt_topic_controlnote" 
-	           inputtype="text"
-	           tags="VDA-ISA"/>
+          <huiproperty
+	        id="samt_topic_controlnote" 
+	        inputtype="text"
+	        tags="VDA-ISA,VDA_ISA_Audit"/>
             
 			<!-- ISA Audit Field, only displayed when VDA_ISA_Audit filter is active -->            
             <huiproperty id="samt_topic_audit_ra" name="Risk Assessment" tags="VDA_ISA_Audit"
