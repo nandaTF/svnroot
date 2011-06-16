@@ -29,6 +29,7 @@ import sernet.hui.common.connect.ITypedElement;
 import sernet.hui.common.connect.Property;
 import sernet.hui.common.connect.PropertyList;
 import sernet.verinice.hibernate.ElementEntityDao;
+import sernet.verinice.interfaces.IAttachmentDao;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.interfaces.IDAOFactory;
 import sernet.verinice.interfaces.IDao;
@@ -133,6 +134,8 @@ public class DAOFactory implements IDAOFactory {
 	 * Special Dao for use in command {@link UpdateElementEntity}
 	 */
 	private IElementEntityDao elementEntityDao;
+	
+	private IAttachmentDao attachmentDao;
 	
 	// injected by spring
 	@SuppressWarnings("unchecked")
@@ -679,6 +682,14 @@ public class DAOFactory implements IDAOFactory {
 
     public void setElementEntityDao(IElementEntityDao elementEntityDao) {
         this.elementEntityDao = elementEntityDao;
+    }
+
+    public IAttachmentDao getAttachmentDao() {
+        return attachmentDao;
+    }
+
+    public void setAttachmentDao(IAttachmentDao attachmentDao) {
+        this.attachmentDao = attachmentDao;
     }
 
     @SuppressWarnings("unchecked")

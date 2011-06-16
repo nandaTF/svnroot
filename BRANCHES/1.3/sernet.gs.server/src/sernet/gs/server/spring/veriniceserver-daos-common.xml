@@ -328,10 +328,7 @@
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 	
-	<bean id="attachmentDAO" class="sernet.verinice.hibernate.TreeElementDao">
-		<constructor-arg>
-			<value>sernet.verinice.model.bsi.Attachment</value>
-		</constructor-arg>
+	<bean id="attachmentDao" class="sernet.verinice.hibernate.AttachmentDao">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 	

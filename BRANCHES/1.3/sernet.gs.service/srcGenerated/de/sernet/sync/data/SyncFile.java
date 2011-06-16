@@ -17,20 +17,18 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for syncObject complex type.
+ * <p>Java class for syncFile complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="syncObject">
+ * &lt;complexType name="syncFile">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="syncAttribute" type="{http://www.sernet.de/sync/data}syncAttribute" maxOccurs="unbounded"/>
  *         &lt;element name="extId" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="extObjectType" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="children" type="{http://www.sernet.de/sync/data}syncObject" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="file" type="{http://www.sernet.de/sync/data}syncFile" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="file" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -40,23 +38,19 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "syncObject", propOrder = {
+@XmlType(name = "syncFile", propOrder = {
     "syncAttribute",
     "extId",
-    "extObjectType",
-    "children",
     "file"
 })
-public class SyncObject {
+public class SyncFile {
 
     @XmlElement(required = true)
     protected List<SyncAttribute> syncAttribute;
     @XmlElement(required = true)
     protected String extId;
     @XmlElement(required = true)
-    protected String extObjectType;
-    protected List<SyncObject> children;
-    protected List<SyncFile> file;
+    protected String file;
 
     /**
      * Gets the value of the syncAttribute property.
@@ -112,85 +106,27 @@ public class SyncObject {
     }
 
     /**
-     * Gets the value of the extObjectType property.
+     * Gets the value of the file property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getExtObjectType() {
-        return extObjectType;
+    public String getFile() {
+        return file;
     }
 
     /**
-     * Sets the value of the extObjectType property.
+     * Sets the value of the file property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setExtObjectType(String value) {
-        this.extObjectType = value;
-    }
-
-    /**
-     * Gets the value of the children property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the children property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getChildren().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link SyncObject }
-     * 
-     * 
-     */
-    public List<SyncObject> getChildren() {
-        if (children == null) {
-            children = new ArrayList<SyncObject>();
-        }
-        return this.children;
-    }
-
-    /**
-     * Gets the value of the file property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the file property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getFile().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link SyncFile }
-     * 
-     * 
-     */
-    public List<SyncFile> getFile() {
-        if (file == null) {
-            file = new ArrayList<SyncFile>();
-        }
-        return this.file;
+    public void setFile(String value) {
+        this.file = value;
     }
 
 }

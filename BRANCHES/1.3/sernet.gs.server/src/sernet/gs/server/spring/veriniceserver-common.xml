@@ -124,7 +124,7 @@ This variant:
 		<property name="permissionDAO" ref="permissionDAO" />
 		<property name="additionDAO" ref="additionDAO" />
 		<property name="noteDAO" ref="noteDAO" />
-		<property name="attachmentDAO" ref="attachmentDAO" />
+		<property name="attachmentDao" ref="attachmentDao" />
 		<property name="attachmentFileDAO" ref="attachmentFileDAO" />
 
 		<!-- DAOs for subclasses of CnATreeElement: -->

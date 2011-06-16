@@ -463,6 +463,13 @@ public interface IDAOFactory {
 
     public void setElementEntityDao(IElementEntityDao elementEntityDao);
 	
+    /**
+     * @return
+     */
+    public abstract IAttachmentDao getAttachmentDao();
+    
+    public void setAttachmentDao(IAttachmentDao attachmentDao);
+    
 	@SuppressWarnings("unchecked")
 	/**
 	 *  Tries to find a DAO by class.
