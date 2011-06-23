@@ -58,6 +58,7 @@ import sernet.verinice.model.common.ChangeLogEntry;
 import sernet.verinice.model.common.CnALink;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.service.sync.StreamFactory;
+import sernet.verinice.service.sync.VeriniceArchive;
 import de.sernet.sync.data.SyncData;
 import de.sernet.sync.data.SyncFile;
 import de.sernet.sync.data.SyncObject;
@@ -87,13 +88,6 @@ public class ExportCommand extends GenericCommand implements IChangeLoggingComma
     public static final Integer EXPORT_FORMAT_VERINICE_ARCHIV = 0; 
     public static final Integer EXPORT_FORMAT_XML_PURE = 1;  
     public static final Integer EXPORT_FORMAT_DEFAULT = EXPORT_FORMAT_VERINICE_ARCHIV;
-    
-    public static final String VERINICE_ARCHIV_VERINICE_XML = "verinice.xml";
-    public static final String VERINICE_ARCHIV_DATA_XSD = "data.xsd";
-    public static final String VERINICE_ARCHIV_MAPPING_XSD = "mapping.xsd";
-    public static final String VERINICE_ARCHIV_SYNC_XSD = "sync.xsd";
-    
-    public static final String VERINICE_ARCHIV_FILES = "files";
     
     
     private transient CacheManager manager = null;
@@ -270,10 +264,12 @@ public class ExportCommand extends GenericCommand implements IChangeLoggingComma
 	        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();        
 	        ZipOutputStream zipOut = new ZipOutputStream(byteOut);     
 	        
-            ExportFactory.createZipEntry(zipOut, VERINICE_ARCHIV_VERINICE_XML, xmlData);
-            ExportFactory.createZipEntry(zipOut, VERINICE_ARCHIV_DATA_XSD, StreamFactory.getDataXsdAsStream());
-            ExportFactory.createZipEntry(zipOut, VERINICE_ARCHIV_MAPPING_XSD, StreamFactory.getMappingXsdAsStream());
-            ExportFactory.createZipEntry(zipOut, VERINICE_ARCHIV_SYNC_XSD, StreamFactory.getSyncXsdAsStream());
+            ExportFactory.createZipEntry(zipOut, VeriniceArchive.VERINICE_XML, xmlData);
+            ExportFactory.createZipEntry(zipOut, VeriniceArchive.DATA_XSD, StreamFactory.getDataXsdAsStream());
+            ExportFactory.createZipEntry(zipOut, VeriniceArchive.MAPPING_XSD, StreamFactory.getMappingXsdAsStream());
+            ExportFactory.createZipEntry(zipOut, VeriniceArchive.SYNC_XSD, StreamFactory.getSyncXsdAsStream());
+            ExportFactory.createZipEntry(zipOut, VeriniceArchive.README_TXT, StreamFactory.getReadmeAsStream());
+            
             
             for (Attachment attachment : getAttachmentSet()) {
                 LoadAttachmentFile command = new LoadAttachmentFile(attachment.getDbId());      
@@ -314,10 +310,16 @@ public class ExportCommand extends GenericCommand implements IChangeLoggingComma
             for (Attachment attachment : fileList) {
                 SyncFile syncFile = new SyncFile();
                 Entity entity = attachment.getEntity();
-                syncFile.setExtId(entity.getId());
+                String extId = ExportFactory.createExtId(attachment);
+                syncFile.setExtId(extId);
                 syncFile.setFile(ExportFactory.createZipFileName(attachment));
                 ExportFactory.transform(entity, syncFile.getSyncAttribute(), Attachment.TYPE_ID, getHuiTypeFactory());
                 fileListXml.add(syncFile);
+                if(isReImport()) {
+                    attachment.setExtId(extId);
+                    attachment.setSourceId(sourceId);
+                    saveElement(attachment);
+                }
             }
             // Add all files to attachment set, to export file data later
             getAttachmentSet().addAll(fileList);
@@ -348,10 +350,7 @@ public class ExportCommand extends GenericCommand implements IChangeLoggingComma
 		if(checkElement(element)) {
 			element = hydrate( element );
 			
-			String extId = element.getExtId();
-			if(extId==null || extId.isEmpty()) {
-				extId = element.getId();
-			}
+			String extId = ExportFactory.createExtId(element);
 			SyncObject syncObject = new SyncObject();
 			syncObject.setExtId(extId);
 			syncObject.setExtObjectType(typeId);
@@ -421,6 +420,14 @@ public class ExportCommand extends GenericCommand implements IChangeLoggingComma
 		IBaseDao<CnATreeElement, Serializable> dao = getDaoFactory().getDAO(element.getTypeId());
 		dao.saveOrUpdate(element);	
 	}
+	
+	/**
+     * @param attachment
+     */
+    private void saveElement(Attachment attachment) {
+        IBaseDao<Attachment, Serializable> dao = getDaoFactory().getDAO(Attachment.class);
+        dao.saveOrUpdate(attachment); 
+    }
 
 	private boolean checkElement(CnATreeElement element) {
 		return exportedObjectIDs.get(element.getId()) == null

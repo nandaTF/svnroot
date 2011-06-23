@@ -140,8 +140,6 @@ public class FileView extends ViewPart {
 	
 	private ICommandService	commandService;
 	
-	private Composite parent;
-	
 	protected TableViewer viewer;
 	protected TableColumn iconColumn;
 	protected TableColumn fileNameColumn;
@@ -182,7 +180,6 @@ public class FileView extends ViewPart {
 	}
 
 	private void initView(Composite parent) {
-		this.parent = parent;
 		parent.setLayout(new FillLayout());
 		try {
 		    createTable(parent);		

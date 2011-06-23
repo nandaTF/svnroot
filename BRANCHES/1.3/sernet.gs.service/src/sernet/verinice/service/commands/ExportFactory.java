@@ -43,6 +43,8 @@ import sernet.hui.common.connect.PropertyList;
 import sernet.hui.common.connect.PropertyType;
 import sernet.verinice.model.bsi.Attachment;
 import sernet.verinice.model.common.CnALink;
+import sernet.verinice.model.common.CnATreeElement;
+import sernet.verinice.service.sync.VeriniceArchive;
 import de.sernet.sync.data.SyncAttribute;
 import de.sernet.sync.data.SyncLink;
 
@@ -70,8 +72,8 @@ public class ExportFactory {
      */
     public static void transform(CnALink link, List<SyncLink> syncLinkXmlList) {
         SyncLink syncLink = new SyncLink();
-        syncLink.setDependant(link.getDependant().getId());
-        syncLink.setDependency(link.getDependency().getId());
+        syncLink.setDependant(ExportFactory.createExtId(link.getDependant()));
+        syncLink.setDependency(ExportFactory.createExtId(link.getDependency()));
         syncLink.setRelationId(link.getRelationId());
         if(link.getComment()!=null && !link.getComment().isEmpty()) {
             syncLink.setComment(link.getComment());
@@ -167,13 +169,41 @@ public class ExportFactory {
      */
     public static String createZipFileName(Attachment attachment) {
         StringBuilder sb = new StringBuilder();
-        sb.append(ExportCommand.VERINICE_ARCHIV_FILES).append("/");
+        sb.append(VeriniceArchive.FILES).append("/");
         sb.append(attachment.getDbId()).append("-");
         // avoid problems with non-ASCII file names 
         String fileName = attachment.getFileName();
         fileName = ExportFactory.replaceNonAsciiChars(fileName);
         sb.append(fileName);
         return sb.toString().replaceAll(" ", "_");
+    }
+    
+    /**
+     * Creates an ext-id for a tree-element
+     * 
+     * @param element a tree-element
+     * @return ext-id for the tree-element
+     */
+    public static String createExtId(CnATreeElement element) {
+        String extId = element.getExtId();
+        if(extId==null || extId.isEmpty()) {
+            extId = element.getId();
+        }
+        return extId;
+    }
+    
+    /**
+     * Creates an ext-id for an attachment
+     * 
+     * @param attachment an attachment of a tree-element
+     * @return ext-id for the attachment
+     */
+    public static String createExtId(Attachment attachment) {
+        String extId = attachment.getExtId();
+        if(extId==null || extId.isEmpty()) {
+            extId = attachment.getEntity().getId();
+        }
+        return extId;
     }
 
     /**
@@ -198,4 +228,8 @@ public class ExportFactory {
         result = result.replaceAll("ß", "ss");
         return result;
     }
+
+
+
+    
 }

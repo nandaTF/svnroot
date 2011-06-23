@@ -33,6 +33,7 @@ public class StreamFactory {
     private static final String DATA_XSD = "sernet/verinice/service/sync/data.xsd";
     private static final String MAPPING_XSD = "sernet/verinice/service/sync/mapping.xsd";
     private static final String SYNC_XSD = "sernet/verinice/service/sync/sync.xsd";
+    private static final String README = "sernet/verinice/service/sync/readme.txt";
     
     public static InputStream getDataXsdAsStream() {
         return StreamFactory.class.getClassLoader().getResourceAsStream(DATA_XSD);
@@ -44,5 +45,9 @@ public class StreamFactory {
     
     public static InputStream getSyncXsdAsStream() {
         return StreamFactory.class.getClassLoader().getResourceAsStream(SYNC_XSD);
+    }
+    
+    public static InputStream getReadmeAsStream() {
+        return StreamFactory.class.getClassLoader().getResourceAsStream(README);
     }
 }

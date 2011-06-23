@@ -25,14 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.LayoutStyle;
-
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.aspectj.weaver.ast.HasAnnotation;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.CellEditor.LayoutData;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
@@ -45,8 +40,6 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -65,6 +58,7 @@ import sernet.verinice.model.bsi.ITVerbund;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Organization;
 import sernet.verinice.service.commands.ExportCommand;
+import sernet.verinice.service.sync.VeriniceArchive;
 
 /**
  * @author Daniel Murygin <dm@sernet.de>
@@ -72,6 +66,8 @@ import sernet.verinice.service.commands.ExportCommand;
 public class ExportDialog extends TitleAreaDialog {
     private static final Logger LOG = Logger.getLogger(ExportDialog.class);
 
+    public static final String[] EXTENSION_ARRAY = new String[] {VeriniceArchive.EXTENSION_VERINICE_ARCHIVE,ExportAction.EXTENSION_XML};
+    
     /**
      * Indicates if the output should be encrypted.
      */
@@ -86,9 +82,8 @@ public class ExportDialog extends TitleAreaDialog {
     private Text txtLocation;
     
     // ExportCommand.EXPORT_FORMAT_VERINICE_ARCHIV or ExportCommand.EXPORT_FORMAT_XML_PURE 
-    private int exportFormat = ExportCommand.EXPORT_FORMAT_DEFAULT;
+    private int format = ExportCommand.EXPORT_FORMAT_DEFAULT;
     
-    private static String[] extensionArray = new String[] {ExportAction.EXTENSION_VERINICE_ARCHIVE,ExportAction.EXTENSION_XML};
     
     public ExportDialog(Shell activeShell) {
         this(activeShell, null);
@@ -169,7 +164,7 @@ public class ExportDialog extends TitleAreaDialog {
                 if(checkbox.getSelection()) {
 	                selectedElementSet.add(selectedElement);
 	                if(txtLocation!=null) {
-	                    filePath = selectedElement.getTitle() + getExtension();
+	                    filePath = selectedElement.getTitle() + getDefaultExtension();
 	                    txtLocation.setText(filePath);
 	                }
 	                setSourceId(selectedElement);
@@ -309,8 +304,8 @@ public class ExportDialog extends TitleAreaDialog {
                     }
                 }             
                 dialog.setFilterExtensions(new String[] {
-                        "*"+extensionArray[0], //$NON-NLS-1$
-                        "*"+extensionArray[1] }); //$NON-NLS-1$          
+                        "*"+EXTENSION_ARRAY[0], //$NON-NLS-1$
+                        "*"+EXTENSION_ARRAY[1] }); //$NON-NLS-1$          
                 dialog.setFilterNames(new String[] {
                         Messages.ExportDialog_2,
                         Messages.SamtExportDialog_15 });
@@ -320,9 +315,9 @@ public class ExportDialog extends TitleAreaDialog {
                 // set export-format to filter index of dialog
                 // filter index must match ExportCommand.EXPORT_FORMAT_VERINICE_ARCHIV 
                 // or ExportCommand.EXPORT_FORMAT_XML_PURE
-                setExportFormat(dialog.getFilterIndex());
+                setFormat(dialog.getFilterIndex());
                 if (exportPath != null) {
-                    txtLocation.setText(ExportAction.addExtension(exportPath,extensionArray[dialog.getFilterIndex()]));
+                    txtLocation.setText(ExportAction.addExtension(exportPath,EXTENSION_ARRAY[dialog.getFilterIndex()]));
                     filePath = exportPath;
                 } else {
                     txtLocation.setText(""); //$NON-NLS-1$
@@ -352,7 +347,7 @@ public class ExportDialog extends TitleAreaDialog {
         });
         
         if(selectedElement!=null) {
-            filePath = selectedElement.getTitle() + getExtension();
+            filePath = selectedElement.getTitle() + getDefaultExtension();
             txtLocation.setText(filePath);
         }
         
@@ -364,8 +359,8 @@ public class ExportDialog extends TitleAreaDialog {
     /**
      * @return
      */
-    protected String getExtension() {
-        return ExportAction.EXTENSION_VERINICE_ARCHIVE;
+    protected String getDefaultExtension() {
+        return VeriniceArchive.EXTENSION_VERINICE_ARCHIVE;
     }
 
     private void setSourceId(CnATreeElement element) {
@@ -444,12 +439,12 @@ public class ExportDialog extends TitleAreaDialog {
         return sourceId;
     }
 
-    public int getExportFormat() {
-        return exportFormat;
+    public int getFormat() {
+        return format;
     }
 
-    public void setExportFormat(int exportFormat) {
-        this.exportFormat = exportFormat;
+    public void setFormat(int exportFormat) {
+        this.format = exportFormat;
     }
 
 }

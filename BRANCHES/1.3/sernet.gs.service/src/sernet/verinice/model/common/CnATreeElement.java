@@ -32,6 +32,7 @@ import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.HUITypeFactory;
 import sernet.hui.common.connect.ITypedElement;
 import sernet.hui.common.connect.PropertyList;
+import sernet.verinice.model.bsi.Attachment;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.bsi.BausteinUmsetzung;
 import sernet.verinice.model.bsi.IBSIModelListener;
@@ -70,18 +71,12 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
     }
     
 	private Integer dbId;
+	
+	private String extId;
 
 	private String sourceId;
 	
 	private String objectType;
-
-	public String getSourceId() {
-		return sourceId;
-	}
-
-	public void setSourceId(String sourceId) {
-		this.sourceId = sourceId;
-	}
 	
 	public int getNumericProperty(String propertyTypeId) {
 	    PropertyList properties = getEntity().getProperties(propertyTypeId);
@@ -96,21 +91,7 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
         getEntity().setSimpleValue(type.getPropertyType(propTypeId), Integer.toString(value));
 	}
 
-	private String extId;
-
 	public void setextId(String extId)
-	{
-	    this.extId = extId;
-	}
-	
-	/* */
-	
-	public String getExtId()
-	{
-	    return extId;
-	}
-
-	public void setExtId(String extId)
 	{
 	    this.extId = extId;
 	}
@@ -142,6 +123,8 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
 	private Set<Permission> permissions = new HashSet<Permission>();
 	
 	private boolean childrenLoaded = false;
+	
+	private Set<Attachment> files;
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -589,7 +572,15 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
 		this.childrenLoaded = childrenLoaded;
 	}
 	
-	public void databaseChildAdded(CnATreeElement child) {
+	public Set<Attachment> getFiles() {
+        return files;
+    }
+
+    public void setFiles(Set<Attachment> files) {
+        this.files = files;
+    }
+
+    public void databaseChildAdded(CnATreeElement child) {
 		getModelChangeListener().databaseChildAdded(child);
 	}
 	
@@ -628,6 +619,24 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
 	public void refreshAllListeners(Object source) {
 		// override this in model classes
 	}
+	
+	public String getExtId()
+    {
+        return extId;
+    }
+
+    public void setExtId(String extId)
+    {
+        this.extId = extId;
+    }
+    
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()

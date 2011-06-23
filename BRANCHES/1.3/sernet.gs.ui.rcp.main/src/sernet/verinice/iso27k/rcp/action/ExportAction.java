@@ -72,6 +72,7 @@ import sernet.verinice.iso27k.rcp.ExportDialog;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Organization;
 import sernet.verinice.service.commands.ExportCommand;
+import sernet.verinice.service.sync.VeriniceArchive;
 
 /**
  * {@link Action} that exports assessment objects from the
@@ -86,8 +87,6 @@ public class ExportAction extends ActionDelegate implements IViewActionDelegate,
 	private static final Logger LOG = Logger.getLogger(ExportAction.class);
 	
 	public static final String EXTENSION_XML = ".xml"; //$NON-NLS-1$
-	
-	public static final String EXTENSION_VERINICE_ARCHIVE = ".vna"; //$NON-NLS-1$
 	
 	public static final String EXTENSION_PASSWORD_ENCRPTION = ".pcr"; //$NON-NLS-1$
     
@@ -148,8 +147,8 @@ public class ExportAction extends ActionDelegate implements IViewActionDelegate,
                 }
             }
 		    filePath = dialog.getFilePath();
-		    filePath = addExtension(filePath, EXTENSION_VERINICE_ARCHIVE);
-		    if(password!=null) {
+		    filePath = ExportAction.addExtension(filePath,ExportDialog.EXTENSION_ARRAY[dialog.getFormat()]);
+		    if(password!=null) {		        
 		        filePath = addExtension(filePath, EXTENSION_PASSWORD_ENCRPTION);
 		    }
 		    if(x509CertificateFile!=null) {
@@ -166,7 +165,7 @@ public class ExportAction extends ActionDelegate implements IViewActionDelegate,
                         		dialog.getSourceId(),
                         		password,
                         		x509CertificateFile,
-                        		dialog.getExportFormat());                    
+                        		dialog.getFormat());                    
                     } catch (Throwable e) {
                         LOG.error("Error while exporting data.", e); //$NON-NLS-1$
                         status= new Status(Status.ERROR, "sernet.verinice.samt.rcp", "Error while exporting data.",e); 

@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import sernet.gs.service.RuntimeCommandException;
 import sernet.gs.ui.rcp.main.service.taskcommands.riskanalysis.FindRiskAnalysisListsByParentID;
 import sernet.verinice.interfaces.CommandException;
@@ -43,9 +45,29 @@ import sernet.verinice.model.common.configuration.Configuration;
 import sernet.verinice.model.iso27k.PersonIso;
 import sernet.verinice.service.commands.LoadConfiguration;
 
+/**
+ * Removes tree-elements.
+ * 
+ * Children, links and attachments are deleted by hibernate cascading 
+ * (see CnATreeElement.hbm.xml)
+ * 
+ * @author Alexander Koderman <ak[at]sernet[dot]de>.
+ * @author Daniel Murygin <dm[at]sernet[dot]de>
+ *
+ * @param <T>
+ */
 @SuppressWarnings("serial")
 public class RemoveElement<T extends CnATreeElement> extends GenericCommand implements IChangeLoggingCommand, INoAccessControl {
 
+    private transient Logger log = Logger.getLogger(RemoveElement.class);
+
+    public Logger getLog() {
+        if (log == null) {
+            log = Logger.getLogger(RemoveElement.class);
+        }
+        return log;
+    }
+    
     private T element;
     private String stationId;
     private Integer elementId;
@@ -98,8 +120,8 @@ public class RemoveElement<T extends CnATreeElement> extends GenericCommand impl
             if (element instanceof GefaehrdungsUmsetzung) {
                 GefaehrdungsUmsetzung gef = (GefaehrdungsUmsetzung) element;
                 removeFromLists(listsDbId, gef);
-            }
-
+            }   
+            
             /*
              * Special case the deletion of FinishedRiskAnalysis instances:
              * Before the instance is deleted itself their children must be
@@ -120,10 +142,13 @@ public class RemoveElement<T extends CnATreeElement> extends GenericCommand impl
 
             element.remove();
             dao.delete(element);
-        } catch (CommandException e) {
+        } catch (RuntimeException e) {
+            getLog().error("RuntimeException while deleting element: " + element, e);
+            throw e;
+        } catch (Exception e) {
+            getLog().error("Exception while deleting element: " + element, e);
             throw new RuntimeCommandException(e);
         }
-
     }
 
     /*
