@@ -87,6 +87,7 @@ ZO RELAXEN UND WATSCHEN DER BLINKENLIGHTS.
     
     <bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
     	<property name="jobDetail" ref="checkTransactionLogJob" />
+        <!-- Set startDelay and repeatInterval in ms -->
     	<property name="startDelay" value="15000" />
     	<property name="repeatInterval" value="15000" />
     </bean>
