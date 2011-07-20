@@ -1,41 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="verinice" uid="sernet.gs.ui.rcp.main.product" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.3.1.92" useFeatures="true" includeLaunchers="true">
+<product name="verinice" uid="sernet.gs.ui.rcp.main.product" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.3.1.93" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/sernet.gs.ui.rcp.main/icons/product_lg.gif"/>
       <text>
-         SerNet verinice
+         SerNet verinice 1.3.2
 
-(c) SerNet Service Network GmbH and others
-1996-2010
+(c) SerNet Service Network GmbH and others 1996-2011
 
-Contact the authors:
-verinice@sernet.de
-
-or
-
-Visit our homepage:
-http://www.verinice.org
+Visit our homepage: http://www.verinice.org
+Contact the authors: verinice@sernet.de
 
 Contributors:
-Alexander Koderman 		&lt;ak@sernet.de&gt;
+Alexander Koderman 	&lt;ak@sernet.de&gt;
 Anne Hanekop 			&lt;ah@sernet.de&gt;
-Marek Seeger			&lt;ms@sernet.de&gt;
+Marek Seeger				&lt;ms@sernet.de&gt;
 Andreas Becker			&lt;andreas.r.becker@ruhr-uni-bochum.de&gt;
 Robert Schuster			&lt;r.schuster@tarent.de&gt;
 Daniel Murygin			&lt;dm@sernet.de&gt;
 Sebastian Engel 			&lt;s.engel@tarent.de&gt;
-Markus Joos				&lt;markus.joos@T-ONLINE.DE&gt;
-Gregorio Levano			&lt;GregorioMagno.LevanoHuaman@HS-FURTWANGEN.DE&gt;
-Christian Ganzmann 		&lt;christian.ganzmann@HS-FURTWANGEN.DE&gt;
+Markus Joos				&lt;markus.joos@t-online.de&gt;
+Gregorio Levano			&lt;GregorioMagno.LevanoHuaman@hs-furtwangen.de&gt;
+Christian Ganzmann 		&lt;christian.ganzmann@hs-furtwangen.de&gt;
 Carmen Probst 			&lt;carmen.probst@hs-furtwangen.de&gt;
+Sebastian Hegedorn		&lt;sh@sernet.de&gt;
 
 Artwork:
-Blackbit						www.blackbit.de
+Blackbit					http://www.blackbit.de
 Joseph North				&lt;north@sublink.ca&gt;
-Agentur Roeder				www.agentur-roeder.de
+Agentur Roeder			http://www.agentur-roeder.de
 
 
 This program comes with ABSOLUTELY NO WARRANTY.
