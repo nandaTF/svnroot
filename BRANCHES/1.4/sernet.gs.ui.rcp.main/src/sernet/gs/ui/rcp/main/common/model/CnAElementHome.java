@@ -50,6 +50,7 @@ import sernet.hui.common.connect.HitroUtil;
 import sernet.hui.common.connect.HuiRelation;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ICommandService;
+import sernet.verinice.iso27k.service.Retriever;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.bsi.BausteinUmsetzung;
 import sernet.verinice.model.bsi.IBSIStrukturElement;
@@ -429,8 +430,9 @@ public class CnAElementHome {
 
             roles = c.getRoles();
         }
-
-        for (Permission p : cte.getPermissions()) {
+        
+        CnATreeElement elemntWithPermissions = Retriever.checkRetrievePermissions(cte);
+        for (Permission p : elemntWithPermissions.getPermissions()) {
             if (p.isWriteAllowed() && roles.contains(p.getRole())) {
                 return true;
             }
