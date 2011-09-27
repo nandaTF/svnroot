@@ -65,7 +65,7 @@ public class UserReportType implements IReportType {
 	}
 	
 	public IOutputFormat[] getOutputFormats() {
-        return new IOutputFormat[] { new PDFOutputFormat(), new HTMLOutputFormat(), new CSVOutputFormat(), new ExcelOutputFormat(), new WordOutputFormat() };
+        return new IOutputFormat[] { new PDFOutputFormat(), new HTMLOutputFormat(), new CSVOutputFormat(), new ExcelOutputFormat(), new WordOutputFormat(), new ODTOutputFormat(), new ODSOutputFormat() };
     }
 
 	public void createReport(IReportOptions reportOptions) {
@@ -91,6 +91,11 @@ public class UserReportType implements IReportType {
 			// in a user report, only one table should be present for the CSV report (first one found is used):
 			brs.extract(task, reportOptions, 1);
 		}
+	}
+
+	@Override
+	public String getUseCaseID() {
+		return IReportType.USE_CASE_ID_ALWAYS_REPORT;
 	}
 
 }

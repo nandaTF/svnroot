@@ -48,7 +48,7 @@ public class StrukturanalyseReport implements IReportType {
 	}
 
 	public IOutputFormat[] getOutputFormats() {
-        return new IOutputFormat[] { new PDFOutputFormat(), new HTMLOutputFormat(),  new ExcelOutputFormat(), new WordOutputFormat() };
+        return new IOutputFormat[] { new PDFOutputFormat(), new HTMLOutputFormat(),  new ExcelOutputFormat(), new WordOutputFormat(), new ODTOutputFormat(), new ODSOutputFormat() };
     }
 
 	public void createReport(IReportOptions reportOptions) {
@@ -84,5 +84,10 @@ public class StrukturanalyseReport implements IReportType {
         // TODO Auto-generated method stub
         
     }
+
+	@Override
+	public String getUseCaseID() {
+		return IReportType.USE_CASE_ID_GENERAL_REPORT;
+	}
 
 }

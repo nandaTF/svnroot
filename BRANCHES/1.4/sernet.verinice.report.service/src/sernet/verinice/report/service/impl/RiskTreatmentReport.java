@@ -44,7 +44,7 @@ public class RiskTreatmentReport implements IReportType {
 	}
 
 	public IOutputFormat[] getOutputFormats() {
-        return new IOutputFormat[] { new PDFOutputFormat(), new HTMLOutputFormat(), new CSVOutputFormat(), new ExcelOutputFormat(), new WordOutputFormat() };
+        return new IOutputFormat[] { new PDFOutputFormat(), new HTMLOutputFormat(), new CSVOutputFormat(), new ExcelOutputFormat(), new WordOutputFormat(), new ODTOutputFormat(), new ODSOutputFormat() };
     }
 
 	public void createReport(IReportOptions reportOptions) {
@@ -80,5 +80,10 @@ public class RiskTreatmentReport implements IReportType {
         // user supplied template not supported by this report type
         
     }
+
+	@Override
+	public String getUseCaseID() {
+		return IReportType.USE_CASE_ID_GENERAL_REPORT;
+	}
 
 }
