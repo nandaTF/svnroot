@@ -18,8 +18,6 @@
 package sernet.verinice.service.commands;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
 
 import sernet.gs.service.RetrieveInfo;
 import sernet.verinice.interfaces.GenericCommand;
@@ -32,7 +30,6 @@ public class LoadElementByUuid<T extends CnATreeElement> extends GenericCommand 
 	private T element;
     private String typeId;
     private RetrieveInfo ri;
-    private boolean isJoin = true;
 
     private transient IBaseDao<T, Serializable> dao;
     
@@ -59,68 +56,14 @@ public class LoadElementByUuid<T extends CnATreeElement> extends GenericCommand 
 		    ri = new RetrieveInfo();
 		}
 	}
-
-	public void execute() {
-	    if(isJoin()) {
-	        executeWithJoin();
-	    } else {
-	        executeWithSelect();
-	    }
-	}
-
-	private void executeWithSelect() {
-	    RetrieveInfo riElement = new RetrieveInfo();
-	    riElement.setProperties(ri.isProperties());
-        riElement.setPermissions(ri.isPermissions());
-        riElement.setLinksDown(ri.isLinksDown());
-        riElement.setLinksUp(ri.isLinksUp());
-        element = getDao().findByUuid(this.uuid,riElement);
-        if(element!=null) {
-            if(ri.isParent()) {     
-                RetrieveInfo riParent = new RetrieveInfo();
-                riParent.setPermissions(ri.isParentPermissions());
-                riParent.setChildren(ri.isSiblings());                
-                CnATreeElement parent = getDao().retrieve(element.getParentId(),riParent);
-                element.setParent(parent);
-            }
-            if(ri.isChildren()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("from CnATreeElement as e");
-                if(ri.isChildrenProperties()) {
-                    sb.append(" left join fetch e.entity.typedPropertyLists.properties");
-                }
-                sb.append(" where e.parentId = ?");
-                final String hql = sb.toString();
-                List<CnATreeElement> children = getDao().findByQuery(hql, new Object[]{element.getDbId()});
-                element.setChildren(new HashSet<CnATreeElement>(children));
-            }
-        }
-	}
 	
-    /**
-     * 
-     */
-    private void executeWithJoin() {
+    public void execute() {
 		element = getDao().findByUuid(this.uuid,ri);
     }
 
 	public T getElement() {
 		return element;
 	}
-
-    /**
-     * @return the isJoin
-     */
-    public boolean isJoin() {
-        return isJoin;
-    }
-
-    /**
-     * @param isJoin the isJoin to set
-     */
-    public void setJoin(boolean isJoin) {
-        this.isJoin = isJoin;
-    }
 
     /**
      * @return the dao

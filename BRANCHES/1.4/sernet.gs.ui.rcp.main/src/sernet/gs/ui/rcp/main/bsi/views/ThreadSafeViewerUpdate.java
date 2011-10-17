@@ -166,7 +166,6 @@ public class ThreadSafeViewerUpdate {
 	        .setChildren(true)
 	        .setSiblings(true);
 		    LoadElementByUuid<CnATreeElement> loadByUuid = new LoadElementByUuid<CnATreeElement>(element.getUuid(),ri);
-		    loadByUuid.setJoin(false);
 		    try {
 		        Activator.inheritVeriniceContextState();
                 loadByUuid = ServiceFactory.lookupCommandService().executeCommand(loadByUuid);
