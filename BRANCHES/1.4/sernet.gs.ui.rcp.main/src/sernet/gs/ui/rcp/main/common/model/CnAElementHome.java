@@ -520,19 +520,23 @@ public class CnAElementHome {
                     }
                 }
         
-                // fire model changed events:
+                // fire model changed events:        
                 for (CnALink link : newLinks) {
                     if (link.getDependant() instanceof ITVerbund) {
                         CnAElementFactory.getInstance().reloadModelFromDatabase();
                         return;
-                    } else {
-                        if (link.getDependant() instanceof IBSIStrukturElement || link.getDependency() instanceof IBSIStrukturElement) {
-                            CnAElementFactory.getLoadedModel().linkAdded(link);
-                        }
-                        if (link.getDependant() instanceof IISO27kElement || link.getDependency() instanceof IISO27kElement) {
-                            CnAElementFactory.getInstance().getISO27kModel().linkAdded(link);
-                        }
                     }
+                }
+                
+                // calling linkAdded for one link reloads all changed links
+                if(newLinks!=null && !newLinks.isEmpty()) {
+                    CnALink link = newLinks.get(newLinks.size()-1);
+                    if (link.getDependant() instanceof IBSIStrukturElement || link.getDependency() instanceof IBSIStrukturElement) {
+                        CnAElementFactory.getLoadedModel().linkAdded(link);
+                    }
+                    if (link.getDependant() instanceof IISO27kElement || link.getDependency() instanceof IISO27kElement) {
+                        CnAElementFactory.getInstance().getISO27kModel().linkAdded(link);
+                    }                 
                 }
                 DNDItems.clear();
             }
