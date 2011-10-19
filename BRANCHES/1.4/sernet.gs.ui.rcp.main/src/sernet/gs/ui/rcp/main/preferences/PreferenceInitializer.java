@@ -47,9 +47,11 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 				.getWorkdir()
 				+ File.separator + "it-grundschutz_el11_html_de.zip"); //$NON-NLS-1$
 
+
 		store.setDefault(PreferenceConstants.ERRORPOPUPS, true);
 		store.setDefault(PreferenceConstants.FIRSTSTART, true);
 		store.setDefault(PreferenceConstants.INPUTHINTS, true);
+		store.setDefault(PreferenceConstants.SHOW_ALIEN_DECORATOR, true);
 
 		store.setDefault(PreferenceConstants.DB_DRIVER,
 				PreferenceConstants.DB_DRIVER_DERBY);
