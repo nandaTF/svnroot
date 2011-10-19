@@ -224,6 +224,10 @@ public class SyncInsertUpdateCommand extends GenericCommand implements IAuthAwar
                 if (getLog().isDebugEnabled()) {
                     getLog().debug("Element found in db: updating, uuid: " + elementInDB.getUuid());
                 }
+                if(parent==null) {
+                    // Org. or IT-Verbund was found
+                    parent = elementInDB.getParent();
+                }
                 setAttributes = true;
                 updated++;
             } else {
@@ -236,8 +240,8 @@ public class SyncInsertUpdateCommand extends GenericCommand implements IAuthAwar
         }
         CnATypeMapper typeMapper = new CnATypeMapper();
         Class clazz = typeMapper.getClassFromTypeId(veriniceObjectType);
-        IBaseDao<CnATreeElement, Serializable> dao = (IBaseDao<CnATreeElement, Serializable>) getDaoFactory().getDAO(clazz);
-               
+        IBaseDao<CnATreeElement, Serializable> dao = (IBaseDao<CnATreeElement, Serializable>) getDaoFactory().getDAO(clazz);      
+        
         parent = (parent == null) ? accessContainer(clazz) : parent;
         
         // If no previous object was found in the database and the 'insert'
