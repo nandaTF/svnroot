@@ -24,18 +24,29 @@ TocHelper.startRun();
 
 TocHelper.endRun();
 ]]></method>
+    <method name="afterRender"><![CDATA[// import necessary package for bundle import
+importPackage(Packages.org.eclipse.core.runtime);  
+importPackage(Packages.sernet.verinice.report.service.impl);
+
+// this ensures the removal of the local used cache at the end of one iteration of the report
+// if its not done, the garbage collector will run into an exception
+
+// import bundles
+var reportBundle = Packages.org.eclipse.core.runtime.Platform.getBundle( "sernet.verinice.report.service" );
+var odaBundle = Packages.org.eclipse.core.runtime.Platform.getBundle("sernet.verinice.oda.driver");
+
+// load classes from bundles
+helperSignature = odaBundle.loadClass("sernet.verinice.oda.driver.impl.ReportJavaScriptHelper");
+commandSignature = reportBundle.loadClass("sernet.verinice.report.service.commands.ClearCacheCommand");
+
+
+var helperInstance = helperSignature.newInstance();
+var commandInstance = commandSignature.newInstance();
+
+helperInstance.execute(commandInstance);]]></method>
     <method name="onPageStart"><![CDATA[importPackage(Packages.sernet.verinice.report.service.impl);
 
 TocHelper.increasePageNumber();]]></method>
-    <method name="onPageEnd"><![CDATA[importPackage(Packages.sernet.verinice.report.service.impl);
-
-//TocHelper.comparePageCount(pageNumber);
-var tableWatcher = reportContext.getPageVariable("tableWatcher");
-var c5s = reportContext.getPersistentGlobalVariable( "chapter5Started");
-if(c5s == "1" &amp;&amp; reportContext.getPageVariable("tableWatcher" == "0")){
-	TocHelper.triggerLog("condition true");
-	TocHelper.increasePageNumber();
-}]]></method>
     <property name="iconFile">/templates/blank_report.gif</property>
     <property name="layoutPreference">auto layout</property>
     <property name="bidiLayoutOrientation">ltr</property>
@@ -2219,41 +2230,50 @@ inParameters(new String[] { "id", "root_object" });</value>
                     <property name="nativeDataType">2000</property>
                 </structure>
             </list-property>
-            <xml-property name="queryText"><![CDATA[id = inpv("id");
+            <xml-property name="queryText"><![CDATA[import sernet.verinice.oda.driver.impl;
+import sernet.verinice.report.service.impl;
 
-c = helper.execute(new sernet.verinice.report.service.commands.LoadAllFindingsCommand(id));
-
+id = inpv("id");
+c = new sernet.verinice.report.service.commands.LoadAllFindingsCommand(id);
+c = helper.execute(c);
+//c.getReportObjects();
 return c.getResult();]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
-  <Version>1.0</Version>
-  <design:DataSetParameters>
-    <design:parameterDefinitions>
-      <design:inOutMode>In</design:inOutMode>
-      <design:attributes>
-        <design:name>id</design:name>
-        <design:position>1</design:position>
-        <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
-        <design:precision>-1</design:precision>
-        <design:scale>-1</design:scale>
-        <design:nullability>Unknown</design:nullability>
-      </design:attributes>
-      <design:inputAttributes>
-        <design:elementAttributes>
-          <design:defaultValues>
-            <design:values>dummy default value</design:values>
-          </design:defaultValues>
-        </design:elementAttributes>
-      </design:inputAttributes>
-    </design:parameterDefinitions>
-  </design:DataSetParameters>
+  <Version>2.0</Version>
+  <DataSetParameters>
+    <parameter>
+      <design:ParameterDefinition>
+        <design:inOutMode>In</design:inOutMode>
+        <design:attributes>
+          <design:identifier>
+            <design:name>id</design:name>
+            <design:position>1</design:position>
+          </design:identifier>
+          <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+          <design:precision>-1</design:precision>
+          <design:scale>-1</design:scale>
+          <design:nullability>Unknown</design:nullability>
+        </design:attributes>
+        <design:inputAttributes>
+          <design:elementAttributes>
+            <design:defaultValues>
+              <design:values>dummy default value</design:values>
+            </design:defaultValues>
+          </design:elementAttributes>
+        </design:inputAttributes>
+      </design:ParameterDefinition>
+    </parameter>
+  </DataSetParameters>
   <design:ResultSets derivedMetaData="true">
     <design:resultSetDefinitions>
       <design:resultSetColumns>
         <design:resultColumnDefinitions>
           <design:attributes>
-            <design:name>no</design:name>
-            <design:position>1</design:position>
+            <design:identifier>
+              <design:name>no</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
             <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
             <design:precision>-1</design:precision>
             <design:scale>-1</design:scale>
@@ -2271,8 +2291,10 @@ return c.getResult();]]></xml-property>
         </design:resultColumnDefinitions>
         <design:resultColumnDefinitions>
           <design:attributes>
-            <design:name>control</design:name>
-            <design:position>2</design:position>
+            <design:identifier>
+              <design:name>control</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
             <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
             <design:precision>-1</design:precision>
             <design:scale>-1</design:scale>
@@ -2290,8 +2312,10 @@ return c.getResult();]]></xml-property>
         </design:resultColumnDefinitions>
         <design:resultColumnDefinitions>
           <design:attributes>
-            <design:name>findings</design:name>
-            <design:position>3</design:position>
+            <design:identifier>
+              <design:name>findings</design:name>
+              <design:position>3</design:position>
+            </design:identifier>
             <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
             <design:precision>-1</design:precision>
             <design:scale>-1</design:scale>
@@ -2309,8 +2333,10 @@ return c.getResult();]]></xml-property>
         </design:resultColumnDefinitions>
         <design:resultColumnDefinitions>
           <design:attributes>
-            <design:name>maturityLevel</design:name>
-            <design:position>4</design:position>
+            <design:identifier>
+              <design:name>maturityLevel</design:name>
+              <design:position>4</design:position>
+            </design:identifier>
             <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
             <design:precision>-1</design:precision>
             <design:scale>-1</design:scale>
@@ -2328,8 +2354,10 @@ return c.getResult();]]></xml-property>
         </design:resultColumnDefinitions>
         <design:resultColumnDefinitions>
           <design:attributes>
-            <design:name>deviation</design:name>
-            <design:position>5</design:position>
+            <design:identifier>
+              <design:name>deviation</design:name>
+              <design:position>5</design:position>
+            </design:identifier>
             <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
             <design:precision>-1</design:precision>
             <design:scale>-1</design:scale>
@@ -2347,8 +2375,10 @@ return c.getResult();]]></xml-property>
         </design:resultColumnDefinitions>
         <design:resultColumnDefinitions>
           <design:attributes>
-            <design:name>risk</design:name>
-            <design:position>6</design:position>
+            <design:identifier>
+              <design:name>risk</design:name>
+              <design:position>6</design:position>
+            </design:identifier>
             <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
             <design:precision>-1</design:precision>
             <design:scale>-1</design:scale>
@@ -2366,8 +2396,10 @@ return c.getResult();]]></xml-property>
         </design:resultColumnDefinitions>
         <design:resultColumnDefinitions>
           <design:attributes>
-            <design:name>measure</design:name>
-            <design:position>7</design:position>
+            <design:identifier>
+              <design:name>measure</design:name>
+              <design:position>7</design:position>
+            </design:identifier>
             <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
             <design:precision>-1</design:precision>
             <design:scale>-1</design:scale>
@@ -2385,8 +2417,10 @@ return c.getResult();]]></xml-property>
         </design:resultColumnDefinitions>
         <design:resultColumnDefinitions>
           <design:attributes>
-            <design:name>personInCharge</design:name>
-            <design:position>8</design:position>
+            <design:identifier>
+              <design:name>personInCharge</design:name>
+              <design:position>8</design:position>
+            </design:identifier>
             <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
             <design:precision>-1</design:precision>
             <design:scale>-1</design:scale>
@@ -7613,7 +7647,7 @@ reportContext.setPersistentGlobalVariable( "attachmentImage2", result )]]></meth
         </grid>
         <grid id="1089">
             <property name="marginBottom">1cm</property>
-            <property name="pageBreakAfter">always</property>
+            <property name="pageBreakAfter">auto</property>
             <property name="width">11.010416666666666in</property>
             <column id="1090">
                 <property name="width">11.010416666666666in</property>
@@ -7696,6 +7730,7 @@ reportContext.setPersistentGlobalVariable( "attachmentImage2", result )]]></meth
                                             <row id="1948">
                                                 <cell id="1949">
                                                     <grid id="2130">
+                                                        <property name="pageBreakAfter">always</property>
                                                         <column id="2131"/>
                                                         <row id="2132">
                                                             <cell id="2133">
@@ -7710,8 +7745,6 @@ reportContext.setPersistentGlobalVariable( "attachmentImage2", result )]]></meth
                                                                     <property name="resultSetColumn">chapterName</property>
                                                                 </data>
                                                                 <text-data id="2136">
-                                                                    <method name="onRender"><![CDATA[importPackage(Packages.sernet.verinice.report.service.impl);
-reportContext.setPageVariable("tableWatcher", "1");]]></method>
                                                                     <expression name="valueExpr">"&lt;h3>" + row["chapterName"] + "&lt;/h3>"</expression>
                                                                     <property name="contentType">html</property>
                                                                 </text-data>
@@ -7723,8 +7756,6 @@ reportContext.setPageVariable("tableWatcher", "1");]]></method>
                                                                     <property name="marginBottom">1cm</property>
                                                                     <property name="pageBreakAfter">always</property>
                                                                     <property name="width">11.28125in</property>
-                                                                    <method name="onPageBreak"><![CDATA[importPackage(Packages.sernet.verinice.report.service.impl);
-TocHelper.triggerLog("PageBreak detected!");]]></method>
                                                                     <column id="1951"/>
                                                                     <column id="1952">
                                                                         <property name="width">3.9375in</property>
