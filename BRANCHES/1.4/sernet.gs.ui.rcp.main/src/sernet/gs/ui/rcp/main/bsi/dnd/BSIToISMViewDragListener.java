@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Alexander Koderman <ak[at]sernet[dot]de>.
+ * Copyright (c) 2011 Sebastian Hagedorn <sh[at]sernet[dot]de>.
  * This program is free software: you can redistribute it and/or 
  * modify it under the terms of the GNU Lesser General Public License 
  * as published by the Free Software Foundation, either version 3 
@@ -13,11 +13,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  * 
  * Contributors:
- *     Alexander Koderman <ak[at]sernet[dot]de> - initial API and implementation
+ *     Sebastian Hagedorn <sh[at]sernet[dot]de> - initial API and implementation
  ******************************************************************************/
 package sernet.gs.ui.rcp.main.bsi.dnd;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -28,34 +30,46 @@ import sernet.gs.model.Baustein;
 import sernet.gs.model.Gefaehrdung;
 import sernet.gs.model.Massnahme;
 
-public class BSIMassnahmenViewDragListener implements DragSourceListener {
+public class BSIToISMViewDragListener implements DragSourceListener {
 
 	private TreeViewer viewer;
-
-	public BSIMassnahmenViewDragListener(TreeViewer viewer) {
+	
+	public BSIToISMViewDragListener(TreeViewer viewer){
 		this.viewer = viewer;
 	}
-
-	public void dragFinished(DragSourceEvent event) {
-		// do nothing
-	}
-
-	public void dragSetData(DragSourceEvent event) {
-		event.data = DNDItems.BAUSTEIN;
-	}
-
-	@SuppressWarnings("unchecked")
+	
+	@Override
 	public void dragStart(DragSourceEvent event) {
 		IStructuredSelection selection = ((IStructuredSelection)viewer.getSelection());
+		if(selection==null) {
+			event.doit = false;
+			return;	
+		}
+		List selectionList = new ArrayList(selection.size());
+		
 		for (Iterator iter = selection.iterator(); iter.hasNext();) {
 			Object o = iter.next();
-			if (!(o instanceof Baustein || o instanceof Massnahme || o instanceof Gefaehrdung)) {
+			selectionList.add(o);
+			if (!(o instanceof Massnahme
+				  || o instanceof Gefaehrdung
+				  || o instanceof Baustein))
+			{
 				event.doit = false;
 				return;	
 			}
 		}
 		event.doit = true;
-		DNDItems.setItems(selection.toList());
+		DNDItems.setItems(selectionList);
+	}
+
+	@Override
+	public void dragSetData(DragSourceEvent event) {
+		event.data = DNDItems.CNAITEM;
+	}
+
+	@Override
+	public void dragFinished(DragSourceEvent event) {
+		// do nothing
 	}
 
 }

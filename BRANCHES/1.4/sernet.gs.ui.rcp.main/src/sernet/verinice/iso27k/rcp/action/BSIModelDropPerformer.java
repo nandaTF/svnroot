@@ -1,22 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2010 Daniel Murygin <dm[at]sernet[dot]de>.
- *
- * This program is free software: you can redistribute it and/or 
- * modify it under the terms of the GNU Lesser General Public License 
- * as published by the Free Software Foundation, either version 3 
- * of the License, or (at your option) any later version.
- * This program is distributed in the hope that it will be useful,    
- * but WITHOUT ANY WARRANTY; without even the implied warranty 
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
- * See the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public 
- * License along with this program. 
- * If not, see <http://www.gnu.org/licenses/>.
- * 
- * Contributors:
- *     Daniel Murygin <dm[at]sernet[dot]de> - initial API and implementation
- ******************************************************************************/
 package sernet.verinice.iso27k.rcp.action;
 
 import java.lang.reflect.InvocationTargetException;
@@ -35,48 +16,37 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IProgressService;
 
+import sernet.gs.model.Baustein;
+import sernet.gs.model.Gefaehrdung;
+import sernet.gs.model.Massnahme;
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.bsi.dnd.DNDItems;
 import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.verinice.interfaces.iso27k.IItem;
-import sernet.verinice.iso27k.rcp.ControlTransformOperation;
+import sernet.verinice.iso27k.rcp.GS2BSITransformOperation;
 import sernet.verinice.iso27k.service.ItemTransformException;
-import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Control;
 import sernet.verinice.model.iso27k.Group;
-import sernet.verinice.model.iso27k.Threat;
-import sernet.verinice.model.iso27k.Vulnerability;
-import sernet.verinice.model.samt.SamtTopic;
+import sernet.verinice.model.iso27k.IncidentScenario;
 
-/**
- * @author Daniel Murygin <dm[at]sernet[dot]de>
- */
-public class ControlDropPerformer implements DropPerformer {
-
-	private boolean isActive;
-
-	/**
-	 * @param view
-	 * @param viewer
-	 */
-	public ControlDropPerformer(ViewPart view) {
+public class BSIModelDropPerformer implements DropPerformer {
+	
+	private boolean isActive = false;
+	
+	private static final Logger LOG = Logger.getLogger(BSIModelDropPerformer.class);
+	
+	public BSIModelDropPerformer(ViewPart view){
+		
 	}
 
-	private static final Logger LOG = Logger.getLogger(ControlDropPerformer.class);
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.viewers.ViewerDropAdapter#performDrop(java.lang.Object)
-	 */
-	@SuppressWarnings("unchecked")
+	@Override
 	public boolean performDrop(Object data, Object target, Viewer viewer) {
-		if (!validateDropObjects(target)) {
+		if(!(validateDropObjects(target))){
 			return false;
 		}
+		
 		boolean success = isActive();
 		if (isActive()) {
 			if (LOG.isDebugEnabled()) {
@@ -86,14 +56,20 @@ public class ControlDropPerformer implements DropPerformer {
 				// because of validateDrop only Groups can be a target
 				Group group = (Group) target;
 				if(CnAElementHome.getInstance().isNewChildAllowed(group)) {
-					ControlTransformOperation operation = new ControlTransformOperation(group);
+					GS2BSITransformOperation operation = new GS2BSITransformOperation(group);
 					IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 					progressService.run(true, true, operation);
 					IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
 					boolean dontShow = preferenceStore.getBoolean(PreferenceConstants.INFO_CONTROLS_ADDED);
+					String objectType = "";
+					if(operation.isScenario()){
+						objectType = Messages.getString("GS2BSITransformer.1");
+					} else {
+						objectType = Messages.getString("ControlDropPerformer.2");
+					}
 					if (!dontShow) {
 						MessageDialogWithToggle dialog = MessageDialogWithToggle.openInformation(PlatformUI.getWorkbench().getDisplay().getActiveShell(), Messages.getString("ControlDropPerformer.1"), //$NON-NLS-1$
-								NLS.bind(Messages.getString("ControlDropPerformer.2"), operation.getNumberOfControls(), ((Group) target).getTitle()), //$NON-NLS-1$
+								NLS.bind(objectType, operation.getNumberOfControls(), ((Group) target).getTitle()), //$NON-NLS-1$
 								Messages.getString("ControlDropPerformer.3"), //$NON-NLS-1$
 								dontShow, preferenceStore, PreferenceConstants.INFO_CONTROLS_ADDED);
 						preferenceStore.setValue(PreferenceConstants.INFO_CONTROLS_ADDED, dialog.getToggleState());
@@ -118,35 +94,24 @@ public class ControlDropPerformer implements DropPerformer {
 			 }
 		}
 		return success;
+		
 	}
 
-    private void showException(ItemTransformException e) {
-        final String message = Messages.getString("ControlDropPerformer.0") + e.getMessage(); //$NON-NLS-1$
-        MessageDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), Messages.getString("ControlDropPerformer.4"), message); //$NON-NLS-1$
-    }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * sernet.verinice.iso27k.rcp.action.DropPerformer#validateDrop(java.lang
-	 * .Object, int, org.eclipse.swt.dnd.TransferData)
-	 */
-	public boolean validateDrop(Object target, int operation, TransferData transferType) {		
+	@Override
+	public boolean validateDrop(Object target, int operation,
+			TransferData transferType) {
 		boolean valid = false;
 		if (target instanceof Group) {
 			List<String> childTypeList = Arrays.asList(((Group) target).getChildTypes());
 			valid = childTypeList.contains(Control.TYPE_ID) 
-			|| childTypeList.contains(Threat.TYPE_ID) 
-			|| childTypeList.contains(Vulnerability.TYPE_ID)
-			|| childTypeList.contains(SamtTopic.TYPE_ID);
+			|| childTypeList.contains(IncidentScenario.TYPE_ID); 
 		}
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("validateDrop, target: " + target + " result: " + valid); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return isActive = valid;
 	}
-
+	
 	/**
 	 * @param target
 	 * @return
@@ -169,35 +134,30 @@ public class ControlDropPerformer implements DropPerformer {
 		if (target instanceof Group) {
 			List<String> childTypeList = Arrays.asList(((Group) target).getChildTypes());
 			if(childTypeList.contains(Control.TYPE_ID)) {
-				valid = isCorrectItemsForGroup(items, IItem.CONTROL);			
+				valid = isCorrectItemsForGroup(items, Control.TYPE_ID);			
 			}
-			if(!valid && childTypeList.contains(SamtTopic.TYPE_ID)) {
-				valid = isCorrectItemsForGroup(items, IItem.ISA_TOPIC);
-			}
-			if(!valid && childTypeList.contains(Threat.TYPE_ID)) {
-				valid = isCorrectItemsForGroup(items, IItem.THREAT);
-			}
-			if(!valid && childTypeList.contains(Vulnerability.TYPE_ID)) {
-				valid = isCorrectItemsForGroup(items, IItem.VULNERABILITY);
+			if(!valid && childTypeList.contains(IncidentScenario.TYPE_ID)) {
+				valid = isCorrectItemsForGroup(items, IncidentScenario.TYPE_ID);
 			}
 		}
 		return isActive = valid;
 	}
-
+	
+	
 	/**
 	 * @param items
 	 * @param control
 	 * @return
 	 */
-	private boolean isCorrectItemsForGroup(Collection<IItem> items, int type) {
-		boolean valid = true;
+	private boolean isCorrectItemsForGroup(Collection<IItem> items, String type) {
+		boolean valid = false;
 		try{
-			for (IItem item : items) {
-				// only check leaf nodes for type:
-				if (item.getItems() != null && item.getItems().size() > 0) {
-					valid = isCorrectItemsForGroup(item.getItems(), type);
-				} else {
-					valid = (item.getTypeId() == type);
+			for (Object item : items) {
+				if((item instanceof Massnahme || item instanceof Baustein) && type.equals(Control.TYPE_ID)){
+					valid = true;
+				}
+				if((item instanceof Gefaehrdung || item instanceof Baustein) && type.equals(IncidentScenario.TYPE_ID)){
+					valid = true;
 				}
 			}
 		}
@@ -211,13 +171,14 @@ public class ControlDropPerformer implements DropPerformer {
 		return valid;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see sernet.verinice.iso27k.rcp.action.DropPerformer#isActive()
-	 */
+	@Override
 	public boolean isActive() {
 		return isActive;
 	}
+	
+    private void showException(ItemTransformException e) {
+        final String message = Messages.getString("ControlDropPerformer.0") + e.getMessage(); //$NON-NLS-1$
+        MessageDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), Messages.getString("ControlDropPerformer.4"), message); //$NON-NLS-1$
+    }
 
 }
