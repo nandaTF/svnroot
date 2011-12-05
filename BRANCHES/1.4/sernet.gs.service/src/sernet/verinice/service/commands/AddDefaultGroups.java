@@ -104,7 +104,7 @@ public class AddDefaultGroups extends GenericCommand implements INoAccessControl
     private void checkGroupName(String name) {
         DetachedCriteria criteria = DetachedCriteria.forClass(Property.class);
         criteria.add(Restrictions.eq("propertyType", Configuration.PROP_ROLES));
-        criteria.add(Restrictions.eq("propertyValue", name));
+        criteria.add(Restrictions.like("propertyValue", name));
         List<Property> result = getPropertyDao().findByCriteria(criteria);
         if(result!=null && !result.isEmpty()) {
             throw new GroupExistsException("Default user group name already exists: " + name);
