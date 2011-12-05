@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 import sernet.gs.service.RuntimeCommandException;
 
 /**
- * Nothing to do in thius command when updating to 0.98 except updating the version itself.
+ * Nothing to do in this command when updating to 0.98 except updating the version itself.
  * Everything else is done in sernet.gs.server.SchemaCreator
  * and by Hibernate.
  * 

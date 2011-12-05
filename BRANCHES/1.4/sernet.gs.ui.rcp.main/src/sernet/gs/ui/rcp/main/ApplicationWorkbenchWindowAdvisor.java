@@ -17,6 +17,10 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Vector;
+
 import org.apache.log4j.Logger;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,8 +32,13 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
+import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.ActionBarAdvisor;
 import org.eclipse.ui.application.IActionBarConfigurer;
@@ -41,6 +50,10 @@ import sernet.gs.ui.rcp.main.actions.ShowCheatSheetAction;
 import sernet.gs.ui.rcp.main.bsi.views.OpenCataloguesJob;
 import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
+import sernet.hui.common.VeriniceContext;
+import sernet.springclient.RightsServiceClient;
+import sernet.verinice.interfaces.IInternalServerStartListener;
+import sernet.verinice.interfaces.InternalServerEvent;
 import sernet.verinice.iso27k.rcp.Iso27kPerspective;
 
 /**
@@ -52,7 +65,9 @@ import sernet.verinice.iso27k.rcp.Iso27kPerspective;
  * 
  */
 public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
-
+    
+    private static Logger LOG = Logger.getLogger(ApplicationWorkbenchWindowAdvisor.class);
+    
     public ApplicationWorkbenchWindowAdvisor(IWorkbenchWindowConfigurer configurer) {
         super(configurer);
     }
@@ -89,6 +104,10 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
         showFirstSteps();
         preloadDBMapper();
+        for(IWorkbenchPage page : PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPages()){
+            initPerspective(page.getPerspective().getId());
+        }
+        closeUnallowedViews();
     }
 
     private void preloadDBMapper() {
@@ -101,7 +120,7 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
             }
         };
         job.schedule();
-
+        
     }
 
     private void showFirstSteps() {
@@ -143,5 +162,72 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
             Logger.getLogger(this.getClass()).error(Messages.ApplicationWorkbenchWindowAdvisor_22, e);
         }
     }
+    
+    public void closeUnallowedViews(){
+        PlatformUI.getWorkbench().getActiveWorkbenchWindow().addPerspectiveListener(new PerspectiveAdapter(){
+           @Override
+           public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor descriptor){
+               super.perspectiveActivated(page, descriptor);
+               initPerspective(descriptor.getId());
+           }
+           @Override
+           public void perspectiveOpened(IWorkbenchPage page,
+                   IPerspectiveDescriptor perspective){
+               super.perspectiveOpened(page, perspective);
+               initPerspective(perspective.getId());
+           }
+        });
+    }
+    
+    private void initPerspective(String perspectiveID){
+        Activator.inheritVeriniceContextState();
+        Vector<String> openViews = new Vector<String>();
+        String rightID = "";
+        IViewReference chosenRef = null;
+        RightsServiceClient rService = (RightsServiceClient)VeriniceContext.get(VeriniceContext.RIGHTS_SERVICE);
+        for(IViewReference ref : PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViewReferences()){
+            openViews.add(ref.getId());
+            IViewPart part = ref.getView(true);
+            for(Method m : part.getClass().getDeclaredMethods()){
+                if(m.getName().equals("getRightID")){
+                    try {
+                        Object o = m.invoke(part, null);
+                        if(o instanceof String){
+                            rightID = (String)o;
+                            chosenRef = ref;
+                            break;
+                        }
+                    } catch (InvocationTargetException e) {
+                        LOG.error("Error while retrieving rightID from view " + ref.getId(), e);
+                    } catch (IllegalArgumentException e) {
+                        LOG.error("Error while retrieving rightID from view " + ref.getId(), e);
+                    } catch (IllegalAccessException e) {
+                        LOG.error("Error while retrieving rightID from view " + ref.getId(), e);
+                    }
+                }
+            }
+            final String rID = rightID;
+            final IViewReference rRef = chosenRef;
+            if(Activator.getDefault().isStandalone() && !Activator.getDefault().getInternalServer().isRunning()){
+                IInternalServerStartListener listener = new IInternalServerStartListener(){
+                    @Override
+                    public void statusChanged(InternalServerEvent e) {
+                        if(e.isStarted()){
+                            Activator.inheritVeriniceContextState();
+                            if(!((RightsServiceClient)VeriniceContext.get(VeriniceContext.RIGHTS_SERVICE)).isEnabled(rID)){
+                                PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().hideView(rRef);
+                            }
+                        }
+                    }
 
+                };
+                Activator.getDefault().getInternalServer().addInternalServerStatusListener(listener);
+            }  else {
+                Activator.inheritVeriniceContextState();
+                if(!((RightsServiceClient)VeriniceContext.get(VeriniceContext.RIGHTS_SERVICE)).isEnabled(rID)){
+                    PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().hideView(rRef);
+                }
+            }
+        }
+    }
 }

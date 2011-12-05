@@ -27,8 +27,10 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarContributionItem;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ContributionItemFactory;
 import org.eclipse.ui.actions.OpenPerspectiveAction;
@@ -66,12 +68,15 @@ import sernet.gs.ui.rcp.main.bsi.views.RelationView;
 import sernet.gs.ui.rcp.main.bsi.views.TodoView;
 import sernet.gs.ui.rcp.main.bsi.views.chart.ChartView;
 import sernet.gs.ui.rcp.main.preferences.ShowPreferencesAction;
+import sernet.hui.common.VeriniceContext;
 import sernet.verinice.bpm.rcp.OpenTaskViewAction;
 import sernet.verinice.bpm.rcp.TaskView;
+import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.iso27k.rcp.CatalogView;
 import sernet.verinice.iso27k.rcp.ISMView;
 import sernet.verinice.iso27k.rcp.Iso27kPerspective;
 import sernet.verinice.iso27k.rcp.action.ImportPersonFromLdap;
+import sernet.verinice.rcp.ProfileEditAction;
 
 /**
  * An action bar advisor is responsible for creating, adding, and disposing of
@@ -137,6 +142,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     private ShowBulkEditAction bulkEditAction;
 
     private ShowAccessControlEditAction accessControlEditAction;
+    
+    private ProfileEditAction profileEditAction;
 
     private ChangeOwnPasswordAction changeOwnPasswordAction;
     
@@ -204,43 +211,43 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         closeOthersAction = ActionFactory.CLOSE_OTHERS.create(window);
         register(closeOthersAction);
 
-        openBSIBrowserAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_0, BrowserView.ID, ImageCache.VIEW_BROWSER);
+        openBSIBrowserAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_0, BrowserView.ID, ImageCache.VIEW_BROWSER, ActionRightIDs.BSIBROWSER);
         register(openBSIBrowserAction);
 
-        openNoteAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_1, NoteView.ID, ImageCache.VIEW_NOTE);
+        openNoteAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_1, NoteView.ID, ImageCache.VIEW_NOTE, ActionRightIDs.NOTES);
         register(openNoteAction);
 
-        openFileAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_2, FileView.ID, ImageCache.ATTACH);
+        openFileAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_2, FileView.ID, ImageCache.ATTACH, ActionRightIDs.FILES);
         register(openFileAction);
 
-        openCatalogAction = new OpenMultipleViewAction(window, Messages.ApplicationActionBarAdvisor_3, CatalogView.ID, ImageCache.WRENCH);
+        openCatalogAction = new OpenMultipleViewAction(window, Messages.ApplicationActionBarAdvisor_3, CatalogView.ID, ImageCache.WRENCH, ActionRightIDs.ISMCATALOG);
         register(openCatalogAction);
 
-        openRelationViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_4, RelationView.ID, ImageCache.LINKS);
+        openRelationViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_4, RelationView.ID, ImageCache.LINKS, ActionRightIDs.RELATIONS);
         register(openRelationViewAction);
 
-        openBSIViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_5, BSIMassnahmenView.ID, ImageCache.VIEW_MASSNAHMEN);
+        openBSIViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_5, BSIMassnahmenView.ID, ImageCache.VIEW_MASSNAHMEN, ActionRightIDs.BSIMASSNAHMEN);
         register(openBSIViewAction);
 
-        openBSIModelViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_6, BsiModelView.ID, ImageCache.VIEW_BSIMODEL);
+        openBSIModelViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_6, BsiModelView.ID, ImageCache.VIEW_BSIMODEL, ActionRightIDs.BSIMODELVIEW);
         register(openBSIModelViewAction);
 
-        openISMViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_7, ISMView.ID, ImageCache.VIEW_ISMVIEW);
+        openISMViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_7, ISMView.ID, ImageCache.VIEW_ISMVIEW, ActionRightIDs.ISMVIEW);
         register(openISMViewAction);
 
-        openDSViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_8, DSModelView.ID, ImageCache.VIEW_DSMODEL);
+        openDSViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_8, DSModelView.ID, ImageCache.VIEW_DSMODEL, ActionRightIDs.DSMODELVIEW);
         register(openDSViewAction);
 
-        openTodoViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_9, TodoView.ID, ImageCache.VIEW_TODO);
+        openTodoViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_9, TodoView.ID, ImageCache.VIEW_TODO, ActionRightIDs.TODO);
         register(openTodoViewAction);
 
-        openDocumentViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_10, DocumentView.ID, ImageCache.VIEW_DOCUMENT);
+        openDocumentViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_10, DocumentView.ID, ImageCache.VIEW_DOCUMENT, ActionRightIDs.DOCUMENTVIEW);
         register(openDocumentViewAction);
 
-        openAuditViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_12, AuditView.ID, ImageCache.VIEW_AUDIT);
+        openAuditViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_12, AuditView.ID, ImageCache.VIEW_AUDIT, ActionRightIDs.AUDITVIEW);
         register(openAuditViewAction);
         
-        openTaskViewAction = new OpenTaskViewAction(window);
+        openTaskViewAction = new OpenTaskViewAction(window, ActionRightIDs.TASKVIEW);
         register(openTaskViewAction);
 
         reloadAction = new ReloadAction(window, Messages.ApplicationActionBarAdvisor_14);
@@ -270,6 +277,9 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
         accessControlEditAction = new ShowAccessControlEditAction(window, Messages.ApplicationActionBarAdvisor_17);
         register(accessControlEditAction);
+        
+        profileEditAction = new ProfileEditAction(window, Messages.ApplicationActionBarAdvisor_33);
+        register(profileEditAction);
 
         konsolidatorAction = new ShowKonsolidatorAction(window, Messages.ApplicationActionBarAdvisor_18);
         register(konsolidatorAction);
@@ -282,7 +292,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
         showCheatSheetListAction = new CheatSheetCategoryBasedSelectionAction(Messages.ApplicationActionBarAdvisor_20);
         
-        testAction = new TestAction(window, "test command", "asset", 152);
+        testAction = new TestAction(window, "test command", "asset", 152); //$NON-NLS-1$ //$NON-NLS-2$
         
         register(openDocumentViewAction);
 
@@ -318,6 +328,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         editMenu.add(bulkEditAction);
         editMenu.add(runRiskAnalysisAction);
         editMenu.add(accessControlEditAction);
+        editMenu.add(profileEditAction);
         editMenu.add(konsolidatorAction);
         editMenu.add(new Separator());
         editMenu.add(copyAction);
@@ -420,6 +431,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         myToolbar.add(new Separator());
         myToolbar.add(bulkEditAction);
         myToolbar.add(accessControlEditAction);
+        myToolbar.add(profileEditAction);
         myToolbar.add(konsolidatorAction);
 
         myToolbar.add(reloadAction);

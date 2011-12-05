@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
@@ -49,7 +48,10 @@ import sernet.gs.ui.rcp.main.service.taskcommands.BulkEditUpdate;
 import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.EntityType;
 import sernet.hui.common.connect.HUITypeFactory;
+import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.CommandException;
+import sernet.verinice.interfaces.IInternalServerStartListener;
+import sernet.verinice.interfaces.InternalServerEvent;
 import sernet.verinice.model.bsi.IBSIModelListener;
 import sernet.verinice.model.bsi.MassnahmenUmsetzung;
 import sernet.verinice.model.common.CnATreeElement;
@@ -64,7 +66,7 @@ import sernet.verinice.model.iso27k.IISO27kElement;
  *          2007) $ $LastChangedBy: koderman $
  * 
  */
-public class ShowBulkEditAction extends Action implements ISelectionListener {
+public class ShowBulkEditAction extends RightsEnabledAction implements ISelectionListener {
 
     // FIXME server: bulk edit does not notify changes on self
 
@@ -81,6 +83,21 @@ public class ShowBulkEditAction extends Action implements ISelectionListener {
         setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.CASCADE));
         window.getSelectionService().addSelectionListener(this);
         setToolTipText(Messages.ShowBulkEditAction_1);
+        setRightID(ActionRightIDs.BULKEDIT);
+        if(Activator.getDefault().isStandalone()  && !Activator.getDefault().getInternalServer().isRunning()){
+            IInternalServerStartListener listener = new IInternalServerStartListener(){
+                @Override
+                public void statusChanged(InternalServerEvent e) {
+                    if(e.isStarted()){
+                        setEnabled(checkRights());
+                    }
+                }
+
+            };
+            Activator.getDefault().getInternalServer().addInternalServerStatusListener(listener);
+        } else {
+            setEnabled(checkRights());
+        }
     }
 
     @Override
@@ -223,7 +240,9 @@ public class ShowBulkEditAction extends Action implements ISelectionListener {
                         return;
                     }
                 }
-                setEnabled(true);
+                if(checkRights()){
+                    setEnabled(true);
+                }
                 return;
             }
 
@@ -262,7 +281,9 @@ public class ShowBulkEditAction extends Action implements ISelectionListener {
                     setEnabled(false);
                     return;
                 }
-                setEnabled(true);
+                if(checkRights()){
+                    setEnabled(true);
+                }
                 return;
             }
         }

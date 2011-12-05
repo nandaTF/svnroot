@@ -86,6 +86,7 @@ import sernet.gs.ui.rcp.main.common.model.NullModel;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnAElementByType;
+import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.iso27k.rcp.JobScheduler;
 import sernet.verinice.iso27k.rcp.action.MetaDropAdapter;
@@ -98,6 +99,7 @@ import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.ds.IDatenschutzElement;
 import sernet.verinice.model.iso27k.ISO27KModel;
 import sernet.verinice.rcp.IAttachedToPerspective;
+import sernet.verinice.interfaces.ActionRightIDs;
 
 /**
  * View for model of own "ITVerbund" with associated controls, risk analysis
@@ -125,6 +127,8 @@ public class BsiModelView extends ViewPart implements IAttachedToPerspective {
 	private BSIModelViewFilterAction filterAction;
 
 	private BSIModelViewContentProvider contentProvider;
+	
+	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
@@ -188,6 +192,10 @@ public class BsiModelView extends ViewPart implements IAttachedToPerspective {
 	 */
 	public BsiModelView() {
 		this.cache = new TreeViewerCache();
+	}
+	
+	public String getRightID(){
+	    return ActionRightIDs.BSIMODELVIEW;
 	}
 
 	private void addBSIFilter() {

@@ -18,16 +18,26 @@
 package sernet.gs.ui.rcp.main.bsi.actions;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IViewActionDelegate;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.actions.ActionDelegate;
 
+import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.bsi.editors.EditorFactory;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
+import sernet.hui.common.VeriniceContext;
+import sernet.springclient.RightsServiceClient;
 import sernet.verinice.model.bsi.ITVerbund;
 import sernet.verinice.model.common.CnATreeElement;
+import sernet.verinice.interfaces.IInternalServerStartListener;
+import sernet.verinice.interfaces.InternalServerEvent;
+import sernet.verinice.interfaces.RightEnabledUserInteraction;
+import sernet.verinice.interfaces.ActionRightIDs;
 
-public class AddITVerbundActionDelegate extends AbstractAddCnATreeElementActionDelegate {
-
+public class AddITVerbundActionDelegate extends ActionDelegate implements IViewActionDelegate, RightEnabledUserInteraction  {
     /*
      * (non-Javadoc)
      * 
@@ -53,5 +63,59 @@ public class AddITVerbundActionDelegate extends AbstractAddCnATreeElementActionD
         } catch (Exception e) {
             ExceptionUtil.log(e, Messages.AddITVerbundActionDelegate_0);
         }
+    }
+
+	@Override
+	public void selectionChanged(IAction arg0, ISelection arg1) {
+		arg0.setEnabled(checkRights());
+	}
+
+	@Override
+	public void init(IViewPart arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void init(final IAction action){
+	    if(Activator.getDefault().isStandalone()  && !Activator.getDefault().getInternalServer().isRunning()){
+	        IInternalServerStartListener listener = new IInternalServerStartListener(){
+	            @Override
+	            public void statusChanged(InternalServerEvent e) {
+	                if(e.isStarted()){
+	                    action.setEnabled(checkRights());
+	                }
+	            }
+
+	        };
+	        Activator.getDefault().getInternalServer().addInternalServerStatusListener(listener);
+	    } else {
+	        action.setEnabled(checkRights());
+	    }
+	}
+
+    /* (non-Javadoc)
+     * @see sernet.verinice.interfaces.RightEnabledUserInteraction#checkRights()
+     */
+    @Override
+    public boolean checkRights() {
+        RightsServiceClient service = (RightsServiceClient)VeriniceContext.get(VeriniceContext.RIGHTS_SERVICE);
+        return service.isEnabled(getRightID());
+    }
+
+    /* (non-Javadoc)
+     * @see sernet.verinice.interfaces.RightEnabledUserInteraction#getRightID()
+     */
+    @Override
+    public String getRightID() {
+        return ActionRightIDs.ADDITVERBUND;
+    }
+
+    /* (non-Javadoc)
+     * @see sernet.verinice.interfaces.RightEnabledUserInteraction#setRightID(java.lang.String)
+     */
+    @Override
+    public void setRightID(String rightID) {
+        // DO nothing, no implementation needed
     }
 }

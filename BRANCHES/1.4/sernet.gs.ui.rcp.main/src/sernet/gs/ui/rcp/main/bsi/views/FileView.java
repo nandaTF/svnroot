@@ -67,6 +67,7 @@ import org.eclipse.ui.part.ViewPart;
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.ImageCache;
+import sernet.gs.ui.rcp.main.actions.RightsEnabledAction;
 import sernet.gs.ui.rcp.main.bsi.editors.AttachmentEditor;
 import sernet.gs.ui.rcp.main.bsi.editors.EditorFactory;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
@@ -74,6 +75,7 @@ import sernet.gs.ui.rcp.main.common.model.IModelLoadListener;
 import sernet.gs.ui.rcp.main.common.model.PlaceHolder;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.crudcommands.DeleteNote;
+import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ICommandService;
 import sernet.verinice.iso27k.rcp.JobScheduler;
@@ -85,6 +87,7 @@ import sernet.verinice.model.iso27k.ISO27KModel;
 import sernet.verinice.rcp.StatusResult;
 import sernet.verinice.service.commands.LoadAttachmentFile;
 import sernet.verinice.service.commands.LoadAttachments;
+import sernet.verinice.interfaces.ActionRightIDs;
 
 /**
  * Lists files {@link Attachment} attached to a CnATreeElement.
@@ -153,9 +156,9 @@ public class FileView extends ViewPart {
 	
 	private ISelectionListener selectionListener;
 
-	private Action addFileAction;
+	private RightsEnabledAction addFileAction;
 
-	private Action deleteFileAction;
+	private RightsEnabledAction deleteFileAction;
 
 	private Action doubleClickAction;
 	
@@ -173,7 +176,11 @@ public class FileView extends ViewPart {
 	
 	public FileView() {
 	}
-
+	
+	public String getRightID(){
+	    return ActionRightIDs.FILES;
+	}
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		initView(parent);
@@ -271,7 +278,7 @@ public class FileView extends ViewPart {
 		if (part == this) {
 			openAction.setEnabled(element!=null);
 			saveCopyAction.setEnabled(element!=null);
-			deleteFileAction.setEnabled(element!=null);
+			deleteFileAction.setEnabled(element!=null && deleteFileAction.checkRights());
 			return;
 		}
 			
@@ -293,7 +300,7 @@ public class FileView extends ViewPart {
 			Attachment att = (Attachment) ((IStructuredSelection) viewer.getSelection()).getFirstElement();
 			openAction.setEnabled(att!=null);
 			saveCopyAction.setEnabled(att!=null);
-			deleteFileAction.setEnabled(att!=null);
+			deleteFileAction.setEnabled(att!=null && deleteFileAction.checkRights());
 			
 		} catch (Exception e) {
 			LOG.error("Error while loading notes", e); //$NON-NLS-1$
@@ -390,7 +397,7 @@ public class FileView extends ViewPart {
 	}
 	
 	private void makeActions() {
-		addFileAction = new Action() {
+		addFileAction = new RightsEnabledAction(ActionRightIDs.ADDFILE) {
 			public void run() {
 				FileDialog fd = new FileDialog(FileView.this.getSite().getShell());
 		        fd.setText(Messages.FileView_14);
@@ -421,7 +428,7 @@ public class FileView extends ViewPart {
 		addFileAction.setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.NOTE_NEW));
 		addFileAction.setEnabled(false);
 		
-		deleteFileAction = new Action() {
+		deleteFileAction = new RightsEnabledAction(ActionRightIDs.DELETEFILE) {
 			public void run() {
 				int count = ((IStructuredSelection) viewer.getSelection()).size();
 				boolean confirm = MessageDialog.openConfirm(getViewer().getControl().getShell(), 

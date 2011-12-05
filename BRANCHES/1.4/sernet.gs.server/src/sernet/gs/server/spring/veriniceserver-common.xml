@@ -109,9 +109,14 @@ This variant:
 	<bean id="schemaCreator" class="sernet.gs.server.SchemaCreator">
 		<property name="dataSource" ref="dataSource" />
         <property name="dbUpdate97To98" ref="dbUpdate97To98" />
+        <property name="dbUpdate98To99" ref="dbUpdate98To99" />
 	</bean>
     
     <bean id="dbUpdate97To98" class="sernet.gs.server.DbUpdate97To98">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    <bean id="dbUpdate98To99" class="sernet.gs.server.DbUpdate98To99">
         <property name="dataSource" ref="dataSource" />
     </bean>
 
@@ -236,9 +241,10 @@ This variant:
 		<property name="exceptionHandler" ref="serverExceptionHandler" />
 		<property name="authService" ref="authService" />
 		<property name="ldapService" ref="ldapService" />
-        <property name="processService" ref="processService" />
+        <property name="processService" ref="processService" />  
+        <property name="configurationService" ref="configurationService" />
 	</bean>
-
+    
 	<bean id="commandService" parent="baseTxProxy">
 		<property name="target" ref="hibernateCommandService" />
 		<property name="transactionAttributes">
@@ -246,8 +252,28 @@ This variant:
 				<prop key="executeCommand">PROPAGATION_REQUIRED,-sernet.gs.ui.rcp.main.service.commands.UsernameExistsException</prop>
 			</props>
 		</property>
-
 	</bean>
+
+    
+    <bean id="configurationServiceImpl" class="sernet.verinice.service.ConfigurationService">
+        <property name="configurationDao" ref="configurationDao" />
+    </bean>
+    
+    
+    <bean id="configurationService" parent="baseTxProxy">
+        <property name="target" ref="configurationServiceImpl" />
+        <property name="transactionAttributes">
+            <props merge="true">
+                <prop key="loadUserData">PROPAGATION_SUPPORTS,readOnly</prop>
+            </props>
+        </property>
+    </bean>
+    
+    <bean id="rightsServiceMessages" class="sernet.verinice.service.AuthMessageSource">
+        <property name="basename">
+            <value>/WEB-INF/verinice-auth-messages</value>
+        </property>
+    </bean>
 
 	<!-- uncomment to activate runtime logging of methods defined in veriniceserver-debug.xml -->
 	<!--<import resource="veriniceserver-debug.xml"/>-->

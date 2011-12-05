@@ -29,12 +29,14 @@ import sernet.gs.common.ApplicationRoles;
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.gs.ui.rcp.main.bsi.dialogs.AccessControlEditDialog;
-import sernet.gs.ui.rcp.main.bsi.views.BsiModelView;
 import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
 import sernet.gs.ui.rcp.main.service.AuthenticationHelper;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
-import sernet.verinice.iso27k.rcp.ISMView;
+import sernet.verinice.interfaces.ActionRightIDs;
+import sernet.verinice.interfaces.IInternalServerStartListener;
+import sernet.verinice.interfaces.InternalServerEvent;
 import sernet.verinice.model.common.CnATreeElement;
+import sernet.verinice.rcp.UserprofileDialog;
 
 /**
  * {@link Action} that creates a dialog to modify the access rights of a
@@ -43,7 +45,7 @@ import sernet.verinice.model.common.CnATreeElement;
  * @author Robert Schuster <r.schuster@tarent.de>
  * 
  */
-public class ShowAccessControlEditAction extends Action implements ISelectionListener {
+public class ShowAccessControlEditAction extends RightsEnabledAction implements ISelectionListener {
 
     public static final String ID = "sernet.gs.ui.rcp.main.actions.showaccesscontroleditaction"; //$NON-NLS-1$
     private final IWorkbenchWindow window;
@@ -56,6 +58,21 @@ public class ShowAccessControlEditAction extends Action implements ISelectionLis
         setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.SECURITY));
         setToolTipText(Messages.ShowAccessControlEditAction_1);
         window.getSelectionService().addSelectionListener(this);
+        setRightID(ActionRightIDs.ACCESSCONTROL);
+        if(Activator.getDefault().isStandalone()  && !Activator.getDefault().getInternalServer().isRunning()){
+            IInternalServerStartListener listener = new IInternalServerStartListener(){
+                @Override
+                public void statusChanged(InternalServerEvent e) {
+                    if(e.isStarted()){
+                        setEnabled(checkRights());
+                    }
+                }
+
+            };
+            Activator.getDefault().getInternalServer().addInternalServerStatusListener(listener);
+        } else {
+            setEnabled(checkRights());
+        }
     }
 
     /* (non-Javadoc)
@@ -68,6 +85,7 @@ public class ShowAccessControlEditAction extends Action implements ISelectionLis
         if (selection == null || selection.size() < 1) {
             return;
         }
+        
         final AccessControlEditDialog dialog = new AccessControlEditDialog(window.getShell(), selection);
         if (dialog.open() != Window.OK) {
             return;
@@ -91,10 +109,8 @@ public class ShowAccessControlEditAction extends Action implements ISelectionLis
         // - permission handling is needed by IAuthService implementation
         // - user has administrator privileges
         boolean b = ((IStructuredSelection) selection).getFirstElement() instanceof CnATreeElement
-        && CnAElementHome.getInstance().isOpen() 
-        && ServiceFactory.isPermissionHandlingNeeded() 
-        && AuthenticationHelper.getInstance().currentUserHasRole(new String[] { ApplicationRoles.ROLE_ADMIN });
-        setEnabled(b);
+        && CnAElementHome.getInstance().isOpen();
+        setEnabled(b && checkRights());
     }
 
 }

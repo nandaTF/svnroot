@@ -20,8 +20,6 @@ package sernet.gs.ui.rcp.main.actions;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
@@ -33,15 +31,16 @@ import sernet.gs.ui.rcp.gsimport.ImportNotesTask;
 import sernet.gs.ui.rcp.gsimport.ImportTask;
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
-import sernet.gs.ui.rcp.main.bsi.dialogs.GSImportDialog;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
 import sernet.gs.ui.rcp.main.common.model.IModelLoadListener;
-import sernet.gs.ui.rcp.main.service.ServiceFactory;
+import sernet.verinice.interfaces.ActionRightIDs;
+import sernet.verinice.interfaces.IInternalServerStartListener;
+import sernet.verinice.interfaces.InternalServerEvent;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.iso27k.ISO27KModel;
 
 
-public class ImportGstoolNotesAction extends Action {
+public class ImportGstoolNotesAction extends RightsEnabledAction {
 	
 	public static final String ID = "sernet.gs.ui.rcp.main.importgstoolnotesaction";
 	private final IWorkbenchWindow window;
@@ -78,11 +77,24 @@ public class ImportGstoolNotesAction extends Action {
 		this.window = window;
         setText(label);
 		setId(ID);
-//		setEnabled(false); disable to make available on server only (see above)
 		setEnabled(true); // now works in standalone again
+		setRightID(ActionRightIDs.GSNOTESIMPORT);
+		if(Activator.getDefault().isStandalone()  && !Activator.getDefault().getInternalServer().isRunning()){
+		    IInternalServerStartListener listener = new IInternalServerStartListener(){
+		        @Override
+		        public void statusChanged(InternalServerEvent e) {
+		            if(e.isStarted()){
+		                setEnabled(checkRights());
+		            }
+		        }
+
+		    };
+		    Activator.getDefault().getInternalServer().addInternalServerStatusListener(listener);
+		} else {
+		    setEnabled(checkRights());
+		}
 		CnAElementFactory.getInstance().addLoadListener(loadListener);
 	}
-	
 	
 	public void run() {
 		try {

@@ -17,15 +17,18 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main.bsi.dialogs;
 
+import org.apache.log4j.Logger;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -38,14 +41,19 @@ import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.bsi.editors.BSIElementEditor;
 import sernet.gs.ui.rcp.main.bsi.editors.InputHelperFactory;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
+import sernet.hui.common.VeriniceContext;
 import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.EntityType;
 import sernet.hui.swt.widgets.HitroUIComposite;
+import sernet.hui.swt.widgets.SingleSelectionControl;
 import sernet.snutils.DBException;
 import sernet.verinice.model.common.configuration.Configuration;
+import sernet.verinice.interfaces.IAuthService;
 
 public class AccountDialog extends TitleAreaDialog {
-
+    
+    private static final Logger LOG = Logger.getLogger(AccountDialog.class);
+    
     private EntityType entType;
     private Entity entity = null;
     private boolean useRules = false;
@@ -56,11 +64,14 @@ public class AccountDialog extends TitleAreaDialog {
 	private String password;
 	private Text textName;
 	private String name;
+	private boolean isScopeOnly;
 
     private AccountDialog(Shell parent, EntityType entType) {
         super(parent);
         setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
         this.entType = entType;
+        IAuthService authService = (IAuthService) VeriniceContext.get(VeriniceContext.AUTH_SERVICE);
+        isScopeOnly = authService.isScopeOnly();
     }
 
     public AccountDialog(Shell shell, EntityType entType2, boolean b, String title, Entity entity) {
@@ -74,7 +85,7 @@ public class AccountDialog extends TitleAreaDialog {
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
         newShell.setText(title);
-        newShell.setSize(404, 840);
+        newShell.setSize(429, 640);
         
         // open the window right under the mouse pointer:
         Point cursorLocation = Display.getCurrent().getCursorLocation();
@@ -96,9 +107,18 @@ public class AccountDialog extends TitleAreaDialog {
     		gd.verticalAlignment = GridData.FILL;
     		container.setLayoutData(gd);
 
-    		createPasswordComposite(container);
+    		ScrolledComposite scrolledComposite = new ScrolledComposite(container, SWT.V_SCROLL);
+            scrolledComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+            scrolledComposite.setExpandHorizontal(true);
+            
+            Composite innerComposite = new Composite (scrolledComposite, SWT.NONE); 
+            scrolledComposite.setContent(innerComposite); 
+            innerComposite.setLayoutData(new GridData (SWT.FILL, SWT.FILL,true, false)); 
+            innerComposite.setLayout(new GridLayout (1, false));
     		
-            HitroUIComposite huiComposite = new HitroUIComposite(container, SWT.NULL, false);
+    		createPasswordComposite(innerComposite);
+    		
+            HitroUIComposite huiComposite = new HitroUIComposite(innerComposite, SWT.NULL, false);
             try {
                 if (this.entity == null) {
                     entity = new Entity(entType.getId());
@@ -107,21 +127,43 @@ public class AccountDialog extends TitleAreaDialog {
                 String[] tags = BSIElementEditor.getEditorTags(); 
                 
                 boolean strict = Activator.getDefault().getPluginPreferences().getBoolean(PreferenceConstants.HUI_TAGS_STRICT);
-                
+     
                 huiComposite.createView(entity, true, useRules, tags, strict);
+                
+                configureScopeOnly((Combo) huiComposite.getField(Configuration.PROP_SCOPE));
+               
+                
                 InputHelperFactory.setInputHelpers(entType, huiComposite);
-                return huiComposite;
+                //return huiComposite;
             } catch (DBException e) {
                 ExceptionUtil.log(e, Messages.BulkEditDialog_1);
             }
-
+            
+            scrolledComposite.setVisible(true);
+            Point size = innerComposite.computeSize(SWT.DEFAULT,SWT.DEFAULT);
+            innerComposite.setSize(size); 
+            container.layout(); 
+            return container;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Error while creating account dialog", e);
+            return null;
         }
-        return null;
+        
     }
 
-	private void createPasswordComposite(final Composite composite) {
+	/**
+     * @param field
+     */
+    private void configureScopeOnly(Combo combo) {
+        if(isScopeOnly) {
+            if(combo.getSelectionIndex()==-1) {
+                combo.select(0);
+            }
+            combo.setEnabled(false);
+        }
+    }
+
+    private void createPasswordComposite(final Composite composite) {
 		GridData gd = new GridData(GridData.GRAB_HORIZONTAL);
 		gd.grabExcessHorizontalSpace = true;
 		gd.grabExcessVerticalSpace = true;

@@ -25,8 +25,6 @@ import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
 
 import sernet.gs.model.Baustein;
-import sernet.gs.model.Gefaehrdung;
-import sernet.gs.model.Massnahme;
 
 public class BSIMassnahmenViewDragListener implements DragSourceListener {
 
@@ -48,8 +46,7 @@ public class BSIMassnahmenViewDragListener implements DragSourceListener {
 	public void dragStart(DragSourceEvent event) {
 		IStructuredSelection selection = ((IStructuredSelection)viewer.getSelection());
 		for (Iterator iter = selection.iterator(); iter.hasNext();) {
-			Object o = iter.next();
-			if (!(o instanceof Baustein || o instanceof Massnahme || o instanceof Gefaehrdung)) {
+			if (!(iter.next() instanceof Baustein)) {
 				event.doit = false;
 				return;	
 			}

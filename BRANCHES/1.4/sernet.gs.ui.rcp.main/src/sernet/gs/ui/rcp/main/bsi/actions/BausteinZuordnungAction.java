@@ -31,24 +31,32 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import sernet.gs.model.Baustein;
+import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.ImageCache;
+import sernet.gs.ui.rcp.main.actions.RightsEnabledAction;
 import sernet.gs.ui.rcp.main.bsi.dialogs.AutoBausteinDialog;
 import sernet.gs.ui.rcp.main.bsi.views.BSIKatalogInvisibleRoot;
 import sernet.gs.ui.rcp.main.bsi.views.BsiModelView;
 import sernet.gs.ui.rcp.main.common.model.BuildInput;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
+import sernet.verinice.interfaces.ActionRightIDs;
+import sernet.verinice.interfaces.IInternalServerStartListener;
+import sernet.verinice.interfaces.InternalServerEvent;
+import sernet.verinice.interfaces.RightEnabledUserInteraction;
 import sernet.verinice.model.bsi.BausteinUmsetzung;
 import sernet.verinice.model.bsi.IBSIStrukturElement;
 import sernet.verinice.model.common.CnATreeElement;
 
-public class BausteinZuordnungAction extends Action implements ISelectionListener {
+public class BausteinZuordnungAction extends RightsEnabledAction implements ISelectionListener {
 
     private static final Logger LOG = Logger.getLogger(BausteinZuordnungAction.class);
 
     public static final String ID = "sernet.gs.ui.rcp.main.bausteinzuordnungaction"; //$NON-NLS-1$
 
     private final IWorkbenchWindow window;
+    
+    private String rightID  = null;
 
     public BausteinZuordnungAction(IWorkbenchWindow window) {
         this.window = window;
@@ -58,6 +66,21 @@ public class BausteinZuordnungAction extends Action implements ISelectionListene
         setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.AUTOBAUSTEIN));
         window.getSelectionService().addSelectionListener(this);
         setToolTipText(Messages.BausteinZuordnungAction_2);
+        setRightID(ActionRightIDs.BAUSTEINZUORDNUNG);
+        if(Activator.getDefault().isStandalone()  && !Activator.getDefault().getInternalServer().isRunning()){
+            IInternalServerStartListener listener = new IInternalServerStartListener(){
+                @Override
+                public void statusChanged(InternalServerEvent e) {
+                    if(e.isStarted()){
+                        setEnabled(checkRights());
+                    }
+                }
+
+            };
+            Activator.getDefault().getInternalServer().addInternalServerStatusListener(listener);
+        } else {
+            setEnabled(checkRights());
+        }
     }
 
     @Override
@@ -106,7 +129,7 @@ public class BausteinZuordnungAction extends Action implements ISelectionListene
     }
 
     public void selectionChanged(IWorkbenchPart part, ISelection input) {
-
+        setEnabled(checkRights());
         if (input instanceof IStructuredSelection) {
             IStructuredSelection selection = (IStructuredSelection) input;
 
@@ -123,7 +146,9 @@ public class BausteinZuordnungAction extends Action implements ISelectionListene
                     return;
                 }
             }
-            setEnabled(true);
+            if(checkRights()){
+                setEnabled(true);
+            }
             return;
         }
         // no structured selection:

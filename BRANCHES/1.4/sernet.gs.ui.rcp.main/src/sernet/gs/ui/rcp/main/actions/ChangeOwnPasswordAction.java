@@ -67,7 +67,7 @@ public class ChangeOwnPasswordAction extends Action  {
         setToolTipText(Messages.ChangeOwnPasswordAction_0);
         setEnabled(true);
     }
-
+    
     /* (non-Javadoc)
      * @see org.eclipse.jface.action.Action#run()
      */

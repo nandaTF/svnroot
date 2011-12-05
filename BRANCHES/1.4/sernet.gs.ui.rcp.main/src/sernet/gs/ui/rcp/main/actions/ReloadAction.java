@@ -51,11 +51,11 @@ public class ReloadAction extends Action {
                 setEnabled(true);
             }
             public void loaded(ISO27KModel model) {
-                setEnabled(true);               
+                setEnabled(true);
             }
         });
     }
-
+    
     /*
      * (non-Javadoc)
      * 

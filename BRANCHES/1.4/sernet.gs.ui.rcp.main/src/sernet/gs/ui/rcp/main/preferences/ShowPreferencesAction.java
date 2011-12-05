@@ -50,7 +50,7 @@ public class ShowPreferencesAction extends Action {
 		setText(Messages.getString("ShowPreferencesAction.1")); //$NON-NLS-1$
 		//setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.TOOL));
 	}
-
+	
 	public void run() {
 
 		PreferenceManager manager = 

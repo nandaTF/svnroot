@@ -20,7 +20,6 @@ package sernet.gs.ui.rcp.main.actions;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -32,11 +31,14 @@ import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
 import sernet.gs.ui.rcp.main.common.model.IModelLoadListener;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.taskcommands.riskanalysis.RunRiskAnalysisCommand;
+import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.CommandException;
+import sernet.verinice.interfaces.IInternalServerStartListener;
+import sernet.verinice.interfaces.InternalServerEvent;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.iso27k.ISO27KModel;
 
-public class RunRiskAnalysisAction extends Action {
+public class RunRiskAnalysisAction extends RightsEnabledAction {
 
     public static final String ID = "sernet.gs.ui.rcp.main.runriskanalysisaction"; //$NON-NLS-1$
 
@@ -45,16 +47,34 @@ public class RunRiskAnalysisAction extends Action {
         setId(ID);
         setActionDefinitionId(ID);
         setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.ISO27K_RISK));
-        setEnabled(false);
+        setRightID(ActionRightIDs.RISKANALYSIS);
+        if(Activator.getDefault().isStandalone()  && !Activator.getDefault().getInternalServer().isRunning()){
+            IInternalServerStartListener listener = new IInternalServerStartListener(){
+                @Override
+                public void statusChanged(InternalServerEvent e) {
+                    if(e.isStarted()){
+                        setEnabled(checkRights());
+                    }
+                }
+
+            };
+            Activator.getDefault().getInternalServer().addInternalServerStatusListener(listener);
+        } else {
+            setEnabled(checkRights());
+        }
         CnAElementFactory.getInstance().addLoadListener(new IModelLoadListener() {
             public void closed(BSIModel model) {
                 setEnabled(false);
             }
             public void loaded(BSIModel model) {
-                setEnabled(true);
+                if(checkRights()){
+                    setEnabled(true);
+                }
             }
             public void loaded(ISO27KModel model) {
-                setEnabled(true);               
+                if(checkRights()){
+                    setEnabled(true);
+                }
             }
         });
     }

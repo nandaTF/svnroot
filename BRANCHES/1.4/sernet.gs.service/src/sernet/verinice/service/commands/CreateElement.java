@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import sernet.gs.service.RetrieveInfo;
 import sernet.gs.service.RuntimeCommandException;
 import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IAuthAwareCommand;
@@ -96,11 +97,12 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand impl
 
     public void execute() {
         IBaseDao<T, Serializable> dao = (IBaseDao<T, Serializable>) getDaoFactory().getDAO(clazz);
-        IBaseDao<Object, Serializable> containerDAO = getDaoFactory().getDAOforTypedElement(container);
+        IBaseDao<CnATreeElement, Serializable> containerDAO = getDaoFactory().getDAOforTypedElement(container);
 
         try {
-            if (!skipReload)
+            if (!skipReload && !containerDAO.contains(container)) {
                 containerDAO.reload(container, container.getDbId());
+            }
 
             // get constructor with parent-parameter and create new object:
             if(clazz.equals(Organization.class)) {
@@ -114,13 +116,17 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand impl
             }
 
             if (authService.isPermissionHandlingNeeded()) {
-                addPermissions();
+                addPermissions(containerDAO);
             }
 
             child = dao.merge(child, false);
             container.addChild(child);
             child.setParent(container);
 
+            if(clazz.equals(Organization.class)) {
+                setScope((Organization)child);
+            }
+            
             // initialize UUID, used to find container in display in views:
             container.getUuid();
         } catch (Exception e) {
@@ -129,7 +135,18 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand impl
         }
     }
 
-    private void addPermissions() {
+    /**
+     * @param child2
+     */
+    private void setScope(Organization org) {
+        org.setScopeId(org.getDbId());
+        for (CnATreeElement child : org.getChildren()) {
+            child.setScopeId(org.getDbId());
+        }
+        
+    }
+
+    private void addPermissions(IBaseDao<CnATreeElement, Serializable> containerDAO) {
         // By default, inherit permissions from parent element but ITVerbund
         // instances cannot do this, as its parents (BSIModel) is not visible
         // and has no permissions. Therefore we use the name of the currently
@@ -138,11 +155,14 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand impl
         if (child instanceof ITVerbund || child instanceof Organization) {
             addPermissions(child);           
         } else {
-            child.setPermissions(Permission.clonePermissionSet(child, container.getPermissions()));
+            RetrieveInfo ri = new RetrieveInfo();
+            ri.setPermissions(true);
+            CnATreeElement elementPerm = containerDAO.retrieve(container.getDbId(), ri);
+            child.setPermissions(Permission.clonePermissionSet(child, elementPerm.getPermissions()));
         }
     }
     
-    private void addPermissions(/*not final*/ CnATreeElement element) {
+    protected void addPermissions(/*not final*/ CnATreeElement element) {
         HashSet<Permission> newperms = new HashSet<Permission>();
         newperms.add(Permission.createPermission(element, authService.getUsername(), true, true));
         element.setPermissions(newperms);

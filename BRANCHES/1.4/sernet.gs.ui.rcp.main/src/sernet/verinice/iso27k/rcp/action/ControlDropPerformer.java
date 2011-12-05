@@ -191,19 +191,13 @@ public class ControlDropPerformer implements DropPerformer {
 	 */
 	private boolean isCorrectItemsForGroup(Collection<IItem> items, int type) {
 		boolean valid = true;
-		try{
-			for (IItem item : items) {
-				// only check leaf nodes for type:
-				if (item.getItems() != null && item.getItems().size() > 0) {
-					valid = isCorrectItemsForGroup(item.getItems(), type);
-				} else {
-					valid = (item.getTypeId() == type);
-				}
+		for (IItem item : items) {
+			// only check leaf nodes for type:
+			if (item.getItems() != null && item.getItems().size() > 0) {
+				valid = isCorrectItemsForGroup(item.getItems(), type);
+			} else {
+				valid = (item.getTypeId() == type);
 			}
-		}
-		catch (ClassCastException e){
-			LOG.error("Wrong type of item dropped", e);
-			valid = false;
 		}
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("isCorrectItemsForGroup result: " + valid); //$NON-NLS-1$

@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -42,10 +41,13 @@ import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.taskcommands.KonsolidatorCommand;
 import sernet.hui.common.connect.EntityType;
+import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.CommandException;
+import sernet.verinice.interfaces.IInternalServerStartListener;
+import sernet.verinice.interfaces.InternalServerEvent;
 import sernet.verinice.model.bsi.BausteinUmsetzung;
 
-public class ShowKonsolidatorAction extends Action implements ISelectionListener {
+public class ShowKonsolidatorAction extends RightsEnabledAction implements ISelectionListener {
 
     public static final String ID = "sernet.gs.ui.rcp.main.actions.showkonsolidatoraction"; //$NON-NLS-1$
 
@@ -59,8 +61,23 @@ public class ShowKonsolidatorAction extends Action implements ISelectionListener
         setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.KONSOLIDATOR));
         window.getSelectionService().addSelectionListener(this);
         setToolTipText(Messages.ShowKonsolidatorAction_1);
-    }
+        setRightID(ActionRightIDs.KONSOLIDATOR);
+        if(Activator.getDefault().isStandalone()  && !Activator.getDefault().getInternalServer().isRunning()){
+            IInternalServerStartListener listener = new IInternalServerStartListener(){
+                @Override
+                public void statusChanged(InternalServerEvent e) {
+                    if(e.isStarted()){
+                        setEnabled(checkRights());
+                    }
+                }
 
+            };
+            Activator.getDefault().getInternalServer().addInternalServerStatusListener(listener);
+        } else {
+            setEnabled(checkRights());
+        }
+    }
+    
     /* (non-Javadoc)
      * @see org.eclipse.jface.action.Action#run()
      */
@@ -158,7 +175,9 @@ public class ShowKonsolidatorAction extends Action implements ISelectionListener
                     return;
                 }
             }
-            setEnabled(true);
+            if(checkRights()){
+                setEnabled(true);
+            }
             return;
         }
         // no structured selection:
