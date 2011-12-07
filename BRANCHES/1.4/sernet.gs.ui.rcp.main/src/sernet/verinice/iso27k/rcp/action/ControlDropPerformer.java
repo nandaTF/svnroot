@@ -43,7 +43,6 @@ import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.verinice.interfaces.iso27k.IItem;
 import sernet.verinice.iso27k.rcp.ControlTransformOperation;
 import sernet.verinice.iso27k.service.ItemTransformException;
-import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Control;
 import sernet.verinice.model.iso27k.Group;
 import sernet.verinice.model.iso27k.Threat;
@@ -191,13 +190,19 @@ public class ControlDropPerformer implements DropPerformer {
 	 */
 	private boolean isCorrectItemsForGroup(Collection<IItem> items, int type) {
 		boolean valid = true;
-		for (IItem item : items) {
-			// only check leaf nodes for type:
-			if (item.getItems() != null && item.getItems().size() > 0) {
-				valid = isCorrectItemsForGroup(item.getItems(), type);
-			} else {
-				valid = (item.getTypeId() == type);
+		try{
+			for (IItem item : items) {
+				// only check leaf nodes for type:
+				if (item.getItems() != null && item.getItems().size() > 0) {
+					valid = isCorrectItemsForGroup(item.getItems(), type);
+				} else {
+					valid = (item.getTypeId() == type);
+				}
 			}
+		}
+		catch (ClassCastException e){
+			LOG.error("Wrong type of item dropped");
+			valid = false;
 		}
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("isCorrectItemsForGroup result: " + valid); //$NON-NLS-1$
