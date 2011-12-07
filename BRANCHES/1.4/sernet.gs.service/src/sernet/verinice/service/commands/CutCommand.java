@@ -134,7 +134,7 @@ public class CutCommand extends GenericCommand {
         command = getCommandService().executeCommand(command);
         parentOld = (CnATreeElement) command.getElement();
           
-        element.setParent(group);
+        element.setParentAndScope(group);
         group.addChild(element);
         
         // save element

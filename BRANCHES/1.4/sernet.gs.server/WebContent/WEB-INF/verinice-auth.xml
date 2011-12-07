@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<p:auth version="0" type="whitelist" 
+<p:auth version="0" type="blacklist" 
     xmlns:p="http://www.verinice.org/auth" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://www.verinice.org/auth verinice-auth.xsd">

@@ -165,7 +165,7 @@ public class CopyCommand extends GenericCommand {
         SaveElement<CnATreeElement> saveCommand = new SaveElement<CnATreeElement>(newElement);
         saveCommand = getCommandService().executeCommand(saveCommand);
         newElement = (CnATreeElement) saveCommand.getElement();
-        newElement.setParent(toGroup);
+        newElement.setParentAndScope(toGroup);
         if (getLog().isDebugEnabled()) {
             getLog().debug("Copy created: " + newElement.getTitle()); //$NON-NLS-1$
         }
@@ -179,7 +179,7 @@ public class CopyCommand extends GenericCommand {
         saveCommand = getCommandService().executeCommand(saveCommand);
         CnATreeElement child = saveCommand.getNewElement();
         container.addChild(child);
-        child.setParent(container);
+        child.setParentAndScope(container);
         return child;
     }
     

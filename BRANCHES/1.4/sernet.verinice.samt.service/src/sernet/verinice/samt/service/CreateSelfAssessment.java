@@ -223,7 +223,7 @@ public class CreateSelfAssessment extends GenericCommand implements IChangeLoggi
                 addPermissions(element);
                 
                 group.addChild(element);
-                element.setParent(group);
+                element.setParentAndScope(group);
                 changedElements.add(element);
             }
         }

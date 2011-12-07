@@ -167,7 +167,7 @@ public class CutService extends PasteService implements IProgressTask {
 		command = getCommandService().executeCommand(command);
 		parentOld = (CnATreeElement) command.getElement();
 		  
-		element.setParent(group);
+		element.setParentAndScope(group);
         group.addChild(element);
 		
 		// save element
