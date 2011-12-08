@@ -95,6 +95,7 @@ public class ProfileDialog extends TitleAreaDialog {
 
     public ProfileDialog(Shell parent) {
         super(parent);
+        setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
         auth = getRightService().getConfiguration();
         allActions = Arrays.asList(ActionRightIDs.getAllRightIDs());
         unselectedActions = new ArrayList<Action>(allActions.size());    
@@ -108,6 +109,7 @@ public class ProfileDialog extends TitleAreaDialog {
      */
     public ProfileDialog(Shell parent, Auth auth, String profileName) {
         super(parent);
+        setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
         this.auth = auth;
         this.profileName = profileName;
         allActions = Arrays.asList(ActionRightIDs.getAllRightIDs());
@@ -128,9 +130,9 @@ public class ProfileDialog extends TitleAreaDialog {
         
         initializeDialogUnits(parent);
 
-        Composite composite = new Composite(parent, SWT.NONE);
+        Composite composite = new Composite(parent, SWT.FILL);
         composite.setLayout(new GridLayout());
-        composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+        composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
         Composite comboComposite = new Composite(composite, SWT.NONE);
         GridData gridData = new GridData(SWT.FILL, SWT.NONE, true, false);
