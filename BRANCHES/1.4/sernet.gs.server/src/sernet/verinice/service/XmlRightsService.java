@@ -22,6 +22,7 @@ package sernet.verinice.service;
 import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -44,12 +45,19 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.core.io.Resource;
 
+import sernet.hui.common.VeriniceContext;
 import sernet.hui.common.connect.Property;
+import sernet.verinice.interfaces.ActionRightIDs;
+import sernet.verinice.interfaces.IAuthService;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.interfaces.IRightsService;
+import sernet.verinice.interfaces.IRightsServiceClient;
+import sernet.verinice.model.auth.Action;
 import sernet.verinice.model.auth.Auth;
+import sernet.verinice.model.auth.ConfigurationType;
 import sernet.verinice.model.auth.OriginType;
 import sernet.verinice.model.auth.Profile;
+import sernet.verinice.model.auth.ProfileRef;
 import sernet.verinice.model.auth.Profiles;
 import sernet.verinice.model.auth.Userprofile;
 import sernet.verinice.model.auth.Userprofiles;
@@ -99,6 +107,14 @@ public class XmlRightsService implements IRightsService {
     private IBaseDao<Property, Integer> propertyDao;
     
     private IRemoteMessageSource messages;
+    
+    private IAuthService authService;
+    
+    private IRightsServiceClient rightServiceClient;
+    
+    private HashMap<String, Profile> profileMap;
+    
+    private static transient Logger LOG = Logger.getLogger(XmlRightsService.class);
 
     /* (non-Javadoc)
      * @see sernet.verinice.interfaces.IRightsService#getConfiguration()
@@ -178,33 +194,43 @@ public class XmlRightsService implements IRightsService {
     @Override
     public void updateConfiguration(Auth auth) {
         // remove profiles from verinice-auth-default.xml
-        Profiles profilesMod = new Profiles();     
-        for (Profile profile : auth.getProfiles().getProfile()) {
-            if(!OriginType.DEFAULT.equals(profile.getOrigin())) {
-                profilesMod.getProfile().add(profile);
+        if(isEnabled(ActionRightIDs.EDITPROFILE, auth)){
+
+
+            Profiles profilesMod = new Profiles();     
+            for (Profile profile : auth.getProfiles().getProfile()) {
+
+                if(!OriginType.DEFAULT.equals(profile.getOrigin())) {
+                    profilesMod.getProfile().add(profile);
+                }
             }
-        }
-        auth.setProfiles(profilesMod);
-        // remove userprofiles from verinice-auth-default.xml
-        Userprofiles userprofilesMod = new Userprofiles();     
-        for (Userprofile userprofile : auth.getUserprofiles().getUserprofile()) {
-            if(!OriginType.DEFAULT.equals(userprofile.getOrigin())) {
-                userprofilesMod.getUserprofile().add(userprofile);
+            auth.setProfiles(profilesMod);
+            // remove userprofiles from verinice-auth-default.xml
+            Userprofiles userprofilesMod = new Userprofiles();   
+            boolean securityCheck = false;
+            for (Userprofile userprofile : auth.getUserprofiles().getUserprofile()) {
+                if(userprofile.getLogin().equals(getAuthService().getUsername())){
+                    securityCheck = true;
+                }
+                if(!OriginType.DEFAULT.equals(userprofile.getOrigin())) {
+                    userprofilesMod.getUserprofile().add(userprofile);
+                }
             }
-        }
-        auth.setUserprofiles(userprofilesMod);
-        
-        Marshaller marshaller;
-        try {
-            marshaller = getContext().createMarshaller();       
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8"); 
-            marshaller.setSchema(getSchema());
-            marshaller.marshal( auth, new FileOutputStream( getAuthConfiguration().getFile().getPath() ) );
-            // set auth to null, next call of getCofiguration will read it from disk
-            this.auth = null;
-        } catch (Exception e) {
-            log.error("", e);
+            auth.setUserprofiles(userprofilesMod);
+            if(securityCheck){
+                Marshaller marshaller;
+                try {
+                    marshaller = getContext().createMarshaller();       
+                    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+                    marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8"); 
+                    marshaller.setSchema(getSchema());
+                    marshaller.marshal( auth, new FileOutputStream( getAuthConfiguration().getFile().getPath() ) );
+                    // set auth to null, next call of getCofiguration will read it from disk
+                    this.auth = null;
+                } catch (Exception e) {
+                    log.error("", e);
+                }
+            }
         }
     }
 
@@ -500,4 +526,76 @@ public class XmlRightsService implements IRightsService {
         return schema;
     }
 
+    public IAuthService getAuthService() {
+        return authService;
+    }
+
+    public void setAuthService(IAuthService authService) {
+        this.authService = authService;
+    }
+
+    public IRightsServiceClient getRightServiceClient() {
+        return rightServiceClient;
+    }
+
+    public void setRightServiceClient(IRightsServiceClient rightServiceClient) {
+        this.rightServiceClient = rightServiceClient;
+    }
+    
+    private  HashMap<String, Action> loadUserprofile(Auth auth) {
+        HashMap<String, Action> actionMap = new HashMap<String, Action>();
+       
+        actionMap = new HashMap<String, Action>();
+        for (Userprofile userprofile : auth.getUserprofiles().getUserprofile()) {  
+            List<ProfileRef> profileList = userprofile.getProfileRef();
+            if(profileList!=null) {
+                for (ProfileRef profileRef : profileList) {
+                    Profile profileWithActions = getProfileMap().get(profileRef.getName());
+                    if(profileWithActions!=null) {
+                        List<Action> actionList = profileWithActions.getAction();
+                        for (Action action : actionList) {
+                            actionMap.put(action.getId(), action);            
+                        }
+                    } else {
+                        LOG.error("Could not find profile " + profileRef.getName() + " of user " + getAuthService().getUsername());
+                    }
+                }
+            }
+        }
+        return actionMap;
+    }
+    
+    private HashMap<String, Profile> getProfileMap() {
+        if(profileMap == null){
+            Profiles profiles = getProfiles();   
+            profileMap = new HashMap<String, Profile>();
+            for (Profile profile : profiles.getProfile()) {
+                profileMap.put(profile.getName(), profile);
+            }
+        }
+        return profileMap;
+    }
+    
+    public boolean isEnabled(String actionId, Auth auth) {
+        boolean returnValue = false;
+        try {
+            HashMap<String, Action> actionMap = loadUserprofile(auth);
+            if(actionMap != null) {
+                returnValue = actionMap.get(actionId)!=null && isWhitelist() || 
+                              actionMap.get(actionId)==null && isBlacklist();
+            }
+            return returnValue;
+        } catch (Exception e) {
+            LOG.error("Error while checking action. Returning false", e);
+            return returnValue;
+        }
+    }
+    
+    public boolean isWhitelist() {
+        return ConfigurationType.WHITELIST.equals(getConfiguration().getType());
+    }
+    
+    public boolean isBlacklist() {
+        return ConfigurationType.BLACKLIST.equals(getConfiguration().getType());
+    }
 }
