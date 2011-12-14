@@ -3291,7 +3291,7 @@ the value between <param></param> will be used directly if no string is found fo
             id="asset_document"
             isURL="true" />
 
-    <!-- TODO externalize strings -->
+    
 		<huipropertygroup id="asset_bcm_group" name="Business Continuity" tags="BCM" >
             <huiproperty id="asset_bcm_mtpd" name="MTPD (h)" tags="BCM" ></huiproperty>
             <huiproperty id="asset_bcm_rpo" name="RPO (h)" tags="BCM" ></huiproperty>
@@ -5053,7 +5053,6 @@ the value between <param></param> will be used directly if no string is found fo
             isURL="true" />
             
             
-       <!-- TODO externalize strings -->
         <huipropertygroup id="process_bcm_group" name="Business Continuity" tags="BCM" >
             <huiproperty id="process_bcm_mtpd" name="MTPD (h)" tags="BCM" ></huiproperty>
             <huiproperty id="process_bcm_rpo" name="RPO (h)" tags="BCM" ></huiproperty>
