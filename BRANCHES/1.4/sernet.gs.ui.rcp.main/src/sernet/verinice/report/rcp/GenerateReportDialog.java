@@ -486,8 +486,12 @@ public class GenerateReportDialog extends TitleAreaDialog {
         }
     }
     
-    protected String getDefaultOutputFilename() {     
-        StringBuilder sb = new StringBuilder("unknown");
+    protected String getDefaultOutputFilename() {
+        String outputFileName = chosenReportType.getReportFile();
+        if(outputFileName == null || outputFileName.equals("")){
+            outputFileName = "unknown";
+        }
+        StringBuilder sb = new StringBuilder(outputFileName);
         if(chosenOutputFormat!=null) {
             sb.append(".").append(chosenOutputFormat.getFileSuffix());
         }

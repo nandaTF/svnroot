@@ -61,7 +61,7 @@ public class UserReportType implements IReportType {
 	}
 
 	public String getLabel() {
-		return Messages.UserReportType_3;
+		return Messages.UserReportType_2;
 	}
 	
 	public IOutputFormat[] getOutputFormats() {
