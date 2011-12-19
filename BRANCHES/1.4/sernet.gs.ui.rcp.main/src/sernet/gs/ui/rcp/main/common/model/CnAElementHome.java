@@ -67,6 +67,7 @@ import sernet.verinice.model.iso27k.IISO27kElement;
 import sernet.verinice.model.iso27k.ISO27KModel;
 import sernet.verinice.model.iso27k.ImportIsoGroup;
 import sernet.verinice.model.iso27k.IncidentScenario;
+import sernet.verinice.model.iso27k.Organization;
 import sernet.verinice.model.iso27k.Threat;
 import sernet.verinice.model.iso27k.Vulnerability;
 import sernet.verinice.service.commands.CreateElement;
@@ -354,7 +355,7 @@ public class CnAElementHome {
 
         // ITVerbund instances can be removed when
         // one has write access to it (There is no parent to check).
-        if (cte instanceof ITVerbund) {
+        if (cte instanceof ITVerbund || cte instanceof Organization) {
             return isWriteAllowed(cte);
         }
 
