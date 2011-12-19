@@ -54,7 +54,7 @@ public class CommonsExecuter extends CommonsHttpInvokerRequestExecutor {
     private static final int DEFAULT_CONNECTION_TIMEOUT_MILLISECONDS =  1000;
     // 30min = 30*60*1000 = 1.800.000 ms
     private static final int DEFAULT_READ_TIMEOUT_MILLISECONDS =  (30 * 60 * 1000);
-    private final Logger log = Logger.getLogger(CommonsExecuter.class);
+    private static final Logger LOG = Logger.getLogger(CommonsExecuter.class);
     
     private int readTimeout = DEFAULT_READ_TIMEOUT_MILLISECONDS;
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT_MILLISECONDS;
@@ -98,30 +98,30 @@ public class CommonsExecuter extends CommonsHttpInvokerRequestExecutor {
         
         if(proxyHost!=null && proxyPort!=null && !proxyHost.isEmpty() ) {
             httpClient.getHostConfiguration().setProxy(proxyHost,proxyPort);
-            if (log.isInfoEnabled()) {
-                log.info("Using proxy host: " + proxyHost + ", port: " + proxyPort);
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Using proxy host: " + proxyHost + ", port: " + proxyPort);
             }
             String proxyName = System.getProperty("http.proxyName");
             String proxyPassword = System.getProperty("http.proxyPassword");
             
             if(proxyName!=null && proxyPassword!=null) {
                 httpClient.getState().setProxyCredentials(AuthScope.ANY, new UsernamePasswordCredentials(proxyName, proxyPassword));
-                if (log.isInfoEnabled()) {
-                    log.info("Using proxy user name: " + proxyHost + " and password");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Using proxy user name: " + proxyHost + " and password");
                 }
             }
-        } else if (log.isDebugEnabled()) {
-            log.debug("No proxy is used.");
+        } else if (LOG.isDebugEnabled()) {
+            LOG.debug("No proxy is used.");
         }    
     }
  
     protected RemoteInvocationResult doExecuteRequest(
             HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
             throws IOException, ClassNotFoundException {
-        if (log.isInfoEnabled()) {
-            log.info("doExecuteRequest: " + config.getServiceUrl());
-            if (log.isDebugEnabled()) {
-                log.debug("Debug Stacktrace: ", new RuntimeException("This is not an error. Exception is thrown for debug only."));
+        if (LOG.isInfoEnabled()) {
+            LOG.info("doExecuteRequest: " + config.getServiceUrl());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Debug Stacktrace: ", new RuntimeException("This is not an error. Exception is thrown for debug only."));
             }
         }
         return super.doExecuteRequest(config, baos);
@@ -172,6 +172,9 @@ public class CommonsExecuter extends CommonsHttpInvokerRequestExecutor {
 
 class AuthDialog extends UserValidationDialog {
     
+    private static final Logger LOG = Logger.getLogger(AuthDialog.class);
+    
+    private static boolean canceled = false;
     
     public static Authentication getAuthentication(final String host, final String message) {
         class UIOperation implements Runnable {
@@ -195,9 +198,13 @@ class AuthDialog extends UserValidationDialog {
      *         <code>null</code> if the dialog has been cancelled
      */
     protected static Authentication askForAuthentication(String host, String message) {
+        Authentication authentication = null; 
         UserValidationDialog ui = new AuthDialog(null, host, message); 
-        ui.open();
-        return ui.getAuthentication();
+        if(!canceled) {
+            ui.open();         
+        } 
+        authentication = ui.getAuthentication();
+        return authentication;
     }
      
     /**
@@ -212,6 +219,15 @@ class AuthDialog extends UserValidationDialog {
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
         newShell.setText("verinice.PRO - Login"); 
+    }
+    
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.dialogs.Dialog#cancelPressed()
+     */
+    @Override
+    protected void cancelPressed() {
+        canceled=true;
+        super.cancelPressed();
     }
 }
 
