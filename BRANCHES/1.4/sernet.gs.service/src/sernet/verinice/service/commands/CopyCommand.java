@@ -38,6 +38,7 @@ import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.interfaces.IPostProcessor;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.IISO27kGroup;
+import sernet.verinice.model.bsi.BausteinUmsetzung;
 
 /**
  * Copies a list of elements with all children to a group.
@@ -209,7 +210,9 @@ public class CopyCommand extends GenericCommand {
             if(depth==0) {
                 insertList.add(element);
             }
-            if(element instanceof IISO27kGroup && element.getChildren()!=null) {
+            if((element instanceof IISO27kGroup || element instanceof BausteinUmsetzung) && element.getChildren()!=null) {
+
+//            if(element instanceof IISO27kGroup && element.getChildren()!=null) {
                 depth++;
                 for (CnATreeElement child : element.getChildren()) {
                     createInsertList(child,tempList,insertList,depth,removed);

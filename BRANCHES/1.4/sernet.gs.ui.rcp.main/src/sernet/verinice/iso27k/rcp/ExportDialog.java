@@ -172,6 +172,7 @@ public class ExportDialog extends TitleAreaDialog {
 	                selectedElementSet.add(selectedElement);
 	                if(txtLocation!=null) {
 	                    filePath = selectedElement.getTitle() + getDefaultExtension();
+	                    filePath = System.getProperty("user.dir") + File.separatorChar +  filePath;
 	                    txtLocation.setText(filePath);
 	                }
 	                setSourceId(selectedElement);
@@ -287,6 +288,7 @@ public class ExportDialog extends TitleAreaDialog {
                 dialog.setText(Messages.SamtExportDialog_3);
                 if(txtLocation!=null && txtLocation.getText()!=null && !txtLocation.getText().isEmpty()) {                 
                     try {
+                        dialog.setFilterPath(System.getProperty("user.dir"));
                         dialog.setFileName(getFileNameFromPath(txtLocation.getText()));
                     } catch (Exception e1) {
                         LOG.warn(Messages.ExportDialog_1, e1);
@@ -338,6 +340,7 @@ public class ExportDialog extends TitleAreaDialog {
         
         if(selectedElement!=null) {
             filePath = selectedElement.getTitle() + getDefaultExtension();
+            filePath = System.getProperty("user.dir") + File.separatorChar + filePath;
             txtLocation.setText(filePath);
         }
         
