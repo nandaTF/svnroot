@@ -55,11 +55,6 @@ public class CreateConfiguration extends GenericCommand {
         PropertyType pType = factory.getPropertyType(Configuration.TYPE_ID, PROP_ROLE);
 		configuration.getEntity().setSimpleValue(pType, DEFAULT_USER_GROUP);
 		getDaoFactory().getDAO(Configuration.class).saveOrUpdate(configuration);
-        for(Entry<String, PropertyList> e : configuration.getEntity().getTypedPropertyLists().entrySet()){
-            for(Property p : e.getValue().getProperties()){
-                System.out.println("Key:\t" + p.getPropertyTypeID() + "\t###\tValue:\t" + p.getPropertyValue());
-            }
-        }
 	}
 
 	public Configuration getConfiguration() {
