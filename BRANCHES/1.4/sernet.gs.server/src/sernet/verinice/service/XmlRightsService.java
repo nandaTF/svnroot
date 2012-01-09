@@ -19,7 +19,9 @@
  ******************************************************************************/
 package sernet.verinice.service;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +32,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -38,6 +42,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
@@ -45,7 +50,6 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.core.io.Resource;
 
-import sernet.hui.common.VeriniceContext;
 import sernet.hui.common.connect.Property;
 import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.IAuthService;
@@ -69,8 +73,8 @@ import sernet.verinice.model.iso27k.PersonIso;
 /**
  * Service to read and change the authorization configuration of verinice.
  * 
- * This implementation loads and saves configuration in an XML file
- * defined in schema <i>verinice-auth.xsd</i>.
+ * This implementation loads and saves configuration in an XML file.
+ * XML schema is defined in: <code>verinice-auth.xsd</code>.
  * 
  * Configuration is defined in two documents:
  * <ul>
@@ -78,28 +82,47 @@ import sernet.verinice.model.iso27k.PersonIso;
  * <li>WEB-INF/verinice-auth.xml: Configuration. Settings in this file overwrite verinice-auth-default.xml.</li>
  * </ul>
  * 
+ * This service is managed by the Spring container as a _singleton_ but it's running
+ * in a multi threaded web server environment. Keep that in mind if you change this service.
+ * 
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
 public class XmlRightsService implements IRightsService {
 
     private final Logger log = Logger.getLogger(XmlRightsService.class);
     
-    Resource authConfigurationDefault;
+    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private final Lock readLock = readWriteLock.readLock();
+    private final Lock writeLock = readWriteLock.writeLock();
+      
+    /**
+     * Holds the authorization configuration.
+     * Variable will be read and modified by different threads.
+     * Read this for a definition of "volatile":
+     * http://www.javamex.com/tutorials/synchronization_volatile.shtml
+     */
+    private volatile Auth auth;
     
-    Resource authConfiguration;
+    /**
+     * Key: scope name, Value: all users of this scope
+     */
+    private volatile Map<String,List<String>> usernameMap = new Hashtable<String, List<String>>();
     
-    Resource authConfigurationSchema;
+    /**
+     * Key: scope name, Value: all groups of this scope
+     */
+    private volatile Map<String,List<String>> groupnameMap = new Hashtable<String, List<String>>();
     
-    Auth auth;
+    private Resource authConfigurationDefault;
     
-    JAXBContext context;
+    private Resource authConfiguration;
     
-    Schema schema;
+    private Resource authConfigurationSchema;
     
-    Map<String,List<String>> usernameMap = new Hashtable<String, List<String>>();
+    private JAXBContext context;
     
-    Map<String,List<String>> groupnameMap = new Hashtable<String, List<String>>();
-    
+    private Schema schema;
+
     private IConfigurationService configurationService;
     
     private IBaseDao<Configuration, Integer> configurationDao;
@@ -113,24 +136,32 @@ public class XmlRightsService implements IRightsService {
     private IRightsServiceClient rightServiceClient;
     
     private HashMap<String, Profile> profileMap;
-    
-    private static transient Logger LOG = Logger.getLogger(XmlRightsService.class);
 
     /* (non-Javadoc)
      * @see sernet.verinice.interfaces.IRightsService#getConfiguration()
      */
     @Override
     public Auth getConfiguration() {
-        if(auth==null) {
-            auth = loadConfiguration();
+        // a local var. is used to make this thread save:
+        Auth currentAuth = auth;
+        if(currentAuth==null) {
+            // prevent reading the configuration while another thread is writing it
+            readLock.lock();
+            try {
+                currentAuth = loadConfiguration();
+                auth = currentAuth;
+            } finally {
+                readLock.unlock(); 
+            }
+         
             if (log.isDebugEnabled()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Merged auth configuration: ");
                 }
-                logAuth(auth);
+                logAuth(currentAuth);
             }
         }      
-        return auth;
+        return currentAuth;
     }
 
     private void logAuth(Auth auth) {
@@ -156,29 +187,30 @@ public class XmlRightsService implements IRightsService {
      */
     private Auth loadConfiguration() {
         try {
-            Unmarshaller um = getContext().createUnmarshaller();            
-            um.setSchema(getSchema());
+            Unmarshaller unmarshaller = getContext().createUnmarshaller();            
+            unmarshaller.setSchema(getSchema());
             
             // read default configuration
-            Auth auth = (Auth) um.unmarshal(getAuthConfigurationDefault().getInputStream());
+            Auth authCurrent = (Auth) unmarshaller.unmarshal(getAuthConfigurationDefault().getInputStream());
             Auth authUser = null;
             
             // check if configuration exists
             if(getAuthConfiguration().exists()) {
-                authUser = (Auth) um.unmarshal(getAuthConfiguration().getInputStream());
                 if (log.isDebugEnabled()) {
-                    log.debug("uri: " + getAuthConfiguration().getURI().getPath());
-                    log.debug("file path: " + getAuthConfiguration().getFile().getPath());
+                    log.debug("Reading authorization configuration from file: " + getAuthConfiguration().getFile().getPath());
                 }
+                
+                authUser = (Auth) unmarshaller.unmarshal(getAuthConfiguration().getInputStream());           
+                
                 // invert default configuration if different type 
-                if(!auth.getType().equals(authUser.getType())) {
-                    auth = AuthHelper.invert(auth);
+                if(!authCurrent.getType().equals(authUser.getType())) {
+                    authCurrent = AuthHelper.invert(authCurrent);
                 }
                 // merge both configurations
-                auth = AuthHelper.merge(new Auth[]{authUser,auth});
+                authCurrent = AuthHelper.merge(new Auth[]{authUser,authCurrent});
             }
             
-            return auth;
+            return authCurrent;
         } catch (RuntimeException e) {
             log.error("Error while reading verinice authorization definition from file: " + getAuthConfiguration().getFilename(), e);
             throw e;
@@ -188,50 +220,90 @@ public class XmlRightsService implements IRightsService {
         }
     }
     
-    /* (non-Javadoc)
+    /**
+     * Updates the configuration defined in <code>auth</code>.
+     * 
+     * Content of <code>authNew</code> is saved in file: verinice-auth.xml
+     * if origin of profiles and userprofiles is "modification".
+     * 
+     * Before writing the content the implementation checks
+     * if user is allowed to change the configuration.
+     * 
      * @see sernet.verinice.interfaces.IRightsService#updateConfiguration(sernet.verinice.model.auth.Auth)
      */
     @Override
-    public void updateConfiguration(Auth auth) {
-        // remove profiles from verinice-auth-default.xml
-        if(isEnabled(ActionRightIDs.EDITPROFILE, auth)){
-
-
+    public void updateConfiguration(Auth authNew) {
+        try {     
+            if(!isReferenced(ActionRightIDs.EDITPROFILE, authNew)){
+                log.warn("Right id: " + ActionRightIDs.EDITPROFILE + " is not referenced in the auth configuration. No user is able to change the configuration anymore.");
+            }
+    
             Profiles profilesMod = new Profiles();     
-            for (Profile profile : auth.getProfiles().getProfile()) {
-
+            for (Profile profile : authNew.getProfiles().getProfile()) {
+                // add profile if origin is "modification"
                 if(!OriginType.DEFAULT.equals(profile.getOrigin())) {
                     profilesMod.getProfile().add(profile);
                 }
             }
-            auth.setProfiles(profilesMod);
-            // remove userprofiles from verinice-auth-default.xml
+            authNew.setProfiles(profilesMod);
+            
             Userprofiles userprofilesMod = new Userprofiles();   
-            boolean securityCheck = false;
-            for (Userprofile userprofile : auth.getUserprofiles().getUserprofile()) {
-                if(userprofile.getLogin().equals(getAuthService().getUsername())){
-                    securityCheck = true;
-                }
+            
+            for (Userprofile userprofile : authNew.getUserprofiles().getUserprofile()) {             
                 if(!OriginType.DEFAULT.equals(userprofile.getOrigin())) {
                     userprofilesMod.getUserprofile().add(userprofile);
                 }
             }
-            auth.setUserprofiles(userprofilesMod);
-            if(securityCheck){
-                Marshaller marshaller;
-                try {
-                    marshaller = getContext().createMarshaller();       
-                    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                    marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8"); 
-                    marshaller.setSchema(getSchema());
-                    marshaller.marshal( auth, new FileOutputStream( getAuthConfiguration().getFile().getPath() ) );
-                    // set auth to null, next call of getCofiguration will read it from disk
-                    this.auth = null;
-                } catch (Exception e) {
-                    log.error("", e);
-                }
-            }
+            authNew.setUserprofiles(userprofilesMod);
+            
+            // Block all other threads before writing the file
+            writeLock.lock();
+            try {
+                checkWritePermission(); //throws sernet.gs.service.SecurityException
+                // create a backup of the old configuration
+                copyConfigurationFile();
+                // write the new configuration
+                Marshaller marshaller = getContext().createMarshaller();       
+                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+                marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8"); 
+                marshaller.setSchema(getSchema());
+                marshaller.marshal( authNew, new FileOutputStream( getAuthConfiguration().getFile().getPath() ) );
+                // set auth to null, 
+                // next call of getCofiguration will read the new configuration from disk
+                this.auth = null;
+            } finally {
+                writeLock.unlock();
+            }                             
+
+        } catch (sernet.gs.service.SecurityException e) {
+            String message = "User " + getAuthService().getUsername() + " has no permission to write authorization configuration.";
+            log.error(message, e);
+            throw e;
+        } catch (Exception e) {
+            String message = "Error while updating configuration.";
+            log.error(message, e);
+            throw new RuntimeException(message);
         }
+    }
+
+    /**
+     * Throws a sernet.gs.service.SecurityException
+     * if current user has no permission to write the 
+     * authorization configuration.
+     */
+    private void checkWritePermission() throws sernet.gs.service.SecurityException {
+        // TODO: implement checkWritePermission     
+    }
+    
+    /**
+     * Creates a copy of the configuration file with suffix ".bak".
+     * If the copy file exists, then this method will overwrite it. 
+     * @throws IOException 
+     */
+    private void copyConfigurationFile() throws IOException {
+        File configuration = getAuthConfiguration().getFile();
+        File copy = new File(configuration.getAbsolutePath() + ".bak");
+        FileUtils.copyFile(configuration, copy);   
     }
 
     /**
@@ -330,10 +402,7 @@ public class XmlRightsService implements IRightsService {
         return usernameList;
     }
     
-    /* (non-Javadoc)
-     * @see sernet.verinice.interfaces.IRightsService#getUsernames(java.lang.Integer)
-     */
-    public void loadUserAndGroupNames(String username) {
+    private void loadUserAndGroupNames(String username) {
         Integer scopeId = getConfigurationService().getScopeId(username);
         
         String HQL = "from CnATreeElement c " + //$NON-NLS-1$           
@@ -542,7 +611,51 @@ public class XmlRightsService implements IRightsService {
         this.rightServiceClient = rightServiceClient;
     }
     
-    private  HashMap<String, Action> loadUserprofile(Auth auth) {
+    private HashMap<String, Profile> getProfileMap() {
+        if(profileMap == null){
+            Profiles profiles = getProfiles();   
+            profileMap = new HashMap<String, Profile>();
+            for (Profile profile : profiles.getProfile()) {
+                profileMap.put(profile.getName(), profile);
+            }
+        }
+        return profileMap;
+    }
+    
+    /**
+     * Returns <code>true</code> if an action is
+     * referenced by a user profile, false if not.
+     * 
+     * @param actionId The id of an action
+     * @param auth An auth configuration
+     * @return True if actionId is referenced in auth
+     */
+    private boolean isReferenced(String actionId, Auth auth) {
+        boolean returnValue = false;
+        try {
+            Map<String, Action> actionMap = loadAllReferencedActions(auth);
+            if(actionMap != null) {
+                returnValue = actionMap.get(actionId)!=null && isWhitelist() || 
+                              actionMap.get(actionId)==null && isBlacklist();
+            }
+            return returnValue;
+        } catch (Exception e) {
+            log.error("Error while checking action. Returning false", e);
+            return returnValue;
+        }
+    }
+    
+    /**
+     * Returns all actions in param <code>auth</code>
+     * which are referenced by a user profile.
+     * 
+     * Actions are returned in a map. Key is the id of the action,
+     * value is the action.
+     * 
+     * @param auth An auth configuration
+     * @return All actions which are referenced by a user profile of an auth configuration
+     */
+    private Map<String, Action> loadAllReferencedActions(Auth auth) {
         HashMap<String, Action> actionMap = new HashMap<String, Action>();
        
         actionMap = new HashMap<String, Action>();
@@ -557,38 +670,12 @@ public class XmlRightsService implements IRightsService {
                             actionMap.put(action.getId(), action);            
                         }
                     } else {
-                        LOG.error("Could not find profile " + profileRef.getName() + " of user " + getAuthService().getUsername());
+                        log.error("Could not find profile " + profileRef.getName() + " of user " + getAuthService().getUsername());
                     }
                 }
             }
         }
         return actionMap;
-    }
-    
-    private HashMap<String, Profile> getProfileMap() {
-        if(profileMap == null){
-            Profiles profiles = getProfiles();   
-            profileMap = new HashMap<String, Profile>();
-            for (Profile profile : profiles.getProfile()) {
-                profileMap.put(profile.getName(), profile);
-            }
-        }
-        return profileMap;
-    }
-    
-    public boolean isEnabled(String actionId, Auth auth) {
-        boolean returnValue = false;
-        try {
-            HashMap<String, Action> actionMap = loadUserprofile(auth);
-            if(actionMap != null) {
-                returnValue = actionMap.get(actionId)!=null && isWhitelist() || 
-                              actionMap.get(actionId)==null && isBlacklist();
-            }
-            return returnValue;
-        } catch (Exception e) {
-            LOG.error("Error while checking action. Returning false", e);
-            return returnValue;
-        }
     }
     
     public boolean isWhitelist() {

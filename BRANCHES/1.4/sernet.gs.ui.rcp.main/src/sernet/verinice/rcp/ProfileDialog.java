@@ -26,11 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CellEditor.LayoutData;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -53,8 +55,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.springframework.transaction.config.TxNamespaceHandler;
 
+import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.hui.common.VeriniceContext;
 import sernet.verinice.interfaces.ActionRightIDs;
@@ -72,6 +74,8 @@ import sernet.verinice.model.auth.Userprofile;
 @SuppressWarnings("restriction")
 public class ProfileDialog extends TitleAreaDialog {
 
+    private static final Logger LOG = Logger.getLogger(ProfileDialog.class);
+    
     private Text  textName;
     private Label translated;
     
@@ -289,11 +293,19 @@ public class ProfileDialog extends TitleAreaDialog {
      */
     @Override
     protected void okPressed() {
-        if(!this.profile.getName().equals(this.profileName)) {
-            updateProfileRefs();
+        try {
+            if(!this.profile.getName().equals(this.profileName)) {
+                updateProfileRefs();
+            }
+            getRightService().updateConfiguration(auth);          
+        } catch(Exception e) {           
+            final String message = "Error while saving profiles.";
+            LOG.error(message, e);
+            final MultiStatus errorStatus = new MultiStatus(Activator.getDefault().getBundle().getSymbolicName(), IStatus.ERROR, message, e);
+            ErrorDialog.openError(this.getShell(), "Error", message, errorStatus);
+        } finally {
+            super.okPressed();
         }
-        getRightService().updateConfiguration(auth);
-        super.okPressed();
     }
     
     /* (non-Javadoc)
