@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<auth version="0" type="blacklist" xmlns="http://www.verinice.org/auth"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.verinice.org/auth verinice-auth.xsd">
+    
+    <!-- This is the default-standalone configuration of access rights to application actions. -->
+    <!-- NEVER edit this file! -->
+    
+    <profiles>
+        <!-- Each profile in this document defines a collection -->
+        <!-- of application actions. All actions in verinice are -->
+        <!-- defined in property file verinice-action.properties. -->
+        <profile name="admin-default-profile" origin="default">
+            <action id="accountsettings" />
+            <action id="accesscontrol" />
+            <action id="editprofile" />
+            <action id="taskdelete" />
+            <action id="taskshowall" />
+        </profile>
+    </profiles>
+    <userprofiles>
+		<userprofile login="internalAdmin" origin="default">
+            <profile-ref name="admin-default-profile" />
+        </userprofile>
+    </userprofiles>
+</auth>
