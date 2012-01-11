@@ -17,34 +17,26 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main.service.crudcommands;
 
-import java.util.Map.Entry;
-
 import sernet.gs.service.RuntimeCommandException;
-import sernet.gs.ui.rcp.main.Activator;
 import sernet.hui.common.VeriniceContext;
 import sernet.hui.common.connect.HUITypeFactory;
-import sernet.hui.common.connect.Property;
-import sernet.hui.common.connect.PropertyList;
 import sernet.hui.common.connect.PropertyType;
 import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.configuration.Configuration;
+import sernet.verinice.service.commands.AddDefaultGroups;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial", "restriction" })
 public class CreateConfiguration extends GenericCommand {
 
 	private CnATreeElement person;
 	private Configuration configuration;
-	
-	private static String PROP_ROLE = "configuration_rolle";
-	private static String DEFAULT_USER_GROUP = "default-user-group";
 	
 
 	public CreateConfiguration(CnATreeElement elmt) {
 		this.person = elmt;
 	}
 	
-	@SuppressWarnings("restriction")
 	public void execute() {
 		configuration = new Configuration();
 		if (person == null)
@@ -52,8 +44,8 @@ public class CreateConfiguration extends GenericCommand {
 			
 		configuration.setPerson(person);
         HUITypeFactory factory = (HUITypeFactory) VeriniceContext.get(VeriniceContext.HUI_TYPE_FACTORY);
-        PropertyType pType = factory.getPropertyType(Configuration.TYPE_ID, PROP_ROLE);
-		configuration.getEntity().setSimpleValue(pType, DEFAULT_USER_GROUP);
+        PropertyType pType = factory.getPropertyType(Configuration.TYPE_ID, Configuration.PROP_ROLES);
+		configuration.getEntity().setSimpleValue(pType, AddDefaultGroups.USER_DEFAULT_GROUP);
 		getDaoFactory().getDAO(Configuration.class).saveOrUpdate(configuration);
 	}
 
