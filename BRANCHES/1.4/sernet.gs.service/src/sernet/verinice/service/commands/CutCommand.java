@@ -125,6 +125,13 @@ public class CutCommand extends GenericCommand {
                 getCommandService().discardUserData();
             }
             
+            // set scope id of all elements and it's subtrees
+            for (CnATreeElement element : elementList) {
+                UpdateScopeId updateScopeId = new UpdateScopeId(element.getDbId(), selectedGroup.getScopeId());
+                updateScopeId = getCommandService().executeCommand(updateScopeId);
+            }
+            
+            
             if(getPostProcessorList()!=null && !getPostProcessorList().isEmpty()) {
                 List<String> copyElementUuidList = new ArrayList<String>(elementList.size());
                 for (CnATreeElement element : elementList) {
@@ -274,7 +281,5 @@ public class CutCommand extends GenericCommand {
         }
         return dao;
     }
-    
-
 
 }
