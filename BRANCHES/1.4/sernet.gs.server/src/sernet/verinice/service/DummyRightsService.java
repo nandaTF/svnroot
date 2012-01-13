@@ -57,8 +57,6 @@ public class DummyRightsService implements IRightsService{
     
     Resource authConfigurationDefault;
     
-    Resource authConfiguration;
-    
     Resource authConfigurationSchema;
     
     Schema schema;
@@ -202,30 +200,13 @@ public class DummyRightsService implements IRightsService{
             um.setSchema(getSchema());
             
             // read default configuration
-            Auth auth = (Auth) um.unmarshal(getAuthConfigurationDefault().getInputStream());
-            Auth authUser = null;
+            return auth = (Auth) um.unmarshal(getAuthConfigurationDefault().getInputStream());
             
-            // check if configuration exists
-            if(getAuthConfiguration().exists()) {
-                authUser = (Auth) um.unmarshal(getAuthConfiguration().getInputStream());
-                if (log.isDebugEnabled()) {
-                    log.debug("uri: " + getAuthConfiguration().getURI().getPath());
-                    log.debug("file path: " + getAuthConfiguration().getFile().getPath());
-                }
-                // invert default configuration if different type 
-                if(!auth.getType().equals(authUser.getType())) {
-                    auth = AuthHelper.invert(auth);
-                }
-                // merge both configurations
-                auth = AuthHelper.merge(new Auth[]{authUser,auth});
-            }
-            
-            return auth;
         } catch (RuntimeException e) {
-            log.error("Error while reading verinice authorization definition from file: " + getAuthConfiguration().getFilename(), e);
+            log.error("Error while reading verinice authorization definition from file: " + getAuthConfigurationDefault().getFilename(), e);
             throw e;
         } catch (Exception e) {
-            log.error("Error while reading verinice authorization definition from file: " + getAuthConfiguration().getFilename(), e);
+            log.error("Error while reading verinice authorization definition from file: " + getAuthConfigurationDefault().getFilename(), e);
             throw new RuntimeException(e);
         }
     }
@@ -240,14 +221,6 @@ public class DummyRightsService implements IRightsService{
             } 
         }
         return schema;
-    }
-
-    public Resource getAuthConfiguration() {
-        return authConfiguration;
-    }
-
-    public void setAuthConfiguration(Resource authConfiguration) {
-        this.authConfiguration = authConfiguration;
     }
 
     public JAXBContext getContext() {

@@ -8,7 +8,6 @@
 
 <bean id="rightsService" class="sernet.verinice.service.DummyRightsService">
     <property name="authConfigurationDefault" value="${rights.authConfigurationDefault}"/>
-   	<property name="authConfiguration" value="${rights.authConfiguration}"/>
 	<property name="authConfigurationSchema" value="${rights.authConfigurationSchema}"/>
 	<property name="configurationDao" ref="configurationDao" />
 	<property name="propertyDao" ref="propertyDao" />
