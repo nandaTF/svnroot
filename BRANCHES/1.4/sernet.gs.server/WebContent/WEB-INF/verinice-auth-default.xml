@@ -18,6 +18,19 @@
             <action id="taskdelete" />
             <action id="taskshowall" />
         </profile>
+        <profile name="user-scope-default-profile" origin="default">
+            <action id="accountsettings" />
+            <action id="accesscontrol" />
+            <action id="editprofile" />
+            <action id="taskdelete" />
+            <action id="taskshowall" />
+            <action id="addismorg" />
+            <action id="additverbund" />
+        </profile>
+        <profile name="admin-scope-default-profile" origin="default">
+            <action id="addismorg" />
+            <action id="additverbund" />
+        </profile>
         <profile name="admin-default-profile" origin="default" />
     </profiles>
     <userprofiles>
@@ -36,6 +49,12 @@
         </userprofile>
         <userprofile login="admin" origin="default">
             <profile-ref name="admin-default-profile" />
+        </userprofile>
+        <userprofile login="user-scope-default-group" origin="default">
+            <profile-ref name="user-scope-default-profile" />
+        </userprofile>
+        <userprofile login="admin-scope-default-group">
+        	<profile-ref name="admin-scope-default-profile"/>
         </userprofile>
     </userprofiles>
 </auth>
