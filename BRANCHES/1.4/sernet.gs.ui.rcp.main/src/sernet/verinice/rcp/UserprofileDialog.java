@@ -334,9 +334,8 @@ public class UserprofileDialog extends TitleAreaDialog {
             getRightService().updateConfiguration(auth);          
         } catch(Exception e) {
             final String message = "Error while saving userprofiles.";
-            LOG.error(message, e);         
-            final MultiStatus errorStatus = new MultiStatus(Activator.getDefault().getBundle().getSymbolicName(), IStatus.ERROR, message, e);
-            ErrorDialog.openError(this.getShell(), "Error", message, errorStatus);
+            LOG.error(message, e);
+            MessageDialog.openError(this.getShell(), "Error", message);
         } finally {
             super.okPressed();
         }

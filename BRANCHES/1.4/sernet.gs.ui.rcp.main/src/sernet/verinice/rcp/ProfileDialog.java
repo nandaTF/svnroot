@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -297,14 +298,12 @@ public class ProfileDialog extends TitleAreaDialog {
             if(!this.profile.getName().equals(this.profileName)) {
                 updateProfileRefs();
             }
-            getRightService().updateConfiguration(auth);          
+            getRightService().updateConfiguration(auth);   
+            super.okPressed();
         } catch(Exception e) {           
             final String message = "Error while saving profiles.";
             LOG.error(message, e);
-            final MultiStatus errorStatus = new MultiStatus(Activator.getDefault().getBundle().getSymbolicName(), IStatus.ERROR, message, e);
-            ErrorDialog.openError(this.getShell(), "Error", message, errorStatus);
-        } finally {
-            super.okPressed();
+            MessageDialog.openError(this.getShell(), "Error", message);
         }
     }
     

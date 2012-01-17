@@ -164,6 +164,9 @@ public class XmlRightsService implements IRightsService {
         return currentAuth;
     }
 
+    /**
+     * For debugging only!
+     */
     private void logAuth(Auth auth) {
         try {
             if (log.isDebugEnabled()) {
@@ -181,9 +184,11 @@ public class XmlRightsService implements IRightsService {
 
 
     /**
-     * Loads the configuration by merging the default and installation configuration
+     * Loads the configuration by merging the files
+     * 'verinice-auth-default.xml' and 'verinice-auth.xml'
      * 
-     * @return the authorization configuration
+     * @return The authorization configuration
+     * @throws IllegalAuthConfTypeException if a different configurationType is detected in 'verinice-auth-default.xml' and 'verinice-auth.xml'
      */
     private Auth loadConfiguration() {
         try {
@@ -191,7 +196,7 @@ public class XmlRightsService implements IRightsService {
             unmarshaller.setSchema(getSchema());
             
             // read default configuration
-            Auth authCurrent = (Auth) unmarshaller.unmarshal(getAuthConfigurationDefault().getInputStream());
+            Auth authDefault = (Auth) unmarshaller.unmarshal(getAuthConfigurationDefault().getInputStream());
             Auth authUser = null;
             
             // check if configuration exists
@@ -202,15 +207,17 @@ public class XmlRightsService implements IRightsService {
                 
                 authUser = (Auth) unmarshaller.unmarshal(getAuthConfiguration().getInputStream());           
                 
-                // invert default configuration if different type 
-                if(!authCurrent.getType().equals(authUser.getType())) {
-                    authCurrent = AuthHelper.invert(authCurrent);
+                // check configuration type of both files
+                // throw an exception if a different type is detected
+                if(!authDefault.getType().equals(authUser.getType())) {
+                    final String message = "You must use the same configurationType in 'verinice-auth-default.xml' and 'verinice-auth.xml'";
+                    throw new IllegalAuthConfTypeException(message);
                 }
                 // merge both configurations
-                authCurrent = AuthHelper.merge(new Auth[]{authUser,authCurrent});
+                authDefault = AuthHelper.merge(new Auth[]{authUser,authDefault});
             }
             
-            return authCurrent;
+            return authDefault;
         } catch (RuntimeException e) {
             log.error("Error while reading verinice authorization definition from file: " + getAuthConfiguration().getFilename(), e);
             throw e;
@@ -261,7 +268,7 @@ public class XmlRightsService implements IRightsService {
             try {
                 checkWritePermission(); //throws sernet.gs.service.SecurityException
                 // create a backup of the old configuration
-                copyConfigurationFile();
+                backupConfigurationFile();
                 // write the new configuration
                 Marshaller marshaller = getContext().createMarshaller();       
                 marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -280,8 +287,19 @@ public class XmlRightsService implements IRightsService {
             log.error(message, e);
             throw e;
         } catch (Exception e) {
-            String message = "Error while updating configuration.";
+            String message = "Error while updating authorization configuration.";
             log.error(message, e);
+            // Big Problem: writing of configuration failed! 
+            // Restore it from backup
+            // Block all other threads before writing the file
+            writeLock.lock();
+            try {
+                log.error("Trying to restore the authorization configuration from backup file now...");
+                restoreConfigurationFile();
+                log.error("Authorization configuration restored from backup file.");
+            } finally {
+                writeLock.unlock();
+            }
             throw new RuntimeException(message);
         }
     }
@@ -300,10 +318,30 @@ public class XmlRightsService implements IRightsService {
      * If the copy file exists, then this method will overwrite it. 
      * @throws IOException 
      */
-    private void copyConfigurationFile() throws IOException {
-        File configuration = getAuthConfiguration().getFile();
-        File copy = new File(configuration.getAbsolutePath() + ".bak");
-        FileUtils.copyFile(configuration, copy);   
+    private void backupConfigurationFile() {
+        try {
+            File backup = new File(getBackupFileName());
+            FileUtils.copyFile(getAuthConfiguration().getFile(), backup); 
+        } catch( Throwable t ) {
+            log.error("Error while creating backup of authorization configuration.", t);
+        }
+    }
+    
+    /**
+     * Restores the configuration file from the backup with suffix ".bak".
+     */
+    private void restoreConfigurationFile() {
+        try {
+            File backup = new File(getBackupFileName());
+            File conf = getAuthConfiguration().getFile();
+            FileUtils.copyFile(backup, conf); 
+        } catch( Throwable t ) {
+            log.error("Error while restoring authorization configuration.", t);
+        }
+    }
+    
+    private String getBackupFileName() throws IOException {
+        return getAuthConfiguration().getFile().getAbsolutePath() + ".bak";
     }
 
     /**

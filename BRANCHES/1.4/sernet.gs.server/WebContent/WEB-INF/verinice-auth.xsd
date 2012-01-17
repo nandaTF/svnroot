@@ -18,9 +18,11 @@
         blacklist. Whitelist means: all actions are disabled
         except the actions in the userprofile. Blacklist: All 
         actions are nabled except the actions in the userprofile.
+        You can NOT set a different configuration type in 
+        verinice-auth.xml and verinice-auth-default.xml.
         
-        You can switch from blacklist to whitelist by attibute type
-        of root element auth.
+        You can switch from blacklist to whitelist by attibute 'type'
+        of root element auth. 
 		]]></xs:documentation>
     </xs:annotation>
 
@@ -38,7 +40,13 @@
             <xs:attribute name="version" use="required"
                 type="xs:integer" />
             <xs:attribute name="type" type="configurationType"
-                default="whitelist" />
+                default="whitelist">
+                <xs:annotation>
+                    <xs:documentation><![CDATA[
+    'whitelist' - by default all actions are disabled, 'blacklist' - all actions are enabled 
+                    ]]></xs:documentation>
+                </xs:annotation>   
+            </xs:attribute>
         </xs:complexType>
 
         <xs:key name="profileName">
@@ -87,7 +95,7 @@
                 <xs:element minOccurs="0" maxOccurs="unbounded"
                     ref="profile-ref" />
             </xs:sequence>
-            <xs:attribute name="login" use="required" type="xs:ID" />
+            <xs:attribute name="login" use="required" type="xs:string" />
             <xs:attribute name="origin" type="originType"
                 default="modification" />
         </xs:complexType>
@@ -104,7 +112,7 @@
 			]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attribute name="id" use="required" type="xs:NCName" />
+            <xs:attribute name="id" use="required" type="xs:string" />
         </xs:complexType>
     </xs:element>
     <xs:element name="profile">
@@ -118,7 +126,7 @@
                 <xs:element minOccurs="0" maxOccurs="unbounded"
                     ref="action" />
             </xs:sequence>
-            <xs:attribute name="name" use="required" type="xs:NCName" />
+            <xs:attribute name="name" use="required" type="xs:string" />
             <xs:attribute name="origin" type="originType"
                 default="modification" />
         </xs:complexType>
@@ -134,10 +142,15 @@
             ]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attribute name="name" use="required" type="xs:NCName" />
+            <xs:attribute name="name" use="required" type="xs:string" />
         </xs:complexType>
     </xs:element>
     <xs:simpleType name="configurationType">
+        <xs:annotation>
+            <xs:documentation><![CDATA[
+    'whitelist' - by default all actions are disabled, 'blacklist' - all actions are enabled 
+                ]]></xs:documentation>
+        </xs:annotation>
         <xs:restriction base="xs:NMTOKEN">
             <xs:enumeration value="blacklist" />
             <xs:enumeration value="whitelist" />
