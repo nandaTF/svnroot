@@ -449,7 +449,7 @@ public class GenerateReportDialog extends TitleAreaDialog {
 
     protected void enableFileSelection() {
         userTemplate = false;
-        if (reportTypes[comboReportType.getSelectionIndex()].getReportFile() != null) {
+        if (reportTypes[comboReportType.getSelectionIndex()].getReportFile() == null || reportTypes[comboReportType.getSelectionIndex()].getReportFile().equals("")) {
             userTemplate = true;
         }
         textReportTemplateFile.setEnabled(userTemplate);
