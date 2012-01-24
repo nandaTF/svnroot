@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<auth version="0" type="blacklist" 
+    xmlns="http://www.verinice.org/auth" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.verinice.org/auth verinice-auth.xsd">
+    <profiles>
+        <profile name="user-default-profile" origin="default">
+            <action id="accountsettings" />
+            <action id="accesscontrol" />
+            <action id="editprofile" />
+            <action id="taskdelete" />
+            <action id="taskshowall" />
+        </profile>
+        <profile name="admin-default-profile" origin="default"/>
+    </profiles>
+    <userprofiles>
+        <userprofile login="user-default-group" origin="default">
+            <profile-ref name="user-default-profile" />
+        </userprofile>
+        <userprofile login="admin-default-group" origin="default">
+            <profile-ref name="admin-default-profile" />
+        </userprofile>
+        <userprofile login="admin" origin="default">
+            <profile-ref name="admin-default-profile" />
+        </userprofile>
+    </userprofiles>
+</auth>
