@@ -22,8 +22,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.naming.ConfigurationException;
+
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
@@ -39,23 +42,32 @@ import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.gs.ui.rcp.main.bsi.dialogs.BulkEditDialog;
+import sernet.gs.ui.rcp.main.bsi.dialogs.PersonBulkEditDialog;
 import sernet.gs.ui.rcp.main.bsi.model.DocumentReference;
 import sernet.gs.ui.rcp.main.bsi.model.TodoViewItem;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
 import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
+import sernet.gs.ui.rcp.main.service.commands.PasswordException;
+import sernet.gs.ui.rcp.main.service.crudcommands.CreateConfiguration;
+import sernet.gs.ui.rcp.main.service.crudcommands.LoadConfiguration;
 import sernet.gs.ui.rcp.main.service.taskcommands.BulkEditUpdate;
+import sernet.gs.ui.rcp.main.service.taskcommands.ConfigurationBulkEditUpdate;
 import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.EntityType;
 import sernet.hui.common.connect.HUITypeFactory;
 import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.CommandException;
+import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IInternalServerStartListener;
 import sernet.verinice.interfaces.InternalServerEvent;
 import sernet.verinice.model.bsi.IBSIModelListener;
 import sernet.verinice.model.bsi.MassnahmenUmsetzung;
+import sernet.verinice.model.bsi.Person;
 import sernet.verinice.model.common.CnATreeElement;
+import sernet.verinice.model.common.configuration.Configuration;
 import sernet.verinice.model.iso27k.IISO27kElement;
+import sernet.verinice.model.iso27k.PersonIso;
 
 /**
  * Erlaubt das gemeinsame Editieren der Eigenschaften von gleichen,
@@ -70,7 +82,7 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
 
     // FIXME server: bulk edit does not notify changes on self
 
-    private static final Logger LOG = Logger.getLogger(ShowBulkEditAction.class);
+    private static transient final Logger LOG = Logger.getLogger(ShowBulkEditAction.class);
 
     public static final String ID = "sernet.gs.ui.rcp.main.actions.showbulkeditaction"; //$NON-NLS-1$
     private final IWorkbenchWindow window;
@@ -100,6 +112,7 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
         }
     }
 
+    @SuppressWarnings("restriction")
     @Override
     public void run() {
         Activator.inheritVeriniceContextState();
@@ -139,6 +152,29 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
             }
             entType = HUITypeFactory.getInstance().getEntityType(MassnahmenUmsetzung.TYPE_ID);
             clazz = MassnahmenUmsetzung.class;
+        } else if (selection.getFirstElement() instanceof Person || selection.getFirstElement() instanceof PersonIso){
+            for (Iterator iter = selection.iterator(); iter.hasNext();) {
+                CnATreeElement cElmt = (CnATreeElement)iter.next();
+                LoadConfiguration command = new LoadConfiguration(cElmt);
+                try {
+                    command = ServiceFactory.lookupCommandService().executeCommand(command);
+                    if(command.getConfiguration() != null){
+                        dbIDs.add(command.getConfiguration().getDbId());
+                    } else { // no configuration existing for this user up to here, create new one
+                        CreateConfiguration command2 = new CreateConfiguration(cElmt);
+                        command2 = ServiceFactory.lookupCommandService().executeCommand(command2);
+                        dbIDs.add(command2.getConfiguration().getDbId());
+                    }
+                } catch (CommandException e) {
+                    LOG.error("Error while retrieving configuration", e);
+                    ExceptionUtil.log(e, Messages.ShowBulkEditAction_6); 
+                }
+            }
+            if(selection.getFirstElement() instanceof Person || selection.getFirstElement() instanceof PersonIso){
+                clazz = Configuration.class;
+            } else {
+                clazz = null;
+            }
         } else {
             // prepare list according to selected tree items:
             for (Iterator iter = selection.iterator(); iter.hasNext();) {
@@ -161,30 +197,54 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
             clazz = null;
         }
 
-        final BulkEditDialog dialog = new BulkEditDialog(window.getShell(), entType);
+        Dialog dialog = null;
+        
+        if(entType != null && !(entType.getId().equals(Person.TYPE_ID) || entType.getId().equals(PersonIso.TYPE_ID))){
+            dialog = new BulkEditDialog(window.getShell(), entType);
+        } else {
+            dialog = new PersonBulkEditDialog(window.getShell(), true, Messages.ShowBulkEditAction_14);
+        }
         if (dialog.open() != Window.OK) {
             return;
         }
-
+        
+        Entity tmpEntity = null;
+        if(dialog instanceof BulkEditDialog)
+            tmpEntity = ((BulkEditDialog)dialog).getEntity();
+        if(dialog instanceof PersonBulkEditDialog)
+            tmpEntity = ((PersonBulkEditDialog)dialog).getEntity();
+        
+        final Entity dialogEntity = tmpEntity;
+        final Dialog chosenDialog = dialog;
+        
         try {
             // close editors first:
             PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeAllEditors(true);
 
             PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+                @SuppressWarnings("restriction")
                 public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
                     Activator.inheritVeriniceContextState();
 
                     // the selected items are of type CnaTreeelement and can be
                     // edited right here:
-                    if (selectedElements.size() > 0) {
-                        editLocally(selectedElements, dialog.getEntity(), monitor);
-                    } else {
+                    if (selectedElements.size() > 0){
+                        if(!(selectedElements.get(0) instanceof Person || selectedElements.get(0) instanceof PersonIso)) {
+                            editLocally(selectedElements, dialogEntity, monitor);
+                        }
+                    }  else {
                         // the selected elements are of type TodoView or other
                         // light weight items,
                         // editing has to be deferred to server (lookup of real
                         // items needed)
                         try {
-                            editOnServer(clazz, dbIDs, dialog.getEntity(), monitor);
+                            String pw1 = null;
+                            String pw2 = null;
+                            if(chosenDialog instanceof PersonBulkEditDialog){
+                                pw1 = ((PersonBulkEditDialog)chosenDialog).getPassword();
+                                pw2 = ((PersonBulkEditDialog)chosenDialog).getPassword2();
+                            }
+                            editOnServer(clazz, dbIDs, dialogEntity, monitor, pw1, pw2);
                         } catch (CommandException e) {
                             throw new InterruptedException(e.getLocalizedMessage());
                         }
@@ -215,14 +275,37 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
         }
     }
 
-    private void editOnServer(Class<? extends CnATreeElement> clazz, List<Integer> dbIDs, Entity dialogEntity, IProgressMonitor monitor) throws CommandException {
+    private void editOnServer(Class<? extends CnATreeElement> clazz, List<Integer> dbIDs, Entity dialogEntity, IProgressMonitor monitor, String newPassword, String newPassword2) throws CommandException {
         monitor.setTaskName(Messages.ShowBulkEditAction_7);
         monitor.beginTask(Messages.ShowBulkEditAction_8, IProgressMonitor.UNKNOWN);
-
-        BulkEditUpdate command = new BulkEditUpdate(clazz, dbIDs, dialogEntity);
+        GenericCommand command = null;
+        if(!dialogEntity.getEntityType().trim().equalsIgnoreCase(Configuration.TYPE_ID)){
+            command = new BulkEditUpdate(clazz, dbIDs, dialogEntity);
+        } else {
+            boolean changePassword = false;
+            if(newPassword!=null && !newPassword.isEmpty()) {
+                if(!newPassword.equals(newPassword2)) {
+                    throw new PasswordException(Messages.ConfigurationAction_10);
+                } else {
+                    changePassword = true;
+                }
+            }
+            command = new ConfigurationBulkEditUpdate(clazz, dbIDs, dialogEntity, changePassword, newPassword);
+        }
         command = ServiceFactory.lookupCommandService().executeCommand(command);
+        if(((ConfigurationBulkEditUpdate)command).getFailedUpdates().size() > 0){
+            StringBuilder sb = new StringBuilder();
+            sb.append(Messages.ShowBulkEditAction_15 +":\n");
+            for(String username : ((ConfigurationBulkEditUpdate)command).getFailedUpdates()){
+                sb.append(username + "\n");
+            }
+            ExceptionUtil.log(new ConfigurationException(Messages.ShowBulkEditAction_16), Messages.ShowBulkEditAction_16 + "\n" + sb.toString() );
+        }
+       
     }
+    
 
+    
     /**
      * Action is enabled when only items of the same type are selected.
      */
