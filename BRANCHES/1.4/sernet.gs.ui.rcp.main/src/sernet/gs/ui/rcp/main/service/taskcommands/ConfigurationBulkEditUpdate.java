@@ -55,6 +55,7 @@ public class ConfigurationBulkEditUpdate extends GenericCommand  implements ICha
     private String stationId;
     private String newPassword;
     private List<String> failedUpdates;
+    
 
     /**
      * @param clazz

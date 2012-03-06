@@ -216,7 +216,9 @@ public class ISMViewContentProvider implements ITreeContentProvider {
         Object parent = null;
         if (child instanceof CnATreeElement) {
             parent = getParentLoader().getParent((CnATreeElement) child);
-            addParentToCache((CnATreeElement) parent);
+            // commented out due to bug 460, just a workaround, not really a solution
+            // TODO: observe perfomance 
+            // addParentToCache((CnATreeElement) parent);
         }
         return parent;
     }

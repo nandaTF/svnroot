@@ -57,6 +57,7 @@ public class PersonBulkEditDialog extends TitleAreaDialog {
     
     private static final Logger LOG = Logger.getLogger(PersonBulkEditDialog.class);
     
+    
     private EntityType entType;
     private boolean b = false;
     private String title;
