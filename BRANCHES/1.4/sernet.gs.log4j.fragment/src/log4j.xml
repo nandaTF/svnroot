@@ -27,6 +27,11 @@
     <logger name="org.ops4j.pax.web.service.internal.ConfigurationImpl">
         <level value="ERROR" />
     </logger>
+    
+    <!-- Logs system configuration on startup -->
+    <logger name="sernet.gs.ui.rcp.main.ConfigurationLogger">
+        <level value="INFO" />
+    </logger>
 
     <!-- Add settings for packages here  -->
     <!--
