@@ -632,7 +632,7 @@
          <action
                class="sernet.verinice.iso27k.rcp.action.DeriveStatusAction"
                enablesFor="1"
-               icon=""
+               icon="icons/derive.gif"
                id="sernet.verinice.model.iso27k.ExportOrganization.menu"
                label="%action.label.28"
                menubarPath="additions"
