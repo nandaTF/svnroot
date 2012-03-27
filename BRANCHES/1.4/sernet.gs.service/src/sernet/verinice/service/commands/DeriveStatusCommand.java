@@ -92,7 +92,7 @@ public class DeriveStatusCommand extends GenericCommand implements IChangeLoggin
     
     public Logger getLog() {
         if (LOG == null) {
-            LOG = Logger.getLogger(ExportCommand.class);
+            LOG = Logger.getLogger(DeriveStatusCommand.class);
         }
         return LOG;
     }
@@ -255,6 +255,7 @@ public class DeriveStatusCommand extends GenericCommand implements IChangeLoggin
     private Set<Control> getAllMeasuresToSet(SamtTopic topic, String maturity){
         Set<Control> list = new HashSet<Control>();
         boolean counterIncreased = false;
+        Set<Control> mgSetNA = new HashSet<Control>();
         for(CnALink mglink : getAllLinks(topic)){
             CnATreeElement genericMeasure = mglink.getRelationObject(topic, mglink);
             RetrieveInfo ri = new RetrieveInfo().setChildren(true).setLinksDown(true).setLinksUp(true).setChildrenProperties(true).setParent(true);
@@ -272,6 +273,7 @@ public class DeriveStatusCommand extends GenericCommand implements IChangeLoggin
                         if(specificMeasure instanceof Control && (Integer.parseInt(getMaturityValueByTag((Control)specificMeasure)) <= Integer.parseInt(maturity) &&
                                 (optVal == null || !optVal.equals(Control.IMPLEMENTED_NA)))){
                             list.add((Control)specificMeasure);
+                            mgSetNA.add((Control)genericMeasure);
                             if(!counterIncreased){
                                 counterIncreased = true;
                                 samtTopicCount++;
@@ -298,7 +300,16 @@ public class DeriveStatusCommand extends GenericCommand implements IChangeLoggin
                 }
             }
         }
+        setControlsTo(mgSetNA, Control.IMPLEMENTED_NA); // set all MG linked to MS to NA
         return list;
+    }
+    
+    public void setControlsTo(Set<Control> list, String lvlToSet){
+        for(Control c : list){
+            c.getEntity().setSimpleValue(getImplPropertyType(), lvlToSet);
+            measureCount++;
+            changedElements.add(c);
+        }
     }
     
     /**
