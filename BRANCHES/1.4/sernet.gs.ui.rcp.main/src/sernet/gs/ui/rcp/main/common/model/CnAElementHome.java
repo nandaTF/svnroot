@@ -41,7 +41,6 @@ import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnAElementByType;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadCurrentUserConfiguration;
 import sernet.gs.ui.rcp.main.service.crudcommands.RefreshElement;
 import sernet.gs.ui.rcp.main.service.crudcommands.RemoveElement;
-import sernet.gs.ui.rcp.main.service.crudcommands.UpdateControlEntity;
 import sernet.gs.ui.rcp.main.service.crudcommands.UpdateElementEntity;
 import sernet.gs.ui.rcp.main.service.crudcommands.UpdateMultipleElements;
 import sernet.gs.ui.rcp.main.service.taskcommands.CreateScenario;
@@ -399,46 +398,49 @@ public class CnAElementHome {
      * @return
      */
     public boolean isWriteAllowed(CnATreeElement cte) {
-        // Short cut: If no permission handling is needed than all objects are
-        // writable.
-        ServiceFactory.lookupAuthService();
-        if (!ServiceFactory.isPermissionHandlingNeeded()) {
-            return true;
-        }
-
-        // Short cut 2: If we are the admin, then everything is writable as
-        // well.
-        if (AuthenticationHelper.getInstance().currentUserHasRole(new String[] { ApplicationRoles.ROLE_ADMIN })) {
-            return true;
-        }
-
-        if (roles == null) {
-            LoadCurrentUserConfiguration lcuc = new LoadCurrentUserConfiguration();
-            try {
-                lcuc = getCommandService().executeCommand(lcuc);
-            } catch (CommandException e) {
-                ExceptionUtil.log(e, Messages.getString("CnAElementHome.2")); //$NON-NLS-1$
-                return false;
-            }
-
-            Configuration c = lcuc.getConfiguration();
-
-            // No configuration for the current user (anymore?). Then nothing is
+        try {
+            // Short cut: If no permission handling is needed than all objects are
             // writable.
-            if (c == null) {
-                return false;
-            }
-
-            roles = c.getRoles();
-        }
-        
-        CnATreeElement elemntWithPermissions = Retriever.checkRetrievePermissions(cte);
-        for (Permission p : elemntWithPermissions.getPermissions()) {
-            if (p.isWriteAllowed() && roles.contains(p.getRole())) {
+            ServiceFactory.lookupAuthService();
+            if (!ServiceFactory.isPermissionHandlingNeeded()) {
                 return true;
             }
+    
+            // Short cut 2: If we are the admin, then everything is writable as
+            // well.
+            if (AuthenticationHelper.getInstance().currentUserHasRole(new String[] { ApplicationRoles.ROLE_ADMIN })) {
+                return true;
+            }
+    
+            if (roles == null) {
+                LoadCurrentUserConfiguration lcuc = new LoadCurrentUserConfiguration();
+                try {
+                    lcuc = getCommandService().executeCommand(lcuc);
+                } catch (CommandException e) {
+                    ExceptionUtil.log(e, Messages.getString("CnAElementHome.2")); //$NON-NLS-1$
+                    return false;
+                }
+    
+                Configuration c = lcuc.getConfiguration();
+    
+                // No configuration for the current user (anymore?). Then nothing is
+                // writable.
+                if (c == null) {
+                    return false;
+                }
+    
+                roles = c.getRoles();
+            }
+            
+            CnATreeElement elemntWithPermissions = Retriever.checkRetrievePermissions(cte);
+            for (Permission p : elemntWithPermissions.getPermissions()) {
+                if (p.isWriteAllowed() && roles.contains(p.getRole())) {
+                    return true;
+                }
+            }
+        } catch(Exception e) {
+            log.error("Error while checking write permission.", e);
         }
-
         return false;
     }
     
@@ -621,13 +623,7 @@ public class CnAElementHome {
      * @return update command
      */
     private UpdateElementEntity<? extends CnATreeElement> createCommand(CnATreeElement element) {
-        UpdateElementEntity<? extends CnATreeElement>  command = null;
-        if(Control.TYPE_ID.equals(element.getTypeId())) {
-            command = new UpdateControlEntity((Control) element, true, ChangeLogEntry.STATION_ID);
-        } else {
-            command = new UpdateElementEntity<CnATreeElement>(element, true, ChangeLogEntry.STATION_ID);
-        }
-        return command;
+        return new UpdateElementEntity<CnATreeElement>(element, true, ChangeLogEntry.STATION_ID);
     }
 
    

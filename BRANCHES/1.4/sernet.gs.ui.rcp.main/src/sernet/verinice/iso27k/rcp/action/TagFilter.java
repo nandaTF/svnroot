@@ -19,7 +19,7 @@ package sernet.verinice.iso27k.rcp.action;
 
 import org.eclipse.jface.viewers.StructuredViewer;
 
-import sernet.verinice.iso27k.rcp.IParameter;
+import sernet.verinice.interfaces.IParameter;
 
 public class TagFilter implements IParameter {
     

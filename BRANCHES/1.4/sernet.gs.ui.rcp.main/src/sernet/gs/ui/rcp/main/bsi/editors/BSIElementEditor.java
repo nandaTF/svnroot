@@ -18,6 +18,7 @@
 package sernet.gs.ui.rcp.main.bsi.editors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -58,6 +60,7 @@ import sernet.hui.common.connect.PropertyChangedEvent;
 import sernet.hui.common.multiselectionlist.IMLPropertyOption;
 import sernet.hui.common.multiselectionlist.IMLPropertyType;
 import sernet.hui.swt.widgets.HitroUIComposite;
+import sernet.verinice.iso27k.service.Retriever;
 import sernet.verinice.model.bsi.IBSIStrukturElement;
 import sernet.verinice.model.bsi.IBSIStrukturKategorie;
 import sernet.verinice.model.common.CnATreeElement;
@@ -167,7 +170,6 @@ public class BSIElementEditor extends EditorPart {
         }
         try {
             // save element, refresh etc:
-            BSIElementEditorInput editorinput = (BSIElementEditorInput) getEditorInput();
             CnAElementHome.getInstance().updateEntity(cnAElement);
             isModelModified = false;
             this.setPartName(cnAElement.getTitle());
@@ -182,7 +184,7 @@ public class BSIElementEditor extends EditorPart {
 
     private void refresh() {
         // notify all views of change:
-        CnAElementFactory.getModel(cnAElement).childChanged(cnAElement.getParent(), cnAElement);
+        CnAElementFactory.getModel(cnAElement).childChanged(cnAElement);
 
         // removed CnAElementFactory.getModel(cnAElement).refreshAllListeners here
         // before release 1.4.2
@@ -216,9 +218,11 @@ public class BSIElementEditor extends EditorPart {
             cnAElement = ((BSIElementEditorInput) getEditorInput()).getCnAElement();
             editorBehaviorList.clear();
 
-            LoadElementForEditor command = new LoadElementForEditor(cnAElement);
+            CnATreeElement elementWithChildren = Retriever.checkRetrieveChildren(cnAElement);          
+            LoadElementForEditor command = new LoadElementForEditor(cnAElement,false);
             command = ServiceFactory.lookupCommandService().executeCommand(command);
             cnAElement = command.getElement();
+            cnAElement.setChildren(elementWithChildren.getChildren());
 
             Entity entity = cnAElement.getEntity();
             EntityType entityType = HitroUtil.getInstance().getTypeFactory().getEntityType(entity.getEntityType());
@@ -285,7 +289,7 @@ public class BSIElementEditor extends EditorPart {
         if (tags == null)
             return new String[] {};
 
-        tags.replaceAll("\\s+", "");
+        tags = tags.replaceAll("\\s+", "");
         return tags.split(",");
     }
 
@@ -353,31 +357,15 @@ public class BSIElementEditor extends EditorPart {
      */
     @Override
     public void createPartControl(Composite parent) {
-        FormLayout formLayout = new FormLayout();
-        parent.setLayout(formLayout);
-
-        huiComposite = new HitroUIComposite(parent, SWT.NULL, false);
-        FormData formData = new FormData();
-        formData.top = new FormAttachment(0, 1);
-        formData.left = new FormAttachment(0, 1);
-        formData.right = new FormAttachment(100, -1);
-        if (isSamtPerspective()) {
-            formData.bottom = new FormAttachment(100, -1);
-        } else {
-            formData.bottom = new FormAttachment(66, -1);
-        }
-        huiComposite.setLayoutData(formData);
-
-        if (!isSamtPerspective()) {
-            linkMaker = new LinkMaker(parent);
-            FormData formData2 = new FormData();
-            formData2.top = new FormAttachment(66, 1);
-            formData2.left = new FormAttachment(0, 1);
-            formData2.right = new FormAttachment(100, -1);
-            formData2.bottom = new FormAttachment(100, -1);
-            linkMaker.setLayoutData(formData2);
-        }
-
+        SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
+        huiComposite = new HitroUIComposite(sashForm, SWT.NULL, false);
+        if (showLinkMaker()) {
+            linkMaker = new LinkMaker(sashForm);
+            sashForm.setWeights(new int[] { 66, 33});
+            sashForm.setSashWidth(4);
+            sashForm.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_GRAY));
+        }   
+        
         initContent();
         setIcon();
 
@@ -389,6 +377,11 @@ public class BSIElementEditor extends EditorPart {
         // if opened the first time, save initialized entity:
         if (isDirty())
             save(false);
+    }
+    
+    private boolean showLinkMaker() {
+        boolean showLinkMaker = Activator.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SHOW_LINK_MAKER_IN_EDITOR);
+        return showLinkMaker && !isSamtPerspective();
     }
 
     /**

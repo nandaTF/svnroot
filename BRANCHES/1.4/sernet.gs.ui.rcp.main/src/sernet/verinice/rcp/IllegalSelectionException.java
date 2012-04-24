@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Daniel Murygin.
+ * Copyright (c) 2012 Daniel Murygin.
  *
  * This program is free software: you can redistribute it and/or 
  * modify it under the terms of the GNU Lesser General Public License 
@@ -17,16 +17,18 @@
  * Contributors:
  *     Daniel Murygin <dm[at]sernet[dot]de> - initial API and implementation
  ******************************************************************************/
-package sernet.verinice.interfaces.bpm;
+package sernet.verinice.rcp;
 
 /**
+ * Thrown when a selection in the GUI is wrong.
+ * 
  * @author Daniel Murygin <dm[at]sernet[dot]de>
- *
  */
-public interface IProcessCommand {
-    
-    IProcessService getProcessService();
-    
-    void setProcessService(IProcessService processService);
-    
+public class IllegalSelectionException extends RuntimeException {
+
+
+    public IllegalSelectionException(String message) {
+        super(message);
+    }
+
 }

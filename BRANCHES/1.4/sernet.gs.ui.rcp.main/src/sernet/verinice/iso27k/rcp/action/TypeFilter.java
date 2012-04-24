@@ -27,8 +27,9 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import sernet.verinice.iso27k.rcp.IParameter;
+import sernet.verinice.interfaces.IParameter;
 import sernet.verinice.iso27k.service.commands.RetrieveCnATreeElement;
+import sernet.verinice.model.common.ElementFilter;
 
 /**
  * @author Daniel Murygin <dm@sernet.de>
@@ -39,12 +40,12 @@ public class TypeFilter implements IParameter {
     private Set<String[]> visibleTypeSet = new HashSet<String[]>(1);
     
     public TypeFilter(StructuredViewer viewer) {
-        visibleTypeSet.add(RetrieveCnATreeElement.ALL_TYPES);
+        visibleTypeSet.add(ElementFilter.ALL_TYPES);
     }
     
     public void addType(String[] type) {
-        if(visibleTypeSet.contains(RetrieveCnATreeElement.ALL_TYPES)) {
-            visibleTypeSet.remove(RetrieveCnATreeElement.ALL_TYPES);
+        if(visibleTypeSet.contains(ElementFilter.ALL_TYPES)) {
+            visibleTypeSet.remove(ElementFilter.ALL_TYPES);
         }
         visibleTypeSet.add(type);
     }

@@ -59,7 +59,7 @@ import sernet.verinice.model.iso27k.InheritLogger;
 @SuppressWarnings("serial")
 public abstract class CnATreeElement implements Serializable, IBSIModelListener, ITypedElement {
 
-    private transient Logger log = Logger.getLogger(CnATreeElement.class);
+    private transient Logger log = Logger.getLogger(CnATreeElement.class); // NOPMD by dm on 07.02.12 12:36
     
     private static final InheritLogger LOG_INHERIT = InheritLogger.getLogger(CnATreeElement.class);
 
@@ -176,13 +176,13 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
 	 * @param child
 	 */
 	public void removeChild(CnATreeElement child) {
-		if (children.remove(child) && getParent()!=null) {
-		    try {
-		        getParent().childRemoved(this, child);
-		    } catch(Exception e) {
-		        getLog().error("Error while removing child", e);
-		    }
-		}
+	    try {
+    	    if (children.remove(child)) {	    
+    	        childRemoved(this, child);	    
+    		}
+	    } catch(Exception e) {
+            getLog().error("Error while removing child", e);
+        }
 	}
 
 	/**
@@ -223,12 +223,12 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
 			getModelChangeListener().childRemoved(category, child);
 	}
 
-	public void childChanged(CnATreeElement category, CnATreeElement child) {
+	public void childChanged(CnATreeElement child) {
 			// child changed:
-			getModelChangeListener().childChanged(category, child);
+			getModelChangeListener().childChanged(child);
 	}
 	
-	public boolean canContain(Object obj) {
+	public boolean canContain(Object obj) { // NOPMD by dm on 07.02.12 12:39
 		return false;
 	}
 
@@ -284,7 +284,7 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
 
     public abstract String getTitle();
 	
-	public void setTitel(String name) {
+	public void setTitel(String name) { // NOPMD by dm on 07.02.12 12:38
 		// override this method
 	}
 	
@@ -473,7 +473,7 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
 		};
 	}
 
-	public ISchutzbedarfProvider getSchutzbedarfProvider() {
+	public ISchutzbedarfProvider getSchutzbedarfProvider() { // NOPMD by dm on 07.02.12 12:38
 		return null;
 	}
 
@@ -666,7 +666,7 @@ public abstract class CnATreeElement implements Serializable, IBSIModelListener,
 		return permissions.remove(permission);
 	}
 	
-	public void refreshAllListeners(Object source) {
+	public void refreshAllListeners(Object source) { // NOPMD by dm on 07.02.12 12:39
 		// override this in model classes
 	}
 	

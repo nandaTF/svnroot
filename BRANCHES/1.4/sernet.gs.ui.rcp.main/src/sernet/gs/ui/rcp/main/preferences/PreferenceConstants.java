@@ -45,6 +45,7 @@ public class PreferenceConstants {
     public static final String INFO_PROCESSES_STARTED = "info_processes_started"; //$NON-NLS-1$
     public static final String INFO_STATUS_DERIVED = "info_status_derived"; //$NON-NLS-1$
     public static final String SHOW_ALIEN_DECORATOR = "show_alien_decorator"; //$NON-NLS-1$
+    public static final String SHOW_DBID_DECORATOR = "show_dbid_decorator"; //$NON-NLS-1$
 
 	public static final String DB_DRIVER = "cna_driver"; //$NON-NLS-1$
 	public static final String DB_DRIVER_DERBY = "org.apache.derby.jdbc.EmbeddedDriver"; //$NON-NLS-1$
@@ -129,6 +130,7 @@ public class PreferenceConstants {
 	public static final String HUI_TAGS = "hui_tags";
 	public static final String HUI_TAGS_ALL = "hui_tags_all";
     public static final String HUI_TAGS_STRICT = "hui_tags_strict";
+    public static final String SHOW_LINK_MAKER_IN_EDITOR = "link_maker_in_editor";
     
 	/**
 	 * Returns the DONT_ASK_BEFORE_SWITCH_PERSPECTIVE preference name for a view class.

@@ -4,13 +4,21 @@
     xsi:schemaLocation="http://www.verinice.org/auth verinice-auth.xsd">
     
     <!-- This is the default configuration of access rights to application actions. -->
-    <!-- NEVER edit this file! Use verinice-auth.xml instead. -->
+    <!-- End users should NEVER edit this file! Use verinice-auth.xml instead. -->
     <!-- Settings in verinice-auth.xml overwrites settings in this file. -->
     
     <profiles>
         <!-- Each profile in this document defines a collection -->
         <!-- of application actions. All actions in verinice are -->
         <!-- defined in property file verinice-action.properties. -->
+        
+        
+        <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+             When adding actions here, don't forget to add 
+             them to verinice-auth-standalone-default.xml as well
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        -->
+        
         <profile name="user-default-profile" origin="default">
         <!-- missing actions: 
             "accountsettings"
@@ -64,6 +72,7 @@
         <action id="simpleauditview" />
         <action id="taskview" />
         <action id="todo" />
+        <action id="unify" />
         <action id="xmlexport" />
         <action id="xmlimport" />
         </profile>
@@ -121,6 +130,7 @@
 	        <action id="simpleauditview" />
 	        <action id="taskview" />
 	        <action id="todo"/>
+            <action id="unify" />
 	        <action id="xmlexport"/>
         </profile>
         <profile name="admin-scope-default-profile" origin="default">
@@ -177,6 +187,7 @@
 	        <action id="taskshowall" />
 	        <action id="taskview" />
 	        <action id="todo"/>
+            <action id="unify" />
 	        <action id="xmlexport"/>
         </profile>
         <profile name="admin-default-profile" origin="default" >
@@ -232,6 +243,7 @@
 	        <action id="taskshowall" />
 	        <action id="taskview" />
 	        <action id="todo"/>
+            <action id="unify" />
 	        <action id="xmlexport"/>
 	        <action id="xmlimport"/>
         </profile>

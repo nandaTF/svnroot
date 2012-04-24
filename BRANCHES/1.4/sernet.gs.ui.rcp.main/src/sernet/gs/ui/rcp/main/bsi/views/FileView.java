@@ -179,6 +179,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView {
 	private IPartListener2 linkWithEditorPartListener  = new LinkWithEditorPartListener(this);
 	
 	public FileView() {
+	    super();
 	}
 	
 	public String getRightID(){
@@ -221,7 +222,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView {
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(new AttachmentLabelProvider());
 		Table table = viewer.getTable();
-		iconColumn = new TableColumn(table, SWT.LEFT);;
+		iconColumn = new TableColumn(table, SWT.LEFT);
 		iconColumn.setWidth(26);
 		iconColumn.addSelectionListener(new SortSelectionAdapter(this,iconColumn,0));
 		
@@ -300,7 +301,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView {
 	protected void elementSelected(Object element) {
 	    try {
             if(element instanceof CnATreeElement) {
-                addFileAction.setEnabled(true);     
+                addFileAction.setEnabled(addFileAction.checkRights());     
                 setCurrentCnaElement((CnATreeElement) element);
                 loadFiles();
                 
@@ -664,6 +665,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView {
 		private int direction = ASCENDING;
 
 		public TableSorter() {
+		    super();
 			this.propertyIndex = DEFAULT_SORT_COLUMN;
 			this.direction = ASCENDING;
 		}
@@ -713,7 +715,11 @@ public class FileView extends ViewPart implements ILinkedWithEditorView {
 					rc = a1.getFileName().compareTo(a2.getFileName());
 					break;
 				case 2:
-					rc = a1.getMimeType().compareTo(a2.getMimeType());
+				    mimeType1 = a1.getMimeType();
+                    mimeType2 = a2.getMimeType();
+                    if (mimeType1 == null || mimeType2 == null)
+                        return 0;
+					rc = mimeType1.compareTo(mimeType2);
 					break;
 				case 3:
 					rc = a1.getText().compareTo(a2.getText());
@@ -743,6 +749,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView {
 		int index;
 		
 		public SortSelectionAdapter(FileView fileView, TableColumn column, int index) {
+		    super();
 			this.fileView = fileView;
 			this.column = column;
 			this.index = index;

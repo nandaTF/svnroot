@@ -27,12 +27,14 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPart;
 
+import sernet.gs.service.RetrieveInfo;
 import sernet.gs.ui.rcp.main.bsi.views.BSIKatalogInvisibleRoot.ISelectionListener;
 import sernet.gs.ui.rcp.main.bsi.views.chart.ChartView;
 import sernet.gs.ui.rcp.main.bsi.views.chart.IChartGenerator;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.ICommandService;
+import sernet.verinice.iso27k.service.Retriever;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.bsi.IBSIModelListener;
 import sernet.verinice.model.common.ChangeLogEntry;
@@ -155,7 +157,10 @@ public class SpiderChartView extends ChartView implements IAttachedToPerspective
               && ControlGroup.TYPE_ID.equals(selection.getTypeId())) {
                group = (ControlGroup) selection; 
            } else {
-               group = getChartControlGroup(selection.getParent()); 
+               RetrieveInfo ri = new RetrieveInfo();
+               ri.setParent(true);
+               CnATreeElement parent = Retriever.retrieveElement(selection.getParent(), ri);
+               group = getChartControlGroup(parent); 
            }
         } else if(selection!=null && Audit.TYPE_ID.equals(selection.getTypeId())) {
             group = getControlGroup(selection);
@@ -250,7 +255,7 @@ public class SpiderChartView extends ChartView implements IAttachedToPerspective
          * @see sernet.verinice.model.iso27k.IISO27KModelListener#childChanged(sernet.verinice.model.common.CnATreeElement, sernet.verinice.model.common.CnATreeElement)
          */
         @Override
-        public void childChanged(CnATreeElement category, CnATreeElement child) {
+        public void childChanged(CnATreeElement child) {
             drawChart();     
         }
     
