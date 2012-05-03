@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="verinice" uid="sernet.gs.ui.rcp.main.product" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.5.1.91" useFeatures="true" includeLaunchers="true">
+<product name="verinice" uid="sernet.gs.ui.rcp.main.product" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.5.1.92" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/sernet.gs.ui.rcp.main/icons/product_lg.gif"/>
@@ -58,7 +58,7 @@ VDA und das VDA Logo sind eingetragene Markenzeichen des Verband der Automobilin
 
    <launcherArgs>
       <programArgs>-data @user.home/verinice/workspace</programArgs>
-      <vmArgs>-Xms64m -Xmx512m -XX:MaxPermSize=128m -Dorg.osgi.service.http.port=8800 -Dorg.ops4j.pax.web.listening.addresses=localhost  -Dosgi.parentClassloader=ext</vmArgs>
+      <vmArgs>-Xms128m -Xmx768m -XX:MaxPermSize=128m -Dorg.osgi.service.http.port=8800 -Dorg.ops4j.pax.web.listening.addresses=localhost  -Dosgi.parentClassloader=ext</vmArgs>
    </launcherArgs>
 
    <windowImages i16="/sernet.gs.ui.rcp.main/icons/window16.gif" i32="/sernet.gs.ui.rcp.main/icons/window32.gif"/>
