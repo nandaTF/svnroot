@@ -1147,52 +1147,24 @@ columns(cols);</value>
         <oda-data-set extensionID="verinice.oda.driver.dataSet.id" name="scope_allrisks" id="1738">
             <list-property name="columnHints">
                 <structure>
-                    <property name="columnName">Probability</property>
-                    <text-property name="displayName">Probability</text-property>
-                </structure>
-                <structure>
-                    <property name="columnName">Impact C</property>
-                    <text-property name="displayName">Impact C</text-property>
-                </structure>
-                <structure>
-                    <property name="columnName">Impact I</property>
-                    <text-property name="displayName">Impact I</text-property>
-                </structure>
-                <structure>
-                    <property name="columnName">Impact A</property>
-                    <text-property name="displayName">Impact A</text-property>
-                </structure>
-                <structure>
                     <property name="columnName">RISK_C</property>
                     <text-property name="displayName">RISK_C</text-property>
+                    <text-property name="heading">RISK_C</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">RISK_I</property>
                     <text-property name="displayName">RISK_I</text-property>
+                    <text-property name="heading">RISK_I</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">RISK_A</property>
                     <text-property name="displayName">RISK_A</text-property>
-                </structure>
-                <structure>
-                    <property name="columnName">TOLERABLE_C</property>
-                    <text-property name="displayName">TOLERABLE_C</text-property>
-                </structure>
-                <structure>
-                    <property name="columnName">TOLERABLE_I</property>
-                    <text-property name="displayName">TOLERABLE_I</text-property>
-                </structure>
-                <structure>
-                    <property name="columnName">TOLERABLE_A</property>
-                    <text-property name="displayName">TOLERABLE_A</text-property>
-                </structure>
-                <structure>
-                    <property name="columnName">Scenario</property>
-                    <text-property name="displayName">Scenario</text-property>
+                    <text-property name="heading">RISK_A</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">Asset</property>
                     <text-property name="displayName">Asset</text-property>
+                    <text-property name="heading">Asset</text-property>
                 </structure>
             </list-property>
             <list-property name="parameters">
@@ -1213,61 +1185,21 @@ columns(cols);</value>
                 <list-property name="resultSet">
                     <structure>
                         <property name="position">1</property>
-                        <property name="name">Probability</property>
-                        <property name="dataType">javaObject</property>
-                    </structure>
-                    <structure>
-                        <property name="position">2</property>
-                        <property name="name">Impact C</property>
-                        <property name="dataType">javaObject</property>
-                    </structure>
-                    <structure>
-                        <property name="position">3</property>
-                        <property name="name">Impact I</property>
-                        <property name="dataType">javaObject</property>
-                    </structure>
-                    <structure>
-                        <property name="position">4</property>
-                        <property name="name">Impact A</property>
-                        <property name="dataType">javaObject</property>
-                    </structure>
-                    <structure>
-                        <property name="position">5</property>
                         <property name="name">RISK_C</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
-                        <property name="position">6</property>
+                        <property name="position">2</property>
                         <property name="name">RISK_I</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
-                        <property name="position">7</property>
+                        <property name="position">3</property>
                         <property name="name">RISK_A</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
-                        <property name="position">8</property>
-                        <property name="name">TOLERABLE_C</property>
-                        <property name="dataType">javaObject</property>
-                    </structure>
-                    <structure>
-                        <property name="position">9</property>
-                        <property name="name">TOLERABLE_I</property>
-                        <property name="dataType">javaObject</property>
-                    </structure>
-                    <structure>
-                        <property name="position">10</property>
-                        <property name="name">TOLERABLE_A</property>
-                        <property name="dataType">javaObject</property>
-                    </structure>
-                    <structure>
-                        <property name="position">11</property>
-                        <property name="name">Scenario</property>
-                        <property name="dataType">javaObject</property>
-                    </structure>
-                    <structure>
-                        <property name="position">12</property>
+                        <property name="position">4</property>
                         <property name="name">Asset</property>
                         <property name="dataType">javaObject</property>
                     </structure>
@@ -1277,83 +1209,27 @@ columns(cols);</value>
             <list-property name="resultSet">
                 <structure>
                     <property name="position">1</property>
-                    <property name="name">Probability</property>
-                    <property name="nativeName">Probability</property>
-                    <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
-                </structure>
-                <structure>
-                    <property name="position">2</property>
-                    <property name="name">Impact C</property>
-                    <property name="nativeName">Impact C</property>
-                    <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
-                </structure>
-                <structure>
-                    <property name="position">3</property>
-                    <property name="name">Impact I</property>
-                    <property name="nativeName">Impact I</property>
-                    <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
-                </structure>
-                <structure>
-                    <property name="position">4</property>
-                    <property name="name">Impact A</property>
-                    <property name="nativeName">Impact A</property>
-                    <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
-                </structure>
-                <structure>
-                    <property name="position">5</property>
                     <property name="name">RISK_C</property>
                     <property name="nativeName">RISK_C</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
                 <structure>
-                    <property name="position">6</property>
+                    <property name="position">2</property>
                     <property name="name">RISK_I</property>
                     <property name="nativeName">RISK_I</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
                 <structure>
-                    <property name="position">7</property>
+                    <property name="position">3</property>
                     <property name="name">RISK_A</property>
                     <property name="nativeName">RISK_A</property>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
                 <structure>
-                    <property name="position">8</property>
-                    <property name="name">TOLERABLE_C</property>
-                    <property name="nativeName">TOLERABLE_C</property>
-                    <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
-                </structure>
-                <structure>
-                    <property name="position">9</property>
-                    <property name="name">TOLERABLE_I</property>
-                    <property name="nativeName">TOLERABLE_I</property>
-                    <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
-                </structure>
-                <structure>
-                    <property name="position">10</property>
-                    <property name="name">TOLERABLE_A</property>
-                    <property name="nativeName">TOLERABLE_A</property>
-                    <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
-                </structure>
-                <structure>
-                    <property name="position">11</property>
-                    <property name="name">Scenario</property>
-                    <property name="nativeName">Scenario</property>
-                    <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">2000</property>
-                </structure>
-                <structure>
-                    <property name="position">12</property>
+                    <property name="position">4</property>
                     <property name="name">Asset</property>
                     <property name="nativeName">Asset</property>
                     <property name="dataType">javaObject</property>
@@ -1372,33 +1248,39 @@ if (myroot != null &amp;&amp; myroot != -1) {
 	root = myroot;
 }
 
-cols = LoadReportAllRisksForScope.COLUMNS;
-c2 = new LoadReportAllRisksForScope(root, true); // DISTINCT
+//cols = LoadReportAllRisksForScope.COLUMNS;
+//c2 = new LoadReportAllRisksForScope(root, true); // DISTINCT
+cols = LoadAssetTotalRiskFigures.COLUMNS;
+c2 = new LoadAssetTotalRiskFigures(root);
 elements = helper.execute(c2).getResult();
 return elements;]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
-  <Version>1.0</Version>
-  <design:DataSetParameters>
-    <design:parameterDefinitions>
-      <design:inOutMode>In</design:inOutMode>
-      <design:attributes>
-        <design:name>root_object</design:name>
-        <design:position>1</design:position>
-        <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
-        <design:precision>-1</design:precision>
-        <design:scale>-1</design:scale>
-        <design:nullability>Unknown</design:nullability>
-      </design:attributes>
-      <design:inputAttributes>
-        <design:elementAttributes>
-          <design:defaultValues>
-            <design:values>dummy default value</design:values>
-          </design:defaultValues>
-        </design:elementAttributes>
-      </design:inputAttributes>
-    </design:parameterDefinitions>
-  </design:DataSetParameters>
+  <Version>2.0</Version>
+  <DataSetParameters>
+    <parameter>
+      <design:ParameterDefinition>
+        <design:inOutMode>In</design:inOutMode>
+        <design:attributes>
+          <design:identifier>
+            <design:name>root_object</design:name>
+            <design:position>1</design:position>
+          </design:identifier>
+          <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+          <design:precision>-1</design:precision>
+          <design:scale>-1</design:scale>
+          <design:nullability>Unknown</design:nullability>
+        </design:attributes>
+        <design:inputAttributes>
+          <design:elementAttributes>
+            <design:defaultValues>
+              <design:values>dummy default value</design:values>
+            </design:defaultValues>
+          </design:elementAttributes>
+        </design:inputAttributes>
+      </design:ParameterDefinition>
+    </parameter>
+  </DataSetParameters>
 </model:DesignValues>]]></xml-property>
             <list-property name="privateDriverProperties">
                 <ex-property>
@@ -1406,7 +1288,7 @@ return elements;]]></xml-property>
                     <value>import sernet.hui.common.*;
 import sernet.gs.ui.rcp.main.service.crudcommands.*;
 
-cols = LoadReportAllRisksForScope.COLUMNS;
+cols = LoadAssetTotalRiskFigures.COLUMNS;
 inParameters(new String[] { "root_object" });
 columns(cols);</value>
                 </ex-property>
@@ -12041,7 +11923,7 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
       </Grouping>
       <Sorting>Ascending</Sorting>
       <SortKey>
-        <Definition>row[&quot;RISK_C&quot;]</Definition>
+        <Definition>Number(row[&quot;RISK_C&quot;])+Number(row[&quot;RISK_I&quot;])+Number(row[&quot;RISK_A&quot;])</Definition>
       </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
@@ -12178,26 +12060,6 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                         <property name="width">7.3in</property>
                         <list-property name="boundDataColumns">
                             <structure>
-                                <property name="name">Probability</property>
-                                <expression name="expression" type="javascript">dataSetRow["Probability"]</expression>
-                                <property name="dataType">javaObject</property>
-                            </structure>
-                            <structure>
-                                <property name="name">Impact C</property>
-                                <expression name="expression" type="javascript">dataSetRow["Impact C"]</expression>
-                                <property name="dataType">javaObject</property>
-                            </structure>
-                            <structure>
-                                <property name="name">Impact I</property>
-                                <expression name="expression" type="javascript">dataSetRow["Impact I"]</expression>
-                                <property name="dataType">javaObject</property>
-                            </structure>
-                            <structure>
-                                <property name="name">Impact A</property>
-                                <expression name="expression" type="javascript">dataSetRow["Impact A"]</expression>
-                                <property name="dataType">javaObject</property>
-                            </structure>
-                            <structure>
                                 <property name="name">RISK_C</property>
                                 <expression name="expression" type="javascript">dataSetRow["RISK_C"]</expression>
                                 <property name="dataType">javaObject</property>
@@ -12210,26 +12072,6 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                             <structure>
                                 <property name="name">RISK_A</property>
                                 <expression name="expression" type="javascript">dataSetRow["RISK_A"]</expression>
-                                <property name="dataType">javaObject</property>
-                            </structure>
-                            <structure>
-                                <property name="name">TOLERABLE_C</property>
-                                <expression name="expression" type="javascript">dataSetRow["TOLERABLE_C"]</expression>
-                                <property name="dataType">javaObject</property>
-                            </structure>
-                            <structure>
-                                <property name="name">TOLERABLE_I</property>
-                                <expression name="expression" type="javascript">dataSetRow["TOLERABLE_I"]</expression>
-                                <property name="dataType">javaObject</property>
-                            </structure>
-                            <structure>
-                                <property name="name">TOLERABLE_A</property>
-                                <expression name="expression" type="javascript">dataSetRow["TOLERABLE_A"]</expression>
-                                <property name="dataType">javaObject</property>
-                            </structure>
-                            <structure>
-                                <property name="name">Scenario</property>
-                                <expression name="expression" type="javascript">dataSetRow["Scenario"]</expression>
                                 <property name="dataType">javaObject</property>
                             </structure>
                             <structure>
