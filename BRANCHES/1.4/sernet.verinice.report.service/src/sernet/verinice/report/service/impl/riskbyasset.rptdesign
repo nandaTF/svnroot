@@ -5467,7 +5467,7 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                                                             <property name="operator">gt</property>
                                                             <expression name="testExpr" type="javascript">Number(row[0])+1</expression>
                                                             <simple-property-list name="value1">
-                                                                <value type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" )</value>
+                                                                <value type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" ))</value>
                                                             </simple-property-list>
                                                             <property name="style">bg_red</property>
                                                         </structure>
@@ -5475,16 +5475,16 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                                                             <property name="operator">between</property>
                                                             <expression name="testExpr" type="javascript">Number(row[0])+1</expression>
                                                             <simple-property-list name="value1">
-                                                                <value type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" ) - 2</value>
+                                                                <value type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" )) - 2</value>
                                                             </simple-property-list>
-                                                            <expression name="value2" type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" )</expression>
+                                                            <expression name="value2" type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" ))</expression>
                                                             <property name="style">bg_yellow</property>
                                                         </structure>
                                                         <structure>
                                                             <property name="operator">lt</property>
                                                             <expression name="testExpr" type="javascript">Number(row[0])+1+2</expression>
                                                             <simple-property-list name="value1">
-                                                                <value type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" )</value>
+                                                                <value type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" ))</value>
                                                             </simple-property-list>
                                                             <property name="style">bg_green</property>
                                                         </structure>
@@ -5501,7 +5501,7 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                                                             <property name="operator">gt</property>
                                                             <expression name="testExpr" type="javascript">Number(row[0])+2</expression>
                                                             <simple-property-list name="value1">
-                                                                <value type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" )</value>
+                                                                <value type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" ))</value>
                                                             </simple-property-list>
                                                             <property name="style">bg_red</property>
                                                         </structure>
@@ -5509,16 +5509,16 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                                                             <property name="operator">between</property>
                                                             <expression name="testExpr" type="javascript">Number(row[0])+2</expression>
                                                             <simple-property-list name="value1">
-                                                                <value type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" ) - 2</value>
+                                                                <value type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" )) - 2</value>
                                                             </simple-property-list>
-                                                            <expression name="value2" type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" )</expression>
+                                                            <expression name="value2" type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" ))</expression>
                                                             <property name="style">bg_yellow</property>
                                                         </structure>
                                                         <structure>
                                                             <property name="operator">lt</property>
                                                             <expression name="testExpr" type="javascript">Number(row[0])+2+2</expression>
                                                             <simple-property-list name="value1">
-                                                                <value type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" )</value>
+                                                                <value type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" ))</value>
                                                             </simple-property-list>
                                                             <property name="style">bg_green</property>
                                                         </structure>
@@ -5534,7 +5534,7 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                                                             <property name="operator">gt</property>
                                                             <expression name="testExpr" type="javascript">Number(row[0])+3</expression>
                                                             <simple-property-list name="value1">
-                                                                <value type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" )</value>
+                                                                <value type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" ))</value>
                                                             </simple-property-list>
                                                             <property name="style">bg_red</property>
                                                         </structure>
@@ -5542,16 +5542,16 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                                                             <property name="operator">between</property>
                                                             <expression name="testExpr" type="javascript">Number(row[0])+3</expression>
                                                             <simple-property-list name="value1">
-                                                                <value type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" ) - 2</value>
+                                                                <value type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" )) - 2</value>
                                                             </simple-property-list>
-                                                            <expression name="value2" type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" )</expression>
+                                                            <expression name="value2" type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" ))</expression>
                                                             <property name="style">bg_yellow</property>
                                                         </structure>
                                                         <structure>
                                                             <property name="operator">lt</property>
                                                             <expression name="testExpr" type="javascript">Number(row[0])+3+2</expression>
                                                             <simple-property-list name="value1">
-                                                                <value type="javascript">reportContext.getPersistentGlobalVariable( "confidentialityValue" )</value>
+                                                                <value type="javascript">Number(reportContext.getPersistentGlobalVariable( "confidentialityValue" ))</value>
                                                             </simple-property-list>
                                                             <property name="style">bg_green</property>
                                                         </structure>
