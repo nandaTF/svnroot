@@ -254,6 +254,11 @@ public class BIRTReportService {
 		} catch (EngineException e) {
 		    log.error("Could not render design: ", e);
 			throw new IllegalStateException(e);
+		} finally{
+		    // ensure .log file is released again (.lck file will be removed)
+		    if(engine != null){
+		        engine.destroy();
+		    }
 		}
 	}
 

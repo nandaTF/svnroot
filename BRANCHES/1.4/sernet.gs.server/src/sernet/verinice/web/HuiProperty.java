@@ -27,10 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import javax.faces.model.SelectItem;
-
 import org.apache.log4j.Logger;
-import org.hibernate.hql.ast.tree.IsNullLogicOperatorNode;
 
 import sernet.hui.common.connect.PropertyOption;
 import sernet.hui.common.connect.PropertyType;
@@ -97,16 +94,26 @@ public class HuiProperty<K,V> implements Serializable{
         return type.isDate();
     }
     
+    public boolean getIsBooleanSelect() {
+        return type.isBooleanSelect();
+    }
+    
     public Date getDate() {
         if(!getIsDate()) {
-            throw new RuntimeException("Not a date property, can not return a date.");
+            return null;
         }
-        return (value!=null) ? new Date(Long.valueOf((String)value)) : null;
+        Date date = null;
+        if(value!=null && value instanceof String ) {
+            if(!((String)value).isEmpty()) {
+                date = new Date(Long.valueOf((String)value));
+            }
+        }
+        return date;
     }
     
     public void setDate(Date date) {
         if(!getIsDate()) {
-            throw new RuntimeException("Not a date property, can not set date.");
+            return;
         }
         if(date!=null) {
             value = (V) Long.valueOf(date.getTime()).toString();
@@ -115,9 +122,21 @@ public class HuiProperty<K,V> implements Serializable{
         }
     }
     
+    public boolean getBoolean() {
+        boolean result = false;
+        if(getValue()!=null) {
+            result = Integer.valueOf((String) getValue())==1;
+        }
+        return result;
+    }
+    
+    public void setBoolean(boolean b) {
+        setValue((b) ? (V)"1" : (V)"0");
+    }
+    
     public List<String> getOptionList() {
         if(!getIsSingleSelect() && !getIsNumericSelect()) {
-            throw new RuntimeException("Not a single select property, can not return option list.");
+            return null;
         }
         List<String> itemList = Collections.emptyList();
         if(type.getOptions()!=null) {
@@ -132,13 +151,13 @@ public class HuiProperty<K,V> implements Serializable{
     public String getSelectedOption() {    
         IMLPropertyOption option = null;
         if(!getIsSingleSelect() && !getIsNumericSelect()) {
-            throw new RuntimeException("Not a single select property, can not return selected option.");
+            return null;
         }
         String item = null;
-        if(getIsSingleSelect()) {
+        if(getIsSingleSelect() && getValue()!=null) {
             option = type.getOption((String)getValue());
         }
-        if(getIsNumericSelect()) {
+        if(getIsNumericSelect() && getValue()!=null) {
             option = type.getOption(Integer.valueOf((String)getValue()));           
         }
         if(option!=null) {
@@ -149,7 +168,7 @@ public class HuiProperty<K,V> implements Serializable{
   
     public void setSelectedOption(String item) {
         if(!getIsSingleSelect() && !getIsNumericSelect()) {
-            throw new RuntimeException("Not a single select property, can not set option.");
+            return;
         }
         if(item!=null) {
             for (IMLPropertyOption option : type.getOptions()) {
@@ -178,14 +197,14 @@ public class HuiProperty<K,V> implements Serializable{
     
     public int getMax() {
         if(!type.isNumericSelect()) {
-            throw new RuntimeException("Not a numeric select property, can not return max value.");
+            return 0;
         }
         return type.getMaxValue();
     }
     
     public int getMin() {
         if(!type.isNumericSelect()) {
-            throw new RuntimeException("Not a numeric select property, can not return min value.");
+            return 0;
         }
         return type.getMinValue();
     }

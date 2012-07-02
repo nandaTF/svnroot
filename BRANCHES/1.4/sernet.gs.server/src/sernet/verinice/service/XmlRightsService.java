@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -50,10 +51,12 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.core.io.Resource;
 
+import sernet.gs.service.SecurityException;
 import sernet.hui.common.connect.Property;
 import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.IAuthService;
 import sernet.verinice.interfaces.IBaseDao;
+import sernet.verinice.interfaces.IRightsChangeListener;
 import sernet.verinice.interfaces.IRightsService;
 import sernet.verinice.interfaces.IRightsServiceClient;
 import sernet.verinice.model.auth.Action;
@@ -113,6 +116,8 @@ public class XmlRightsService implements IRightsService {
      */
     private volatile Map<String,List<String>> groupnameMap = new Hashtable<String, List<String>>();
     
+    private RightsServerHandler rightsServerHandler;
+    
     private Resource authConfigurationDefault;
     
     private Resource authConfiguration;
@@ -133,9 +138,9 @@ public class XmlRightsService implements IRightsService {
     
     private IAuthService authService;
     
-    private IRightsServiceClient rightServiceClient;
-    
     private HashMap<String, Profile> profileMap;
+    
+    private static List<IRightsChangeListener> changeListener;
 
     /* (non-Javadoc)
      * @see sernet.verinice.interfaces.IRightsService#getConfiguration()
@@ -280,11 +285,12 @@ public class XmlRightsService implements IRightsService {
                 this.auth = null;
             } finally {
                 writeLock.unlock();
-            }                             
+            }
+            
+            fireChangeEvent();
 
         } catch (sernet.gs.service.SecurityException e) {
-            String message = "User " + getAuthService().getUsername() + " has no permission to write authorization configuration.";
-            log.error(message, e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             String message = "Error while updating authorization configuration.";
@@ -304,13 +310,22 @@ public class XmlRightsService implements IRightsService {
         }
     }
 
+    private void fireChangeEvent() {       
+        for (IRightsChangeListener listener : getChangeListener()) {
+            listener.configurationChanged(getConfiguration());
+        }
+    }
+
     /**
      * Throws a sernet.gs.service.SecurityException
      * if current user has no permission to write the 
      * authorization configuration.
      */
     private void checkWritePermission() throws sernet.gs.service.SecurityException {
-        // TODO: implement checkWritePermission     
+        boolean isWritePermission = getRightsServerHandler().isEnabled(getAuthService().getUsername(), ActionRightIDs.EDITPROFILE); 
+        if(!isWritePermission) {
+            throw new SecurityException("User " + getAuthService().getUsername() + " has no permission to write authorization configuration.");
+        }       
     }
     
     /**
@@ -399,6 +414,7 @@ public class XmlRightsService implements IRightsService {
                 "where props.propertyType = ?"; //$NON-NLS-1$
         Object[] params = new Object[]{Configuration.PROP_USERNAME};  
         List<String> usernameList = getPropertyDao().findByQuery(HQL,params);
+        usernameList.add(getAuthService().getAdminUsername());
         return usernameList;
     }
 
@@ -483,6 +499,13 @@ public class XmlRightsService implements IRightsService {
         return getConfiguration().getProfiles();
     }
     
+    public RightsServerHandler getRightsServerHandler() {
+        if(rightsServerHandler==null) {
+            rightsServerHandler = new RightsServerHandler(this);
+        }
+        return rightsServerHandler;
+    }
+
     /* (non-Javadoc)
      * @see sernet.verinice.interfaces.IRightsService#getMessage(java.lang.String)
      */
@@ -640,14 +663,6 @@ public class XmlRightsService implements IRightsService {
     public void setAuthService(IAuthService authService) {
         this.authService = authService;
     }
-
-    public IRightsServiceClient getRightServiceClient() {
-        return rightServiceClient;
-    }
-
-    public void setRightServiceClient(IRightsServiceClient rightServiceClient) {
-        this.rightServiceClient = rightServiceClient;
-    }
     
     private HashMap<String, Profile> getProfileMap() {
         if(profileMap == null){
@@ -714,6 +729,21 @@ public class XmlRightsService implements IRightsService {
             }
         }
         return actionMap;
+    }
+    
+    private static List<IRightsChangeListener> getChangeListener() {
+        if(XmlRightsService.changeListener==null) {
+            XmlRightsService.changeListener = new LinkedList<IRightsChangeListener>();
+        }
+        return XmlRightsService.changeListener;
+    }
+    
+    public static void addChangeListener(IRightsChangeListener listener) {
+        getChangeListener().add(listener);
+    }
+    
+    public static void removeChangeListener(IRightsChangeListener listener) {
+        getChangeListener().remove(listener);
     }
     
     public boolean isWhitelist() {

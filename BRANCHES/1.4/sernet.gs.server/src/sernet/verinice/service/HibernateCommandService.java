@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
@@ -31,12 +32,14 @@ import org.springframework.orm.hibernate3.HibernateCallback;
 import sernet.gs.common.ApplicationRoles;
 import sernet.hui.common.VeriniceContext;
 import sernet.verinice.interfaces.CommandException;
+import sernet.verinice.interfaces.ElementChange;
 import sernet.verinice.interfaces.IAuthAwareCommand;
 import sernet.verinice.interfaces.IAuthService;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.interfaces.IChangeLoggingCommand;
 import sernet.verinice.interfaces.ICommand;
 import sernet.verinice.interfaces.ICommandService;
+import sernet.verinice.interfaces.IHibernateCommandService;
 import sernet.verinice.interfaces.INoAccessControl;
 import sernet.verinice.interfaces.bpm.IProcessServiceGeneric;
 import sernet.verinice.interfaces.ldap.ILdapCommand;
@@ -74,6 +77,8 @@ public class HibernateCommandService implements ICommandService, IHibernateComma
 	private IConfigurationService configurationService;
 	
 	IBaseDao<BSIModel, Serializable> dao;
+	
+	private Properties properties;
 	
 	/**
 	 * This method is encapsulated in a transaction by the Spring container.
@@ -164,19 +169,20 @@ public class HibernateCommandService implements ICommandService, IHibernateComma
 
 
     private void log(IChangeLoggingCommand notifyCommand) {
-		List<CnATreeElement> changedElements = notifyCommand.getChangedElements();
-		for (CnATreeElement changedElement : changedElements) {
+		List<ElementChange> elementChanges = notifyCommand.getChanges();
+		for (ElementChange changedElement : elementChanges) {
 			
 			// save reference to element, if it has not been deleted:
 			CnATreeElement referencedElement = null;
-			if (notifyCommand.getChangeType() != ChangeLogEntry.TYPE_DELETE)
-				referencedElement = changedElement;
+			if (changedElement.getChangeType() != ChangeLogEntry.TYPE_DELETE) {
+				referencedElement = changedElement.getElement();
+			}
 				
-			ChangeLogEntry logEntry = new ChangeLogEntry(changedElement,
-					notifyCommand.getChangeType(),
+			ChangeLogEntry logEntry = new ChangeLogEntry(changedElement.getElement(),
+			        changedElement.getChangeType(),
 					getAuthService().getUsername(),
 					notifyCommand.getStationId(),
-					GregorianCalendar.getInstance().getTime());
+					changedElement.getTime());
 			log(logEntry, referencedElement);
 		}
 	}
@@ -249,6 +255,16 @@ public class HibernateCommandService implements ICommandService, IHibernateComma
     }
 
 
+    public Properties getProperties() {
+        return properties;
+    }
+
+
+    public void setProperties(Properties properties) {
+        this.properties = properties;
+    }
+
+
     /**
      * 
      */
@@ -262,12 +278,7 @@ public class HibernateCommandService implements ICommandService, IHibernateComma
                 }
             });        
         } else {
-            getBsiModelDao().executeCallback(new HibernateCallback() {
-                public Object doInHibernate(Session session) throws HibernateException, SQLException {
-                    session.disableFilter("scopeFilter");
-                    return null;
-                }
-            });
+            disableScopeFilter();
         }
     }
 	

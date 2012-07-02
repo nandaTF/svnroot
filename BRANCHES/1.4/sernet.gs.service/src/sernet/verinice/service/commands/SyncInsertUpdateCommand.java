@@ -245,8 +245,8 @@ public class SyncInsertUpdateCommand extends GenericCommand implements IAuthAwar
                 setAttributes = false;
             }
         }
-        CnATypeMapper typeMapper = new CnATypeMapper();
-        Class clazz = typeMapper.getClassFromTypeId(veriniceObjectType);
+       
+        Class clazz = CnATypeMapper.getClassFromTypeId(veriniceObjectType);
         IBaseDao<CnATreeElement, Serializable> dao = getDao(clazz);      
         
         parent = (parent == null) ? accessContainer(clazz) : parent;
@@ -293,15 +293,16 @@ public class SyncInsertUpdateCommand extends GenericCommand implements IAuthAwar
 
                 MapAttributeType mat = getMapAttribute(mot, attrExtId);
 
+                String attrIntId = null;
                 if (mat == null) {
-                    final String message = "Could not find mapObjectType-Element for XML attribute type: " + attrExtId + " of type: " + extObjectType;
-                    getLog().error(message);
-                    this.errorList.add(message);
+                    final String message = "Could not find mapObjectType-Element for XML attribute type: " + attrExtId + " of type: " + extObjectType + ". Using extern-id.";
+                    getLog().warn(message);
+                    attrIntId = attrExtId;
                 } else {
-                    String attrIntId = mat.getIntId();
-                    elementInDB.getEntity().importProperties(huiTypeFactory,attrIntId, attrValues);
-                    addElement(elementInDB);
-                }           
+                    attrIntId = mat.getIntId();                  
+                }
+                elementInDB.getEntity().importProperties(huiTypeFactory,attrIntId, attrValues);
+                addElement(elementInDB);
             } // for <syncAttribute>
             elementInDB = dao.merge(elementInDB);
             parent.addChild(elementInDB);
@@ -332,7 +333,7 @@ public class SyncInsertUpdateCommand extends GenericCommand implements IAuthAwar
         }
         
         if(elementInDB!=null) {
-            idElementMap.put(elementInDB.getExtId(), elementInDB);
+            idElementMap.put(extId, elementInDB);
         }
         
         if (getLogrt().isDebugEnabled()) {
@@ -756,7 +757,7 @@ public class SyncInsertUpdateCommand extends GenericCommand implements IAuthAwar
 	}
 	
 	private boolean isVeriniceArchive() {
-        return ExportCommand.EXPORT_FORMAT_VERINICE_ARCHIV.equals(parameter.getFormat());
+        return SyncParameter.EXPORT_FORMAT_VERINICE_ARCHIV.equals(parameter.getFormat());
     }
 	
 	/**

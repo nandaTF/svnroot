@@ -27,7 +27,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import sernet.gs.service.RetrieveInfo;
-import sernet.gs.ui.rcp.main.bsi.views.BsiModelView;
 import sernet.gs.ui.rcp.main.common.model.NullModel;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.verinice.interfaces.CommandException;
@@ -44,7 +43,7 @@ import sernet.verinice.service.commands.LoadTreeItem;
  * 
  * One instance of this class created for every view opened at runtime which is
  * used by {@link TreeContentProvider} and {@link TreeUpdateListener}. It's used
- * by {@link ISMView} and {@link BsiModelView}.
+ * by {@link ISMView} and BsiModelView.
  * 
  * ElementManager caches objects to ensure that they are loaded only once. If an
  * element is not cached already it's loaded from the backend by command
@@ -180,27 +179,28 @@ public class ElementManager {
     /**
      * Method is called when an element was removed.
      * 
-     * Element is removed also from chidren set of it's parent.
+     * Element is removed also from children set of it's parent.
      * 
-     * @param element
-     *            REmoved element
+     * @param element Removed element
      */
     public void elementRemoved(CnATreeElement element) {
-        CacheObject cachObjectParent = cache.getCachedObject(element.getParent());
-        if (cachObjectParent != null) {
-            CnATreeElement parentFromCache = cachObjectParent.getElement();
-            boolean exists = parentFromCache.getChildren().remove(element);
-            if (exists) {
-                CacheObject newCacheObjectParent = new CacheObject(parentFromCache, cachObjectParent.isChildrenPropertiesLoaded());
-                cache.addObject(newCacheObjectParent);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Element removed from parent child set in cache...");
-                }
-            }
-        }
         cache.remove(element);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Element removed from cache");
+            LOG.debug("Element removed from cache, uuid: " + element.getUuid());
+        }
+    }
+    
+    /**
+     * Method is called when an element was removed.
+     * 
+     * Element is removed also from children set of it's parent.
+     * 
+     * @param element Uuid of removed element
+     */
+    public void elementRemoved(String uuid) {
+        cache.remove(uuid);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Element removed from cache, uuid: " + uuid);
         }
     }
 
@@ -366,6 +366,7 @@ public class ElementManager {
         CnATreeElement[] children = new CnATreeElement[childrenSet.size()];
         int n = 0;
         for (CnATreeElement child : childrenSet) {
+            child.setParent(cachedElement);
             children[n] = child;
             n++;
         }
@@ -382,5 +383,7 @@ public class ElementManager {
     private ICommandService createCommandService() {
         return ServiceFactory.lookupCommandService();
     }
+
+   
 
 }

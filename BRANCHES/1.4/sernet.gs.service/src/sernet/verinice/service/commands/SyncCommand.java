@@ -37,6 +37,7 @@ import sernet.gs.service.RuntimeCommandException;
 import sernet.gs.service.VeriniceCharset;
 import sernet.verinice.service.commands.SyncDeleteCommand;
 import sernet.verinice.service.commands.SyncInsertUpdateCommand;
+import sernet.verinice.interfaces.ChangeLoggingCommand;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IAuthAwareCommand;
@@ -50,7 +51,7 @@ import de.sernet.sync.mapping.SyncMapping;
 import de.sernet.sync.sync.SyncRequest;
 
 @SuppressWarnings("serial")
-public class SyncCommand extends GenericCommand implements IChangeLoggingCommand, IAuthAwareCommand {
+public class SyncCommand extends ChangeLoggingCommand implements IChangeLoggingCommand, IAuthAwareCommand {
     private transient Logger log = Logger.getLogger(SyncCommand.class);
 
     public Logger getLog() {
@@ -129,16 +130,18 @@ public class SyncCommand extends GenericCommand implements IChangeLoggingCommand
         this.stationId = ChangeLogEntry.STATION_ID;
     }
 
+    /**
+     * Called by soap web-service
+     * 
+     * @param sr SyncRequest
+     */
     public SyncCommand(SyncRequest sr) {
-        this.sourceId = sr.getSourceId();
-
-        parameter = new SyncParameter(sr.isInsert(), sr.isUpdate(), sr.isDelete(), true,  ExportCommand.EXPORT_FORMAT_XML_PURE);
-
+        this.sourceId = sr.getSourceId();      
         this.syncData = sr.getSyncData();
         this.syncMapping = sr.getSyncMapping();
-
         this.syncRequestSerialized = null;
         this.stationId = ChangeLogEntry.STATION_ID;
+        this.parameter = new SyncParameter(sr.isInsert(), sr.isUpdate(), sr.isDelete(), false,  SyncParameter.EXPORT_FORMAT_XML_PURE);
     }
 
     @Override
@@ -149,33 +152,8 @@ public class SyncCommand extends GenericCommand implements IChangeLoggingCommand
            start = System.currentTimeMillis();
         }
         
-        if (syncRequestSerialized == null) {
-            throw new IllegalStateException("Command serialized but " + SyncRequest.class.getName() + " not provided pre-serialized. Check constructor usage!");
-        }
+        getDataFromRequest();
         
-        byte[] xmlData = null;
-        if(isVeriniceArchive()) {
-            veriniceArchive = new VeriniceArchive(syncRequestSerialized);
-            xmlData = veriniceArchive.getVeriniceXml();
-        }
-        if(ExportCommand.EXPORT_FORMAT_XML_PURE.equals(parameter.getFormat())) {
-            xmlData = syncRequestSerialized;
-        }
-        
-        if (getLog().isDebugEnabled()) {
-            String xml = new String(xmlData,VeriniceCharset.CHARSET_UTF_8);
-            getLog().debug("### Importing data begin ###");
-            getLog().debug(xml);
-            getLog().debug("### Importing data end ####");
-        }
-   
-        SyncRequest sr = JAXB.unmarshal(new ByteArrayInputStream(xmlData), SyncRequest.class);
-        sourceId = sr.getSourceId();
-        syncData = sr.getSyncData();
-        syncMapping = sr.getSyncMapping();
-        // clear memory
-        xmlData = null;
-
         SyncInsertUpdateCommand cmdInsertUpdate = new SyncInsertUpdateCommand(
         		sourceId, 
         		syncData, 
@@ -224,6 +202,33 @@ public class SyncCommand extends GenericCommand implements IChangeLoggingCommand
             getLog().info("Runtime: " + time +" ms");
          }
 
+    }
+
+    private SyncRequest getDataFromRequest() {
+        byte[] xmlData = null;
+        if(isVeriniceArchive()) {
+            veriniceArchive = new VeriniceArchive(syncRequestSerialized);
+            xmlData = veriniceArchive.getVeriniceXml();
+        }
+        if(SyncParameter.EXPORT_FORMAT_XML_PURE.equals(parameter.getFormat())) {
+            xmlData = syncRequestSerialized;
+        }
+        
+        SyncRequest sr = null;
+        if( xmlData!=null) {
+            if (getLog().isDebugEnabled()) {
+                String xml = new String(xmlData,VeriniceCharset.CHARSET_UTF_8);
+                getLog().debug("### Importing data begin ###");
+                getLog().debug(xml);
+                getLog().debug("### Importing data end ####");
+            }
+       
+            sr = JAXB.unmarshal(new ByteArrayInputStream(xmlData), SyncRequest.class);
+            sourceId = sr.getSourceId();
+            syncData = sr.getSyncData();
+            syncMapping = sr.getSyncMapping();
+        }
+        return sr;
     }
 
     public int getInserted() {
@@ -317,7 +322,7 @@ public class SyncCommand extends GenericCommand implements IChangeLoggingCommand
     }
     
     private boolean isVeriniceArchive() {
-        return ExportCommand.EXPORT_FORMAT_VERINICE_ARCHIV.equals(parameter.getFormat());
+        return SyncParameter.EXPORT_FORMAT_VERINICE_ARCHIV.equals(parameter.getFormat());
     }
 
 }

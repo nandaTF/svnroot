@@ -20,7 +20,7 @@ This variant:
 
 	<!-- BEGIN Server settings ========================================================================= -->
 
-	<bean id="serverInitializer" class="sernet.gs.server.ServerInitializer" init-method="initialize">
+	<bean id="serverInitializer" class="sernet.gs.service.ServerInitializer" init-method="initialize">
 		<property name="workObjects" ref="workObjects" />
 		<property name="hibernateCommandService" ref="hibernateCommandService" />
 	</bean>
@@ -36,7 +36,7 @@ This variant:
  	available via the VeriniceContext class (look it up for further details).
     -->
 
-	<bean id="gsScraperUtil" class="sernet.gs.ui.rcp.main.bsi.model.GSScraperUtil">
+	<bean id="gsScraperUtil" class="sernet.gs.ui.rcp.main.bsi.model.GSScraperUtil" >
 		<property name="model">
 			<bean class="sernet.gs.ui.rcp.main.bsi.model.BSIMassnahmenModel">
 				<constructor-arg>
@@ -70,6 +70,7 @@ This variant:
 				<entry key="commandService" value-ref="commandService" />
 				<entry key="authService" value-ref="authService" />
                 <entry key="taskService" value-ref="taskService" />
+                <entry key="rightsServerHandler" value-ref="rightsServerHandler" />
 			</map>
 		</property>
 	</bean>
@@ -80,9 +81,9 @@ This variant:
 		<property name="jdbcUrl" value="${jdbc.url}" />
 		<property name="user" value="${jdbc.username}" />
 		<property name="password" value="${jdbc.password}" />
-		<property name="minPoolSize" value="5" />
+		<property name="minPoolSize" value="10" />
 		<property name="initialPoolSize" value="5" />
-		<property name="maxPoolSize" value="40" />
+		<property name="maxPoolSize" value="60" />
 		<property name="acquireIncrement" value="5" />
 		<property name="maxStatements" value="100" />
 		<property name="checkoutTimeout" value="10000" />
@@ -248,7 +249,7 @@ This variant:
 		<property name="target" ref="hibernateCommandService" />
 		<property name="transactionAttributes">
 			<props merge="true">
-				<prop key="executeCommand">PROPAGATION_REQUIRED,-sernet.gs.ui.rcp.main.service.commands.UsernameExistsException</prop>
+				<prop key="executeCommand">PROPAGATION_REQUIRED,-sernet.gs.ui.rcp.main.service.commands.UsernameExistsException,-sernet.verinice.interfaces.CommandException</prop>
 			</props>
 		</property>
 	</bean>

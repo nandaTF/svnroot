@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import sernet.gs.service.RetrieveInfo;
 import sernet.gs.service.RuntimeCommandException;
+import sernet.verinice.interfaces.ChangeLoggingCommand;
 import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IAuthAwareCommand;
 import sernet.verinice.interfaces.IAuthService;
@@ -48,12 +49,13 @@ import sernet.verinice.model.iso27k.Organization;
  * @param <T>
  */
 @SuppressWarnings("serial")
-public class CreateElement<T extends CnATreeElement> extends GenericCommand implements IChangeLoggingCommand, IAuthAwareCommand {
+public class CreateElement<T extends CnATreeElement> extends ChangeLoggingCommand implements IChangeLoggingCommand, IAuthAwareCommand {
 
     transient private Logger log = Logger.getLogger(CreateElement.class);
 
     private CnATreeElement container;
     private Class<T> clazz;
+    private String typeId;
     // may be null
     private String title;
     protected T child;
@@ -78,12 +80,29 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand impl
         this.skipReload = skipReload;
         this.createChildren = createChildren;
     }
+    
+    public CreateElement(CnATreeElement container, String typeId, String title, boolean skipReload, boolean createChildren) {
+        this.container = container;
+        this.typeId = typeId;
+        this.title = title;
+        this.stationId = ChangeLogEntry.STATION_ID;
+        this.skipReload = skipReload;
+        this.createChildren = createChildren;
+    }
 
+    public CreateElement(CnATreeElement container, String typeId, String title) {
+        this(container, typeId, title, false, true);
+    }
+    
     public CreateElement(CnATreeElement container, Class<T> type, String title) {
         this(container, type, title, false, true);
     }
 
     public CreateElement(CnATreeElement container, Class<T> type) {
+        this(container, type, null, false, true);
+    }
+    
+    public CreateElement(CnATreeElement container, String type) {
         this(container, type, null, false, true);
     }
 
@@ -96,7 +115,13 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand impl
     }
 
     public void execute() {
-        IBaseDao<T, Serializable> dao = (IBaseDao<T, Serializable>) getDaoFactory().getDAO(clazz);
+        IBaseDao<T, Serializable> dao;
+        if(clazz==null) {
+            clazz = CnATypeMapper.getClassFromTypeId(typeId);
+        }
+        
+        dao = (IBaseDao<T, Serializable>) getDaoFactory().getDAO(clazz);
+        
         IBaseDao<CnATreeElement, Serializable> containerDAO = getDaoFactory().getDAOforTypedElement(container);
 
         try {
@@ -105,10 +130,11 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand impl
             }
 
             // get constructor with parent-parameter and create new object:
-            if(clazz.equals(Organization.class)) {
-                child = clazz.getConstructor(CnATreeElement.class,boolean.class).newInstance(container,createChildren);
+            if(isOrganization()) {
+                child = (T) Organization.class.getConstructor(CnATreeElement.class,boolean.class).newInstance(container,createChildren);
             } else {
-                child = clazz.getConstructor(CnATreeElement.class).newInstance(container);
+                child = (T) clazz.getConstructor(CnATreeElement.class).newInstance(container);
+            
             }
             if (title != null) {
                 // override the default title
@@ -123,7 +149,7 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand impl
             container.addChild(child);
             child.setParentAndScope(container);
 
-            if(clazz.equals(Organization.class)) {
+            if(isOrganization()) {
                 setScope((Organization)child);
             }
             
@@ -133,6 +159,13 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand impl
             getLogger().error("Error while creating element", e);
             throw new RuntimeCommandException(e);
         }
+    }
+
+    /**
+     * @return
+     */
+    private boolean isOrganization() {
+        return Organization.class.equals(clazz) || Organization.TYPE_ID.equals(typeId);
     }
 
     /**
@@ -195,6 +228,14 @@ public class CreateElement<T extends CnATreeElement> extends GenericCommand impl
      */
     public String getStationId() {
         return stationId;
+    }
+
+    public String getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(String typeId) {
+        this.typeId = typeId;
     }
 
     /*

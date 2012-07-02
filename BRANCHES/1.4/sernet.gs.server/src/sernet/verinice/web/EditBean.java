@@ -20,6 +20,7 @@
 package sernet.verinice.web;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -61,7 +62,9 @@ public class EditBean {
     
     public static final String BOUNDLE_NAME = "sernet.verinice.web.EditMessages";
 
-    private static final CharSequence TAG_WEB = "Web";
+    public static final String TAG_WEB = "Web";
+    
+    public static final String TAG_ALL = "ALL-TAGS-VISIBLE";
     
     private LinkBean linkBean;
     
@@ -87,6 +90,8 @@ public class EditBean {
     
     private List<IActionHandler> actionHandler;
     
+    private List<IChangeListener> changeListener;
+    
     private boolean generalOpen = true;
     
     private boolean groupOpen = false;
@@ -94,6 +99,12 @@ public class EditBean {
     private boolean linkOpen = false;
     
     private boolean attachmentOpen = true;
+    
+    private boolean saveButtonHidden = false;
+    
+    private List<String> visibleTags = Arrays.asList(TAG_ALL);
+    
+    private String saveMessage = null;
        
     public void init() {
         try {
@@ -133,6 +144,9 @@ public class EditBean {
                                     prop.setShowLabel(false);
                                 }
                                 listOfGroup.add(prop);
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("prop: " + id + " (" + huiType.getInputName() + ") - " + value);
+                                }
                             }
                         }
                         group.setPropertyList(listOfGroup);
@@ -165,18 +179,10 @@ public class EditBean {
         }
     }
 
-    /**
-     * @param huiType
-     * @return
-     */
     private boolean isVisible(PropertyType huiType) {
         return isVisible(getTagSet(huiType.getTags()));
     }
 
-    /**
-     * @param groupHui
-     * @return
-     */
     private boolean isVisible(PropertyGroup groupHui) {
         return isVisible(getTagSet(groupHui.getTags()));
     }
@@ -195,7 +201,16 @@ public class EditBean {
      * @return
      */
     private boolean isVisible(Set<String> tagSet) {
-        return tagSet!=null && tagSet.contains(TAG_WEB);
+        boolean visible = getVisibleTags().contains(TAG_ALL);
+        if(tagSet!=null) {
+            for (String tag : getVisibleTags()) {
+                if(tagSet.contains(tag)) {
+                    visible = true;
+                    break;
+                }
+            }
+        }
+        return visible;
     }
     
     public String getSave() {
@@ -233,19 +248,40 @@ public class EditBean {
         Entity entity = getElement().getEntity();    
         for (HuiProperty<String, String> property : getPropertyList()) {
             entity.setSimpleValue(property.getType(), property.getValue());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Property: " + property.getType().getId() + " set to: " + property.getValue());
+            }
         }
         for (sernet.verinice.web.PropertyGroup group : getGroupList()) {
             for (HuiProperty<String, String> property : group.getPropertyList()) {
                 entity.setSimpleValue(property.getType(), property.getValue());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Property: " + property.getType().getId() + " set to: " + property.getValue());
+                }
             }
         }
         SaveElement<CnATreeElement> command = new SaveElement<CnATreeElement>(getElement());                           
         command = getCommandService().executeCommand(command);
         setElement(command.getElement());
+        for (IChangeListener listener : getChangeListener()) {
+            listener.elementChanged(getElement());
+        }
         if(LOG.isDebugEnabled()) {
             LOG.debug("Element saved, uuid: " + getUuid());
         }   
-        Util.addInfo("submit", Util.getMessage(EditBean.BOUNDLE_NAME, "saved"));
+        Util.addInfo("submit", getSaveMessage());
+    }
+
+    private String getSaveMessage() {
+        if(saveMessage==null) {
+            return Util.getMessage(EditBean.BOUNDLE_NAME, "saved");
+        } else {
+            return saveMessage;
+        }
+    }
+    
+    public void setSaveMessage( String message ) {
+        this.saveMessage = message;
     }
     
     public void clear() {
@@ -487,6 +523,33 @@ public class EditBean {
             getActionHandler().clear();
         }
     }
+    
+    public List<IChangeListener> getChangeListener() {
+        if(this.changeListener==null) {
+            this.changeListener = new LinkedList<IChangeListener>();
+        }
+        return changeListener;
+    }
+
+    public void setChangeListener(List<IChangeListener> changeListener) {
+        this.changeListener = changeListener;
+    }
+    
+    public void addChangeListener(IChangeListener changeListener) {
+        getChangeListener().add(changeListener);
+    }
+    
+    public void clearChangeListener() {
+        getChangeListener().clear();
+    }
+
+    public List<String> getVisibleTags() {
+        return visibleTags;
+    }
+
+    public void setVisibleTags(List<String> visibleTags) {
+        this.visibleTags = visibleTags;
+    }
 
     public boolean isGeneralOpen() {
         return generalOpen;
@@ -518,6 +581,22 @@ public class EditBean {
 
     public void setAttachmentOpen(boolean open) {
         this.attachmentOpen = open;
+    }
+
+    public boolean isSaveButtonHidden() {
+        return saveButtonHidden;
+    }
+
+    public void setSaveButtonHidden(boolean saveButtonHidden) {
+        this.saveButtonHidden = saveButtonHidden;
+    }
+    
+    public String getSaveButtonClass() {
+        if(isSaveButtonHidden()) {
+            return "saveButtonHidden";
+        } else {
+            return "saveButton";
+        }
     }
 
     public TimeZone getTimeZone() {

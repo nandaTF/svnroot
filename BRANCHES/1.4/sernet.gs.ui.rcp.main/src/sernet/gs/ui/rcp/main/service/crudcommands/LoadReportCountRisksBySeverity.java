@@ -112,7 +112,7 @@ public class LoadReportCountRisksBySeverity extends GenericCommand {
             List<CnATreeElement> elements = command.getElements();
 
             for (CnATreeElement process : elements) {
-                LoadReportLinkedElements cmnd2 = new LoadReportLinkedElements(Asset.TYPE_ID, process.getDbId(), true, false);
+                LoadReportLinkedElements cmnd2 = new LoadReportLinkedElements(Asset.TYPE_ID, process.getDbId(), true);
                 cmnd2 = getCommandService().executeCommand(cmnd2);
                 List<CnATreeElement> assets = cmnd2.getElements();
                 for (CnATreeElement asset : assets) {
