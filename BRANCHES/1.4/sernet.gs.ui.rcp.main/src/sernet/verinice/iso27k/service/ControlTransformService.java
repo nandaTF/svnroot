@@ -38,7 +38,6 @@ import sernet.verinice.service.commands.SaveElement;
 /**
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
-@SuppressWarnings("restriction")
 public class ControlTransformService {
 	
 	private final Logger log = Logger.getLogger(ControlTransformService.class);
@@ -53,14 +52,11 @@ public class ControlTransformService {
 	
 	private List itemList;
 	
-	@SuppressWarnings("unchecked")
 	private Group selectedGroup;
 	
 	private int numberOfControls;
 	
 	private int numberProcessed;
-	
-	private boolean doFullRefresh = false;
 	
 	public int getNumberOfControls() {
 		return numberOfControls;
@@ -94,15 +90,16 @@ public class ControlTransformService {
 		try {	
 			this.numberOfControls = 0;
 			List<IItem> itemList = createInsertList(getItemList());
-			progressObserver.beginTask(Messages.getString("ControlTransformService.1", numberOfControls), numberOfControls); //$NON-NLS-1$
-			doFullRefresh = numberOfControls > 9;
+			progressObserver.beginTask(Messages.getString("ControlTransformService.1", numberOfControls), numberOfControls); //$NON-NLS-1$		
 			numberProcessed = 0;
 			for (IItem item : itemList) {				
 				insertItem(progressObserver, selectedGroup, item);
 			}	
-			if(doFullRefresh) {
-			    modelUpdater.reload();
-			}
+			
+		    if(!selectedGroup.getChildren().isEmpty()) {
+		        modelUpdater.childAdded(selectedGroup, selectedGroup.getChildren().iterator().next());
+		    }			    
+			
 		} catch (RuntimeException re) {
 		    log.error("Error while transforming item to control", re); //$NON-NLS-1$
             throw re;
@@ -169,10 +166,7 @@ public class ControlTransformService {
 		
 		
 		element = (CnATreeElement) command.getElement();
-		element.setParentAndScope(group);
-		if(!doFullRefresh) {
-		    modelUpdater.childAdded(group, element);
-		}
+		element.setParentAndScope(group);		
 		monitor.processed(1);
 		numberProcessed++;
 		if(item.getItems()!=null) {
