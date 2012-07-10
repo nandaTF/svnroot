@@ -103,8 +103,6 @@ public class TaskView extends ViewPart implements IAttachedToPerspective {
 
     public static final String ID = "sernet.verinice.bpm.rcp.TaskView";
 
-    private static final String[] ALLOWED_ROLES = new String[] { ApplicationRoles.ROLE_ADMIN };
-
     private TreeViewer treeViewer;
 
     private TaskLabelProvider labelProvider;
@@ -284,38 +282,6 @@ public class TaskView extends ViewPart implements IAttachedToPerspective {
         return listener;
     }
 
-    private Listener getResizeListener() {
-        Listener listener = new Listener() {
-
-            @Override
-            public void handleEvent(Event event) {
-                final TreeItem treeItem = (TreeItem) event.item;
-                Display.getDefault().asyncExec(new Runnable() {
-                    @Override
-                    public void run() {
-                        int parentWidth = treeItem.getParent().getParent().getSize().x;
-                        for (TreeColumn tc : treeItem.getParent().getColumns()) {
-                            if (tc.getText().equals(Messages.TaskViewColumn_0)) {
-                                tc.setWidth(computeColumnWidth(0.5, parentWidth));
-                            } else if (tc.getText().equals(Messages.TaskViewColumn_1)) {
-                                tc.setWidth(computeColumnWidth(0.25, parentWidth));
-                            } else if (tc.getText().equals(Messages.TaskViewColumn_2)) {
-                                tc.setWidth(computeColumnWidth(0.1, parentWidth));
-                            } else if (tc.getText().equals(Messages.TaskViewColumn_3)) {
-                                tc.setWidth(computeColumnWidth(0.15, parentWidth));
-                            }
-                        }
-                    }
-                });
-            }
-        };
-        return listener;
-    }
-
-    private int computeColumnWidth(double percentage, int parentWidth) {
-        return Integer.valueOf(String.valueOf(parentWidth * percentage));
-    }
-
     private void makeActions() {
         refreshAction = new Action() {
             @Override
@@ -424,6 +390,13 @@ public class TaskView extends ViewPart implements IAttachedToPerspective {
     private void addToolBarActions() {
         IActionBars bars = getViewSite().getActionBars();
         IToolBarManager manager = bars.getToolBarManager();
+        // Dummy action to force displaying the toolbar in a new line
+        Action dummyAction = new Action() {};
+        dummyAction.setText(" ");
+        dummyAction.setEnabled(false);
+        ActionContributionItem item = new ActionContributionItem(dummyAction);
+        item.setMode(ActionContributionItem.MODE_FORCE_TEXT);
+        manager.add(item);
         manager.add(this.refreshAction);
         manager.add(myTasksAction);
         manager.add(cancelTaskAction);
@@ -605,6 +578,7 @@ public class TaskView extends ViewPart implements IAttachedToPerspective {
                                 completeTask((TaskInformation) sel, outcomeId);
                             }
                         }
+                        loadTasks();
                     }
                 });
                 showInformation("Information", number + " task(s) completed.");
