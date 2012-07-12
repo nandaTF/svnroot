@@ -412,17 +412,27 @@ public class TaskService implements ITaskService{
      */
     @Override
     public void cancelTask(String taskId) {
-        // Every task belongs to a subprocess of the main process
+        // Some task belongs to a subprocess of the main process
         // HQL query to find the main process
         String hql = "select execution.parent from org.jbpm.pvm.internal.task.TaskImpl t where t.id = ?";
-        final List<Execution> executionList = getJbpmTaskDao().findByQuery(hql,new Long[]{Long.valueOf(taskId)});         
+        List<Execution> executionList = getJbpmTaskDao().findByQuery(hql,new Long[]{Long.valueOf(taskId)});         
         if(!executionList.isEmpty()) {
             for (Execution process : executionList) {
                 if(process!=null && process.getId()!=null) {
                     getExecutionService().deleteProcessInstance(process.getId());
                 }
             }
-        }     
+        }
+        // HQL query to find the  process
+        hql = "select execution from org.jbpm.pvm.internal.task.TaskImpl t where t.id = ?";
+        executionList = getJbpmTaskDao().findByQuery(hql,new Long[]{Long.valueOf(taskId)});         
+        if(!executionList.isEmpty()) {
+            for (Execution process : executionList) {
+                if(process!=null && process.getId()!=null) {
+                    getExecutionService().deleteProcessInstance(process.getId());
+                }
+            }
+        }    
     }
 
     public org.jbpm.api.TaskService getTaskService() {
