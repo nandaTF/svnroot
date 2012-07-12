@@ -2313,10 +2313,12 @@ the value between <param></param> will be used directly if no string is found fo
 		
 		<huipropertygroup
 			id="mnums_group_revision"
-			name="Revision">
+			name="Revision"
+            tags="Revision">
 			<huiproperty
 			id="mnums_letzterevisiondurch_link"
 			name="Letzte Revision durch"
+            tags="Revision"
 			inputtype="reference" 
 			required="true">
 				<references 
@@ -2325,16 +2327,19 @@ the value between <param></param> will be used directly if no string is found fo
 			<huiproperty 
 				id="mnums_letzterevisionam"
 				name="Letzte Revision am"
+                tags="Revision"
 				inputtype="date">
             <defaultRule class="Today" />
             </huiproperty>
 			<huiproperty
 				id="mnums_bemerkungen"
 				name="Bemerkungen"
+                tags="Revision"
 				inputtype="text" />
 			<huiproperty
 			id="mnums_naechsterevisiondurch_link"
 			name="Nächste Revision durch"
+            tags="Revision"
 			inputtype="reference" 
 			required="true">
 				<references 
@@ -2343,6 +2348,7 @@ the value between <param></param> will be used directly if no string is found fo
 			<huiproperty
 				id="mnums_naechsterevisionam"
 				name="Nächste Revision am"
+                tags="Revision"
 				inputtype="date" >
                 <defaultRule class="Today">
                     <param id="mnums_naechsterevisionam_changeField">YEAR</param>
