@@ -41,6 +41,7 @@ public class ActionRightIDs {
     public static final String ADDNOTE = "addnote";
     public static final String ADDSECURITYASSESSMENT = "addsecurityassessment";
     public static final String ADDSECURITYASSESSMENTWC = "addsecurityassessmentwc";
+    public static final String ADDOWNMODUL = "addownmodul";
     public static final String ASSIGNALLISATOPICS = "assignallisatopics";
     public static final String AUDITVIEW = "auditview";
     public static final String BAUSTEINZUORDNUNG = "bausteinzuordnung";
@@ -85,6 +86,7 @@ public class ActionRightIDs {
     public static final String UNIFY = "unify";
     public static final String XMLEXPORT = "xmlexport";
     public static final String XMLIMPORT = "xmlimport";
+    public static final String GROUP_BY_TAG = "groupbytag";
     
     public static String[] getAllRightIDs(){
         ArrayList<String> retVal = new ArrayList<String>(0);

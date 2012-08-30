@@ -26,7 +26,7 @@ import sernet.verinice.model.samt.SamtTopic;
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  *
  */
-public class IsaProcessContext {
+public class IsaProcessContext extends ProcessContext {
 
     String uuidAudit;
     
@@ -36,12 +36,6 @@ public class IsaProcessContext {
     
     SamtTopic samtTopic;
 
-    int numberOfProcesses;
-    
-    public void increaseProcessNumber() {
-        numberOfProcesses++;
-    }
-    
     public IsaProcessContext() {
         super();
     }
@@ -76,13 +70,5 @@ public class IsaProcessContext {
 
     public void setSamtTopic(SamtTopic samtTopic) {
         this.samtTopic = samtTopic;
-    }
-
-    public int getNumberOfProcesses() {
-        return numberOfProcesses;
-    }
-
-    public void setNumberOfProcesses(int numberOfProcesses) {
-        this.numberOfProcesses = numberOfProcesses;
     }
 }

@@ -1915,14 +1915,17 @@ the value between <param></param> will be used directly if no string is found fo
 		 	name="verknüpft mit" reversename="modelliert mit" />
 		 <huirelation  to="gebaeude" id="rel_bstumsetzung_gebaeude"
 		 	name="verknüpft mit" reversename="modelliert mit" />
+		 <huirelation to="document" id="rel_bstumsetzung_document"
+		 	name="verknüpft mit" reversename="modelliert mit"/>
+		 	 
 			
 		<huiproperty
 			id="bstumsetzung_nr"
-            editable="false"
+            editable="true"
 			name="Kapitel" />
 		<huiproperty
 			id="bstumsetzung_name"
-            editable="false"
+            editable="true"
 			name="Titel" />
 		<huiproperty
 			id="bstumsetzung_url"
@@ -1936,7 +1939,7 @@ the value between <param></param> will be used directly if no string is found fo
 			name="Encoding" />
 		<huiproperty
 			id="bstumsetzung_stand"
-            editable="false"
+            editable="true"
             visible="true"
 			name="Stand" />
 		<huiproperty
@@ -1965,6 +1968,12 @@ the value between <param></param> will be used directly if no string is found fo
 			id="bstumsetzung_erlaeuterung"
             inputtype="text"
 			name="Erläuterung" />
+		<huiproperty
+			id="eigene_bstumsetzung_beschreibung"
+			editable="true"
+            visible="true"
+			inputtype="text"
+			name="Beschreibung" />
 		<huiproperty
             name="Dokument"
             id="bstumsetzung_dokument"
@@ -2059,9 +2068,13 @@ the value between <param></param> will be used directly if no string is found fo
 	<huientity
 		id="mnums"
 		name="Maßnahmenumsetzung">
+		
+		<huirelation to="document" id="rel_mnums_document"
+		 	name="verknüpft mit" reversename="modelliert mit"/>
+		 	
 		<huiproperty
 				id="mnums_id"
-                editable="false"
+                editable="true"
 				name="Kapitel" />
 		<huiproperty
 				id="mnums_url"
@@ -2070,7 +2083,7 @@ the value between <param></param> will be used directly if no string is found fo
 				name="Url" />
 		<huiproperty
 			id="mnums_stand"
-            editable="false"
+            editable="true"
             visible="true"
 			name="Stand" />
 		<huiproperty
@@ -2085,22 +2098,29 @@ the value between <param></param> will be used directly if no string is found fo
 			name="Verantw. Umsetzung" />
 		<huiproperty
 				id="mnums_name"
-                editable="false"
+                editable="true"
 				name="Titel" />
             <huiproperty
                 id="mnums_lebenszyklus"
                 name="Lebenszyklus"
-                editable="false"/>
+                editable="true"/>
 			<huiproperty
 				id="mnums_siegel"
 				name="Siegelstufe"
-                editable="false"
+                editable="true"
                 />
         <huiproperty
             name="Dokument"
             id="mnums_dokument"
             isURL="true" />
             
+         <huiproperty
+               id="mnums_beschreibung"
+               editable="true"
+               visible="true"
+               inputtype="text"
+               name="Beschreibung"/>
+               
         <huipropertygroup id="mnums_gsaudit" name="GS Audit" tags="GS-Audit" >
 
 
@@ -3544,6 +3564,55 @@ the value between <param></param> will be used directly if no string is found fo
 					inputtype="text"
 					id="asset_value_comment" />
 		</huipropertygroup>
+<huipropertygroup name="Greenbone GSM" id="gsm_asset_group" tags="Greenbone_GSM" >
+        <!-- TODO translate this property -->
+        <huiproperty id="gsm_asset_tag" name="GSM Tag" />
+		
+        <!-- TODO translate this property -->
+        <huiproperty id="gsm_asset_description" name="GSM Desc." 
+            inputtype="line"
+        />
+        
+        <!-- TODO translate this property -->
+<huiproperty id="gsm_hostname" name="Hostname" inputtype="line" tags="Greenbone_GSM" />
+
+        <!-- TODO translate this property -->
+<huiproperty id="gsm_installed_apps" name="Installed Software" inputtype="text" tags="Greenbone_GSM" />
+ 
+
+        <!-- TODO translate this property -->
+<huiproperty id="gsm_traceroute" name="Traceroute" inputtype="line" tags="Greenbone_GSM" />
+ 
+
+        <!-- TODO translate this property -->
+<huiproperty id="gsm_memory" name="Memory" inputtype="line" tags="Greenbone_GSM" />
+ 
+
+        <!-- TODO translate this property -->
+<huiproperty id="gsm_cpuinfo" name="CPU" inputtype="line" tags="Greenbone_GSM" />
+ 
+
+        <!-- TODO translate this property -->
+<huiproperty id="gsm_os" name="OS" inputtype="line" tags="Greenbone_GSM" />
+ 
+
+        <!-- TODO translate this property -->
+<huiproperty id="gsm_os_cpe" name="CPE" inputtype="line" tags="Greenbone_GSM" />
+ 
+
+        <!-- TODO translate this property -->
+<huiproperty id="gsm_open_ports" name="Open Ports" inputtype="line" tags="Greenbone_GSM" />
+ 
+
+        <!-- TODO translate this property -->
+<huiproperty id="gsm_scan_started" name="Scan start" inputtype="line" tags="Greenbone_GSM" />
+ 
+
+        <!-- TODO translate this property -->
+<huiproperty id="gsm_scan_ended" name="Scan end" inputtype="line" tags="Greenbone_GSM" />
+
+
+</huipropertygroup>
 		
 	
 		<huipropertygroup name="Calculated Total Risk" id="asset_riskgroup" tags="Risk">
@@ -4003,6 +4072,143 @@ the value between <param></param> will be used directly if no string is found fo
         <huiproperty 
         	id="audit_isa_creatmail" 
            	tags="VDA-ISA" />
+         <huiproperty 
+			name="Audit Release Date"
+			id="audit_release_date"
+			inputtype="date"
+			tags="VDA-ISA">
+            <defaultRule class="Today" />
+		</huiproperty>
+		<huiproperty 
+		    name="Audit approved by" 
+		    id="audit_approved_by" 
+            tags="VDA-ISA" />
+        <huiproperty
+        	name="Audit executing company"
+        	id="audit_executing_company"
+        	tags="VDA_ISA_Audit"
+        	inputtype="text"
+        	textrows="1"/>
+		<huiproperty
+			id="audit_included_topics" 
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="4"/>        
+		<huiproperty
+			id="audit_excluded_topics" 
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="4"/>
+        <huipropertygroup id="audit_document_data" name="Audit Document Data" tags="VDA_ISA_Audit">
+        <huiproperty
+        	id="audit_document_data_author_name"
+        	name="Audit author name"
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="1"/>
+         <huiproperty 
+			name="Audit Author Date"
+			id="audit_document_data_author_date"
+			inputtype="date"
+			tags="VDA-ISA">
+            <defaultRule class="Today" />
+        </huiproperty>
+        <huiproperty
+        	id="audit_document_data_first_quality_control_name"
+        	name="First Quality Control done by"
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="1"/>
+         <huiproperty 
+			name="Audit Document Data, Date of First Quality Control"
+			id="audit_document_data_first_quality_control_date"
+			inputtype="date"
+			tags="VDA-ISA">
+            <defaultRule class="Today" />
+        </huiproperty>
+        <huiproperty
+        	id="audit_document_data_approval_name"
+        	name="Audit Document Data, Approval done by"
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="1"/>
+         <huiproperty 
+			name="Audit Document Data, Approval done on"
+			id="audit_document_data_approval_date"
+			inputtype="date"
+			tags="VDA-ISA">
+            <defaultRule class="Today" />
+        </huiproperty>
+        <huiproperty
+        	id="audit_document_data_company_coordination_name"
+        	name="Audit Document Data, Coordination with Company done by"
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="1"/>
+         <huiproperty 
+			name="Audit Document Data, Coordination with Componay done on"
+			id="audit_document_data_company_coordination_date"
+			inputtype="date"
+			tags="VDA-ISA">
+            <defaultRule class="Today" />
+        </huiproperty>            
+        <huiproperty
+        	id="audit_document_data_adjustment_approval_name"
+        	name="Audit Document Data, Adjustment and Approval done by"
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="1"/>
+         <huiproperty 
+			name="Audit Document Data, Adjustment and Approval done on"
+			id="audit_document_data_adjustment_approval_date"
+			inputtype="date"
+			tags="VDA-ISA">
+            <defaultRule class="Today" />
+        </huiproperty>            
+         <huiproperty
+        	id="audit_document_data_second_quality_control_name"
+        	name="Audit Document Data, Second Quality Control done by"
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="1"/>
+         <huiproperty 
+			name="Audit Document Data, Date of Second Quality Control"
+			id="audit_document_data_second_quality_control_date"
+			inputtype="date"
+			tags="VDA-ISA">
+            <defaultRule class="Today" />
+         </huiproperty>
+         <huiproperty
+        	id="audit_document_data_final_approval_distribution_name"
+        	name="Audit Document Data, Final Approval and Distribution done by"
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="1"/>
+         <huiproperty 
+			name="Audit Document Data, Date of Final Approval and Distribution"
+			id="audit_document_data_final_approval_distribution_date"
+			inputtype="date"
+			tags="VDA-ISA">
+            <defaultRule class="Today" />           
+        </huiproperty>            
+        </huipropertygroup>
+        <huipropertygroup id="audit_topics_group" name="Information Security Reporting" tags="VDA_ISA_Audit">
+		<huiproperty
+			id="audit_topics_good_results" 
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="4"/>
+		<huiproperty
+			id="audit_topics_bad_results" 
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="4"/>
+		</huipropertygroup>
+		<huiproperty
+			id="audit_target_audience" 
+			inputtype="text" 
+            tags="VDA_ISA_Audit"
+            textrows="4"/>		
     </huientity>
 
     <huientity
@@ -4011,6 +4217,12 @@ the value between <param></param> will be used directly if no string is found fo
         <huiproperty
             name="Title"
             id="controlgroup_name" />
+            
+        <huirelation to="person-iso" id="controlgroup_room_inspector" 
+        	name="inspector" reversename="is inspector of" tooltip="Person is inspector of this room."/>
+
+        <huirelation to="person-iso" id="controlgroup_room_companion" 
+        	name="companion" reversename="is inspector of" tooltip="Person is companion of inspector of this room."/>            
     	
     	<!-- Flag to decide if a controlgroup is a group which contains only the controls of ISO 27001 annex A or not -->
         <huiproperty
@@ -4019,6 +4231,37 @@ the value between <param></param> will be used directly if no string is found fo
         	inputtype="booleanoption" defaultValue="0"
         	tags="VDA_ISA_Audit"
         	/>
+        <huipropertygroup id="controlgroup_isroom_group" name="IT-Room-Check" tags="VDA_ISA_Audit" >
+        	<huiproperty
+        		name="isRoom"
+        		id="controlgroup_is_room"
+        		inputtype="booleanoption" defaultValue="0"
+        		tags="VDA_ISA_Audit"
+        		/>
+        	<huiproperty
+        		name="dateofinspection"
+        		id="controlgroup_isroom_dateofinspection"
+        		inputtype="date"
+         		tags="VDA_ISA_Audit">
+				<defaultRule class="Today">
+                </defaultRule>
+        	</huiproperty>       		
+        	<huiproperty
+        		name="categorisation"
+          		id="controlgroup_isroom_categorisation"
+        		inputtype="singleoption"
+         		tags="VDA_ISA_Audit"
+        		>
+        		<option name="dataCentre" id="controlgroup_isroom_categorisation_datacentre" />
+        	</huiproperty>
+        	<huiproperty
+        		name="gotConcept"
+        		id="controlgroup_is_room_gotConcept"
+        		inputtype="booleanoption" defaultValue="0"
+        		tags="VDA_ISA_Audit"
+        		/>
+   		
+        </huipropertygroup>        	
     </huientity>
 
     <huientity
@@ -4431,7 +4674,19 @@ the value between <param></param> will be used directly if no string is found fo
 	            textrows="12" />
         
         </huipropertygroup>
-       
+        
+        <huipropertygroup id="control_feedback" name="Feedback" tags="Feedback">
+            <huiproperty id="control_feedback_note"
+                name="feedback" 
+                inputtype="text"
+                tags="Feedback" />
+            <huiproperty id="control_feedback_date"
+                name="feedback from" 
+                inputtype="date"
+                tags="Feedback">
+                <defaultRule class="Today"/>
+            </huiproperty>
+        </huipropertygroup>
     </huientity>
     
     <huientity
@@ -4718,6 +4973,20 @@ the value between <param></param> will be used directly if no string is found fo
             
 			        	
         </huipropertygroup>
+<huipropertygroup name="Greenbone GSM" id="gsm_incscen_group" tags="Greenbone_GSM" >
+   <!-- TODO translate this property -->
+        <huiproperty id="gsm_ism_scenario_description" name="GSM Desc." 
+            inputtype="text"
+        />
+    
+    
+   <!-- TODO translate this property -->
+        <huiproperty id="gsm_ism_scenario_cve" name="GSM CVE" />
+    
+    
+   <!-- TODO translate this property -->
+        <huiproperty id="gsm_ism_scenario_level" name="GSM Lvl." />
+</huipropertygroup>
         
     </huientity>
     
@@ -4839,6 +5108,19 @@ the value between <param></param> will be used directly if no string is found fo
             <option id="vulnerability_level_2" name="2: Easily possible" value="2"/>
             <option id="vulnerability_level_3" name="3: Probable" value="3"/>
 		</huiproperty>
+<huipropertygroup name="Greenbone GSM" id="gsm_vuln_group" tags="Greenbone_GSM" >
+  <!-- TODO translate this property -->
+        <huiproperty id="gsm_ism_vulnerability_description" name="GSM Desc." 
+            inputtype="text"
+        />
+    
+  <!-- TODO translate this property -->
+        <huiproperty id="gsm_ism_vulnerability_cve" name="GSM CVE" />
+    
+  <!-- TODO translate this property -->
+        <huiproperty id="gsm_ism_vulnerability_level" name="GSM Lvl." />
+</huipropertygroup>
+       
     </huientity>
     
     <huientity
@@ -4881,6 +5163,7 @@ the value between <param></param> will be used directly if no string is found fo
         	name="documents" reversename="related document" tooltip=""/>
         <huirelation to="finding" id="rel_document_finding" 
         	name="documents" reversename="related document" tooltip=""/>
+        
 
 		<huirelation to="samt_topic" id="rel_document_samt_topic_documented"
  		  	name="documents" reversename="related document" tooltip="" />		
@@ -4938,7 +5221,7 @@ the value between <param></param> will be used directly if no string is found fo
 			<option name="Other" id="document_type_other" />       	
 		</huiproperty>
         <huiproperty 
-       		id="document_classfc" name="Classification" inputtype="singleoption">
+       		id="document_classfc" name="Classification" inputtype="singleoption" >
 	       <option name="Confidential" id="document_classfc_confidential"/>
 	       <option name="Internal Use" id="document_classfc_internal"/>
 	       <option name="Public" id="document_classfc_public"/>
@@ -4970,13 +5253,32 @@ the value between <param></param> will be used directly if no string is found fo
             name="Document"
             id="interview_document"
             isURL="true" />
+            
+        <huiproperty
+        	name="showInReport"
+        	id="interview_showInISAReport"
+			inputtype="booleanoption"  defaultValue="0" tags="VDA_ISA_Audit"/>
+
+        <huiproperty 
+       		id="interview_audit_action" name="Audit Action Type" inputtype="singleoption" tags="VDA_ISA_Audit">
+	       <option name="Interview" id="interview_audit_action_type_interview"/>
+	       <option name="Documentationcheck" id="interview_audit_action_type_documentation_check"/>
+	       <option name="Inspection" id="interview_audit_action_type_inspection"/>
+	       <option name="Document review" id="interview_audit_action_type_document_review"/>
+	       <option name="Third party document application" id="interview_audit_action_type_third_party_document_application"/>
+	       <option name="Observation of workflows and activities" id="interview_audit_action_type_activity_observation"/>
+        </huiproperty>
+        
+        <huiproperty
+	    	id="interview_audit_action_description" name="Audit Action Description" inputtype="text" tags="VDA_ISA_Audit"
+	 	   textrows="4"/>        			
 	
     	<huirelation to="finding" id="rel_interview_finding_notice"
     		name="revealed" reversename="noticed in" tooltip="" />
     	<huirelation to="evidence" id="rel_interview_evidence_relevant"
     		name="documented" reversename="relevant for" tooltip="" />
 		<huirelation to="samt_topic"  id="rel_interview_samt_topic_included"  
-			name="included" reversename="processed in" tooltip="" /> 
+			name="interviewed" reversename="interviewed about" tooltip="" /> 
     </huientity>
     
     <huientity
@@ -5074,7 +5376,15 @@ the value between <param></param> will be used directly if no string is found fo
 			inputtype="date">
             <defaultRule class="Today" />
         </huiproperty>
-        
+        <huiproperty 
+       		name="finding Type" id="finding_type2" inputtype="singleoption" tags="VDA_ISA_Audit">
+			<option name="technical Finding" id="finding_type2_technical" />       	
+			<option name="significant Detection" id="finding_type2_significant" /> 
+        </huiproperty>
+        <huiproperty
+        	name="showInReport"
+        	id="finding_showInISAReport"
+			inputtype="booleanoption"  defaultValue="0" tags="VDA_ISA_Audit" />
     </huientity>
     
     <huientity
@@ -5442,14 +5752,16 @@ the value between <param></param> will be used directly if no string is found fo
         <huirelation to="process" id="rel_samt_topic_process" />
         <huirelation to="record" id="rel_samt_topic_record" />
         <huirelation to="response" id="rel_samt_topic_response" />
-        
+        <huirelation to="incident_scenario"
+        id="rel_samt_topic_incident_scenario" />
+                
           <huipropertygroup id="samt_topic_groupdesc" name="Description" tags="Web">
           <huiproperty 
                 id="samt_topic_desc"
                 inputtype="text"
                 tags="Web"
-                editable="false"
-                visible="false"/>
+                editable="true"
+                visible="true"/>
           </huipropertygroup>
                
           <huiproperty 
@@ -5514,13 +5826,14 @@ the value between <param></param> will be used directly if no string is found fo
             <huiproperty id="samt_topic_audit_ra" name="Risk Assessment" tags="VDA_ISA_Audit"
                inputtype="numericoption" 
                min="-1" 
-               max="2" 
+               max="3" 
                defaultValue="-1">
                             
                 <option id="samt_topic_audit_ra_na"  value="-1" />
                 <option id="samt_topic_audit_ra_0"  value="0" />
                 <option id="samt_topic_audit_ra_1"  value="1" />
                 <option id="samt_topic_audit_ra_2"  value="2" />
+                <option id="samt_topic_audit_ra_3"  value="3" />
             </huiproperty>
 
             <!-- ISA Audit Field, only displayed when VDA_ISA_Audit filter is active -->
@@ -5558,6 +5871,24 @@ the value between <param></param> will be used directly if no string is found fo
     			<option name="Partly" id="samt_topicimplemented_partly"/>
     			<option name="N.a." id="samt_topicimplemented_na"/>
     		</huiproperty>
+    		
+    		<huiproperty name="userClassification" id="samt_user_classification" inputtype="singleoption" tags="VDA_ISA_Audit">
+    			<option name="Good implementation" id="samt_classification_good" />
+    			<option name="Insufficient implementation" id="samt_classification_insufficient" />
+    			<option name="No classification" id="samt_classification_none" />
+    		</huiproperty>
+            <huiproperty
+            	name="Samttopic UserClassification Comment" 
+	            id="samt_topic_classification_comment" 
+	            tags="VDA_ISA_Audit"
+	            inputtype="text"
+	            />    		
   
+<huipropertygroup name="Greenbone GSM" id="gsm_control_group" tags="Greenbone_GSM" >
+        <!-- TODO translate this property -->
+        <huiproperty id="gsm_ism_control_description" name="" 
+            inputtype="text"
+        />
+</huipropertygroup>
       </huientity> 
 </huientities>

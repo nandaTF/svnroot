@@ -20,14 +20,18 @@
 package sernet.verinice.bpm.rcp;
 
 import java.text.DateFormat;
+import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
+import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.hui.common.VeriniceContext;
 import sernet.verinice.interfaces.IAuthService;
+import sernet.verinice.interfaces.bpm.IGenericProcess;
 import sernet.verinice.interfaces.bpm.ITask;
 import sernet.verinice.interfaces.bpm.KeyValue;
 
@@ -38,6 +42,15 @@ import sernet.verinice.interfaces.bpm.KeyValue;
 public class TaskLabelProvider implements ITableLabelProvider {
 
     boolean onlyMyTasks = true;
+    
+    private static final Map<String, String> prioImageMap;
+    
+    static {
+        prioImageMap = new Hashtable<String, String>();
+        prioImageMap.put(ITask.PRIO_LOW, ImageCache.PRIORITY_LOW);
+        prioImageMap.put(ITask.PRIO_NORMAL, ImageCache.PRIORITY_NORMAL);
+        prioImageMap.put(ITask.PRIO_HIGH, ImageCache.PRIORITY_HIGH);
+    }
     
     /**
      * @param onlyMyTasks
@@ -51,8 +64,16 @@ public class TaskLabelProvider implements ITableLabelProvider {
      */
     @Override
     public Image getColumnImage(Object element, int columnIndex) {
-        // TODO Auto-generated method stub
-        return null;
+        Image image = null;
+        if(element instanceof ITask) {
+            ITask task = (ITask) element;
+            switch (columnIndex) {
+            case 0:
+                image = ImageCache.getInstance().getImage(prioImageMap.get(task.getPriority()));
+                break;
+            }
+        }
+        return image;
     }
 
     /* (non-Javadoc)
@@ -73,16 +94,19 @@ public class TaskLabelProvider implements ITableLabelProvider {
                 text = task.getControlTitle();
                 break;
             case 1:
-                text = task.getName();
+                text = task.getProcessName();
                 break;
             case 2:
+                text = task.getName();
+                break;
+            case 3:
                 IAuthService authService = ServiceFactory.lookupAuthService();
                 text = task.getAssignee();
                 if(text!=null && text.equals(authService.getUsername())) {
                     text = text + " (you)";
                 }                          
                 break;    
-            case 3:
+            case 4:
                 if(task.getDueDate()!=null) {
                     text = DateFormat.getDateInstance().format(task.getDueDate());
                 }

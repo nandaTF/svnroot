@@ -47,6 +47,28 @@
         </property>
     </bean>
     
+     <bean name="/controlFlowHttpInvoker"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter"
+          lazy-init="false">
+        <property name="service">
+            <ref bean="isaControlFlowService"/>
+        </property>
+        <property name="serviceInterface">
+            <value>sernet.verinice.interfaces.bpm.IIsaControlFlowService</value>
+        </property>
+    </bean>
+    
+    <bean name="/qmHttpInvoker"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter"
+          lazy-init="false">
+        <property name="service">
+            <ref bean="isaQmService"/>
+        </property>
+        <property name="serviceInterface">
+            <value>sernet.verinice.interfaces.bpm.IIsaQmService</value>
+        </property>
+    </bean>
+    
     <bean name="/rightsServiceHttpInvoker"
           class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter"
           lazy-init="false">

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,12 +45,15 @@ import sernet.gs.service.ServerInitializer;
 import sernet.verinice.interfaces.IAuthService;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.interfaces.IDao;
-import sernet.verinice.interfaces.bpm.IExecutionProcess;
+import sernet.verinice.interfaces.bpm.ICompleteServerHandler;
+import sernet.verinice.interfaces.bpm.IGenericProcess;
 import sernet.verinice.interfaces.bpm.IIsaExecutionProcess;
 import sernet.verinice.interfaces.bpm.ITask;
+import sernet.verinice.interfaces.bpm.ITaskDescriptionHandler;
 import sernet.verinice.interfaces.bpm.ITaskParameter;
 import sernet.verinice.interfaces.bpm.ITaskService;
 import sernet.verinice.interfaces.bpm.KeyValue;
+import sernet.verinice.model.bpm.Messages;
 import sernet.verinice.model.bpm.TaskInformation;
 import sernet.verinice.model.bpm.TaskParameter;
 import sernet.verinice.model.common.CnATreeElement;
@@ -67,7 +71,7 @@ import sernet.verinice.service.IConfigurationService;
  * 
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
-public class TaskService implements ITaskService{
+public class TaskService implements ITaskService {
 
     private final Logger log = Logger.getLogger(TaskService.class);
     
@@ -95,6 +99,16 @@ public class TaskService implements ITaskService{
     
     private IBaseDao<Audit, Integer> auditDao;
     
+    private Set<String> taskOutcomeBlacklist;
+    
+    private Map<String, ICompleteServerHandler> completeHandler;
+    
+    private ICompleteServerHandler defaultCompleteServerHandler;
+
+    private Map<String, ITaskDescriptionHandler> descriptionHandler;
+    
+    private ITaskDescriptionHandler defaultDescriptionHandler;
+    
     
     /* (non-Javadoc)
      * @see sernet.verinice.interfaces.bpm.ITaskService#getTaskList()
@@ -118,7 +132,7 @@ public class TaskService implements ITaskService{
     @Override
     public List<ITask> getTaskList(ITaskParameter parameter) {
         if (log.isDebugEnabled()) {
-            log.debug("getTaskList called...");
+            log.debug("getTaskList called..."); //$NON-NLS-1$
         }
         ServerInitializer.inheritVeriniceContextState();      
         if(!parameter.getAllUser() && parameter.getUsername()==null) {
@@ -127,60 +141,72 @@ public class TaskService implements ITaskService{
         List<ITask> taskList = Collections.emptyList();
         if(doSearch(parameter)) {      
             List<Object> paramList = new LinkedList<Object>();
-            StringBuilder sb = new StringBuilder("from org.jbpm.pvm.internal.task.TaskImpl as task ");
+            StringBuilder sb = new StringBuilder("from org.jbpm.pvm.internal.task.TaskImpl as task "); //$NON-NLS-1$
                 
             if(parameter.getAuditUuid()!=null) {
-                sb.append("inner join task.execution.processInstance.variables as auditVar ");
+                sb.append("inner join task.execution.processInstance.variables as auditVar "); //$NON-NLS-1$
             }    
             // create (un)read query if one is false:
             if((parameter.getRead()!=null && !parameter.getRead())
                || (parameter.getUnread()!=null && !parameter.getUnread())) {
-                sb.append("inner join task.execution.processInstance.variables as readVar "); 
+                sb.append("inner join task.execution.processInstance.variables as readVar ");  //$NON-NLS-1$
             }
             
             boolean where = false;
             if(!parameter.getAllUser() && parameter.getUsername()!=null) {
                 where = concat(sb,where);
-                sb.append("task.assignee=? ");
+                sb.append("task.assignee=? "); //$NON-NLS-1$
                 paramList.add(parameter.getUsername());
             } 
             
+            if(parameter.getProcessKey()!=null) {
+                where = concat(sb,where);
+                sb.append("task.executionId like ? "); //$NON-NLS-1$
+                paramList.add(parameter.getProcessKey() + "%"); //$NON-NLS-1$
+            }
+            
+            if(parameter.getTaskId()!=null) {
+                where = concat(sb,where);
+                sb.append("task.name=? "); //$NON-NLS-1$
+                paramList.add(parameter.getTaskId()); 
+            }
+            
             if(parameter.getSince()!=null) {
                 where = concat(sb,where);
-                sb.append("task.createTime>=? ");
+                sb.append("task.createTime>=? "); //$NON-NLS-1$
                 paramList.add(parameter.getSince());
             }
             
             if(parameter.getAuditUuid()!=null) {
                 where = concat(sb,where);
-                sb.append("auditVar.key=? ");
+                sb.append("auditVar.key=? "); //$NON-NLS-1$
                 paramList.add(IIsaExecutionProcess.VAR_AUDIT_UUID);
-                sb.append("and auditVar.string=? ");
+                sb.append("and auditVar.string=? "); //$NON-NLS-1$
                 paramList.add(parameter.getAuditUuid());
             }
             
             if(parameter.getRead()!=null && parameter.getRead() && parameter.getUnread()!=null && !parameter.getUnread()) { 
                 where = concat(sb,where);           
-                sb.append("readVar.key=? ");
+                sb.append("readVar.key=? "); //$NON-NLS-1$
                 paramList.add(ITaskService.VAR_READ_STATUS);
-                sb.append("and readVar.string=? ");
+                sb.append("and readVar.string=? "); //$NON-NLS-1$
                 paramList.add(ITaskService.VAR_READ);
             }
             if(parameter.getUnread()!=null && parameter.getUnread() && parameter.getRead()!=null && !parameter.getRead()) {
                 where = concat(sb,where);
-                sb.append("readVar.key=? ");
+                sb.append("readVar.key=? "); //$NON-NLS-1$
                 paramList.add(ITaskService.VAR_READ_STATUS);
-                sb.append("and readVar.string=? ");
+                sb.append("and readVar.string=? "); //$NON-NLS-1$
                 paramList.add(ITaskService.VAR_UNREAD);
             }
 
             final String hql = sb.toString();
             if (log.isDebugEnabled()) {
-                log.debug("getTaskList, hql: " + hql);
+                log.debug("getTaskList, hql: " + hql); //$NON-NLS-1$
             }
             List jbpmTaskList = getJbpmTaskDao().findByQuery(hql,paramList.toArray());
             if (log.isDebugEnabled()) {
-                log.debug("getTaskList, number of tasks: " + jbpmTaskList.size());
+                log.debug("getTaskList, number of tasks: " + jbpmTaskList.size()); //$NON-NLS-1$
             }
             
             if(jbpmTaskList!=null && !jbpmTaskList.isEmpty()) {
@@ -199,7 +225,9 @@ public class TaskService implements ITaskService{
                         Set<String> outcomeSet = getTaskService().getOutcomes(task.getId());
                         List<KeyValue> outcomeList = new ArrayList<KeyValue>(outcomeSet.size());
                         for (String id : outcomeSet) {
-                            outcomeList.add(new KeyValue(id, Messages.getString(id)));                          
+                            if(!getTaskOutcomeBlacklist().contains(id)) {
+                                outcomeList.add(new KeyValue(id, Messages.getString(id)));
+                            }
                         }
                         taskInfo.setOutcomes(outcomeList);
                         taskList.add(taskInfo);  
@@ -208,7 +236,7 @@ public class TaskService implements ITaskService{
             }
         }    
         if (log.isDebugEnabled()) {
-            log.debug("getTaskList finished");
+            log.debug("getTaskList finished"); //$NON-NLS-1$
         }
         return taskList;
     }
@@ -219,10 +247,10 @@ public class TaskService implements ITaskService{
      */
     private boolean concat(/*not final*/StringBuilder hql,/*not final*/boolean where) {
         if(!where) {
-            hql.append("where ");
+            hql.append("where "); //$NON-NLS-1$
             where = true;
         } else {
-            hql.append("and ");
+            hql.append("and "); //$NON-NLS-1$
         }
         return where;
     }
@@ -233,7 +261,7 @@ public class TaskService implements ITaskService{
     @Override
     public List<String> getElementList() {
         ServerInitializer.inheritVeriniceContextState();
-        String hql = "select distinct var.string from Variable var where var.key = ?";
+        String hql = "select distinct var.string from Variable var where var.key = ?"; //$NON-NLS-1$
         String[] param = new String[]{IIsaExecutionProcess.VAR_AUDIT_UUID};
         List<String> uuidAuditList = getJbpmVariableDao().findByQuery(hql, param);
         return uuidAuditList;
@@ -251,29 +279,34 @@ public class TaskService implements ITaskService{
     private TaskInformation map(Task task) {
         TaskInformation taskInformation = new TaskInformation();
         taskInformation.setId(task.getId());
+        taskInformation.setType(task.getName());
         taskInformation.setName(Messages.getString(task.getName()));
+        taskInformation.setDescription(loadTaskDescription(task));
         taskInformation.setCreateDate(task.getCreateTime()); 
-        taskInformation.setAssignee(task.getAssignee());
+        taskInformation.setAssignee(getConfigurationService().getName(task.getAssignee()));
         if (log.isDebugEnabled()) {
-            log.debug("map, setting read status...");
-        }
-        String readStatus = (String) getTaskService().getVariable(task.getId(), ITaskService.VAR_READ_STATUS);
-        taskInformation.setIsRead(ITaskService.VAR_READ.equals(readStatus));
-  
+            log.debug("map, setting read status..."); //$NON-NLS-1$
+        }          
         
-        Map<String, Object> varMap = loadVariables(task);      
+        Map<String, Object> varMap = loadVariables(task);  
+        taskInformation.setIsRead(ITaskService.VAR_READ.equals(varMap.get(ITaskService.VAR_READ_STATUS)));       
+        String priority =  (String) varMap.get(IGenericProcess.VAR_PRIORITY);
+        if(priority==null) {
+            priority = ITask.PRIO_NORMAL;
+        }
+        taskInformation.setPriority(priority);
         mapControl(taskInformation, varMap);       
         mapAudit(taskInformation, varMap);
         
         if (log.isDebugEnabled()) {
-            log.debug("map, loading type...");
+            log.debug("map, loading type..."); //$NON-NLS-1$
         }
-        String typeId = (String) varMap.get(IExecutionProcess.VAR_TYPE_ID); 
-        taskInformation.setType(typeId);
+        String typeId = (String) varMap.get(IGenericProcess.VAR_TYPE_ID); 
+        taskInformation.setElementType(typeId);
         taskInformation.setDueDate(task.getDuedate());   
-        
+        taskInformation.setProcessName(getProcessName(task));
         if (log.isDebugEnabled()) {
-            log.debug("map finished");
+            log.debug("map finished"); //$NON-NLS-1$
         }
         return taskInformation;
     }
@@ -282,15 +315,39 @@ public class TaskService implements ITaskService{
      * @param task
      * @return
      */
+    private String getProcessName(Task task) {
+        String executionId = task.getExecutionId();
+        String processKey = executionId.substring(0,executionId.indexOf('.'));        
+        return Messages.getString(processKey);
+    }
+
+    /**
+     * @param task
+     * @return
+     */
+    private String loadTaskDescription(Task task) {
+        ITaskDescriptionHandler handler = getDescriptionHandler().get(task.getName());
+        if(handler==null) {
+            handler = getDefaultDescriptionHandler();
+        }
+        return handler.loadDescription(task);
+    }
+
+    /**
+     * @param task
+     * @return
+     */
     private Map<String, Object> loadVariables(Task task) {
         if (log.isDebugEnabled()) {
-            log.debug("map, loading element...");
+            log.debug("map, loading element..."); //$NON-NLS-1$
         }
         String executionId = task.getExecutionId();
         Set<String> varNameSet = new HashSet<String>();
-        varNameSet.add(IExecutionProcess.VAR_UUID);
+        varNameSet.add(IGenericProcess.VAR_UUID);
         varNameSet.add(IIsaExecutionProcess.VAR_AUDIT_UUID);
-        varNameSet.add(IExecutionProcess.VAR_TYPE_ID);
+        varNameSet.add(IGenericProcess.VAR_TYPE_ID);
+        varNameSet.add(ITaskService.VAR_READ_STATUS);
+        varNameSet.add(IGenericProcess.VAR_PRIORITY);
         Map<String, Object> varMap = getExecutionService().getVariables(executionId,varNameSet);
         return varMap;
     }
@@ -301,17 +358,20 @@ public class TaskService implements ITaskService{
      */
     private void mapAudit(TaskInformation taskInformation, Map<String, Object> varMap) {
         if (log.isDebugEnabled()) {
-            log.debug("map, loading audit...");
+            log.debug("map, loading audit..."); //$NON-NLS-1$
         }
+        CnATreeElement audit = null;
         String uuidAudit = (String) varMap.get(IIsaExecutionProcess.VAR_AUDIT_UUID);     
         if(uuidAudit!=null) {
             taskInformation.setUuidAudit(uuidAudit);
             RetrieveInfo ri = new RetrieveInfo();
             ri.setProperties(true);
-            CnATreeElement audit = getElementDao().findByUuid(uuidAudit, ri);
-            if(audit!=null) {
-                taskInformation.setAuditTitle(audit.getTitle());
-            }
+            audit = getElementDao().findByUuid(uuidAudit, ri);           
+        } 
+        if(audit!=null) {
+            taskInformation.setAuditTitle(audit.getTitle());
+        } else {
+            taskInformation.setAuditTitle(Messages.getString("TaskService.0")); //$NON-NLS-1$
         }
     }
 
@@ -321,7 +381,7 @@ public class TaskService implements ITaskService{
      * @return
      */
     private void mapControl(TaskInformation taskInformation, Map<String, Object> varMap) {
-        String uuidControl = (String) varMap.get(IExecutionProcess.VAR_UUID);            
+        String uuidControl = (String) varMap.get(IGenericProcess.VAR_UUID);            
         taskInformation.setUuid(uuidControl);  
         RetrieveInfo ri = new RetrieveInfo();
         ri.setProperties(true);
@@ -339,11 +399,11 @@ public class TaskService implements ITaskService{
         String sortable = text;
         if(sortable!=null && sortable.length()>0 && isNumber(sortable.substring(0,1)) ) {
             if(sortable.length()==1 || !isNumber(sortable.substring(1,2))) {
-                sortable = new StringBuilder("0").append(sortable).toString();
+                sortable = new StringBuilder("0").append(sortable).toString(); //$NON-NLS-1$
             }
-            if(sortable.indexOf(".")==2 && sortable.length()>3) {
+            if(sortable.indexOf(".")==2 && sortable.length()>3) { //$NON-NLS-1$
                 sortable = new StringBuilder(sortable.substring(0, 2))
-                .append(".")
+                .append(".") //$NON-NLS-1$
                 .append(createSortableString(sortable.substring(3)))
                 .toString();
             }
@@ -365,24 +425,57 @@ public class TaskService implements ITaskService{
      */
     @Override
     public void completeTask(String taskId) {
+        completeTask(taskId,(Map<String, Object>)null);
+    }
+    
+    public void completeTask(String taskId, Map<String, Object> parameter) {
         Task task = getTaskService().getTask(taskId);
         if(task!=null) {
             String name = task.getName();
             if(DEFAULT_OUTCOMES.get(name)!=null) {
-                completeTask(taskId,DEFAULT_OUTCOMES.get(name));
+                completeTask(task,DEFAULT_OUTCOMES.get(name),parameter);
             } else {
-                log.warn("No default outcome set for task: " + name);
+                log.warn("No default outcome set for task: " + name); //$NON-NLS-1$
                 getTaskService().completeTask(taskId);
             }
         }
     }
     
-
     @Override
     public void completeTask(String taskId, String outcomeId) {
-        getTaskService().completeTask(taskId,outcomeId);
+        completeTask(taskId,outcomeId,null);
     }
     
+
+    @Override
+    public void completeTask(String taskId, String outcomeId, Map<String, Object> parameter) {
+        Task task = getTaskService().getTask(taskId);
+        if(task!=null) {
+            completeTask(task,outcomeId,parameter);
+        }
+    }
+    
+    private void completeTask(Task task, String outcomeId, Map<String, Object> parameter) {     
+        ICompleteServerHandler handler = getHandler(task.getName(),outcomeId);
+        if(handler!=null) {
+            handler.execute(task.getId(),parameter);
+        }
+        getTaskService().completeTask(task.getId(),outcomeId);
+    }
+    
+    /**
+     * @param name
+     * @param outcomeId
+     * @return
+     */
+    private ICompleteServerHandler getHandler(String name, String outcomeId) {
+        ICompleteServerHandler handler = getCompleteHandler().get(new StringBuilder(name).append(".").append(outcomeId).toString());
+        if(handler==null) {
+            handler = getDefaultCompleteServerHandler();
+        }
+        return handler;
+    }
+
     /* (non-Javadoc)
      * @see sernet.verinice.interfaces.bpm.ITaskService#markAsRead(java.lang.String)
      */
@@ -414,7 +507,7 @@ public class TaskService implements ITaskService{
     public void cancelTask(String taskId) {
         // Some task belongs to a subprocess of the main process
         // HQL query to find the main process
-        String hql = "select execution.parent from org.jbpm.pvm.internal.task.TaskImpl t where t.id = ?";
+        String hql = "select execution.parent from org.jbpm.pvm.internal.task.TaskImpl t where t.id = ?"; //$NON-NLS-1$
         List<Execution> executionList = getJbpmTaskDao().findByQuery(hql,new Long[]{Long.valueOf(taskId)});         
         if(!executionList.isEmpty()) {
             for (Execution process : executionList) {
@@ -433,6 +526,49 @@ public class TaskService implements ITaskService{
                 }
             }
         }    
+    }
+    
+    /* (non-Javadoc)
+     * @see sernet.verinice.interfaces.bpm.ITaskService#setAssignee(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void setAssignee(Set<String> taskIdset, String username) {
+        if(taskIdset!=null && !taskIdset.isEmpty() && username!=null) {
+            for (String taskId : taskIdset) {
+                getTaskService().assignTask(taskId, username);            
+            }
+            
+        }
+    }
+    
+    @Override
+    public void setAssigneeVar(Set<String> taskIdset, String username) {
+        if(taskIdset!=null && !taskIdset.isEmpty() && username!=null) {
+            for (String taskId : taskIdset) {
+                Map<String, String> param = new HashMap<String, String>();
+                param.put(IGenericProcess.VAR_ASSIGNEE_NAME, username);
+                getTaskService().setVariables(taskId, param);
+            }
+            
+        }
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see sernet.verinice.interfaces.bpm.ITaskService#setVariables(java.lang.String, java.util.Map)
+     */
+    @Override
+    public void setVariables(String taskId, Map<String, Object> param) {
+        getTaskService().setVariables(taskId, param);
+    }
+    
+    public Map<String, Object> getVariables(String taskId) {
+        Map<String, Object> variables = new HashMap<String, Object>();
+        Set<String> names = getTaskService().getVariableNames(taskId);
+        for (String name : names) {          
+            variables.put(name, getTaskService().getVariable(taskId, name));
+        }
+        return variables;
     }
 
     public org.jbpm.api.TaskService getTaskService() {
@@ -457,6 +593,14 @@ public class TaskService implements ITaskService{
 
     public void setAuthService(IAuthService authService) {
         this.authService = authService;
+    }
+
+    public IConfigurationService getConfigurationService() {
+        return configurationService;
+    }
+
+    public void setConfigurationService(IConfigurationService configurationService) {
+        this.configurationService = configurationService;
     }
 
     public void setProcessEngine(ProcessEngine processEngine) {
@@ -493,6 +637,49 @@ public class TaskService implements ITaskService{
 
     public void setAuditDao(IBaseDao<Audit, Integer> auditDao) {
         this.auditDao = auditDao;
+    }
+
+    public Set<String> getTaskOutcomeBlacklist() {
+        if(taskOutcomeBlacklist==null) {
+            taskOutcomeBlacklist = Collections.emptySet();
+        }
+        return taskOutcomeBlacklist;
+    }
+
+    public void setTaskOutcomeBlacklist(Set<String> processDefinitions) {
+        this.taskOutcomeBlacklist = processDefinitions;
+    }
+
+    public Map<String, ICompleteServerHandler> getCompleteHandler() {
+        return completeHandler;
+    }
+
+    public void setCompleteHandler(Map<String, ICompleteServerHandler> completeHandler) {
+        this.completeHandler = completeHandler;
+    }
+
+    public ICompleteServerHandler getDefaultCompleteServerHandler() {
+        return defaultCompleteServerHandler;
+    }
+
+    public void setDefaultCompleteServerHandler(ICompleteServerHandler defaultCompleteServerHandler) {
+        this.defaultCompleteServerHandler = defaultCompleteServerHandler;
+    }
+
+    public Map<String, ITaskDescriptionHandler> getDescriptionHandler() {
+        return descriptionHandler;
+    }
+
+    public void setDescriptionHandler(Map<String, ITaskDescriptionHandler> descriptionHandler) {
+        this.descriptionHandler = descriptionHandler;
+    }
+
+    public ITaskDescriptionHandler getDefaultDescriptionHandler() {
+        return defaultDescriptionHandler;
+    }
+
+    public void setDefaultDescriptionHandler(ITaskDescriptionHandler defaultDescriptionHandler) {
+        this.defaultDescriptionHandler = defaultDescriptionHandler;
     }
 
 }

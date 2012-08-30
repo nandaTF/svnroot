@@ -32,27 +32,33 @@ import sernet.verinice.interfaces.bpm.KeyValue;
  */
 public class TaskInformation implements ITask, Serializable {
 
-    String id;
+    private String id;
     
-    Date createDate;
+    private String type;
     
-    Date dueDate;
+    private Date createDate;
     
-    String name;
+    private Date dueDate;
     
-    String controlTitle;
+    private String name;
     
-    String uuid;
+    private String processName;
     
-    String type;
+    private String description;
     
-    String sortValue;
+    private String controlTitle;
     
-    List<KeyValue> outcomeList;
+    private String uuid;
+    
+    private String elementType;
+    
+    private String sortValue;
+    
+    private List<KeyValue> outcomeList;
 
-    boolean isRead = false;
+    private boolean isRead = false;
     
-    String style;
+    private String style;
 
     private String uuidAudit;
 
@@ -61,6 +67,8 @@ public class TaskInformation implements ITask, Serializable {
     private String assignee;
     
     private boolean processed = false;
+    
+    private String priority;
     
     /**
      * 
@@ -81,6 +89,14 @@ public class TaskInformation implements ITask, Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     /* (non-Javadoc)
@@ -113,6 +129,22 @@ public class TaskInformation implements ITask, Serializable {
         this.name = name;
     }
 
+    public String getProcessName() {
+        return processName;
+    }
+
+    public void setProcessName(String processName) {
+        this.processName = processName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     /* (non-Javadoc)
      * @see sernet.verinice.interfaces.bpm.ITask#getControlTitle()
      */
@@ -135,12 +167,12 @@ public class TaskInformation implements ITask, Serializable {
         this.uuid = uuid;
     }
 
-    public String getType() {
-        return type;
+    public String getElementType() {
+        return elementType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setElementType(String type) {
+        this.elementType = type;
     }
 
     public String getSortValue() {
@@ -243,6 +275,14 @@ public class TaskInformation implements ITask, Serializable {
     @Override
     public boolean getIsProcessed() {
         return processed;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
     }
 
     @Override

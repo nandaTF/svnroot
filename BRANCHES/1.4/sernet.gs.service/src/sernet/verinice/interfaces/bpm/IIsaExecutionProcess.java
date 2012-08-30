@@ -23,21 +23,14 @@ package sernet.verinice.interfaces.bpm;
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  *
  */
-public interface IIsaExecutionProcess extends IExecutionProcess {
+public interface IIsaExecutionProcess extends IGenericProcess {
     
     String KEY = "isa-execution";
-
-    String VAR_OWNER_NAME = "ISA_OWNER_NAME";
-    String VAR_ASSIGNEE_NAME = "ISA_ASSIGNEE_NAME";
-    String VAR_IMPLEMENTATION = "ISA_IMPLEMENTATION";
-    String VAR_DUEDATE = "ISA_DUEDATE";
-    String VAR_AUDIT_UUID = "UUID_AUDIT";
+    
     String VAR_WRITE_PERMISSION = "ISA_WRITE_PERMISSION";
     
     String TRANSITION_IS_WRITE_PERMISSION = "is write permission";
     String TRANSITION_NO_WRITE_PERMISSION = "no write permission";
-    String TRANSITION_NOT_IMPLEMENTED = "not implemented";
-    String TRANSITION_IMPLEMENTED = "implemented";
     
     String DEFAULT_OWNER_NAME = "admin";
     

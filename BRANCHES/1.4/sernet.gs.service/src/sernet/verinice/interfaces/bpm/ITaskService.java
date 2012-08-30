@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import sernet.verinice.model.common.CnATreeElement;
 
@@ -40,6 +41,7 @@ import sernet.verinice.model.common.CnATreeElement;
  */
 public interface ITaskService {
 
+    String DESCRIPTION_SUFFIX = ".description";
     
     String VAR_READ_STATUS = "TASK_READ_STATUS";
     
@@ -84,6 +86,10 @@ public interface ITaskService {
     
     void completeTask(String taskId, String outcomeId);
     
+    void completeTask(String taskId, Map<String, Object> parameter);
+    
+    void completeTask(String taskId, String outcomeId, Map<String, Object> parameter);
+    
     void markAsRead(String taskId);
     
     /**
@@ -100,5 +106,29 @@ public interface ITaskService {
      * @param taskId The database id of an task
      */
     void cancelTask(String taskId);
+
+    /**
+     * Set the assignee of a task.
+     * 
+     * @param taskIdSet A set with the database ids of tasks
+     * @param username The login name of an user
+     */
+    void setAssignee(Set<String> taskIdSet, String username);
     
+    /**
+     * Set the assignee variable of a task.
+     * Name of the var.: IGenericProcess.VAR_ASSIGNEE_NAME
+     * 
+     * @param taskIdSet A set with the database ids of tasks
+     * @param username The login name of an user
+     */
+    void setAssigneeVar(Set<String> taskIdSet, String username);
+
+    Map<String, Object> getVariables(String taskId);
+    
+    /**
+     * @param taskId
+     * @param param
+     */
+    void setVariables(String taskId, Map<String, Object> param);
 }

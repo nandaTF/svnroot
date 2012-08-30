@@ -80,14 +80,19 @@ public abstract class HtmlWriter {
 
         if (element instanceof BausteinUmsetzung) {
             BausteinUmsetzung bst = (BausteinUmsetzung) element;
+            if (bst.getUrl() == null || bst.getUrl().isEmpty() || bst.getUrl().equals("null")){
+            	html=toHtml(bst);
+            }else {
+            
             html = getHtmlFromStream(GSScraperUtil.getInstance().getModel().getBaustein(bst.getUrl(), bst.getStand()), bst.getEncoding());
+        }
         }
         
         if (element instanceof Massnahme) {
             Massnahme mn = (Massnahme) element;
             html = GSScraperUtil.getInstance().getModel().getMassnahmeHtml(mn.getUrl(), mn.getStand());
         }
-
+ 
         if (element instanceof RisikoMassnahmenUmsetzung) {
             RisikoMassnahmenUmsetzung ums = (RisikoMassnahmenUmsetzung) element;
             RisikoMassnahmeHome.getInstance().initRisikoMassnahmeUmsetzung(ums);
@@ -98,7 +103,11 @@ public abstract class HtmlWriter {
             }
         } else if (element instanceof MassnahmenUmsetzung) {
             MassnahmenUmsetzung mnu = (MassnahmenUmsetzung) element;
+            if (mnu.getUrl() == null || mnu.getUrl().isEmpty() || mnu.getUrl().equals("null")){
+            	html=toHtml(mnu);
+            }else {
             html = GSScraperUtil.getInstance().getModel().getMassnahmeHtml(mnu.getUrl(), mnu.getStand());
+        }
         }
  
         if (element instanceof TodoViewItem) {
@@ -138,6 +147,18 @@ public abstract class HtmlWriter {
   
     }
     
+    private static String toHtml(BausteinUmsetzung bstums){
+    	StringBuilder buf =  new StringBuilder();
+    	writeHtml(buf, bstums.getTitle(), bstums.getDescription(), "iso-8859-1");
+    	return buf.toString();
+    }
+    
+    private static String toHtml(MassnahmenUmsetzung mnums){
+    	StringBuilder buf =  new StringBuilder();
+    	writeHtml(buf, mnums.getTitle(), mnums.getDescription(), "iso-8859-1");
+    	return buf.toString();
+    }
+    
     private static String toHtml(GefaehrdungsUmsetzung ums) {
         StringBuilder buf = new StringBuilder();
         writeHtml(buf, ums.getId() + " " + ums.getTitle(), ums.getDescription(), "iso-8859-1"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -151,15 +172,24 @@ public abstract class HtmlWriter {
         return buf.toString();
     }
     
+    public static String getPage(String text) {
+        StringBuilder sb = new StringBuilder();
+        writeHtml(sb, null, text, VeriniceCharset.CHARSET_UTF_8.name());
+        return sb.toString();
+    }
+    
     private static void writeHtml(StringBuilder buf, String headline, String bodytext, String encoding) {
         String cssDir = CnAWorkspace.getInstance().getWorkdir()+ File.separator + "html" + File.separator + "screen.css"; //$NON-NLS-1$ //$NON-NLS-2$
         buf.append("<html><head>"); //$NON-NLS-1$
         buf.append("<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=").append(encoding).append("\"/>\n"); //$NON-NLS-1$ //$NON-NLS-2$
         buf.append("<link REL=\"stylesheet\" media=\"screen\" HREF=\"").append(cssDir).append("\"/>"); //$NON-NLS-1$ //$NON-NLS-2$
-        buf.append("</head><body><div id=\"content\"><h1>"); //$NON-NLS-1$
-        buf.append(headline);
-        buf.append("</h1><p>"); //$NON-NLS-1$
-        buf.append(""); //$NON-NLS-1$
+        buf.append("</head><body><div id=\"content\">"); //$NON-NLS-1$
+        if(headline!=null) {
+            buf.append("<h1>"); //$NON-NLS-1$
+            buf.append(headline);
+            buf.append("</h1>"); //$NON-NLS-1$
+        }
+        buf.append("<p>"); //$NON-NLS-1$
         buf.append(bodytext.replaceAll("\\n", "<br/>")); //$NON-NLS-1$ //$NON-NLS-2$
         buf.append("</p></div></body></html>"); //$NON-NLS-1$
     }

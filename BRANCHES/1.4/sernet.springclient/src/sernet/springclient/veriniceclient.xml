@@ -38,6 +38,8 @@ ZO RELAXEN UND WATSCHEN DER BLINKENLIGHTS.
     <bean name="veriniceCommonsExecuter" class="sernet.springclient.CommonsExecuter" init-method="init">
         <!-- Request-timeout in ms 30min = 30*60*1000 = 1.800.000-->
         <property name="readTimeout" value="1800000"/>
+        <!-- Connection-timeout in ms -->
+        <property name="connectionTimeout" value="5000"/>
     </bean>
 
      <bean id="authService"
@@ -69,6 +71,28 @@ ZO RELAXEN UND WATSCHEN DER BLINKENLIGHTS.
         </property>
         <property name="serviceInterface">
             <value>sernet.verinice.interfaces.bpm.IProcessServiceIsa</value>         
+        </property>
+        <property name="httpInvokerRequestExecutor" ref="veriniceCommonsExecuter"/>
+    </bean>
+    
+    <bean id="isaControlFlowService"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+        <property name="serviceUrl">
+            <value>${verinice.serverURL}/service/controlFlowHttpInvoker</value>
+        </property>
+        <property name="serviceInterface">
+            <value>sernet.verinice.interfaces.bpm.IIsaControlFlowService</value>         
+        </property>
+        <property name="httpInvokerRequestExecutor" ref="veriniceCommonsExecuter"/>
+    </bean>
+    
+    <bean id="qmService"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+        <property name="serviceUrl">
+            <value>${verinice.serverURL}/service/qmHttpInvoker</value>
+        </property>
+        <property name="serviceInterface">
+            <value>sernet.verinice.interfaces.bpm.IIsaQmService</value>         
         </property>
         <property name="httpInvokerRequestExecutor" ref="veriniceCommonsExecuter"/>
     </bean>
@@ -205,6 +229,8 @@ ZO RELAXEN UND WATSCHEN DER BLINKENLIGHTS.
 			<!--<entry key="syncService" value-ref="syncService" />-->
 			<entry key="webServiceClient" value-ref="webServiceClient" />
             <entry key="taskService" value-ref="taskService" />
+            <entry key="isaControlFlowService" value-ref="isaControlFlowService" />
+            <entry key="isaQmService" value-ref="qmService" />
             <entry key="processServiceIsa" value-ref="processServiceIsa" />
             <entry key="rightsService" value-ref="rightsServiceClient" />
 		</map>

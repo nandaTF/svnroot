@@ -59,17 +59,16 @@ public class BSIToISMViewDragListener implements DragSourceListener {
 			}
 		}
 		event.doit = true;
-		DNDItems.setItems(selectionList);
 	}
 
 	@Override
 	public void dragSetData(DragSourceEvent event) {
-		event.data = DNDItems.CNAITEM;
+	    IStructuredSelection selection = ((IStructuredSelection)viewer.getSelection());
+	    event.data = DNDHelper.castDataArray(selection.toArray());
 	}
 
 	@Override
 	public void dragFinished(DragSourceEvent event) {
 		// do nothing
 	}
-
 }
