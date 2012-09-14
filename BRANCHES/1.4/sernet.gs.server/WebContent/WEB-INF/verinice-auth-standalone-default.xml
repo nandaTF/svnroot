@@ -21,6 +21,8 @@
             <!-- missing actions:
             	"accountsettings"
             	"accesscontrol"
+                "createindividualtasks"
+                "createisatasks"
 	            "editprofile"
 	            "taskdelete" 
 	            "taskshowall" -->
@@ -33,6 +35,7 @@
 	        <action id="additverbund" />
 	        <action id="addnote" />
 	        <action id="addsecurityassessment" />
+	        <action id="addownmodul"/>
 	        <action id="assignallisatopics" />
 	        <action id="auditview" />
 	        <action id="bausteinzuordnung" />
@@ -41,7 +44,6 @@
 	        <action id="bsimassnahmen" />
 	        <action id="bsimodelview" />
 	        <action id="bulkedit" />
-	        <action id="createisatasks" />
 	        <action id="deletecatalog" />
 	        <action id="deletefile" />
 	        <action id="deleteitem" />
@@ -51,6 +53,7 @@
 	        <action id="files" />
 	        <action id="generateauditreport" />
 	        <action id="generateorgreport" />
+            <action id="groupbytag"/>
 	        <action id="gsnotesimport" />
 	        <action id="gstoolimport" />
 	        <action id="importcsv" />
@@ -74,7 +77,6 @@
             <action id="unify" />
 	        <action id="xmlexport"/>
 	        <action id="xmlimport"/>
-            <action id="groupbytag"/>
         </profile>
     </profiles>
     <userprofiles>
