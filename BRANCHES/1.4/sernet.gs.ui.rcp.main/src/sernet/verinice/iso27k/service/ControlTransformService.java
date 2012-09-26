@@ -136,33 +136,25 @@ public class ControlTransformService {
 		CnATreeElement element = null;
 		if(item.getItems()!=null && item.getItems().size()>0) {
 			// create a group
-			element = GenericItemTransformer.transformToGroup(item);
-			monitor.setTaskName(getText(numberOfControls,numberProcessed,element.getTitle()));
-			if (group.canContain(element)) {
-				group.addChild(element);
-				element.setParentAndScope(group);			
-				if (log.isDebugEnabled()) {
-               	 log.debug("Creating control group,  UUID: " + element.getUuid() + ", title: " + element.getTitle()); //$NON-NLS-1$ //$NON-NLS-2$
-           	 	}	
-			    
-			} else {
-			    throw new ItemTransformException(Messages.getString("ControlTransformService.0")); //$NON-NLS-1$
-			}
+		    if (log.isDebugEnabled()) {
+                log.debug("Creating control group,  UUID: " + element.getUuid() + ", title: " + element.getTitle()); //$NON-NLS-1$ //$NON-NLS-2$
+            }
+			element = GenericItemTransformer.transformToGroup(item);			
 		} else {		   		  		 
 			// create a control
-			element = GenericItemTransformer.transform(item);
-			monitor.setTaskName(getText(numberOfControls,numberProcessed,element.getTitle()));			
-			if (group.canContain(element)) {
-				group.addChild(element);
-				element.setParentAndScope(group);
-				if (log.isDebugEnabled()) {
-			    	log.debug("Creating control,  UUID: " + element.getUuid() + ", title: " + element.getTitle());    //$NON-NLS-1$ //$NON-NLS-2$
-			
-				}
-            } else {
-                throw new ItemTransformException(Messages.getString("ControlTransformService.3")); //$NON-NLS-1$
-            }					
+		    if (log.isDebugEnabled()) {
+                log.debug("Creating control,  UUID: " + element.getUuid() + ", title: " + element.getTitle());    //$NON-NLS-1$ //$NON-NLS-2$     
+            }
+			element = GenericItemTransformer.transform(item);							
 		}
+		
+		monitor.setTaskName(getText(numberOfControls,numberProcessed,element.getTitle()));
+        if (group.canContain(element)) {         
+            element.setParentAndScope(group);           
+        } else {
+            throw new ItemTransformException(Messages.getString("ControlTransformService.0")); //$NON-NLS-1$
+        }
+		
 		try {
 		    HashSet<Permission> newperms = new HashSet<Permission>();
 	        newperms.add(Permission.createPermission(element, getAuthService().getUsername(), true, true));
@@ -173,8 +165,7 @@ public class ControlTransformService {
 			log.error("Error while inserting control", e); //$NON-NLS-1$
 			throw new RuntimeException("Error while inserting control", e); //$NON-NLS-1$
 		}
-		
-		
+			
 		element = (CnATreeElement) command.getElement();
 		element.setParentAndScope(group);		
 		monitor.processed(1);
@@ -184,6 +175,7 @@ public class ControlTransformService {
 				insertItem(monitor,(Group) element,child);
 			}
 		}
+		group.addChild(element);
 	}
 
 	/**

@@ -68,14 +68,13 @@ import sernet.gs.ui.rcp.main.actions.ShowAccessControlEditAction;
 import sernet.gs.ui.rcp.main.actions.ShowBulkEditAction;
 import sernet.gs.ui.rcp.main.actions.ShowKonsolidatorAction;
 import sernet.gs.ui.rcp.main.bsi.actions.BausteinZuordnungAction;
+import sernet.gs.ui.rcp.main.bsi.actions.GSMBausteinZuordnungAction;
 import sernet.gs.ui.rcp.main.bsi.actions.NaturalizeAction;
 import sernet.gs.ui.rcp.main.bsi.dnd.BSIModelViewDragListener;
 import sernet.gs.ui.rcp.main.bsi.dnd.BSIModelViewDropListener;
-import sernet.gs.ui.rcp.main.bsi.dnd.transfer.BausteinElementTransfer;
 import sernet.gs.ui.rcp.main.bsi.dnd.transfer.BausteinUmsetzungTransfer;
 import sernet.gs.ui.rcp.main.bsi.dnd.transfer.IBSIStrukturElementTransfer;
-import sernet.gs.ui.rcp.main.bsi.dnd.transfer.ISO27kElementTransfer;
-import sernet.gs.ui.rcp.main.bsi.dnd.transfer.ISO27kGroupTransfer;
+import sernet.gs.ui.rcp.main.bsi.dnd.transfer.IGSModelElementTransfer;
 import sernet.gs.ui.rcp.main.bsi.editors.BSIElementEditorInput;
 import sernet.gs.ui.rcp.main.bsi.editors.EditorFactory;
 import sernet.gs.ui.rcp.main.bsi.filter.BSIModelElementFilter;
@@ -155,9 +154,14 @@ public class BsiModelView extends ViewPart implements IAttachedToPerspective, IL
 	private Action selectEqualsAction;
 
 	private ShowKonsolidatorAction konsolidatorAction;
+	
+	//private GSMBasicSecurityCheckAction gsmbasicsecuritycheckAction;
 
 	private BausteinZuordnungAction bausteinZuordnungAction;
-
+	
+	private GSMBausteinZuordnungAction gsmbausteinZuordnungAction;
+	
+	
 	private MetaDropAdapter dropAdapter;
 	
 	private IModelLoadListener modelLoadListener;
@@ -322,8 +326,10 @@ public class BsiModelView extends ViewPart implements IAttachedToPerspective, IL
 		manager.add(selectEqualsAction);
 		selectEqualsAction.setEnabled(bausteinSelected());
 		manager.add(konsolidatorAction);
+		//manager.add(gsmbasicsecuritycheckAction);
 		manager.add(bausteinZuordnungAction);
-
+		manager.add(gsmbausteinZuordnungAction);
+		
 		manager.add(new Separator());
 		drillDownAdapter.addNavigationActions(manager);
 		manager.add(expandAllAction);
@@ -362,8 +368,8 @@ public class BsiModelView extends ViewPart implements IAttachedToPerspective, IL
 	}
 
 	private void hookDNDListeners() {
-		Transfer[] dropTypes = new Transfer[] { BausteinElementTransfer.getInstance(),
-		                                        BausteinUmsetzungTransfer.getInstance(), 
+		Transfer[] dropTypes = new Transfer[] { IGSModelElementTransfer.getInstance(),
+		                                        BausteinUmsetzungTransfer.getInstance(),
 		                                        IBSIStrukturElementTransfer.getInstance() 
 		                                      };
 		Transfer[] dragTypes = new Transfer[]{  IBSIStrukturElementTransfer.getInstance(),
@@ -423,8 +429,13 @@ public class BsiModelView extends ViewPart implements IAttachedToPerspective, IL
 		naturalizeAction = new NaturalizeAction(getViewSite().getWorkbenchWindow());
 
 		konsolidatorAction = new ShowKonsolidatorAction(getViewSite().getWorkbenchWindow(), Messages.BsiModelView_15);
+		
+		//gsmbasicsecuritycheckAction = new GSMBasicSecurityCheckAction(getViewSite().getWorkbenchWindow(), Messages.BsiModelView_19);
 
 		bausteinZuordnungAction = new BausteinZuordnungAction(getViewSite().getWorkbenchWindow());
+		
+		gsmbausteinZuordnungAction = new GSMBausteinZuordnungAction(getViewSite().getWorkbenchWindow());
+		
 
 		doubleClickAction = new Action() {
 			@Override

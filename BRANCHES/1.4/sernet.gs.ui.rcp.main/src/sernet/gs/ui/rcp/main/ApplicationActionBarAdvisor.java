@@ -27,14 +27,12 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarContributionItem;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.actions.ContributionItemFactory;
 import org.eclipse.ui.actions.OpenPerspectiveAction;
-import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.application.ActionBarAdvisor;
 import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.internal.ChangeToPerspectiveMenu;
@@ -56,6 +54,7 @@ import sernet.gs.ui.rcp.main.actions.ShowBulkEditAction;
 import sernet.gs.ui.rcp.main.actions.ShowKonsolidatorAction;
 import sernet.gs.ui.rcp.main.actions.TestAction;
 import sernet.gs.ui.rcp.main.bsi.actions.BausteinZuordnungAction;
+import sernet.gs.ui.rcp.main.bsi.actions.GSMBausteinZuordnungAction;
 import sernet.gs.ui.rcp.main.bsi.views.AuditView;
 import sernet.gs.ui.rcp.main.bsi.views.BSIMassnahmenView;
 import sernet.gs.ui.rcp.main.bsi.views.BrowserView;
@@ -66,11 +65,8 @@ import sernet.gs.ui.rcp.main.bsi.views.FileView;
 import sernet.gs.ui.rcp.main.bsi.views.NoteView;
 import sernet.gs.ui.rcp.main.bsi.views.RelationView;
 import sernet.gs.ui.rcp.main.bsi.views.TodoView;
-import sernet.gs.ui.rcp.main.bsi.views.chart.ChartView;
 import sernet.gs.ui.rcp.main.preferences.ShowPreferencesAction;
-import sernet.hui.common.VeriniceContext;
 import sernet.verinice.bpm.rcp.OpenTaskViewAction;
-import sernet.verinice.bpm.rcp.TaskView;
 import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.iso27k.rcp.CatalogView;
 import sernet.verinice.iso27k.rcp.ISMView;
@@ -162,6 +158,10 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     private OpenViewAction openDocumentViewAction;
 
     private BausteinZuordnungAction bausteinZuordnungAction;
+    
+    private GSMBausteinZuordnungAction gsmbausteinZuordnungAction;
+
+    //private GSMBasicSecurityCheckAction gsmbasicsecuritycheckAction;
 
 	private ImportGstoolNotesAction importGSNotesAction;
 
@@ -284,8 +284,14 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         konsolidatorAction = new ShowKonsolidatorAction(window, Messages.ApplicationActionBarAdvisor_18);
         register(konsolidatorAction);
 
+        //gsmbasicsecuritycheckAction = new GSMBasicSecurityCheckAction(window, Messages.ApplicationActionBarAdvisor_34);
+        //register(gsmbasicsecuritycheckAction);
+        
         bausteinZuordnungAction = new BausteinZuordnungAction(window);
         register(bausteinZuordnungAction);
+        
+        gsmbausteinZuordnungAction = new GSMBausteinZuordnungAction(window);
+        register(gsmbausteinZuordnungAction);
         
         changeOwnPasswordAction = new ChangeOwnPasswordAction(window, Messages.ApplicationActionBarAdvisor_31);
         
