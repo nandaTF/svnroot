@@ -17,16 +17,16 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main.bsi.dialogs;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.apache.log4j.Logger;
-import org.aspectj.bridge.Message;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -34,10 +34,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -51,10 +48,15 @@ import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.hui.common.VeriniceContext;
 import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.EntityType;
+import sernet.hui.common.connect.HUITypeFactory;
+import sernet.hui.common.connect.HitroUtil;
+import sernet.hui.common.connect.Property;
+import sernet.hui.common.connect.PropertyType;
 import sernet.hui.swt.widgets.HitroUIComposite;
 import sernet.snutils.DBException;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.IAuthService;
+import sernet.verinice.interfaces.IRightsService;
 import sernet.verinice.model.common.configuration.Configuration;
 import sernet.verinice.service.commands.CheckUserName;
 
@@ -66,6 +68,9 @@ import sernet.verinice.service.commands.CheckUserName;
 public class AccountDialog extends TitleAreaDialog {
     
     private static transient Logger LOG = Logger.getLogger(AccountDialog.class);
+    
+    // usernames that should not be assigned by a user, use only lowercase here
+    private static String[] reservedUsernames = new String[]{"admin"};
     
     private EntityType entType;
     private Entity entity = null;
@@ -79,8 +84,9 @@ public class AccountDialog extends TitleAreaDialog {
 	private String name;
 	private boolean isScopeOnly;
 	
-	private FocusListener nameValidator;
-	private FocusListener pwValidator;
+	private String initialUserName;
+	
+	private HitroUIComposite huiComposite;
 	
 
     private AccountDialog(Shell parent, EntityType entType) {
@@ -135,20 +141,21 @@ public class AccountDialog extends TitleAreaDialog {
     		
     		createPasswordComposite(innerComposite);
     		
-            HitroUIComposite huiComposite = new HitroUIComposite(innerComposite, SWT.NULL, false);
+            huiComposite = new HitroUIComposite(innerComposite, SWT.NULL, false);
             try {
                 if (this.entity == null) {
                     entity = new Entity(entType.getId());
                 }
-                
+
                 String[] tags = BSIElementEditor.getEditorTags(); 
-                
+
                 boolean strict = Activator.getDefault().getPluginPreferences().getBoolean(PreferenceConstants.HUI_TAGS_STRICT);
-     
+
                 huiComposite.createView(entity, true, useRules, tags, strict);
-                
+
                 configureScopeOnly((Combo) huiComposite.getField(Configuration.PROP_SCOPE));
-               
+                
+                configureIsAdmin((Combo)huiComposite.getField(Configuration.PROP_ISADMIN));
                 
                 InputHelperFactory.setInputHelpers(entType, huiComposite);
                 //return huiComposite;
@@ -178,7 +185,188 @@ public class AccountDialog extends TitleAreaDialog {
             }
             combo.setEnabled(false);
         }
+        combo.addSelectionListener(getScopeGroupSelectionListener());
     }
+    
+    private void configureIsAdmin(Combo combo){
+        combo.addSelectionListener(getIsAdminSelectionListener());
+    }
+    
+    /**
+     *  ensures that admin groups are set / unset when isAdmin value is changed
+     * @return
+     */
+    private SelectionListener getIsAdminSelectionListener(){
+        return new SelectionListener() {
+            
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if(e.getSource() instanceof Combo){
+                    Combo combo = (Combo)e.getSource();
+                    String isAdminYES = HUITypeFactory.getInstance().getMessage(Configuration.PROP_ISADMIN_YES);
+                    String isAdminNO  = HUITypeFactory.getInstance().getMessage(Configuration.PROP_ISADMIN_NO);
+                    if(combo.getItem(combo.getSelectionIndex()).equals(isAdminYES)){
+                        toggleIsAdminGroup(true);
+                    } else if(combo.getItem(combo.getSelectionIndex()).equals(isAdminNO)){
+                        toggleIsAdminGroup(false);
+                    }
+                }
+            }
+            
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {
+                widgetSelected(e);
+            }
+        };
+    }
+    
+    
+    /**
+     * ensures that usergroups are set when changed 
+     * every user has to be in one of the 4 groups definend via IRightsService
+     * @return
+     */
+    private SelectionListener getScopeGroupSelectionListener(){
+        return new SelectionListener() {
+            
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                Combo combo = null;
+                if(e.getSource() instanceof Combo){
+                    combo = (Combo)e.getSource();
+                }
+                String scopeYes = HUITypeFactory.getInstance().getMessage(Configuration.PROP_SCOPE_YES);
+                String scopeNo = HUITypeFactory.getInstance().getMessage(Configuration.PROP_SCOPE_NO);
+                if(combo != null && combo.getItem(combo.getSelectionIndex()).equals(scopeYes)){
+                    toggleScopeGroup(true);
+                } else if(combo != null && combo.getItem(combo.getSelectionIndex()).equals(scopeNo)){
+                    toggleScopeGroup(false);
+                }
+            }
+            
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {
+                widgetSelected(e);
+            }
+        };
+    }
+    
+    /**
+     * removes every default group from user configuration entity but groupNotToRemove
+     * creates groupNotToRemove if not existent before
+     * @param groupNotToRemove
+     */
+    private void removeAllButOneGroup(String groupNotToRemove){
+        String[] groupNames = new String[]{IRightsService.ADMINDEFAULTGROUPNAME,
+                IRightsService.ADMINSCOPEDEFAULTGROUPNAME,
+                IRightsService.USERDEFAULTGROUPNAME,
+                IRightsService.USERSCOPEDEFAULTGROUPNAME};
+        PropertyType type = HitroUtil.getInstance().getTypeFactory().getPropertyType(Configuration.TYPE_ID, Configuration.PROP_ROLES);
+        ArrayList<Property> propsToRemove = new ArrayList<Property>(0);
+        Property notRemovedProp = null;
+        for(Property prop : getEntity().getProperties(Configuration.PROP_ROLES).getProperties()){
+            if(Arrays.asList(groupNames).contains(prop.getPropertyValue())){
+                if(prop.getPropertyValue().equals(groupNotToRemove)){
+                    notRemovedProp = prop;
+                } else {
+                    propsToRemove.add(prop);
+                }
+            }
+        }
+        for(Property prop : propsToRemove){
+            removeProperty(Configuration.PROP_ROLES, prop);
+        }
+        if(notRemovedProp == null){
+            type.getReferenceResolver().addNewEntity(this.entity, groupNotToRemove);
+        }
+    }
+    
+    
+    private void toggleIsAdminGroup(boolean isAdmin){
+        if(isAdmin && isScopeOnly()){
+            removeAllButOneGroup(IRightsService.ADMINSCOPEDEFAULTGROUPNAME);
+        } else if(isAdmin && !isScopeOnly()){
+            removeAllButOneGroup(IRightsService.ADMINDEFAULTGROUPNAME);
+        } else if(!isAdmin && isScopeOnly()){
+            removeAllButOneGroup(IRightsService.USERSCOPEDEFAULTGROUPNAME);
+        } else if(!isAdmin && !isScopeOnly()){
+            removeAllButOneGroup(IRightsService.USERDEFAULTGROUPNAME);
+        }
+        toggleGroupText();
+    }
+    
+    /**
+     * returns true if scopeOnly-Combo has "Yes"-value selected
+     * @return
+     */
+    private boolean isScopeOnly(){
+        return ((Combo)huiComposite.getField(Configuration.PROP_SCOPE)).
+                getItem(((Combo)huiComposite.getField(Configuration.PROP_SCOPE)).
+                        getSelectionIndex()).equals(HUITypeFactory.getInstance().
+                                getMessage(Configuration.PROP_SCOPE_YES));
+    }
+    
+    /**
+     * returns true if admin-Combo has "Yes"-value selected
+     * @return
+     */
+    private boolean isAdmin(){
+        return((Combo)huiComposite.getField(Configuration.PROP_ISADMIN)).
+                getItem(((Combo)huiComposite.getField(Configuration.PROP_ISADMIN)).
+                        getSelectionIndex()).equals(HUITypeFactory.getInstance().
+                                getMessage(Configuration.PROP_ISADMIN_YES));
+                
+    }
+    /**
+     * removes defined property from current entity
+     * @param propertyType
+     * @param property
+     */
+    private void removeProperty(String propertyType, Property property){
+        getEntity().getProperties(propertyType).getProperties().remove(property);
+    }
+    
+    private boolean isPropertySet(String propertyID){
+        return getEntity() != null &&
+                getEntity().getProperties(propertyID) != null &&
+                getEntity().getProperties(propertyID).getProperty(0) != null &&
+                getEntity().getProperties(propertyID).getProperty(0).getPropertyValue() != null;
+    }
+    
+    /**
+     * 
+     */
+    private void toggleScopeGroup(boolean isScope) {
+            if(isScope && isAdmin()){
+                removeAllButOneGroup(IRightsService.ADMINSCOPEDEFAULTGROUPNAME);
+            }
+            if(!isScope && isAdmin()){
+                removeAllButOneGroup(IRightsService.ADMINDEFAULTGROUPNAME);
+            }
+            if(isScope && !isAdmin()){
+                removeAllButOneGroup(IRightsService.USERSCOPEDEFAULTGROUPNAME);
+            }
+            if(!isScope && !isAdmin()){
+                removeAllButOneGroup(IRightsService.USERDEFAULTGROUPNAME);
+            }
+            toggleGroupText();
+    }
+    
+    
+    private void toggleGroupText(){
+        Text text = (Text)huiComposite.getField(Configuration.PROP_ROLES);
+        StringBuilder sb = new StringBuilder();
+        for(Property prop : getEntity().getProperties(Configuration.PROP_ROLES).getProperties()){
+            if(sb.length() == 0){
+                sb.append(prop.getPropertyValue());
+            } else {
+                sb.append(" / " + prop.getPropertyValue());
+            }
+        }
+        text.setText(sb.toString());
+    }
+    
+
 
     private void createPasswordComposite(final Composite composite) {
 		GridData gd = new GridData(GridData.GRAB_HORIZONTAL);
@@ -200,65 +388,11 @@ public class AccountDialog extends TitleAreaDialog {
 		gdText.horizontalAlignment = GridData.FILL;
 		textName.setLayoutData(gdText);
 		
-		nameValidator = new FocusListener() {
-            
-            @Override
-            public void focusLost(FocusEvent e) {
-                CheckUserName command = new CheckUserName(textName.getText());
-                try {
-                    command = ServiceFactory.lookupCommandService().executeCommand(command);
-                    if(command.getResult()){
-                        Display.getDefault().asyncExec(new Runnable() {
-                            
-                            @Override
-                            public void run() {
-                                textName.setToolTipText(Messages.AccountDialog_7);
-                                textName.selectAll();
-                                MessageDialog.openWarning(getParentShell(), Messages.AccountDialog_9, Messages.AccountDialog_7);
-                                textName.setFocus();
-                                textName.forceFocus();
-                            }
-                        });
-                    } else {
-                        textName.setToolTipText("");
-                    }
-                } catch (CommandException e1) {
-                    LOG.error("Error while checking username", e1);
-                }
-            }
-            
-            @Override
-            public void focusGained(FocusEvent e) {
-            }
-        };
-		
-        textName.addFocusListener(nameValidator);
-		
 		Label labelPassword = new Label(compositePassword, SWT.NONE);
 		labelPassword.setText(Messages.AccountDialog_2);
 		
 		textPassword = new Text(compositePassword, SWT.BORDER | SWT.SINGLE | SWT.PASSWORD);
 		textPassword.setLayoutData(gdText);
-		textPassword.addFocusListener(new FocusListener() {
-            
-            @Override
-            public void focusLost(FocusEvent e) {
-                String pwd = textPassword.getText();
-                if(pwd.matches(".*[ÄäÖöÜüß€]+.*")) { //$NON-NLS-1$
-                    MessageDialog.openWarning(AccountDialog.this.getShell(), Messages.AccountDialog_5, Messages.AccountDialog_6);
-                    textPassword.setText(""); //$NON-NLS-1$
-                    textPassword2.setText(""); //$NON-NLS-1$
-                    textPassword.setFocus();
-                }
-            }
-            
-            @Override
-            public void focusGained(FocusEvent e) {
- 
-            }
-        });
-		
-		
 		
 		Label labelPassword2 = new Label(compositePassword, SWT.NONE);
 		labelPassword2.setText(Messages.AccountDialog_3);
@@ -266,54 +400,22 @@ public class AccountDialog extends TitleAreaDialog {
 		textPassword2 = new Text(compositePassword, SWT.BORDER | SWT.SINGLE | SWT.PASSWORD);
 		textPassword2.setLayoutData(gdText);
 		
-		pwValidator = new FocusListener() {
-            
-            @Override
-            public void focusLost(FocusEvent e) {
-                if(!textPassword.getText().equals(textPassword2.getText())){
-                Display.getDefault().asyncExec(new Runnable() {
-                    
-                    @Override
-                    public void run() {
-                        textPassword2.setToolTipText(Messages.AccountDialog_8);
-                        textPassword.selectAll();
-                        MessageDialog.openWarning(getParentShell(), Messages.AccountDialog_9, Messages.AccountDialog_8);
-                        textPassword.setFocus();
-                        textPassword.forceFocus();
-                    }
-                });
-            } else {
-                textPassword2.setToolTipText("");
-            }
-            }
-            
-            @Override
-            public void focusGained(FocusEvent e) {
-            }
-        };
-        
-        textPassword2.addFocusListener(pwValidator);
-		
-		if(getEntity()!=null 
-			&& getEntity().getProperties(Configuration.PROP_USERNAME)!=null
-			&& getEntity().getProperties(Configuration.PROP_USERNAME).getProperty(0) !=null
-		    && getEntity().getProperties(Configuration.PROP_USERNAME).getProperty(0).getPropertyValue() !=null) {
+		if(isPropertySet(Configuration.PROP_USERNAME)) {
 			textName.setText(getEntity().getProperties(Configuration.PROP_USERNAME).getProperty(0).getPropertyValue());
+			initialUserName = textName.getText();
 		}
 	}
 	
-	@Override
 	protected void okPressed() {
 		password=textPassword.getText();
 		password2=textPassword2.getText();
 		name=textName.getText();
-		super.okPressed();
+		if(validateInput()){
+		    super.okPressed();
+		}
 	}
 	
-	@Override
 	protected void cancelPressed(){
-	    textName.removeFocusListener(nameValidator);
-	    textPassword2.removeFocusListener(pwValidator);
 	    super.cancelPressed();
 	}
 	
@@ -338,6 +440,107 @@ public class AccountDialog extends TitleAreaDialog {
 	        LOG = Logger.getLogger(AccountDialog.class);
 	    }
 	    return LOG;
+	}
+	
+	private boolean validateInput(){
+	    return checkUserName() && checkPassword1() && checkPassword2();
+	}
+	
+	private boolean checkPassword1(){
+        String pwd = textPassword.getText();
+        if(pwd.matches(".*[ÄäÖöÜüß€]+.*")) { //$NON-NLS-1$
+            MessageDialog.openWarning(AccountDialog.this.getShell(), Messages.AccountDialog_5, Messages.AccountDialog_6);
+            textPassword.setText(""); //$NON-NLS-1$
+            textPassword2.setText(""); //$NON-NLS-1$
+            textPassword.setFocus();
+            return false;
+        } else {
+            return true;
+        }
+	}
+	
+	private boolean checkPassword2(){
+	    boolean passwordsEqual = textPassword.getText().equals(textPassword2.getText());
+	    boolean passwordEmpty = textPassword.getText().isEmpty() && !isPasswordSet();
+	    if(!passwordsEqual ||  passwordEmpty){
+	        if(!passwordsEqual){
+	            toggleValidationError(textPassword, Messages.AccountDialog_8, Messages.AccountDialog_8);
+	        } else if(passwordEmpty){
+	            toggleValidationError(textPassword, Messages.AccountDialog_8, Messages.AccountDialog_11);
+	        }
+	        return false;
+	    } else {
+	        textPassword2.setToolTipText("");
+	        return true;
+	    }
+	}
+	
+	private boolean isPasswordSet(){
+	    if(isPropertySet(Configuration.PROP_PASSWORD)){
+	        String pw = getEntity().getProperties(Configuration.PROP_PASSWORD).getProperty(0).getPropertyValue();
+	        if(pw != null && !pw.isEmpty()){
+	            return true;
+	        }
+	    } 
+	    return false;
+	}
+	
+	private boolean checkUserName(){
+	    boolean retVal = false;
+	    String enteredName = textName.getText();
+	    final boolean noPasswordEntered = enteredName.isEmpty();
+	    if(isReservedUsername(enteredName)){
+	        toggleValidationError(textName, Messages.AccountDialog_7, Messages.AccountDialog_7);
+            return false;
+	    }
+        if((initialUserName != null && !initialUserName.equals(enteredName)) ||
+                (initialUserName == null && !enteredName.isEmpty())){
+            CheckUserName command = new CheckUserName(enteredName);
+            try {
+                command = ServiceFactory.lookupCommandService().executeCommand(command);
+                boolean userNameExists = command.getResult();
+                if(userNameExists){
+                    toggleValidationError(textName, Messages.AccountDialog_7, Messages.AccountDialog_7);
+                    return false;
+                } else if(noPasswordEntered){
+                    toggleValidationError(textName, Messages.AccountDialog_10, Messages.AccountDialog_10);
+                    return false;
+                } else {
+                    textName.setToolTipText("");
+                    return true;
+                }
+            } catch (CommandException e1) {
+                LOG.error("Error while checking username", e1);
+            }
+        } else if (enteredName.equals(initialUserName)){
+            return true;
+        } else if(initialUserName == null && noPasswordEntered){
+            toggleValidationError(textName, Messages.AccountDialog_10, Messages.AccountDialog_10);
+        }
+        return retVal;
+	}
+	
+	private boolean isReservedUsername(String username){
+	    for(String s : reservedUsernames){
+	        if(username.toLowerCase().equals(s)){
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+	
+	private void toggleValidationError(final Text control, final String dialogMsg, final String tooltip){
+	    Display.getDefault().asyncExec(new Runnable(){
+	       @Override
+	       public void run(){
+	           control.setToolTipText(tooltip);
+	           control.selectAll();
+	           MessageDialog.openWarning(getParentShell(), Messages.AccountDialog_9, dialogMsg);
+	           control.setFocus();
+	           control.forceFocus();
+	           
+	       }
+	    });
 	}
 	
 }

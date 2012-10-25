@@ -3,6 +3,8 @@
 <process key="isa-quality-management" name="verinice ISA quality management process" version="1" xmlns="http://jbpm.org/4.4/jpdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jbpm.org/4.4/jpdl jpdl.xsd">
    <description>ISA quality management process in verinice</description>
 
+   <variable init-expr="TASK_UNREAD" name="TASK_READ_STATUS" type="string"/>
+
    <start g="332,25,80,40" name="start">
       <transition to="iqm.task.setAssignee"/>
    </start>
@@ -21,7 +23,7 @@
    <java class="sernet.verinice.bpm.Reminder" g="114,300,167,37" method="sendEmail" name="java.reminderFixed">
       <arg><object expr="#{execution.id}"/></arg>
       <arg><object expr="REMINDER_FIXED"/></arg>
-      <arg><object expr="#{ISA_ASSIGNEE_NAME}"/></arg>
+      <arg><object expr="#{ISA_OWNER_NAME}"/></arg>
       <arg><object expr="#{UUID}"/></arg>
       <transition to="end"/>
    </java>
@@ -29,7 +31,7 @@
    <java class="sernet.verinice.bpm.Reminder" g="417,296,211,37" method="sendEmail" name="java.reminderNotChanged">
       <arg><object expr="#{execution.id}"/></arg>
       <arg><object expr="REMINDER_NOT_CHANGED"/></arg>
-      <arg><object expr="#{ISA_ASSIGNEE_NAME}"/></arg>
+      <arg><object expr="#{ISA_OWNER_NAME}"/></arg>
       <arg><object expr="#{UUID}"/></arg>
       <transition to="end"/>
    </java>

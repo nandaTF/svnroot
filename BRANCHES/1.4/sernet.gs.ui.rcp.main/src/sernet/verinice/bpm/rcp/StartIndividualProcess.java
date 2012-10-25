@@ -32,8 +32,13 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
@@ -50,7 +55,12 @@ import sernet.verinice.interfaces.RightEnabledUserInteraction;
 import sernet.verinice.interfaces.bpm.IIndividualService;
 import sernet.verinice.interfaces.bpm.IProcessStartInformation;
 import sernet.verinice.interfaces.bpm.IndividualServiceParameter;
+import sernet.verinice.model.bsi.IBSIStrukturElement;
+import sernet.verinice.model.bsi.ImportBsiGroup;
+import sernet.verinice.model.bsi.Person;
 import sernet.verinice.model.common.CnATreeElement;
+import sernet.verinice.model.iso27k.ImportIsoGroup;
+import sernet.verinice.model.iso27k.PersonIso;
 import sernet.verinice.rcp.InfoDialogWithShowToggle;
 
 /**
@@ -71,6 +81,8 @@ public class StartIndividualProcess implements IObjectActionDelegate, RightEnabl
     private List<String> selectedTitles = new LinkedList<String>();
 
     private List<String> selectedTypeIds = new LinkedList<String>();
+    
+    private String personTypeId = PersonIso.TYPE_ID;
     
     private IndividualServiceParameter parameter = new IndividualServiceParameter();
     
@@ -95,12 +107,13 @@ public class StartIndividualProcess implements IObjectActionDelegate, RightEnabl
         try {
             if(!selectedUuids.isEmpty()) {
                 if(isValid()) {
-                    IndividualProcessWizard wizard = new IndividualProcessWizard(selectedTitles.get(0),selectedTypeIds.get(0));
-                    WizardDialog wizardDialog = new WizardDialog(Display.getCurrent().getActiveShell(),wizard);
+                    IndividualProcessWizard wizard = new IndividualProcessWizard(selectedUuids, selectedTitles.get(0),selectedTypeIds.get(0));                 
+                    wizard.setPersonTypeId(personTypeId);
+                    WizardDialog wizardDialog = new NonModalWizardDialog(Display.getCurrent().getActiveShell(),wizard);
                     if (wizardDialog.open() == Window.OK) {
-                        wizard.saveAsTemplateIfNew();
+                        wizard.saveTemplate();
                         parameter = wizard.getParameter();                                 
-                        startProcess();
+                        startProcess(wizard.getUuids());
                     }
                 }
             }
@@ -113,20 +126,43 @@ public class StartIndividualProcess implements IObjectActionDelegate, RightEnabl
      * @return
      */
     private boolean isValid() {
+        boolean valid = true;
         if(!selectedTypeIds.isEmpty()) {
-            String lastTypeId = null;
-            for (String typeId : selectedTypeIds) {
-                if(lastTypeId!=null && !lastTypeId.equals(typeId)) {
-                    MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.StartIndividualProcess_1, Messages.StartIndividualProcess_2);
-                    return false;
-                }
-                lastTypeId = typeId;
+            valid = isOfTheSameType();
+            if(valid) {
+                valid = isValidType();
             }
         }
-        return true;
+        return valid;
     }
 
-    private void startProcess() {
+    private boolean isOfTheSameType() {
+        boolean valid = true;
+        String lastTypeId = null;
+        for (String typeId : selectedTypeIds) {
+            if(lastTypeId!=null && !lastTypeId.equals(typeId)) {
+                MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.StartIndividualProcess_1, Messages.StartIndividualProcess_2);
+                valid = false;
+                break;
+            }
+            lastTypeId = typeId;
+        }
+        return valid;
+    }
+    
+    private boolean isValidType() {
+        boolean valid = true;
+        if(!selectedTypeIds.isEmpty()) {
+           String type = selectedTypeIds.get(0);
+           if(ImportBsiGroup.TYPE_ID.equals(type) || ImportIsoGroup.TYPE_ID.equals(type)) {
+               MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.StartIndividualProcess_1, Messages.StartIndividualProcess_3);
+               valid = false;              
+           }
+        }
+        return valid;
+    }
+
+    private void startProcess(final List<String> uuids) {
         IProgressService progressService = PlatformUI.getWorkbench().getProgressService();       
         try {
             progressService.run(true, true, new IRunnableWithProgress() {  
@@ -135,8 +171,8 @@ public class StartIndividualProcess implements IObjectActionDelegate, RightEnabl
                     Activator.inheritVeriniceContextState();
                     numberOfProcess=0;
                     IProcessStartInformation info = null;
-                    if(!selectedUuids.isEmpty() ) {
-                        for (String uuid : selectedUuids) {
+                    if(uuids!=null && !uuids.isEmpty() ) {
+                        for (String uuid : uuids) {
                             parameter.setUuid(uuid);
                             info = ServiceFactory.lookupIndividualService().startProcess(parameter);
                             if(info!=null) {
@@ -182,6 +218,11 @@ public class StartIndividualProcess implements IObjectActionDelegate, RightEnabl
                         selectedTitles.add(element.getTitle());
                         selectedTypeIds.add(element.getTypeId());
                     }
+                    if(selectedElement instanceof IBSIStrukturElement) {
+                        personTypeId = Person.TYPE_ID;
+                    } else {
+                        personTypeId = PersonIso.TYPE_ID;
+                    }
                 }
                 
             }
@@ -221,5 +262,14 @@ public class StartIndividualProcess implements IObjectActionDelegate, RightEnabl
     @Override
     public void setRightID(String rightID) {
     }
-
+    
+    class NonModalWizardDialog extends WizardDialog {
+        public NonModalWizardDialog(Shell parentShell, IWizard newWizard) {
+            super(parentShell, newWizard);
+            setShellStyle(SWT.CLOSE | SWT.MAX | SWT.TITLE | SWT.BORDER
+                     | SWT.RESIZE | getDefaultOrientation());         
+        }
+    }
 }
+
+

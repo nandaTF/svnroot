@@ -20,13 +20,12 @@ ${elementTitle}
 has indicated that he is not responsible for this task. 
 
 Explanation:
-
 "${comment}"
 
-It's now your task to set another assignee.
+It's now your task to select another assignee.
+
 You will find a list with all your task here:
 ${url}
-
 After logged in you can edit your tasks in the browser.
 
 [This e-mail has been automatically generated.]

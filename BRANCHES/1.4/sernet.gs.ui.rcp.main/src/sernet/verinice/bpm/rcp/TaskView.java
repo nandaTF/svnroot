@@ -20,7 +20,6 @@
 package sernet.verinice.bpm.rcp;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -70,7 +69,6 @@ import sernet.gs.ui.rcp.main.bsi.editors.EditorFactory;
 import sernet.gs.ui.rcp.main.bsi.views.HtmlWriter;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
 import sernet.gs.ui.rcp.main.common.model.IModelLoadListener;
-import sernet.gs.ui.rcp.main.service.AuthenticationHelper;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.hui.common.VeriniceContext;
 import sernet.springclient.RightsServiceClient;
@@ -88,7 +86,6 @@ import sernet.verinice.model.bpm.TaskInformation;
 import sernet.verinice.model.bpm.TaskParameter;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.common.CnATreeElement;
-import sernet.verinice.model.iso27k.Control;
 import sernet.verinice.model.iso27k.ISO27KModel;
 import sernet.verinice.rcp.IAttachedToPerspective;
 import sernet.verinice.service.commands.LoadAncestors;
@@ -335,7 +332,11 @@ public class TaskView extends ViewPart implements IAttachedToPerspective {
                         RetrieveInfo ri = RetrieveInfo.getPropertyInstance();
                         LoadAncestors loadControl = new LoadAncestors(task.getElementType(), task.getUuid(), ri);
                         loadControl = getCommandService().executeCommand(loadControl);
-                        EditorFactory.getInstance().updateAndOpenObject(loadControl.getElement());
+                        if(loadControl.getElement()!=null) {
+                            EditorFactory.getInstance().updateAndOpenObject(loadControl.getElement());
+                        } else {
+                            MessageDialog.openError(getSite().getShell(), "Error", "Object not found.");
+                        }
                     } catch (Throwable t) {
                         LOG.error("Error while opening control.", t); //$NON-NLS-1$
                     }
@@ -446,14 +447,21 @@ public class TaskView extends ViewPart implements IAttachedToPerspective {
         treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
             public void selectionChanged(SelectionChangedEvent event) {         
-                if (getViewer().getSelection() instanceof IStructuredSelection && ((IStructuredSelection) getViewer().getSelection()).getFirstElement() instanceof TaskInformation) {
+                if (isTaskSelected()) {
                     try {
                         taskSelected();
                     } catch (Throwable t) {
                         LOG.error("Error while configuring task actions.", t); //$NON-NLS-1$
                     }
+                } else {
+                    resetToolbar();
+                    getInfoPanel().setText("");
                 }
                 getViewSite().getActionBars().updateActionBars();
+            }
+
+            private boolean isTaskSelected() {
+                return getViewer().getSelection() instanceof IStructuredSelection && ((IStructuredSelection) getViewer().getSelection()).getFirstElement() instanceof TaskInformation;
             }
         });
         // First we create a menu Manager
@@ -479,10 +487,7 @@ public class TaskView extends ViewPart implements IAttachedToPerspective {
      * @param manager
      */
     private void taskSelected() { 
-        IToolBarManager manager = getViewSite().getActionBars().getToolBarManager();
-        manager.removeAll();
-         
-        addToolBarActions();
+        IToolBarManager manager = resetToolbar();
         
         cancelTaskAction.setEnabled(false);
         cancelTaskAction.setEnabled(getRightsService().isEnabled(ActionRightIDs.TASKDELETE));
@@ -495,9 +500,18 @@ public class TaskView extends ViewPart implements IAttachedToPerspective {
             completeAction.setText(keyValue.getValue());
             completeAction.setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.MASSNAHMEN_UMSETZUNG_JA));
             ActionContributionItem item = new ActionContributionItem(completeAction);
+            
             item.setMode(ActionContributionItem.MODE_FORCE_TEXT);
             manager.add(item);
         }
+    }
+
+    private IToolBarManager resetToolbar() {
+        IToolBarManager manager = getViewSite().getActionBars().getToolBarManager();
+        manager.removeAll();
+         
+        addToolBarActions();
+        return manager;
     }
 
     /**

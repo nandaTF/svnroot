@@ -30,13 +30,20 @@ public class Messages extends NLS {
     public static String StartIndividualProcess_0;
     public static String StartIndividualProcess_1;
     public static String StartIndividualProcess_2;
+    public static String StartIndividualProcess_3;
     public static String StartIsaProcess_0;
     public static String StartIsaProcess_1;
     public static String StartIsaProcess_3;
     public static String StartIsaProcess_5;
+    public static String StartIsaProcess_6;
+    public static String StartIsaProcess_7;
     public static String ButtonUserTasks;
     public static String ButtonRefresh;
     public static String ButtonCancel;
+    public static String CompleteTaskAction_3;
+    public static String CompleteTaskAction_4;
+    public static String CompleteTaskAction_6;
+    public static String CompleteTaskAction_7;
     public static String ConfirmTaskDelete_0;
     public static String ConfirmTaskDelete_1;
     public static String DatePage_10;
@@ -49,6 +56,7 @@ public class Messages extends NLS {
     public static String DatePage_8;
     public static String DatePage_9;
     public static String DescriptionPage_0;
+    public static String DescriptionPage_1;
     public static String DescriptionPage_10;
     public static String DescriptionPage_11;
     public static String DescriptionPage_2;
@@ -56,7 +64,9 @@ public class Messages extends NLS {
     public static String DescriptionPage_4;
     public static String DescriptionPage_5;
     public static String DescriptionPage_6;
+    public static String DescriptionPage_7;
     public static String DescriptionPage_8;
+    public static String DescriptionPage_9;
     public static String IndividualProcessWizard_2;
     public static String NewQmIssueDialog_0;
     public static String NewQmIssueDialog_1;
@@ -67,6 +77,7 @@ public class Messages extends NLS {
     public static String NewQmIssueDialog_6;
     public static String NewQmIssueDialog_7;
     public static String NewQmIssueDialog_9;
+    public static String OpenTaskViewAction_0;
     public static String PersonPage_1;
     public static String PersonPage_2;
     public static String PersonPage_3;
@@ -107,7 +118,11 @@ public class Messages extends NLS {
     public static String TemplatePage_11;
     public static String TemplatePage_12;
     public static String TemplatePage_13;
+    public static String TemplatePage_14;
     public static String TemplatePage_15;
+    public static String TemplatePage_16;
+    public static String TemplatePage_17;
+    public static String TemplatePage_18;
     public static String TemplatePage_2;
     public static String TemplatePage_3;
     public static String TemplatePage_4;
