@@ -17,10 +17,8 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Vector;
 
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Platform;
@@ -83,13 +81,15 @@ public class ApplicationWorkbenchAdvisor extends WorkbenchAdvisor {
 	 * currently thats:
 	 *     -   org.eclipse.datatools.connectivity.ui.preferences.dataNode
 	 *     -   org.eclipse.birt.report.designer.ui.preferences
+	 *     -   org.eclipse.birt.chart.ui.swt.fieldassist.preferences.FieldAssistPreferencePage
 	 */
 	private void removeUnneededPrefPages(){
 	    PreferenceManager pm = PlatformUI.getWorkbench().getPreferenceManager();
 	    // add id of prefPage to remove here
 	    String[] prefPageIDsToRemove = new String[]{
 	            "org.eclipse.datatools.connectivity.ui.preferences.dataNode",
-	            "org.eclipse.birt.report.designer.ui.preferences"
+	            "org.eclipse.birt.report.designer.ui.preferences",
+	            "org.eclipse.birt.chart.ui.swt.fieldassist.preferences.FieldAssistPreferencePage"
 	    };
 	    Set<String> idSet = new HashSet<String>();
 	    for(String s : prefPageIDsToRemove){
