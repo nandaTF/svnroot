@@ -327,7 +327,7 @@ public class BsiModelView extends ViewPart implements IAttachedToPerspective, IL
 		manager.add(selectEqualsAction);
 		selectEqualsAction.setEnabled(bausteinSelected());
 		manager.add(konsolidatorAction);
-		manager.add(gsmbasicsecuritycheckAction);
+		//manager.add(gsmbasicsecuritycheckAction);
 		manager.add(bausteinZuordnungAction);
 		manager.add(gsmbausteinZuordnungAction);
 		
