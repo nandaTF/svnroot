@@ -46,6 +46,7 @@ public class PreferenceConstants {
     public static final String INFO_STATUS_DERIVED = "info_status_derived"; //$NON-NLS-1$
     public static final String SHOW_ALIEN_DECORATOR = "show_alien_decorator"; //$NON-NLS-1$
     public static final String SHOW_DBID_DECORATOR = "show_dbid_decorator"; //$NON-NLS-1$
+    public static final String USE_AUTOMATIC_VALIDATION = "use_automatic_validation"; //$NON-NLS-1$
 
 	public static final String DB_DRIVER = "cna_driver"; //$NON-NLS-1$
 	public static final String DB_DRIVER_DERBY = "org.apache.derby.jdbc.EmbeddedDriver"; //$NON-NLS-1$
@@ -135,6 +136,8 @@ public class PreferenceConstants {
     public static final String SHOW_LINK_MAKER_IN_EDITOR = "link_maker_in_editor";
     
     public static final String THUMBNAIL_SIZE = "thumbnail_size";
+    
+    public static final String RESTART = "is_restart";
     
 	/**
 	 * Returns the DONT_ASK_BEFORE_SWITCH_PERSPECTIVE preference name for a view class.

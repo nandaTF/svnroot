@@ -327,7 +327,7 @@ public class BsiModelView extends ViewPart implements IAttachedToPerspective, IL
 		manager.add(selectEqualsAction);
 		selectEqualsAction.setEnabled(bausteinSelected());
 		manager.add(konsolidatorAction);
-		//manager.add(gsmbasicsecuritycheckAction);
+		manager.add(gsmbasicsecuritycheckAction);
 		manager.add(bausteinZuordnungAction);
 		manager.add(gsmbausteinZuordnungAction);
 		
@@ -560,7 +560,7 @@ public class BsiModelView extends ViewPart implements IAttachedToPerspective, IL
             return;
         }
         CnATreeElement element = BSIElementEditorInput.extractElement(editor);
-        if(element!=null 
+        if(element!=null               
            && ((element instanceof IBSIStrukturElement) || (element instanceof MassnahmenUmsetzung) || (element instanceof BausteinUmsetzung) )) {
            viewer.setSelection(new StructuredSelection(element),true);          
         }      

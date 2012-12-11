@@ -82,8 +82,10 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PreferenceConstants.LINK_TO_EDITOR, true);
 		
 		store.setDefault(PreferenceConstants.SHOW_LINK_MAKER_IN_EDITOR, true);
-        
-        store.setDefault(PreferenceConstants.THUMBNAIL_SIZE, 50);
+		
+		store.setDefault(PreferenceConstants.THUMBNAIL_SIZE, 50);
+		
+		store.setDefault(PreferenceConstants.RESTART, false);
 	}
 
 }

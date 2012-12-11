@@ -2,6 +2,7 @@ package sernet.gs.ui.rcp.main.bsi.wizards;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import org.eclipse.osgi.util.NLS;
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
+import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.model.common.CnATreeElement;
@@ -44,7 +46,8 @@ public class ImportCSVWizard extends Wizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
 	 */
-	public boolean performFinish() {
+	@Override
+    public boolean performFinish() {
 		Activator.inheritVeriniceContextState();
 
 		SyncRequest sr = null;
@@ -73,6 +76,9 @@ public class ImportCSVWizard extends Wizard {
 		Set<CnATreeElement> importRootObjectSet = command.getImportRootObject();
         Set<CnATreeElement> changedElement = command.getElementSet();
         updateModel(importRootObjectSet, changedElement);
+        if(Activator.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.USE_AUTOMATIC_VALIDATION)){
+            createValidations(changedElement);
+        }
 		return true;
 	}
 	
@@ -102,7 +108,8 @@ public class ImportCSVWizard extends Wizard {
         }
     }
 
-	public void addPages() {
+	@Override
+    public void addPages() {
 		addPage(entityPage);
 		addPage(propertyPage);
 	}
@@ -110,7 +117,8 @@ public class ImportCSVWizard extends Wizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
 	 */
-	public IWizardPage getNextPage(IWizardPage page) {
+	@Override
+    public IWizardPage getNextPage(IWizardPage page) {
 		if (page == entityPage) {
 		    try {
     		    propertyPage.setEntityName(entityPage.getEntityName());
@@ -163,11 +171,18 @@ public class ImportCSVWizard extends Wizard {
 		mot.setExtId(entityName);
 		mot.setIntId(entityPage.getEntityNameId());
 		
+		// list of properties user has mapped
+		List<String> extIdList = new LinkedList<String>();
 		for (List<String> properties : propertyPage.getPropertyTable()) {
-			MapAttributeType mat = new MapAttributeType();
-			mat.setExtId(properties.get(1));
-			mat.setIntId(properties.get(0));
-			mot.getMapAttributeType().add(mat);
+            String intId = properties.get(0);
+		    String extId = properties.get(1);
+		    if(isValid(intId,extId)) {
+    			MapAttributeType mat = new MapAttributeType();
+    			mat.setExtId(extId);
+    			extIdList.add(extId);
+    			mat.setIntId(intId);
+    			mot.getMapAttributeType().add(mat);
+		    }
 		}
 		mots.add(mot);
 
@@ -185,7 +200,7 @@ public class ImportCSVWizard extends Wizard {
 			for (String tableCell : tableLine) {
 			    if(j==0) {
 			        so.setExtId(tableCell);
-			    } else {
+			    } else if(extIdList.contains(columns[j])) { /* only import columns the user has mapped */
     				SyncAttribute sa = new SyncAttribute();
     				sa.setName(columns[j]);
     				
@@ -205,6 +220,10 @@ public class ImportCSVWizard extends Wizard {
 		return sr;
 	}
 
+    private boolean isValid(String intId, String extId) {       
+        return intId!=null && extId!=null && !intId.trim().isEmpty() && !extId.trim().isEmpty();
+    }
+
 
     /**
      * @return
@@ -215,5 +234,14 @@ public class ImportCSVWizard extends Wizard {
     
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
+    }
+    
+    private void createValidations(Set<CnATreeElement> elmts){
+        for(CnATreeElement elmt : elmts){
+            ServiceFactory.lookupValidationService().createValidationForSingleElement(elmt);
+        }
+        if(elmts != null && elmts.size() > 0){
+            CnAElementFactory.getModel(((CnATreeElement)elmts.toArray()[0])).validationAdded(((CnATreeElement)elmts.toArray()[0]).getScopeId()); 
+        }
     }
 }
