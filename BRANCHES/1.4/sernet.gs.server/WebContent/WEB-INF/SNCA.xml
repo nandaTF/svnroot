@@ -23,6 +23,31 @@
 -->
 
 <!--
+	ValidationAPI - Documentation (requires verinice 1.6.1 or newer)
+	add "<validationRule class=?>" element to huiPropertyType to add a validation
+	parameter "class" defines used rule class, which could currently be:
+	- NotEmpty (equals shortcut via attribute "required="true"" in huiProperty)
+		specifies a value must not be empty
+	- RegExRule
+		specifies a regular expression the property must match to pass a validation
+		define own expression via:
+		<param id="regEx">.{0,}</param>
+	- DateBeforeRule
+		specifies that (date)property must be before date given by parameter
+		define date to compare to via:
+		<param id="compareDate">01.01.1970</param>
+	- DateAfterRule
+		specifies that (date)property must be before date given by parameter
+		define date to compare to via:
+		<param id="compareDate">01.01.1970</param>
+		
+	To specifiy a hint (explaining the user how to solve the validation issue) define an attribute "hint" with
+	the hint itself as the value of the attribute. There is a set of default
+	hints which is used, if no own hint is specified.
+	This is applicable to every rule mentioned above.		
+-->
+
+<!--
 Template:
 (see hitro.xsd for full grammar and documentation)
 
@@ -3113,7 +3138,8 @@ the value between <param></param> will be used directly if no string is found fo
             name="Title"
             id="org_name" 
             focus="true"
-            tags="Basic,VDA-ISA" />
+            required="true"
+            tags="Basic,VDA-ISA, VDA_ISA_Audit" />
                     
         <huiproperty
             name="Description"
@@ -3297,7 +3323,7 @@ the value between <param></param> will be used directly if no string is found fo
             name="Tags"
             tooltip="List of tags, separated by comma or space"/>
 		<huiproperty
-			name="Description" id="asset_description" inputtype="text"  />
+			name="Description" id="asset_description" inputtype="text" />	
 		
 		<huiproperty
 			name="Type of Asset"
@@ -3325,8 +3351,8 @@ the value between <param></param> will be used directly if no string is found fo
 		<huiproperty
             name="Document"
             id="asset_document"
-            isURL="true" />
-
+            isURL="true"/>
+        
     <!-- TODO externalize strings -->
 		<huipropertygroup id="asset_bcm_group" name="Business Continuity" tags="BCM" >
             <huiproperty id="asset_bcm_mtpd" name="MTPD (h)" tags="BCM" ></huiproperty>
@@ -3564,12 +3590,12 @@ the value between <param></param> will be used directly if no string is found fo
 					name="Explanation"
                      tags="Risk"
 					inputtype="text"
-					id="asset_value_comment" />
+					id="asset_value_comment"/>
 		</huipropertygroup>
         
         <huipropertygroup name="Greenbone GSM" id="gsm_asset_group" tags="Greenbone_GSM" >
             <huiproperty id="gsm_asset_tag" name="GSM Tag" tags="Greenbone_GSM" editable="false"/>
-            <huiproperty id="gsm_asset_description" name="GSM Desc." tags="Greenbone_GSM" inputtype="line" editable="false"/>
+            <huiproperty id="gsm_asset_description" name="GSM Desc." tags="Greenbone_GSM" inputtype="text" editable="false"/>
             <huiproperty id="gsm_hostname" name="Hostname" inputtype="line" tags="Greenbone_GSM" editable="false"/>
             <huiproperty id="gsm_installed_apps" name="Installed Software" inputtype="text" tags="Greenbone_GSM" editable="false" />
             <huiproperty id="gsm_traceroute" name="Traceroute" inputtype="line" tags="Greenbone_GSM" editable="false" />
@@ -3733,11 +3759,13 @@ the value between <param></param> will be used directly if no string is found fo
 		</huiproperty>
 		<huiproperty
 			name="Surname"
-			id="person-iso_surname">
+			id="person-iso_surname"
+			required="true">
 		</huiproperty>
 		<huiproperty
 			name="Name"
-			id="person-iso_name" />
+			id="person-iso_name"
+			required="true" />
 
 		<huiproperty
 			name="Phone"
@@ -4018,13 +4046,16 @@ the value between <param></param> will be used directly if no string is found fo
 		<huiproperty 
 			name="From"
 			id="audit_startdate"
-			inputtype="date">
+			inputtype="date"
+			tags="VDA_ISA_Audit" required="true">
             <defaultRule class="Today" />
 		</huiproperty>
 		<huiproperty 
 			name="Until"
 			id="audit_enddate"
-			inputtype="date">
+			inputtype="date"
+			tags="VDA_ISA_Audit"
+			required="true">
             <defaultRule class="Today" />
 		</huiproperty>
 		<!-- moved from org to audit, bug 277 -->
@@ -4034,7 +4065,8 @@ the value between <param></param> will be used directly if no string is found fo
             tags="Risk,VDA-ISA"/>
 		<huiproperty 
 		    id="audit_isa_creat" 
-            tags="VDA-ISA" />
+            tags="VDA-ISA, VDA_ISA_Audit"
+            required="true" />
         <huiproperty 
         	id="audit_isa_creatphone" 
            	tags="VDA-ISA" />
@@ -4057,29 +4089,33 @@ the value between <param></param> will be used directly if no string is found fo
         	id="audit_executing_company"
         	tags="VDA_ISA_Audit"
         	inputtype="text"
-        	textrows="1"/>
+        	textrows="1"
+        	required="true"/>
 		<huiproperty
 			id="audit_included_topics" 
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="4"/>        
+            textrows="4"
+            required="true"/>        
 		<huiproperty
 			id="audit_excluded_topics" 
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="4"/>
+            textrows="4"
+            required="true"/>
         <huipropertygroup id="audit_document_data" name="Audit Document Data" tags="VDA_ISA_Audit">
         <huiproperty
         	id="audit_document_data_author_name"
         	name="Audit author name"
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="1"/>
+            textrows="1"
+            required="true"/>
          <huiproperty 
 			name="Audit Author Date"
 			id="audit_document_data_author_date"
 			inputtype="date"
-			tags="VDA-ISA">
+			tags="VDA_ISA_Audit" required="true">
             <defaultRule class="Today" />
         </huiproperty>
         <huiproperty
@@ -4087,12 +4123,13 @@ the value between <param></param> will be used directly if no string is found fo
         	name="First Quality Control done by"
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="1"/>
+            textrows="1"
+            required="true"/>
          <huiproperty 
 			name="Audit Document Data, Date of First Quality Control"
 			id="audit_document_data_first_quality_control_date"
 			inputtype="date"
-			tags="VDA-ISA">
+			tags="VDA_ISA_Audit" required="true">
             <defaultRule class="Today" />
         </huiproperty>
         <huiproperty
@@ -4100,12 +4137,14 @@ the value between <param></param> will be used directly if no string is found fo
         	name="Audit Document Data, Approval done by"
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="1"/>
+            textrows="1"
+            required="true"/>
          <huiproperty 
 			name="Audit Document Data, Approval done on"
 			id="audit_document_data_approval_date"
 			inputtype="date"
-			tags="VDA-ISA">
+			tags="VDA_ISA_Audit"
+			required="true">
             <defaultRule class="Today" />
         </huiproperty>
         <huiproperty
@@ -4113,12 +4152,14 @@ the value between <param></param> will be used directly if no string is found fo
         	name="Audit Document Data, Coordination with Company done by"
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="1"/>
+            textrows="1"
+            required="true"/>
          <huiproperty 
 			name="Audit Document Data, Coordination with Componay done on"
 			id="audit_document_data_company_coordination_date"
 			inputtype="date"
-			tags="VDA-ISA">
+			tags="VDA_ISA_Audit"
+			required="true">
             <defaultRule class="Today" />
         </huiproperty>            
         <huiproperty
@@ -4126,12 +4167,14 @@ the value between <param></param> will be used directly if no string is found fo
         	name="Audit Document Data, Adjustment and Approval done by"
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="1"/>
+            textrows="1"
+            required="true"/>
          <huiproperty 
 			name="Audit Document Data, Adjustment and Approval done on"
 			id="audit_document_data_adjustment_approval_date"
 			inputtype="date"
-			tags="VDA-ISA">
+			tags="VDA_ISA_Audit"
+			required="true">
             <defaultRule class="Today" />
         </huiproperty>            
          <huiproperty
@@ -4139,12 +4182,14 @@ the value between <param></param> will be used directly if no string is found fo
         	name="Audit Document Data, Second Quality Control done by"
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="1"/>
+            textrows="1"
+            required="true"/>
          <huiproperty 
 			name="Audit Document Data, Date of Second Quality Control"
 			id="audit_document_data_second_quality_control_date"
 			inputtype="date"
-			tags="VDA-ISA">
+			tags="VDA_ISA_Audit"
+			required="true">
             <defaultRule class="Today" />
          </huiproperty>
          <huiproperty
@@ -4152,12 +4197,14 @@ the value between <param></param> will be used directly if no string is found fo
         	name="Audit Document Data, Final Approval and Distribution done by"
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="1"/>
+            textrows="1"
+            required="true"/>
          <huiproperty 
 			name="Audit Document Data, Date of Final Approval and Distribution"
 			id="audit_document_data_final_approval_distribution_date"
 			inputtype="date"
-			tags="VDA-ISA">
+			tags="VDA_ISA_Audit"
+			required="true">
             <defaultRule class="Today" />           
         </huiproperty>            
         </huipropertygroup>
@@ -4166,18 +4213,21 @@ the value between <param></param> will be used directly if no string is found fo
 			id="audit_topics_good_results" 
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="4"/>
+            textrows="4"
+            required="true"/>
 		<huiproperty
 			id="audit_topics_bad_results" 
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="4"/>
+            textrows="4"
+            required="true"/>
 		</huipropertygroup>
 		<huiproperty
 			id="audit_target_audience" 
 			inputtype="text" 
             tags="VDA_ISA_Audit"
-            textrows="4"/>		
+            textrows="4"
+            required="true"/>		
     </huientity>
 
     <huientity
@@ -4185,7 +4235,7 @@ the value between <param></param> will be used directly if no string is found fo
         id="controlgroup" >
         <huiproperty
             name="Title"
-            id="controlgroup_name" />
+            id="controlgroup_name" required="true" tags="VDA_ISA_Audit"/>
             
         <huirelation to="person-iso" id="controlgroup_room_inspector" 
         	name="inspector" reversename="is inspector of" tooltip="Person is inspector of this room."/>
@@ -4262,7 +4312,8 @@ the value between <param></param> will be used directly if no string is found fo
             name="Title"
             id="control_name" 
             inputtype="text"
-            tags="Web,Basic"/>
+            tags="Web,Basic, VDA_ISA_Audit"
+            required="true"/>
         <huiproperty
             name="Abbreviation"
             id="control_abbr"
@@ -4287,32 +4338,13 @@ the value between <param></param> will be used directly if no string is found fo
      		 ??? measured effectiveness, notes, date... 
      	</huipropertygroup>
 -->
-     	<huipropertygroup id="control_implementedgroup" name="Implementation" tags="Risk,Web">
-     		<huiproperty name="Implemented" id="control_implemented" inputtype="singleoption" tags="Risk,Web">
+     	<huipropertygroup id="control_implementedgroup" name="Implementation" tags="Risk,Web,Greenbone_GSM">
+     		<huiproperty name="Implemented" id="control_implemented" inputtype="singleoption" tags="Risk,Web,Greenbone_GSM">
      			<option name="Yes" id="control_implemented_yes"/>
      			<option name="No" id="control_implemented_no"/>
      			<option name="Partly" id="control_implemented_partly"/>
      			<option name="N.a." id="control_implemented_na"/>
      		</huiproperty>
-   		<huiproperty id="control_selected" 
-        	name="Control selected"
-        	inputtype="booleanoption"
-        	defaultValue="0"
-        	tags="SoA, Risk, Web" />
-        	
-        <huiproperty
-	           id="control_reason_for_selection" name="Reason for selection"
-               inputtype="singleoption" 
-               min="-1" 
-               max="1" 
-               defaultValue="-1" 
-               tags="SoA, Risk, Web"
-            >
-            <option id="control_reason_for_selection_1"  name="LR: legal requirements" />
-            <option id="control_reason_for_selection_2"  name="CO: contractual obligations" />
-            <option id="control_reason_for_selection_3"  name="BR: business requirement" />
-			<option id="control_reason_for_selection_4"  name="RRA: result of risk assessment" />
-          </huiproperty> 
      		<huiproperty 
             tags="Risk,Web"
      			name="Explanation" 
@@ -4335,6 +4367,32 @@ the value between <param></param> will be used directly if no string is found fo
                 </defaultRule>
             </huiproperty>
      	</huipropertygroup>
+        
+        <huipropertygroup name="SoA" id="control_soa_group" tags="SoA" >
+            <huiproperty id="control_selected" 
+                name="Control selected"
+                inputtype="booleanoption"
+                defaultValue="0"
+                tags="SoA" />
+                
+            <huiproperty
+                   id="control_reason_for_selection" name="Reason for selection"
+                   inputtype="singleoption" 
+                   min="-1" 
+                   max="1" 
+                   defaultValue="-1" 
+                   tags="SoA"
+                >
+                <option id="control_reason_for_selection_1"  name="LR: legal requirements" />
+                <option id="control_reason_for_selection_2"  name="CO: contractual obligations" />
+                <option id="control_reason_for_selection_3"  name="BR: business requirement" />
+                <option id="control_reason_for_selection_4"  name="RRA: result of risk assessment" />
+              </huiproperty>
+         </huipropertygroup>
+        
+          <huipropertygroup name="Greenbone GSM" id="gsm_control_group" tags="Greenbone_GSM" >
+                <huiproperty id="gsm_ism_control_description" name="" tags="Greenbone_GSM" inputtype="text" editable="false" />
+            </huipropertygroup>
         
          <!-- Risk analysis, values must match those defined for asset CIA and scenario probability  -->
     <huipropertygroup name="Control Strength" id="control_effectivenessgroup" tags="Risk">
@@ -4587,7 +4645,8 @@ the value between <param></param> will be used directly if no string is found fo
             max="5" 
             defaultValue="-2" 
             tags="VDA-ISA,VDA_ISA_Audit"
-            focus="true">
+            focus="true"
+            required="true">
                 <option id="control_isa_maturity_null"  value="-2" />
                 <option id="control_isa_maturity_na"  value="-1" />
                 <option id="control_isa_maturity_0"  value="0" />
@@ -4625,6 +4684,7 @@ the value between <param></param> will be used directly if no string is found fo
                min="-1" 
                max="2" 
                defaultValue="-1" 
+               required="true"
             >
                 <option id="control_isa_audit_ra_na"  value="-1" />
                 <option id="control_isa_audit_ra_0"  value="0" />
@@ -4647,7 +4707,7 @@ the value between <param></param> will be used directly if no string is found fo
             
 			<!-- ISA Audit Field, only displayed when VDA_ISA_Audit filter is active -->
             <huiproperty
-	           id="control_isa_audit_compluntil" name="Complete until" inputtype="date" tags="VDA_ISA_Audit">
+	           id="control_isa_audit_compluntil" name="Complete until" inputtype="date" tags="VDA_ISA_Audit" required="true">
                 <defaultRule class="Today">
                     <param id="control_isa_audit_compluntil_changeField">MONTH</param>
                     <param id="control_isa_audit_compluntil_timeDifference">2</param>
@@ -4910,10 +4970,10 @@ the value between <param></param> will be used directly if no string is found fo
             <huiproperty name="Vulnerability exploitation" id="incscen_vuln_level" inputtype="numericoption"
                 min="0" max="3" defaultValue="1" 
                 tags="Risk">
-                <option id="incscen_vuln_level_0" name="0: Hardly possible" value="0"/>
-                <option id="incscen_vuln_level_1" name="1: Possible" value="1"/>
-                <option id="incscen_vuln_level_2" name="2: Easily possible" value="2"/>
-                <option id="incscen_vuln_level_3" name="3: Probable" value="3"/>
+                <option id="incscen_vuln_level_0" name="0: Very low" value="0"/>
+                <option id="incscen_vuln_level_1" name="1: Low" value="1"/>
+                <option id="incscen_vuln_level_2" name="2: High" value="2"/>
+                <option id="incscen_vuln_level_3" name="3: Very High" value="3"/>
             </huiproperty> 
             
             <!-- Risk analysis, range has to match min to max sum possible from threat + vulnerability -->
@@ -4966,6 +5026,7 @@ the value between <param></param> will be used directly if no string is found fo
             <huiproperty id="gsm_ism_scenario_description" name="GSM Desc." tags="Greenbone_GSM" inputtype="text" editable="false" />
             <huiproperty id="gsm_ism_scenario_cve" name="GSM CVE" tags="Greenbone_GSM" editable="false" />
             <huiproperty id="gsm_ism_scenario_level" name="GSM Lvl." tags="Greenbone_GSM" editable="false" />
+            <huiproperty id="gsm_ism_scenario_cvss" name="GSM CVSS" tags="Greenbone_GSM" editable="false" />
         </huipropertygroup>
         
     </huientity>
@@ -5014,6 +5075,11 @@ the value between <param></param> will be used directly if no string is found fo
         <huiproperty
             name="Title"
             id="threat_name"
+            tags="Risk,Basic" />
+        <huiproperty
+            name="Description"
+            id="threat_desc"
+            inputtype="text"
             tags="Risk,Basic" />
         <huiproperty
             name="Abbreviation"
@@ -5068,14 +5134,15 @@ the value between <param></param> will be used directly if no string is found fo
             name="Title"
             id="vulnerability_name" tags="Risk,Basic"/>
         <huiproperty
+            name="Description"
+            id="vulnerability_desc" inputtype="text" tags="Risk,Basic"/>
+        <huiproperty
             name="Abbreviation"
             id="vulnerability_abbr" tags="Risk,Basic"/>
         <huiproperty
             id="vulnerability_tag"
             name="Tags,Basic"
             tooltip="List of tags, separated by comma or space"/>
-        <huiproperty
-				name="Description" id="vulnerability_desc"  visible="false" tags="Risk,Basic"/>
 		<huiproperty
             name="Document"
             id="vulnerability_document"
@@ -5083,15 +5150,16 @@ the value between <param></param> will be used directly if no string is found fo
                 
 		<huiproperty name="Ease of Exploitation " id="vulnerability_level" inputtype="numericoption"
 			min="0" max="3" defaultValue="0" tags="Risk">
-            <option id="vulnerability_level_0" name="0: Hardly possible" value="0"/>
-            <option id="vulnerability_level_1" name="1: Possible" value="1"/>
-            <option id="vulnerability_level_2" name="2: Easily possible" value="2"/>
-            <option id="vulnerability_level_3" name="3: Probable" value="3"/>
+            <option id="vulnerability_level_0" name="0: Very low" value="0"/>
+            <option id="vulnerability_level_1" name="1: Low" value="1"/>
+            <option id="vulnerability_level_2" name="2: High" value="2"/>
+            <option id="vulnerability_level_3" name="3: Very High" value="3"/>
 		</huiproperty>
         <huipropertygroup name="Greenbone GSM" id="gsm_vuln_group" tags="Greenbone_GSM" >
             <huiproperty id="gsm_ism_vulnerability_description" name="GSM Desc." tags="Greenbone_GSM" inputtype="text" editable="false"/>
             <huiproperty id="gsm_ism_vulnerability_cve" name="GSM CVE" tags="Greenbone_GSM" editable="false"/>
             <huiproperty id="gsm_ism_vulnerability_level" name="GSM Lvl." tags="Greenbone_GSM" editable="false" />
+            <huiproperty id="gsm_ism_vulnerability_cvss" name="GSM CVSS" tags="Greenbone_GSM" editable="false" />
         </huipropertygroup>
        
     </huientity>
@@ -5214,7 +5282,9 @@ the value between <param></param> will be used directly if no string is found fo
         id="interview" >
         <huiproperty
             name="Title"
-            id="interview_name" />
+            id="interview_name" 
+            required="true"
+            tags="VDA_ISA_Audit"/>
         <huiproperty
             name="Abbreviation"
             id="interview_abbr" />
@@ -5233,7 +5303,7 @@ the value between <param></param> will be used directly if no string is found fo
 			inputtype="booleanoption"  defaultValue="0" tags="VDA_ISA_Audit"/>
 
         <huiproperty 
-       		id="interview_audit_action" name="Audit Action Type" inputtype="singleoption" tags="VDA_ISA_Audit">
+       		id="interview_audit_action" name="Audit Action Type" inputtype="singleoption" tags="VDA_ISA_Audit" required="true">
 	       <option name="Interview" id="interview_audit_action_type_interview"/>
 	       <option name="Documentationcheck" id="interview_audit_action_type_documentation_check"/>
 	       <option name="Inspection" id="interview_audit_action_type_inspection"/>
@@ -5244,7 +5314,8 @@ the value between <param></param> will be used directly if no string is found fo
         
         <huiproperty
 	    	id="interview_audit_action_description" name="Audit Action Description" inputtype="text" tags="VDA_ISA_Audit"
-	 	   textrows="4"/>        			
+	 	   textrows="4"
+	 	   required="true"/>        			
 	
     	<huirelation to="finding" id="rel_interview_finding_notice"
     		name="revealed" reversename="noticed in" tooltip="" />
@@ -5317,7 +5388,7 @@ the value between <param></param> will be used directly if no string is found fo
 
         <huiproperty
             name="Title"
-            id="finding_name" />
+            id="finding_name" required="true" tags="VDA_ISA_Audit"/>
         <huiproperty
             name="Abbreviation"
             id="finding_abbr" />
@@ -5326,7 +5397,7 @@ the value between <param></param> will be used directly if no string is found fo
             name="Tags"
             tooltip="List of tags, separated by comma or space"/>
         <huiproperty
-			name="Description" id="finding_desc" inputtype="text"/>
+			name="Description" id="finding_desc" inputtype="text" tags="VDA_ISA_Audit"/>
         <huiproperty
 			name="Root cause" id="finding_cause" inputtype="text"/>
 		<huiproperty
@@ -5350,7 +5421,7 @@ the value between <param></param> will be used directly if no string is found fo
             <defaultRule class="Today" />
         </huiproperty>
         <huiproperty 
-       		name="finding Type" id="finding_type2" inputtype="singleoption" tags="VDA_ISA_Audit">
+       		name="finding Type" id="finding_type2" inputtype="singleoption" tags="VDA_ISA_Audit" required="true">
 			<option name="technical Finding" id="finding_type2_technical" />       	
 			<option name="significant Detection" id="finding_type2_significant" /> 
         </huiproperty>
@@ -5378,6 +5449,10 @@ the value between <param></param> will be used directly if no string is found fo
         <huiproperty
             name="Title"
             id="process_name" />
+        <huiproperty
+            name="Description"
+            inputtype="text"
+            id="process_desc" />
         <huiproperty
             name="Abbreviation"
             id="process_abbr" />
@@ -5738,6 +5813,8 @@ the value between <param></param> will be used directly if no string is found fo
           <huiproperty 
             id="samt_topic_name" 
             editable="false" 
+            required="true"
+            tags="VDA_ISA_Audit"
             />
           <huiproperty 
             id="samt_topic_abbr" 
@@ -5749,7 +5826,8 @@ the value between <param></param> will be used directly if no string is found fo
           <!-- ISA Audit Field, only displayed when VDA_ISA_Audit filter is active -->  
           <huiproperty
 	           id="samt_topic_audit_findings" name="Findings" inputtype="text" tags="VDA_ISA_Audit"
-	           textrows="12"/>
+	           textrows="12"
+	           required="true"/>
             
           <huiproperty 
             id="samt_topic_maturity"      
@@ -5758,7 +5836,8 @@ the value between <param></param> will be used directly if no string is found fo
             max="5" 
             defaultValue="-2" 
             tags="VDA-ISA,VDA_ISA_Audit,Web"
-            focus="true">
+            focus="true"
+            required="true">
                 <option id="samt_topic_maturity_null"  value="-2" />
                 <option id="samt_topic_maturity_na"  value="-1" />
                 <option id="samt_topic_maturity_0"  value="0" />
@@ -5798,7 +5877,8 @@ the value between <param></param> will be used directly if no string is found fo
                inputtype="numericoption" 
                min="-1" 
                max="3" 
-               defaultValue="-1">
+               defaultValue="-1"
+               required="true">
                             
                 <option id="samt_topic_audit_ra_na"  value="-1" />
                 <option id="samt_topic_audit_ra_0"  value="0" />
@@ -5822,7 +5902,7 @@ the value between <param></param> will be used directly if no string is found fo
             
 			<!-- ISA Audit Field, only displayed when VDA_ISA_Audit filter is active -->
             <huiproperty
-	           id="samt_topic_audit_compluntil" name="Complete until" inputtype="date" tags="VDA_ISA_Audit">
+	           id="samt_topic_audit_compluntil" name="Complete until" inputtype="date" tags="VDA_ISA_Audit" required="true">
                 <defaultRule class="Today">
                     <param id="samt_topic_audit_compluntil_changeField">MONTH</param>
                     <param id="samt_topic_audit_compluntil_timeDifference">2</param>
@@ -5843,7 +5923,7 @@ the value between <param></param> will be used directly if no string is found fo
     			<option name="N.a." id="samt_topicimplemented_na"/>
     		</huiproperty>
     		
-    		<huiproperty name="userClassification" id="samt_user_classification" inputtype="singleoption" tags="VDA_ISA_Audit">
+    		<huiproperty name="userClassification" id="samt_user_classification" inputtype="singleoption" tags="VDA_ISA_Audit" required="true">
     			<option name="Good implementation" id="samt_classification_good" />
     			<option name="Insufficient implementation" id="samt_classification_insufficient" />
     			<option name="No classification" id="samt_classification_none" />
@@ -5854,9 +5934,5 @@ the value between <param></param> will be used directly if no string is found fo
 	            tags="VDA_ISA_Audit"
 	            inputtype="text"
 	            />    		
-  
-            <huipropertygroup name="Greenbone GSM" id="gsm_control_group" tags="Greenbone_GSM" >
-                <huiproperty id="gsm_ism_control_description" name="" tags="Greenbone_GSM" inputtype="text" editable="false" />
-            </huipropertygroup>
       </huientity> 
 </huientities>

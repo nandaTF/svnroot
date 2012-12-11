@@ -5,44 +5,22 @@
 
 <hibernate-configuration>
 
+    <!-- Database configuration template for verinice server. -->
+    <!-- Database access credentials are to be found in the 'veriniceserver-plain.properties' property file. -->
+    <!-- @author 2009-01-08 ak@sernet.de -->
 
-<!-- 
-
-###########################################################################
-    	Database configuration template for verinice server.
-    	
-    	Database access credentials are to be found in the
-    	'veriniceserver-plain.properties' property file.
-    	
-    	@author 2009-01-08 ak@sernet.de
-###########################################################################
-
-
- -->
     <session-factory>
- 		<!-- CAUTION: No user configuration is usually needed beyond this point: . -->
- 		
- 		
- 		<!-- Improve performance for collection inserts -->
-		<property name="hibernate.jdbc.batch_size">50</property>
+        <!-- CAUTION: No user configuration is usually needed beyond this point: . -->        <!-- Improve performance for collection inserts -->
+        <property name="hibernate.jdbc.batch_size">50</property>
         <property name="hibernate.order_inserts">true</property>
         <property name="hibernate.order_updates">true</property>
 
-  
-
         <!-- JDBC connection pool -->
-	    <property name="connection.provider_class">
-	    	org.hibernate.connection.C3P0ConnectionProvider
-	    </property>
-
-       	<!-- Enable session context management -->
-        <property name="current_session_context_class">
-        org.springframework.orm.hibernate3.SpringSessionContext
-        </property>
-		
-		
-		<!-- Enable memory read write cache 
-		-->
+        <property name="connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+        
+        <!-- Enable session context management -->
+        <property name="current_session_context_class">org.springframework.orm.hibernate3.SpringSessionContext</property>        <!-- Enable memory read write cache -->
+       
         <property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
 
         <!-- Echo all executed SQL to stdout -->
@@ -50,14 +28,9 @@
         <property name="hibernate.format_sql">false</property>
         <property name="hibernate.use_sql_comments">false</property>
 
-        <!-- Should database schema be automatically updated when needed:
-        <property name="hbm2ddl.auto">validate</property>
-        Use "update" only in development, it does not work with all changes, i.e. indices aren't created.
-        Use a proper migration script instead (@see DbVersion.java)
-        <property name="hbm2ddl.auto">update</property>
-		-->
+        <!-- Should database schema be automatically updated when needed -->
          <property name="hbm2ddl.auto">update</property>
-
+ 
 		<!-- Optimized mappings for real DBMS, not for derby -->
         <mapping resource="sernet/gs/ui/rcp/hibernate/Entity.hbm.xml"/>
         <mapping resource="sernet/gs/ui/rcp/hibernate/CnALink.hbm.xml"/>
@@ -73,6 +46,7 @@
         <mapping resource="sernet/gs/ui/rcp/hibernate/BausteinVorschlag.hbm.xml"/>
         <mapping resource="sernet/gs/ui/rcp/hibernate/Addition.hbm.xml"/>
         <mapping resource="sernet/gs/ui/rcp/hibernate/AttachmentFile.hbm.xml"/>
+        <mapping resource="sernet/gs/ui/rcp/hibernate/CnAValidation.hbm.xml"/>
         
         <mapping resource="jbpm.repository.hbm.xml" />
         <mapping resource="jbpm.execution.hbm.xml" />

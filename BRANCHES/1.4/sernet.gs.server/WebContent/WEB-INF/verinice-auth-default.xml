@@ -43,6 +43,7 @@
         <action id="bsimassnahmen" />
         <action id="bsimodelview" />
         <action id="bulkedit" />
+        <action id="changeicon" />
         <action id="createindividualtasks" />
         <action id="createisatasks" />
         <action id="deletecatalog" />
@@ -79,6 +80,7 @@
         <action id="unify" />
         <action id="xmlexport" />
         <action id="xmlimport" />
+        <action id="cnavalidation" />
         </profile>
         <profile name="user-scope-default-profile" origin="default">
         <!-- missing actions: 
@@ -106,6 +108,7 @@
 	        <action id="bsimassnahmen" />
 	        <action id="bsimodelview" />
 	        <action id="bulkedit" />
+            <action id="changeicon" />
             <action id="createindividualtasks" />
 	        <action id="createisatasks" />
 	        <action id="deletecatalog" />
@@ -141,6 +144,7 @@
 	        <action id="todo"/>
             <action id="unify" />
 	        <action id="xmlexport"/>
+	        <action id="cnavalidation" />
         </profile>
         <profile name="admin-scope-default-profile" origin="default">
         <!-- missing actions: 
@@ -165,6 +169,7 @@
 	        <action id="bsimassnahmen" />
 	        <action id="bsimodelview" />
 	        <action id="bulkedit" />
+            <action id="changeicon" />
             <action id="createindividualtasks" />
 	        <action id="createisatasks" />
 	        <action id="deletecatalog" />
@@ -203,6 +208,7 @@
 	        <action id="todo"/>
             <action id="unify" />
 	        <action id="xmlexport"/>
+	        <action id="cnavalidation" />
         </profile>
         <profile name="admin-default-profile" origin="default" >
         	<!-- this user is allowed to do everything -->
@@ -226,6 +232,7 @@
 	        <action id="bsimassnahmen" />
 	        <action id="bsimodelview" />
 	        <action id="bulkedit" />
+            <action id="changeicon" />
             <action id="createindividualtasks" />
 	        <action id="createisatasks" />
 	        <action id="deletecatalog" />
@@ -265,6 +272,7 @@
             <action id="unify" />
 	        <action id="xmlexport"/>
 	        <action id="xmlimport"/>
+	        <action id="cnavalidation" />
         </profile>
     </profiles>
     <userprofiles>

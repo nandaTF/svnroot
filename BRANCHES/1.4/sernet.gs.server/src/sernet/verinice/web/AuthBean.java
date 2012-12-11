@@ -35,6 +35,18 @@ public class AuthBean {
         return getAuthService().getUsername();
     }
     
+    public boolean getLogoutPossible() {
+        return getAuthService().isLogoutPossible();
+    }
+    
+    /**
+     * This method is called from client to keep session alive
+     * and prevents session timeout.
+     */
+    public void keepSessionAlive() {
+        getAuthService().getUsername();
+    }
+    
     public boolean getBsiTasks() {
         return isEnabled(ActionRightIDs.BSIMASSNAHMEN);
     }

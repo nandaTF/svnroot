@@ -49,6 +49,7 @@ public class ActionRightIDs {
     public static final String BSIMASSNAHMEN = "bsimassnahmen";
     public static final String BSIMODELVIEW = "bsimodelview";
     public static final String BULKEDIT = "bulkedit";
+    public static final String CHANGEICON = "changeicon";   
     public static final String CREATEISATASKS = "createisatasks";
     public static final String DELETECATALOG = "deletecatalog";
     public static final String DELETEFILE = "deletefile";
@@ -90,6 +91,7 @@ public class ActionRightIDs {
     public static final String XMLIMPORT = "xmlimport";
     public static final String GROUP_BY_TAG = "groupbytag";
     public static final String CREATE_INDIVIDUAL_TASKS = "createindividualtasks";
+    public static final String CNAVALIDATION = "cnavalidation";
     
     public static String[] getAllRightIDs(){
         ArrayList<String> retVal = new ArrayList<String>(0);
