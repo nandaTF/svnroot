@@ -27,7 +27,6 @@ public class AnwendungenKategorie extends CnATreeElement
 	
 	public AnwendungenKategorie(CnATreeElement parent) {
 		super(parent);
-		
 	}
 	
 	protected AnwendungenKategorie() {

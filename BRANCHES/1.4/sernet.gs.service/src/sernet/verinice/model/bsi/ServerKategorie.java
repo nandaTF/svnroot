@@ -25,7 +25,7 @@ public class ServerKategorie extends CnATreeElement implements IBSIStrukturKateg
 	
 	public ServerKategorie(CnATreeElement model) {
 		super(model);
-	}
+		}
 	
 	public ServerKategorie() {
 		

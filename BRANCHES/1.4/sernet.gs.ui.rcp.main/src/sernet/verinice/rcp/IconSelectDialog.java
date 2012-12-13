@@ -127,7 +127,9 @@ public class IconSelectDialog extends Dialog {
                 }
                 String[] directories = baseDir.list(DirectoryFileFilter.INSTANCE);
                 for (String dir : directories) {
-                    dirComboModel.add(new IconPathDescriptor(dir, baseDir.getPath() + File.separator + dir));
+                    if(!dir.startsWith(".")) {
+                        dirComboModel.add(new IconPathDescriptor(dir, baseDir.getPath() + File.separator + dir));
+                    }
                 }
             }
         } catch (Exception e) {
