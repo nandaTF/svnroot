@@ -93,8 +93,8 @@ public class AccountDialog extends TitleAreaDialog {
         super(parent);
         setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
         this.entType = entType;
-        IAuthService authService = (IAuthService) VeriniceContext.get(VeriniceContext.AUTH_SERVICE);
-        isScopeOnly = authService.isScopeOnly();
+
+        isScopeOnly = getAuthService().isScopeOnly();
     }
 
     public AccountDialog(Shell shell, EntityType entType2, boolean b, String title, Entity entity) {
@@ -463,11 +463,12 @@ public class AccountDialog extends TitleAreaDialog {
 	private boolean checkPassword2(){
 	    boolean passwordsEqual = textPassword.getText().equals(textPassword2.getText());
 	    boolean passwordEmpty = textPassword.getText().isEmpty() && !isPasswordSet();
-	    if(!passwordsEqual ||  passwordEmpty){
+	    boolean passwordsManagedByVerinice = getAuthService().isHandlingPasswords();
+	    if(!passwordsEqual || (passwordsManagedByVerinice && passwordEmpty)){
 	        if(!passwordsEqual){
-	            toggleValidationError(textPassword, Messages.AccountDialog_8, Messages.AccountDialog_8);
+	            toggleValidationError(textPassword, Messages.AccountDialog_8);
 	        } else if(passwordEmpty){
-	            toggleValidationError(textPassword, Messages.AccountDialog_8, Messages.AccountDialog_11);
+	            toggleValidationError(textPassword, Messages.AccountDialog_11);
 	        }
 	        return false;
 	    } else {
@@ -491,7 +492,7 @@ public class AccountDialog extends TitleAreaDialog {
 	    String enteredName = textName.getText();
 	    final boolean noPasswordEntered = enteredName.isEmpty();
 	    if(isReservedUsername(enteredName)){
-	        toggleValidationError(textName, Messages.AccountDialog_7, Messages.AccountDialog_7);
+	        toggleValidationError(textName, Messages.AccountDialog_7);
             return false;
 	    }
         if((initialUserName != null && !initialUserName.equals(enteredName)) ||
@@ -501,10 +502,10 @@ public class AccountDialog extends TitleAreaDialog {
                 command = ServiceFactory.lookupCommandService().executeCommand(command);
                 boolean userNameExists = command.getResult();
                 if(userNameExists){
-                    toggleValidationError(textName, Messages.AccountDialog_7, Messages.AccountDialog_7);
+                    toggleValidationError(textName, Messages.AccountDialog_7);
                     return false;
                 } else if(noPasswordEntered){
-                    toggleValidationError(textName, Messages.AccountDialog_10, Messages.AccountDialog_10);
+                    toggleValidationError(textName, Messages.AccountDialog_10);
                     return false;
                 } else {
                     textName.setToolTipText("");
@@ -516,7 +517,7 @@ public class AccountDialog extends TitleAreaDialog {
         } else if (enteredName.equals(initialUserName)){
             return true;
         } else if(initialUserName == null && noPasswordEntered){
-            toggleValidationError(textName, Messages.AccountDialog_10, Messages.AccountDialog_10);
+            toggleValidationError(textName, Messages.AccountDialog_10);
         }
         return retVal;
 	}
@@ -530,11 +531,11 @@ public class AccountDialog extends TitleAreaDialog {
 	    return false;
 	}
 	
-	private void toggleValidationError(final Text control, final String dialogMsg, final String tooltip){
+	private void toggleValidationError(final Text control, final String dialogMsg){
 	    Display.getDefault().asyncExec(new Runnable(){
 	       @Override
 	       public void run(){
-	           control.setToolTipText(tooltip);
+	           control.setToolTipText(dialogMsg);
 	           control.selectAll();
 	           MessageDialog.openWarning(getParentShell(), Messages.AccountDialog_9, dialogMsg);
 	           control.setFocus();
@@ -543,5 +544,12 @@ public class AccountDialog extends TitleAreaDialog {
 	       }
 	    });
 	}
+
+    /**
+     * @return the authService
+     */
+    public IAuthService getAuthService() {
+        return (IAuthService) VeriniceContext.get(VeriniceContext.AUTH_SERVICE);
+    }
 	
 }
