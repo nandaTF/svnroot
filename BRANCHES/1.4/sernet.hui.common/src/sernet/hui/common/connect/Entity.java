@@ -119,14 +119,17 @@ public class Entity implements ISelectOptionHandler, ITypedElement, Serializable
      * 
      */
     public void initDefaultValues(HUITypeFactory huiTypeFactory) {
-        String[] types = huiTypeFactory.getEntityType(this.entityType).getAllPropertyTypeIDsIncludingGroups();
-        for (String type : types) {
-            PropertyType propertyType = huiTypeFactory.getPropertyType(this.entityType, type);
-            if (propertyType.isNumericSelect() || propertyType.isBooleanSelect()) {
-                setNumericValue(propertyType, propertyType.getNumericDefault());
-            } else if ((propertyType.isText() || propertyType.isDate() || propertyType.isLine())
-                       && (propertyType.getDefaultRule() != null)) {
-                    setSimpleValue(propertyType, propertyType.getDefaultRule().getValue());              
+        EntityType entityType = huiTypeFactory.getEntityType(this.entityType);
+        if(entityType!=null) {
+            String[] types = entityType.getAllPropertyTypeIDsIncludingGroups();
+            for (String type : types) {
+                PropertyType propertyType = huiTypeFactory.getPropertyType(this.entityType, type);
+                if (propertyType.isNumericSelect() || propertyType.isBooleanSelect()) {
+                    setNumericValue(propertyType, propertyType.getNumericDefault());
+                } else if ((propertyType.isText() || propertyType.isDate() || propertyType.isLine())
+                           && (propertyType.getDefaultRule() != null)) {
+                        setSimpleValue(propertyType, propertyType.getDefaultRule().getValue());              
+                }
             }
         }
     }
