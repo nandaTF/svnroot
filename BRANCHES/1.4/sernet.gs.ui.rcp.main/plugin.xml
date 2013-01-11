@@ -763,10 +763,10 @@
                enablesFor="*"
                icon="icons/icons.gif"
                id="sernet.verinice.rcp.IconSelectAction.action"
-               label="Change icon..."
+               label="%action.label.change_icon"
                menubarPath="special"
                style="push"
-               tooltip="Change icon of object">
+               tooltip="%action.tooltip.change_icon">
          </action>
       </objectContribution> 
       <objectContribution
