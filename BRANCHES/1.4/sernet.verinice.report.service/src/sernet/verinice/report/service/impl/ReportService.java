@@ -43,6 +43,7 @@ public class ReportService implements IReportService {
 		        new UserReportType(), 
 		        new SamtReportType(), 
 		        new SamtComplianceReport(),
+		        new ComprehensiveSamtReportType(),
 		        
 		        new ISMRiskManagementResultsReport(), // ISO 27k1 Reports
 		        
@@ -71,7 +72,7 @@ public class ReportService implements IReportService {
 		        new GSRisikoanalyseReport(),
 		        new ManagementRisikoBewertung(),
 		        new RealisierungsplanReport(),
-		        new ComprehensiveSamtReportType(),
+		        new GraphischerUmsetzungsstatusReport(),
 		        new AuditberichtReport()
 		    };
 		
