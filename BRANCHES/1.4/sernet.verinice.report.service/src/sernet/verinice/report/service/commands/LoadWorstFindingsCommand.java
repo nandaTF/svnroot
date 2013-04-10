@@ -18,7 +18,6 @@
 package sernet.verinice.report.service.commands;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,14 +31,10 @@ import net.sf.ehcache.Status;
 import org.apache.log4j.Logger;
 
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
-import sernet.gs.ui.rcp.main.service.crudcommands.LoadChildrenForExpansion;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnAElementById;
-import sernet.gs.ui.rcp.main.service.crudcommands.LoadReportElementWithChildren;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.model.common.CnATreeElement;
-import sernet.verinice.model.iso27k.Audit;
-import sernet.verinice.model.iso27k.Control;
 import sernet.verinice.model.iso27k.ControlGroup;
 import sernet.verinice.model.samt.SamtTopic;
 
@@ -72,16 +67,17 @@ public class LoadWorstFindingsCommand extends GenericCommand {
     
     public LoadWorstFindingsCommand(int id) {
         log = Logger.getLogger(LoadWorstFindingsCommand.class);
+        int id0 = -1;
         if(String.valueOf(id).startsWith(String.valueOf(LoadChapterListCommand.PLACEHOLDER_CONTROLGROUP_ID))){
             String chapterIdString = String.valueOf(id);
             chapterIdString = chapterIdString.substring(String.valueOf(LoadChapterListCommand.PLACEHOLDER_CONTROLGROUP_ID).length());
-            id = Integer.parseInt(chapterIdString);
-        }
-        this.id = id;
+            id0 = Integer.parseInt(chapterIdString);
+        } 
+        this.id = (id0 > -1) ? id0 : id;
     }
 
     public Object[][] getResult() {
-        return result;
+        return (result != null) ? result.clone() : null;
     }
 
     @SuppressWarnings("unchecked")
@@ -104,6 +100,9 @@ public class LoadWorstFindingsCommand extends GenericCommand {
 
     @Override
     public void execute() {
+        final int maxDevStart = -2;
+        final int maxRiskStart = -2;
+        final int defaultResultSize = 6;
         ControlGroup group = null;
         if (getCache().get(id) != null) {
             group = (ControlGroup) getCache().get(id).getValue();
@@ -118,8 +117,8 @@ public class LoadWorstFindingsCommand extends GenericCommand {
             }
 
         }
-        int maxDev = -2; // minimum value is -1
-        int maxRisk = -2; // minimum value is -1
+        int maxDev = maxDevStart; // minimum value is -1
+        int maxRisk = maxRiskStart; // minimum value is -1
         List<SamtTopic> worstTopics = new ArrayList<SamtTopic>();
         Set<SamtTopic> allSamtTopics = getAllSamtTopicChildren(group);
         for (SamtTopic topic : allSamtTopics) {
@@ -144,11 +143,12 @@ public class LoadWorstFindingsCommand extends GenericCommand {
             if(worstTopic.getNumericProperty(LoadDeviationRiskTableCommand.SAMT_DEVIATION_PROPERTY) == maxDev){
                 String finding = worstTopic.getEntity().getValue(SAMT_PROP_FINDING);
                 String measure = worstTopic.getEntity().getValue(SAMT_PROP_MEASURE);
-                if(finding != null && !finding.equals(""))
+                if(finding != null && !finding.equals("")){
                     arrayList.add(new Object[]{worstTopic.getDbId(), worstTopic.getTitle(), finding, maxDev, maxRisk, measure});
+                }
             }
         }
-        result = arrayList.toArray(new Object[arrayList.size()][6]);
+        result = arrayList.toArray(new Object[arrayList.size()][defaultResultSize]);
     }
 
     private Cache getCache() {
@@ -161,9 +161,12 @@ public class LoadWorstFindingsCommand extends GenericCommand {
     }
 
     private Cache createCache() {
+        final int maxElementsInMemory = 20000;
+        final int timeToLiveSeconds = 600;
+        final int timeToIdleSeconds = 500;
         cacheId = UUID.randomUUID().toString();
         manager = CacheManager.create();
-        cache = new Cache(cacheId, 20000, false, false, 600, 500);
+        cache = new Cache(cacheId, maxElementsInMemory, false, false, timeToLiveSeconds, timeToIdleSeconds);
         manager.addCache(cache);
         return cache;
     }

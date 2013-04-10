@@ -76,8 +76,8 @@ public class LoadElementImagesCommand extends GenericCommand {
     private String cacheId = null;
     private transient Cache cache = null;
 
-    private final static int MAX_IMAGE_HEIGHT = 151;
-    private final static int MAX_IMAGE_WIDTH = 310;
+    private static final int MAX_IMAGE_HEIGHT = 151;
+    private static final int MAX_IMAGE_WIDTH = 310;
     
     public LoadElementImagesCommand(){
     	// BIRT JavaScript Constructor for use with class.newInstance()
@@ -94,12 +94,12 @@ public class LoadElementImagesCommand extends GenericCommand {
     }
 
     public byte[] getResult() {
-        return result;
+        return (result != null) ? result.clone() : null;
     }
 
     private boolean isImage(Attachment attachment) {
         boolean isImage = Boolean.FALSE;
-        for (String imageMimeType : Attachment.IMAGE_MIME_TYPES) {
+        for (String imageMimeType : Attachment.getImageMimeTypes()) {
             if (attachment.getMimeType().equals(imageMimeType)) {
                 isImage = Boolean.TRUE;
                 break;
@@ -158,37 +158,7 @@ public class LoadElementImagesCommand extends GenericCommand {
                     command1 = getCommandService().executeCommand(command1);
                     AttachmentFile attachmentFile = command1.getAttachmentFile();
                     if (attachmentFile != null) {
-                        InputStream in = new ByteArrayInputStream(attachmentFile.getFileData());
-                        BufferedImage bImage = ImageIO.read(in);
-                        ByteArrayOutputStream baos = null;
-                        
-                        BufferedImage rotatedImage = null; 
-                        if(bImage.getHeight() > bImage.getWidth()){ 
-                            rotatedImage = rotateImage(bImage, 90);
-                        }
-                        BufferedImage imageToWorkWith = null;
-                        if(rotatedImage != null){
-                            imageToWorkWith = rotatedImage;
-                        } else {
-                            imageToWorkWith = bImage;
-                        }
-                        if (imageToWorkWith.getWidth() > MAX_IMAGE_WIDTH || imageToWorkWith.getHeight() > MAX_IMAGE_HEIGHT) {
-                            Image image = imageToWorkWith.getScaledInstance(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, BufferedImage.SCALE_DEFAULT);
-
-                            baos = new ByteArrayOutputStream(1000);
-                            if (image instanceof BufferedImage) {
-                                imageToWorkWith = (BufferedImage) image;
-                            } else {
-                                imageToWorkWith = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
-                                imageToWorkWith.getGraphics().drawImage(image, 0, 0, null);
-                            }
-                        }
-                        if(baos !=  null){
-                            ImageIO.write(imageToWorkWith, "jpeg", baos);
-                            result = baos.toByteArray();
-                        } else {
-                        	result = attachmentFile.getFileData();
-                        }
+                        result = processImageData(attachmentFile);
                     }
                 }
             }
@@ -205,14 +175,51 @@ public class LoadElementImagesCommand extends GenericCommand {
             log.error("Error reading image from byte data", e);
         }
     }
+
+    private byte[] processImageData(AttachmentFile attachmentFile) throws IOException {
+        final int degrees90 = 90;
+        final int defaultByteArraySize = 1000;
+        InputStream in = new ByteArrayInputStream(attachmentFile.getFileData());
+        BufferedImage bImage = ImageIO.read(in);
+        ByteArrayOutputStream baos = null;
+        
+        BufferedImage rotatedImage = null; 
+        if(bImage.getHeight() > bImage.getWidth()){ 
+            rotatedImage = rotateImage(bImage, degrees90);
+        }
+        BufferedImage imageToWorkWith = null;
+        if(rotatedImage != null){
+            imageToWorkWith = rotatedImage;
+        } else {
+            imageToWorkWith = bImage;
+        }
+        if (imageToWorkWith.getWidth() > MAX_IMAGE_WIDTH || imageToWorkWith.getHeight() > MAX_IMAGE_HEIGHT) {
+            Image image = imageToWorkWith.getScaledInstance(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, BufferedImage.SCALE_DEFAULT);
+
+            baos = new ByteArrayOutputStream(defaultByteArraySize);
+            if (image instanceof BufferedImage) {
+                imageToWorkWith = (BufferedImage) image;
+            } else {
+                imageToWorkWith = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
+                imageToWorkWith.getGraphics().drawImage(image, 0, 0, null);
+            }
+        }
+        if(baos !=  null){
+            ImageIO.write(imageToWorkWith, "jpeg", baos);
+            return baos.toByteArray();
+        } else {
+        	return attachmentFile.getFileData();
+        }
+    }
     
     private void setDummyImage(){
+        final int defaultByteArraySize = 4096;
     	URL url = getClass().getResource("onewhitepixel.jpg");
     	InputStream is = null;
     	ByteArrayOutputStream bais = new ByteArrayOutputStream();
     	try{
     		is = url.openStream();
-    		byte[] byteChunk = new byte[4096];
+    		byte[] byteChunk = new byte[defaultByteArraySize];
     		int i = 0;
     		while((i = is.read(byteChunk)) > 0){
     			bais.write(byteChunk, 0, i);
@@ -233,7 +240,7 @@ public class LoadElementImagesCommand extends GenericCommand {
     
     private BufferedImage rotateImage(BufferedImage image, int radiant){
         AffineTransform transform = new AffineTransform();
-        transform.rotate(Math.toRadians(radiant), image.getWidth() / 2, image.getHeight() / 2);
+        transform.rotate(Math.toRadians(radiant), (double)image.getWidth() / 2.0, (double)image.getHeight() / 2.0);
         AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
         return op.filter(image, null);
     }
@@ -248,9 +255,12 @@ public class LoadElementImagesCommand extends GenericCommand {
     }
 
     private Cache createCache() {
+        final int maxElementsInMemory = 20000;
+        final int timeToLiveSeconds = 600;
+        final int timeToIdleSeconds = 500;
         cacheId = UUID.randomUUID().toString();
         manager = CacheManager.create();
-        cache = new Cache(cacheId, 20000, false, false, 600, 500);
+        cache = new Cache(cacheId, maxElementsInMemory, false, false, timeToLiveSeconds, timeToIdleSeconds);
         manager.addCache(cache);
         return cache;
     }

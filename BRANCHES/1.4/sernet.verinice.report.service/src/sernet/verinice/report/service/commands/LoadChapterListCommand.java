@@ -18,13 +18,10 @@
  ******************************************************************************/
 package sernet.verinice.report.service.commands;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import net.sf.ehcache.Cache;
@@ -38,18 +35,11 @@ import sernet.gs.service.NumericStringComparator;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadChildrenForExpansion;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnAElementById;
-import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnAElementByTypeId;
-import sernet.gs.ui.rcp.main.service.crudcommands.LoadReportElementByTitle;
-import sernet.gs.ui.rcp.main.service.crudcommands.LoadReportElementWithChildren;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.GenericCommand;
-import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.model.common.CnATreeElement;
-import sernet.verinice.model.common.CnALink.Id;
 import sernet.verinice.model.iso27k.Audit;
-import sernet.verinice.model.iso27k.Control;
 import sernet.verinice.model.iso27k.ControlGroup;
-import sernet.verinice.model.iso27k.IControl;
 import sernet.verinice.model.samt.SamtTopic;
 
 /**
@@ -102,7 +92,7 @@ public class LoadChapterListCommand extends GenericCommand {
             try {
                 command = ServiceFactory.lookupCommandService().executeCommand(command);
                 CnATreeElement e = command.getFound();
-                if (e != null && e instanceof Audit) {
+                if (e instanceof Audit) {
                     rootObject = loadChildren((Audit) e);
                 }
             } catch (Exception e) {
@@ -112,7 +102,7 @@ public class LoadChapterListCommand extends GenericCommand {
     }
 
     public Object[][] getResult() {
-    	return result;
+    	return (result != null) ? result.clone() : null;
     }
 
     @Override
@@ -161,6 +151,7 @@ public class LoadChapterListCommand extends GenericCommand {
     }
 
     private List<Object[]> computeChapters(Integer id) {
+        final int dummyDBID = -10;
         List<Object[]> values = new ArrayList<Object[]>(0);
         if (!rootObject.isChildrenLoaded()) {
             loadChildren(rootObject);
@@ -203,7 +194,7 @@ public class LoadChapterListCommand extends GenericCommand {
         } else if (id == -5) {
             ControlGroup headlineGroup = new ControlGroup();
             headlineGroup.setTitel(rootObject.getTitle() + " Overview");
-            headlineGroup.setDbId(-10);
+            headlineGroup.setDbId(dummyDBID);
             values.add(createValueEntry(headlineGroup));
             for (CnATreeElement e : rootObject.getChildren()) {
                 if (e instanceof ControlGroup) { // rootControlGroup
@@ -215,13 +206,11 @@ public class LoadChapterListCommand extends GenericCommand {
                             if (!elmt.isChildrenLoaded()) {
                                 elmt = loadChildren(elmt);
                             }
-                            if (!isCnaTreeElementInList(values, elmt)) {
-                                if (elmt instanceof ControlGroup) {
-                                    ControlGroup g = (ControlGroup) elmt;
-                                    String isOverviewElementString = g.getEntity().getValue(OVERVIEW_PROPERTY);
-                                    if (isOverviewElementString != null && isOverviewElementString.equals(String.valueOf(OVERVIEW_PROPERTY_TARGET))) {
-                                        values.add(createValueEntry(elmt));
-                                    }
+                            if (!isCnaTreeElementInList(values, elmt) && elmt instanceof ControlGroup) {
+                                ControlGroup g = (ControlGroup) elmt;
+                                String isOverviewElementString = g.getEntity().getValue(OVERVIEW_PROPERTY);
+                                if (isOverviewElementString != null && isOverviewElementString.equals(String.valueOf(OVERVIEW_PROPERTY_TARGET))) {
+                                    values.add(createValueEntry(elmt));
                                 }
                             }
                         }
@@ -239,13 +228,11 @@ public class LoadChapterListCommand extends GenericCommand {
                             if (!elmt.isChildrenLoaded()) {
                                 elmt = loadChildren(elmt);
                             }
-                            if (!isCnaTreeElementInList(values, elmt)) {
-                                if (elmt instanceof ControlGroup) {
-                                    ControlGroup g = (ControlGroup) elmt;
-                                    String isOverviewElementString = g.getEntity().getValue(OVERVIEW_PROPERTY);
-                                    if (isOverviewElementString != null && !isOverviewElementString.equals(String.valueOf(OVERVIEW_PROPERTY_TARGET))) {
-                                        values.add(createValueEntry(elmt));
-                                    }
+                            if (!isCnaTreeElementInList(values, elmt) && elmt instanceof ControlGroup) {
+                                ControlGroup g = (ControlGroup) elmt;
+                                String isOverviewElementString = g.getEntity().getValue(OVERVIEW_PROPERTY);
+                                if (isOverviewElementString != null && !isOverviewElementString.equals(String.valueOf(OVERVIEW_PROPERTY_TARGET))) {
+                                    values.add(createValueEntry(elmt));
                                 }
                             }
                         }
@@ -261,10 +248,8 @@ public class LoadChapterListCommand extends GenericCommand {
                 for (Object[] o : id5Groups) {
                     int groupid = ((Integer) o[0]).intValue();
                     for(ControlGroup rootChild : loadAllControlgroupChildren(rootObject)){
-                        if(rootChild.getDbId().intValue() == groupid){
-                            if(rootChild.getEntity().getValue(OVERVIEW_PROPERTY).equals(String.valueOf(OVERVIEW_PROPERTY_TARGET))){
+                        if(rootChild.getDbId().intValue() == groupid && rootChild.getEntity().getValue(OVERVIEW_PROPERTY).equals(String.valueOf(OVERVIEW_PROPERTY_TARGET))){
                                 values.add(createValueEntry(rootChild));
-                            }
                         }
                     }
                 }
@@ -277,8 +262,9 @@ public class LoadChapterListCommand extends GenericCommand {
                         command1 = new LoadCnAElementById(SamtTopic.TYPE_ID, id);
                         ce = command1.getFound();
                     }
-                    if (ce != null)
+                    if (ce != null){
                         getCache().put(new Element(id, ce));
+                    }
                 } catch (CommandException e) {
                     log.error("Error while executing command", e);
                 }
@@ -288,7 +274,7 @@ public class LoadChapterListCommand extends GenericCommand {
                 if (ce instanceof ControlGroup) {
                     ControlGroup g = (ControlGroup) ce;
                     if(g.getEntity().getValue(OVERVIEW_PROPERTY).equals(String.valueOf(OVERVIEW_PROPERTY_TARGET))){
-                        String placeHolderIdString = String.valueOf(PLACEHOLDER_CONTROLGROUP_ID) + String.valueOf(g.getDbId());
+                        String placeHolderIdString = PLACEHOLDER_CONTROLGROUP_ID.toString() + g.getDbId();
                         placeHolderGroup.setDbId(Integer.parseInt(placeHolderIdString));
                         if(!g.isChildrenLoaded()){
                             g = (ControlGroup)loadChildren(g);
@@ -382,9 +368,12 @@ public class LoadChapterListCommand extends GenericCommand {
     }
 
     private Cache createCache() {
+        final int maxElementsInMemory = 20000;
+        final int timeToLiveSeconds = 600;
+        final int timeToIdleSeconds = 500;
         cacheId = UUID.randomUUID().toString();
         manager = CacheManager.create();
-        cache = new Cache(cacheId, 20000, false, false, 600, 500);
+        cache = new Cache(cacheId, maxElementsInMemory, false, false, timeToLiveSeconds, timeToIdleSeconds);
         manager.addCache(cache);
         return cache;
     }

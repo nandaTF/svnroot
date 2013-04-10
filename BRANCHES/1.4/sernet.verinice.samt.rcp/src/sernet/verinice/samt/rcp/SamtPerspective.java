@@ -20,17 +20,13 @@
 package sernet.verinice.samt.rcp;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 
 import sernet.gs.ui.rcp.main.bsi.views.BrowserView;
-import sernet.gs.ui.rcp.main.bsi.views.FileView;
-import sernet.gs.ui.rcp.main.bsi.views.NoteView;
-import sernet.gs.ui.rcp.main.bsi.views.RelationView;
 import sernet.verinice.interfaces.ActionRightIDs;
-import sernet.verinice.iso27k.rcp.CatalogView;
-import sernet.verinice.iso27k.rcp.ISMView;
 
 /**
  * @author Daniel Murygin <dm@sernet.de>
@@ -40,7 +36,7 @@ public class SamtPerspective implements IPerspectiveFactory {
 
     public static final String ID = "sernet.verinice.samt.rcp.SamtPerspective";
     
-    public static HashMap<String, String> viewsRightIDs;
+    private static final Map<String, String> viewsRightIDs;
     
     static{
         viewsRightIDs = new HashMap<String, String>();
@@ -58,11 +54,13 @@ public class SamtPerspective implements IPerspectiveFactory {
      */
     @Override
     public void createInitialLayout(IPageLayout layout) {
+        final float ratio30Percent = 0.3f;
+        final float ratio60Percent = 0.6f;
         String editorArea = layout.getEditorArea();
         layout.setEditorAreaVisible(true);
-        layout.addView(SamtView.ID, IPageLayout.LEFT, 0.3f, editorArea);
-        layout.addView(BrowserView.ID, IPageLayout.TOP, 0.6f, editorArea);
-        layout.addView(SpiderChartView.ID, IPageLayout.BOTTOM, 0.6f, SamtView.ID);
+        layout.addView(SamtView.ID, IPageLayout.LEFT, ratio30Percent, editorArea);
+        layout.addView(BrowserView.ID, IPageLayout.TOP, ratio60Percent, editorArea);
+        layout.addView(SpiderChartView.ID, IPageLayout.BOTTOM, ratio60Percent, SamtView.ID);
     }
 
 }

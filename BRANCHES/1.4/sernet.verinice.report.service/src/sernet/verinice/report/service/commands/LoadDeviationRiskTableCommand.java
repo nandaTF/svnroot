@@ -53,10 +53,10 @@ import sernet.verinice.model.samt.SamtTopic;
 @SuppressWarnings("serial")
 public class LoadDeviationRiskTableCommand extends GenericCommand {
 
-    public final static String CONTROL_DEVIATION_PROPERTY = "control_isa_audit_devi";
-    public final static String CONTROL_RISK_PROPERTY = "control_isa_audit_ra";
-    public final static String SAMT_DEVIATION_PROPERTY = "samt_topic_audit_devi";
-    public final static String SAMT_RISK_PROPERTY = "samt_topic_audit_ra";
+    public static final String CONTROL_DEVIATION_PROPERTY = "control_isa_audit_devi";
+    public static final String CONTROL_RISK_PROPERTY = "control_isa_audit_ra";
+    public static final String SAMT_DEVIATION_PROPERTY = "samt_topic_audit_devi";
+    public static final String SAMT_RISK_PROPERTY = "samt_topic_audit_ra";
     private static final String OVERVIEW_PROPERTY = "controlgroup_is_NoIso_group";
 
     private List<List<String>> result;
@@ -75,13 +75,14 @@ public class LoadDeviationRiskTableCommand extends GenericCommand {
 
     public LoadDeviationRiskTableCommand(int chapterId, String chapterName) {
         log = Logger.getLogger(LoadDeviationRiskTableCommand.class);
+        int chapterId0 = -1;
         if(String.valueOf(chapterId).startsWith(String.valueOf(LoadChapterListCommand.PLACEHOLDER_CONTROLGROUP_ID))){
             String chapterIdString = String.valueOf(chapterId);
             chapterIdString = chapterIdString.substring(String.valueOf(LoadChapterListCommand.PLACEHOLDER_CONTROLGROUP_ID).length());
-            chapterId = Integer.parseInt(chapterIdString);
+            chapterId0 = Integer.parseInt(chapterIdString);
             isNonIsoGroup = true;
         }
-        this.chapterId = chapterId;
+        this.chapterId = (chapterId0 > -1) ? chapterId0 : chapterId;
         this.chapterName = chapterName;
     }
 
@@ -105,8 +106,10 @@ public class LoadDeviationRiskTableCommand extends GenericCommand {
     @Override
     @SuppressWarnings("unchecked")
     public void execute() {
+        final int matrixLines = 3;
+        final int matrixColumns = 4;
         Audit rootElement = null;
-        ComprehensiveSamtReportMatrix chapterValues = new ComprehensiveSamtReportMatrix(3, 4);
+        ComprehensiveSamtReportMatrix chapterValues = new ComprehensiveSamtReportMatrix(matrixLines, matrixColumns);
         ArrayList<String> l = new ArrayList<String>();
         try {
             if (getCache().get(rootObjectId) != null) {
@@ -183,8 +186,8 @@ public class LoadDeviationRiskTableCommand extends GenericCommand {
 
             if (rootChapterElement != null) {
                 l.add(chapterName);
-                for (int line = 0; line < 3; line++) {
-                    for (int column = 0; column < 4; column++) {
+                for (int line = 0; line < matrixLines; line++) {
+                    for (int column = 0; column < matrixColumns; column++) {
                         l.add(String.valueOf(chapterValues.getValue(line, column)));
                     }
                 }
@@ -246,9 +249,12 @@ public class LoadDeviationRiskTableCommand extends GenericCommand {
     }
 
     private Cache createCache() {
+        final int maxElementsInMemory = 20000;
+        final int timeToLiveSeconds = 600;
+        final int timeToIdleSeconds = 500;
         cacheId = UUID.randomUUID().toString();
         manager = CacheManager.create();
-        cache = new Cache(cacheId, 20000, false, false, 600, 500);
+        cache = new Cache(cacheId, maxElementsInMemory, false, false, timeToLiveSeconds, timeToIdleSeconds);
         manager.addCache(cache);
         return cache;
     }

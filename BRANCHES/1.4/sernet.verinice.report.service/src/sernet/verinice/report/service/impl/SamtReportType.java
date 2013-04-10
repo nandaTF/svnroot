@@ -19,7 +19,6 @@ package sernet.verinice.report.service.impl;
 
 import java.net.URL;
 
-import org.apache.log4j.Logger;
 import org.eclipse.birt.report.engine.api.IDataExtractionTask;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 
@@ -29,8 +28,6 @@ import sernet.verinice.interfaces.report.IReportType;
 
 public class SamtReportType implements IReportType {
 	
-	private static final Logger LOG = Logger.getLogger(SamtReportType.class);
-
 	public String getDescription() {
 		return Messages.SamtReportType_0;
 	}
@@ -48,6 +45,7 @@ public class SamtReportType implements IReportType {
 	}
 
 	public void createReport(IReportOptions reportOptions) {
+	    final int iterations = 3;
 		BIRTReportService brs = new BIRTReportService();
 		
 		URL reportDesign = SamtReportType.class.getResource("samt-report.rptdesign"); //$NON-NLS-1$
@@ -61,7 +59,7 @@ public class SamtReportType implements IReportType {
 		{
 			IDataExtractionTask task = brs.createExtractionTask(reportDesign);
 			// In a SAMT report the 4th result set is the one that is of interest.
-			brs.extract(task, reportOptions, 3);
+			brs.extract(task, reportOptions, iterations);
 		}
 	}
 

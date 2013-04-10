@@ -37,7 +37,6 @@ import sernet.gs.service.RuntimeCommandException;
 import sernet.hui.common.connect.HitroUtil;
 import sernet.verinice.interfaces.ChangeLoggingCommand;
 import sernet.verinice.interfaces.CommandException;
-import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IAuthAwareCommand;
 import sernet.verinice.interfaces.IAuthService;
 import sernet.verinice.interfaces.IBaseDao;
@@ -177,17 +176,21 @@ public class CreateSelfAssessment extends ChangeLoggingCommand implements IChang
                 categorie.addLinkUp(link);
                 daoLink.saveOrUpdate(link);
             }
-        } catch (Exception e) {
+        } catch (CommandException e) {
             getLog().error("Error while creating self assesment", e); //$NON-NLS-1$
             throw new RuntimeCommandException("Error while creating self assesment: " + e.getMessage()); //$NON-NLS-1$
+        } catch (IOException e){
+            getLog().error("I-/O-Error while creating self assesment", e); //$NON-NLS-1$
+            throw new RuntimeCommandException("I-/O-Error while creating self assesment: " + e.getMessage()); //$NON-NLS-1$
         }
     }
     
-    public Organization saveNewOrganisation(CnATreeElement container, String title) throws Exception {
-        if(title==null) {
-            title = HitroUtil.getInstance().getTypeFactory().getMessage(Organization.TYPE_ID);   
+    public Organization saveNewOrganisation(CnATreeElement container, String title) throws CommandException {
+        String title0 = (title != null) ? title : null;
+        if(title0==null) {
+            title0 = HitroUtil.getInstance().getTypeFactory().getMessage(Organization.TYPE_ID);   
         }
-        CreateElement<Organization> saveCommand = new CreateElement<Organization>(container, Organization.class, title, false, true);
+        CreateElement<Organization> saveCommand = new CreateElement<Organization>(container, Organization.class, title0, false, true);
         saveCommand = getCommandService().executeCommand(saveCommand);
         Organization child = saveCommand.getNewElement();
         container.addChild(child);
@@ -233,11 +236,9 @@ public class CreateSelfAssessment extends ChangeLoggingCommand implements IChang
                 element = ItemControlTransformer.transformGeneric(item, new SamtTopic());
                 element.setParentAndScope(group);
             }
-            if (element !=null) {
-                addPermissions(element);             
-                group.addChild(element);
-                changedElements.add(element);
-            }
+            addPermissions(element);             
+            group.addChild(element);
+            changedElements.add(element);
         }
     }
 
@@ -252,7 +253,7 @@ public class CreateSelfAssessment extends ChangeLoggingCommand implements IChang
      * @throws CommandException
      *             if executing of CSV import command fails
      */
-    private Collection<IItem> getItemCollection() throws FileNotFoundException, IOException, CommandException {
+    private Collection<IItem> getItemCollection() throws IOException, CommandException {
         // if csvFile was not passed to this command as parameter, read it here
         if (csvFile == null) {
             // read the CSV file which contains the self assessment controls
@@ -265,8 +266,7 @@ public class CreateSelfAssessment extends ChangeLoggingCommand implements IChang
         }
         ImportCatalog catalogCommand = new ImportCatalog(csvFile.getFileContent());
         catalogCommand = getCommandService().executeCommand(catalogCommand);
-        Collection<IItem> itemCollection = catalogCommand.getCatalog().getRoot().getItems();
-        return itemCollection;
+        return catalogCommand.getCatalog().getRoot().getItems();
     }
 
     /**
@@ -274,16 +274,16 @@ public class CreateSelfAssessment extends ChangeLoggingCommand implements IChang
      * @return
      */
     private AuditGroup getAuditGroup(CnATreeElement selfAssessment) {
-        AuditGroup auditGroup = null;
+        AuditGroup auditGroup0 = null;
         Set<CnATreeElement> elementSet = selfAssessment.getChildren();
         for (Iterator<CnATreeElement> iterator = elementSet.iterator(); iterator.hasNext();) {
             CnATreeElement element = iterator.next();
             if (element instanceof AuditGroup) {
-                auditGroup = (AuditGroup) element;
+                auditGroup0 = (AuditGroup) element;
                 break;
             }
         }
-        return auditGroup;
+        return auditGroup0;
     }
     
     /**

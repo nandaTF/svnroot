@@ -47,9 +47,9 @@ import sernet.verinice.model.samt.SamtTopic;
  */
 public class LoadISAReportChapterList extends GenericCommand implements ICachedCommand{
 
-    private static transient Logger LOG = Logger.getLogger(LoadISAReportChapterList.class);
+    private static transient Logger log = Logger.getLogger(LoadISAReportChapterList.class);
     
-    public static String[] COLUMNS = new String[]{"dbid", "title"};
+    public static final String[] COLUMNS = new String[]{"dbid", "title"};
     
     private static final String OVERVIEW_PROPERTY = "controlgroup_is_NoIso_group";
     private static final int OVERVIEW_PROPERTY_TARGET = 0;
@@ -179,9 +179,12 @@ public class LoadISAReportChapterList extends GenericCommand implements ICachedC
     }
 
     private Cache createCache() {
+        final int maxElementsInMemory = 20000;
+        final int timeToLiveSeconds = 600;
+        final int timeToIdleSeconds = 500;
         cacheId = UUID.randomUUID().toString();
         manager = CacheManager.create();
-        cache = new Cache(cacheId, 20000, false, false, 600, 500);
+        cache = new Cache(cacheId, maxElementsInMemory, false, false, timeToLiveSeconds, timeToIdleSeconds);
         manager.addCache(cache);
         return cache;
     }
@@ -225,9 +228,9 @@ public class LoadISAReportChapterList extends GenericCommand implements ICachedC
     }
     
     private Logger getLog(){
-        if(LOG == null){
-            LOG = Logger.getLogger(this.getClass());
+        if(log == null){
+            log = Logger.getLogger(this.getClass());
         }
-        return LOG;
+        return log;
     }
 }
