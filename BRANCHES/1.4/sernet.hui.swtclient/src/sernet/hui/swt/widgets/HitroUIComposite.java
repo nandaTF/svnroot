@@ -38,7 +38,7 @@ public class HitroUIComposite extends ScrolledComposite {
 	
 	private HitroUIView huiView;
 	
-	public HitroUIComposite(Composite parent, int style, boolean twistie) {
+	public HitroUIComposite(Composite parent, boolean twistie) {
 		// scrollable composite:
 		super(parent, SWT.V_SCROLL);
 		this.setExpandHorizontal(true);
@@ -46,11 +46,11 @@ public class HitroUIComposite extends ScrolledComposite {
 		GridLayout scrollLayout = new GridLayout(4, true);
 		this.setLayout(scrollLayout);
 		
-		if (twistie)
+		if (twistie){
 			createTwistieGroup();
-		else
+		} else {
 			createGroup();
-		
+		}
 	}
 	
 	public void setInputHelper(String typeid, IInputHelper helper, int type, boolean showHint) {
@@ -93,11 +93,13 @@ public class HitroUIComposite extends ScrolledComposite {
 		huiTwistie.setLayoutData(huiTwistieLD);
 
 		huiTwistie.addExpansionListener(new IExpansionListener() {
-			public void expansionStateChanged(ExpansionEvent arg0) {
+			@Override
+            public void expansionStateChanged(ExpansionEvent arg0) {
 				huiView.resizeContainer();
 			}
 
-			public void expansionStateChanging(ExpansionEvent arg0) {
+			@Override
+            public void expansionStateChanging(ExpansionEvent arg0) {
 				// nothing
 			}
 		});
@@ -156,11 +158,13 @@ public class HitroUIComposite extends ScrolledComposite {
 		huiTwistie.setLayoutData(huiTwistieLD);
 
 		huiTwistie.addExpansionListener(new IExpansionListener() {
-			public void expansionStateChanged(ExpansionEvent arg0) {
+			@Override
+            public void expansionStateChanged(ExpansionEvent arg0) {
 				huiView.resizeContainer();
 			}
 
-			public void expansionStateChanging(ExpansionEvent arg0) {
+			@Override
+            public void expansionStateChanging(ExpansionEvent arg0) {
 				// nothing
 			}
 		});
@@ -184,13 +188,20 @@ public class HitroUIComposite extends ScrolledComposite {
 		huiView = new HitroUIView(this,contentComp, fieldsComposite);
 	}
 	
+    /**
+     * @param inheritanceBehavior
+     */
+    public void initBehaviour(IEditorBehavior behavior) {
+        huiView.initBehaviour(behavior);        
+    }
+	
 	public void createView(Entity entity, boolean editable, boolean useRules, String[] tags, boolean taggedOnly, List<String> validationList, boolean useValidationGuiHints) throws DBException {
 		huiView.createView(entity, editable, useRules, tags, taggedOnly, validationList, useValidationGuiHints);
 	}
 	
 	public void createView(Entity entity, boolean editable, boolean useRules, String tags, boolean taggedOnly, List<String> validationList,  boolean useValidationGuiHints) throws DBException {
-	    tags = tags.replaceAll("\\s+", "");
-        String[] individualTags = tags.split(",");
+	    String tags_ = tags.replaceAll("\\s+", "");
+        String[] individualTags = tags_.split(",");
         huiView.createView(entity, editable, useRules, individualTags, taggedOnly, validationList, useValidationGuiHints);
     }
 	
@@ -213,9 +224,6 @@ public class HitroUIComposite extends ScrolledComposite {
 	public void closeView() {
 		huiView.closeView();
 	}
-
-   
-
-    
+  
 
 }

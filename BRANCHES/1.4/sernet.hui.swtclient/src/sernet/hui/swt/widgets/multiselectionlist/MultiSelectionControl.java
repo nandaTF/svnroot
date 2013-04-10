@@ -59,13 +59,14 @@ public class MultiSelectionControl implements IHuiControl {
 	private Entity entity;
 	private PropertyType type;
 	private Composite parent;
-	Text text;
+	private Text text;
 	private boolean editable = false;
 	private Color bgColor;
 	private Color fgColor;
 	private boolean referencesEntities;
 	private boolean crudButtons;
-	private boolean showValidationHint;
+    private boolean cnalinkreference;
+    private boolean showValidationHint;
 	private boolean useValidationGUIHints;
 	
 	private Label label;
@@ -81,13 +82,16 @@ public class MultiSelectionControl implements IHuiControl {
 	 * @param crudButtons 
 	 * @param composite
 	 */
-	public MultiSelectionControl(Entity entity, PropertyType type, Composite parent, boolean edit, boolean reference, boolean crudButtons, boolean showValidationHint, boolean useValidationGuiHints) {
+	public MultiSelectionControl(Entity entity, PropertyType type, 
+	        Composite parent, boolean edit, boolean reference, boolean crudButtons, boolean cnalinkreference, 
+	        boolean showValidationHint, boolean useValidationGuiHints) {
 		this.entity = entity;
 		this.type = type;
 		this.parent = parent;
 		this.editable = edit;
 		this.referencesEntities = reference;
 		this.crudButtons = crudButtons;
+		this.cnalinkreference = cnalinkreference;
 		this.showValidationHint = showValidationHint;
 		this.useValidationGUIHints = useValidationGuiHints;
 	}
@@ -97,7 +101,6 @@ public class MultiSelectionControl implements IHuiControl {
 	 */
 	public void create() {
 		label = new Label(parent, SWT.NULL);
-		String labelText = type.getName();
 
 		label.setText(type.getName());
 		
@@ -136,7 +139,8 @@ public class MultiSelectionControl implements IHuiControl {
 			}
 		});
 		
-		if (crudButtons) {
+		// buttons not available for cnalink references
+		if (crudButtons && ! cnalinkreference) {
 			// create buttons to add / delete new properties:
 			Button addBtn = new Button(container, SWT.PUSH);
 			addBtn.setText(Messages.MultiSelectionControl_2);
@@ -160,38 +164,54 @@ public class MultiSelectionControl implements IHuiControl {
 	}
 
 	public void writeToTextField() {
-		if (referencesEntities)
+		if (referencesEntities){
 			writeEntitiesToTextField();
-		else
+		} else if (cnalinkreference) {
+		    writeLinkedObjectsToTextField();
+		} else {
 			writeOptionsToTextField();
+		}
 	}
 
-	private void writeEntitiesToTextField() {
+	/**
+     * Get all linked objects for linktype and write their names to the text field.
+     * Uses a runtime callback (reference resolver) to do this.
+     */
+    private void writeLinkedObjectsToTextField() {
+        String referencedCnaLinkType = type.getReferencedCnaLinkType();
+        String names = type.getReferenceResolver().getTitlesOfLinkedObjects(referencedCnaLinkType, entity.getUuid());
+        text.setText(names);
+    }
+
+    private void writeEntitiesToTextField() {
 		StringBuffer names = new StringBuffer();
 		List properties = entity.getProperties(type.getId()).getProperties();
-		if (properties == null)
+		if (properties == null){
 			return;
-		
+		}
 		for (Iterator iter = properties.iterator(); iter.hasNext();) {
 			Property prop = (Property) iter.next();
 			String referencedId = prop.getPropertyValue();
 			IMLPropertyOption ref = getEntity(referencedId);
-			if (ref==null)
+			if (ref==null){
 				continue;
+			}
 			String optionName = ref.getName();
-			if (names.length()==0)
+			if (names.length()==0){
 				names.append(optionName);
-			else
-				names.append(" / " + optionName);
-				
+			} else {
+				names.append(" / ");
+				names.append(optionName);
+			}
 		}
 		text.setText(names.toString());
 	}
 
 	private IMLPropertyOption getEntity(String referencedId) {
-		for (IMLPropertyOption entity : type.getReferencedEntities()) {
-			if (entity.getId().equals(referencedId))
-				return entity;
+		for (IMLPropertyOption entity_ : type.getReferencedEntities()) {
+			if (entity_.getId().equals(referencedId)){
+				return entity_;
+			}
 		}
 		return null;
 	}
@@ -206,21 +226,23 @@ public class MultiSelectionControl implements IHuiControl {
 	private void writeOptionsToTextField() {
 		StringBuffer names = new StringBuffer();
 		List properties = entity.getProperties(type.getId()).getProperties();
-		if (properties == null)
+		if (properties == null){
 			return;
-		
+		}
 		for (Iterator iter = properties.iterator(); iter.hasNext();) {
 			Property prop = (Property) iter.next();
 			String optionId = prop.getPropertyValue();
 			IMLPropertyOption opt = type.getOption(optionId);
-			if (opt==null)
+			if (opt==null){
 				continue;
+			}
 			String optionName = opt.getName();
-			if (names.length()==0)
+			if (names.length()==0){
 				names.append(optionName);
-			else
-				names.append(" / " + optionName);
-				
+			} else {
+				names.append(" / ");
+				names.append(optionName);
+			}
 		}
 		text.setText(names.toString());
 		
@@ -229,16 +251,33 @@ public class MultiSelectionControl implements IHuiControl {
 	void showSelectionDialog() {
 		Display display = Display.getDefault();
         Shell shell = new Shell(display);
-		MultiSelectionDialog dialog = new MultiSelectionDialog(shell, SWT.NULL, 
-				this.entity, this.type, this.referencesEntities);
-		dialog.open();
+        if (cnalinkreference) {
+            createLinks();
+        }
+        else {
+            MultiSelectionDialog dialog = new MultiSelectionDialog(shell, SWT.NULL, 
+                    this.entity, this.type, this.referencesEntities);
+            dialog.open();
+        }
 	}
 	
+	 public void createLinks() {
+         // create new link to object
+         String linkType = type.getReferencedCnaLinkType();
+         String referencedEntityType = type.getReferencedEntityTypeId();
+         type.getReferenceResolver().createLinks(referencedEntityType, linkType, entity.getUuid());
+         writeLinkedObjectsToTextField();
+     }
+	
+	/** 
+	 * This is currently only implemented for "roles" in Configuration objects as a special case.
+	 */
 	void showAddDialog() {
 		InputDialog dialog = new InputDialog(Display.getCurrent().getActiveShell(), Messages.MultiSelectionControl_3, Messages.MultiSelectionControl_4, "", new IInputValidator() {
 			public String isValid(String newText) {
-				if (newText.length()<1)
+				if (newText.length()<1){
 					return Messages.MultiSelectionControl_5;
+				}
 				return null;
 			}
 		});
@@ -278,8 +317,8 @@ public class MultiSelectionControl implements IHuiControl {
 		}
 		
 		if(useValidationGUIHints){
-		    text.setForeground(Colors.BLACK);
-		    text.setBackground(Colors.YELLOW);
+			text.setForeground(Colors.BLACK);
+			text.setBackground(Colors.YELLOW);
 			refontLabel(true);
 		}
 		return false;
