@@ -40,7 +40,7 @@ public interface IReferenceResolver {
 	/**
 	 * Get all entities of the given type.
 	 */
-	public List<IMLPropertyOption> getAllEntitesForType(String referencedEntityTypeId);
+	List<IMLPropertyOption> getAllEntitesForType(String referencedEntityTypeId);
 
 	/**
 	 * Allows for the creation of new entities on the spot.
@@ -48,7 +48,7 @@ public interface IReferenceResolver {
 	 * @param parentEntity 
 	 * @param newName 
 	 */
-	public void addNewEntity(Entity parentEntity, String newName);
+	void addNewEntity(Entity parentEntity, String newName);
 
 	/**
 	 * Get only those entities that match the given referenced IDs.
@@ -57,7 +57,26 @@ public interface IReferenceResolver {
 	 * @param references
 	 * @return
 	 */
-	public List<IMLPropertyOption> getReferencedEntitesForType(
+	List<IMLPropertyOption> getReferencedEntitesForType(
 			String referencedEntityTypeId, List<Property> references);
+
+    /**
+     * Load a CnaTreeElement fr the given entity and find all relations of given linkType
+     * from / to this element.
+     * Create a comma-separated list of names of these elements for display and return that.
+     * 
+     * @param referencedCnaLinkType
+     * @param uuid
+     * @return
+     */
+    String getTitlesOfLinkedObjects(String referencedCnaLinkType, String entityUuid);
+
+    /**
+     * Create new CnaLinks of the given type, should open a dialog to allow the user to choose the object to link to.
+     * 
+     * @param linkType
+     * @param entity
+     */
+    void createLinks(String referencedEntityType, String linkType, String entityUuid);
 
 }

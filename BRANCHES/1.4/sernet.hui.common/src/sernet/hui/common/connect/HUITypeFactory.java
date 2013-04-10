@@ -17,17 +17,12 @@
  ******************************************************************************/
 package sernet.hui.common.connect;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,9 +58,19 @@ import sernet.snutils.DBException;
  * 
  */
 public class HUITypeFactory {
-    private static final Logger log = Logger.getLogger(HUITypeFactory.class);
+    private static final Logger LOG = Logger.getLogger(HUITypeFactory.class);
 
-    public static String HUI_CONFIGURATION_FILE = "SNCA.xml";
+    public static final String HUI_CONFIGURATION_FILE = "SNCA.xml";
+    
+    private static final String ATTRIBUTE_NAME = "name";
+    private static final String ATTRIBUTE_ID = "id";
+    private static final String ATTRIBUTE_REVERSENAME = "reversename";
+    private static final String ATTRIBUTE_TOOLTIP = "tooltip";
+    private static final String ATTRIBUTE_TAGS = "tags";
+    private static final String ATTRIBUTE_DEFAULTVALUE = "defaultValue";
+    private static final String ATTRIBUTE_REQUIRED = "required";
+    private static final String ATTRIBUTE_VALUE = "value";
+    private static final String BOOLEAN_TRUE = "true";
 
     private static Document doc;
     
@@ -75,12 +80,8 @@ public class HUITypeFactory {
 
     private Set<String> allDependecies = new HashSet<String>();
 
-    // last-modified fields for local file or HTTP:
-    private static Date fileDate;
-    private static String lastModified;
-
     // loads translated messages for HUI entities from resource bundles
-    public SNCAMessages messages;
+    private SNCAMessages messages;
 
     protected HUITypeFactory() {
         // Intentionally do nothing (is for the Functionless subclass).
@@ -104,11 +105,10 @@ public class HUITypeFactory {
      * @throws DBException
      */
     private HUITypeFactory(URL xmlFile) throws DBException {
-
+        
         if (xmlFile == null) {
             throw new DBException("Pfad für XML Systemdefinition nicht initialisiert. Config File korrekt?");
         }
-
         if (xmlFile.getProtocol().equals("http") || xmlFile.getProtocol().equals("ftp")) {
             try {
                 xmlFile = new URL(xmlFile.toString() + "?nocache=" + Math.random());
@@ -119,8 +119,8 @@ public class HUITypeFactory {
 
         messages = new SNCAMessages(xmlFile.toExternalForm());
 
-        if (log.isDebugEnabled()) {
-            log.debug("Conf url: " + messages.getBaseUrl() + ", localized name of huientity role: " + messages.getString("role"));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Conf url: " + messages.getBaseUrl() + ", localized name of huientity role: " + messages.getString("role"));
         }
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -139,21 +139,24 @@ public class HUITypeFactory {
             parser = factory.newDocumentBuilder();
 
         } catch (ParserConfigurationException e) {
-            log.error("Unrecognized parser feature.", e);
+            LOG.error("Unrecognized parser feature.", e);
             throw new RuntimeException(e);
         }
 
         try {
-            log.debug("Getting XML property definition from " + xmlFile);
+            LOG.debug("Getting XML property definition from " + xmlFile);
             parser.setErrorHandler(new ErrorHandler() {
+                @Override
                 public void error(SAXParseException exception) throws SAXException {
                     throw new RuntimeException(exception);
                 }
 
+                @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
                     throw new RuntimeException(exception);
                 }
 
+                @Override
                 public void warning(SAXParseException exception) throws SAXException {
                     Logger.getLogger(this.getClass()).debug("Parser warning: " + exception.getLocalizedMessage());
                 }
@@ -162,7 +165,7 @@ public class HUITypeFactory {
             readAllEntities();
 
         } catch (IOException ie) {
-            log.error(ie);
+            LOG.error(ie);
             throw new DBException("Die XML Datei mit der Definition der Formularfelder konnte nicht geladen werden! Bitte Pfad und Erreichbarkeit laut Konfigurationsfile überprüfen.", ie);
         } catch (SAXException e) {
             throw new DBException("Die XML Datei mit der Definition der Formularfelder ist defekt!", e);
@@ -176,13 +179,13 @@ public class HUITypeFactory {
 
             Element entityEl = (Element) entities.item(i);
             EntityType entityObj = new EntityType();
-            String id = entityEl.getAttribute("id");
+            String id = entityEl.getAttribute(ATTRIBUTE_ID);
             entityObj.setId(id);
 
             // labels are loaded from SNCAMessages (resource bundles)
-            entityObj.setName(getMessage(id, entityEl.getAttribute("name")));
+            entityObj.setName(getMessage(id, entityEl.getAttribute(ATTRIBUTE_NAME)));
 
-            this.allEntities.put(entityEl.getAttribute("id"), entityObj);
+            this.allEntities.put(entityEl.getAttribute(ATTRIBUTE_ID), entityObj);
             readChildElements(entityObj, null);
         }
     }
@@ -210,59 +213,6 @@ public class HUITypeFactory {
         return result;
     }
 
-    /**
-     * Check if file has changed (or was never read). Timestamp for local files,
-     * for remote files the server will only deliver the file if it has changed,
-     * because we set the modified-since property on the request.
-     * 
-     * @param xmlFile
-     *            the URI of the xml file
-     */
-    private static boolean fileChanged(String xmlFile) {
-        if (xmlFile.matches("^http.*")) {
-            try {
-                URL xml = new URL(xmlFile);
-                HttpURLConnection.setFollowRedirects(true);
-                HttpURLConnection connection = (HttpURLConnection) xml.openConnection();
-                if (lastModified != null) {
-                    connection.addRequestProperty("If-Modified-Since", lastModified);
-                }
-                connection.connect();
-
-                if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
-                    connection.disconnect();
-                    log.debug("Remote PropertyType file not modified.");
-                    return false;
-                }
-                lastModified = connection.getHeaderField("Last-Modified");
-                connection.disconnect();
-                log.debug("CHANGED: Remote PropertyType file modified.");
-                return true;
-            } catch (MalformedURLException e) {
-                log.error(e);
-                log.error(e);
-            } catch (ProtocolException e) {
-                log.error(e);
-            } catch (UnsupportedEncodingException e) {
-                log.error(e);
-            } catch (IOException e) {
-                log.error(e);
-            }
-        } else {
-            // check local :
-            File xml = new File(xmlFile);
-            Date fileNow = new Date(xml.lastModified());
-            if (fileDate == null || fileNow.after(fileDate)) {
-                log.debug("CHANGED: Local PropertyType file was modified.");
-                fileDate = fileNow;
-                return true;
-            }
-            log.debug("Local PropertyType file was not modified.");
-            return false;
-        }
-        return true;
-    }
-
     private void readChildElements(EntityType entityType, PropertyGroup propGroup) {
         NodeList nodes = null;
         if (propGroup != null) {
@@ -282,18 +232,18 @@ public class HUITypeFactory {
             }
             Element child = (Element) nodes.item(i);
             if (child.getTagName().equals("huiproperty")) {
-                PropertyType type = readPropertyType(child.getAttribute("id"));
+                PropertyType type = readPropertyType(child.getAttribute(ATTRIBUTE_ID));
                 if (propGroup != null) {
                     propGroup.addPropertyType(type);
                 } else {
                     entityType.addPropertyType(type);
                 }
             } else if (child.getTagName().equals("huipropertygroup")) {
-                PropertyGroup group = readPropertyGroup(child.getAttribute("id"));
+                PropertyGroup group = readPropertyGroup(child.getAttribute(ATTRIBUTE_ID));
                 entityType.addPropertyGroup(group);
                 readChildElements(entityType, group);
             } else if (child.getTagName().equals("huirelation")) {
-                HuiRelation relation = new HuiRelation(child.getAttribute("id"));
+                HuiRelation relation = new HuiRelation(child.getAttribute(ATTRIBUTE_ID));
                 readRelation(child, entityType.getId(), relation);
                 entityType.addRelation(relation);
             }
@@ -305,12 +255,12 @@ public class HUITypeFactory {
      * @param relation
      */
     private void readRelation(Element child, String sourceTypeId, HuiRelation relation) {
-        final String id = child.getAttribute("id");
+        final String id = child.getAttribute(ATTRIBUTE_ID);
         // name, reversename and tooltip are loaded from SNCAMessages (resource bundles)
         // key is: [id]_name, [id]_reversename, [id]_tooltip 
-        relation.setName(getMessage(getKey(id,"name"), child.getAttribute("name"), false));
-        relation.setReversename(getMessage(getKey(id,"reversename"), child.getAttribute("reversename"), false));
-        relation.setTooltip(getMessage(getKey(id,"tooltip"), child.getAttribute("tooltip"), true));
+        relation.setName(getMessage(getKey(id,ATTRIBUTE_NAME), child.getAttribute(ATTRIBUTE_NAME), false));
+        relation.setReversename(getMessage(getKey(id,ATTRIBUTE_REVERSENAME), child.getAttribute(ATTRIBUTE_REVERSENAME), false));
+        relation.setTooltip(getMessage(getKey(id,ATTRIBUTE_TOOLTIP), child.getAttribute(ATTRIBUTE_TOOLTIP), true));
         
         relation.setTo(child.getAttribute("to"));
         relation.setFrom(sourceTypeId);
@@ -340,22 +290,23 @@ public class HUITypeFactory {
 
         // name and tooltip are loaded from SNCAMessages (resource bundles)
         // key is: [id]_name, [id]_tooltip 
-        propObj.setName(getMessage(id, prop.getAttribute("name")));
-        propObj.setTooltiptext(getMessage(getKey(id, "tooltip"), prop.getAttribute("tooltip"), true));
+        propObj.setName(getMessage(id, prop.getAttribute(ATTRIBUTE_NAME)));
+        propObj.setTooltiptext(getMessage(getKey(id, ATTRIBUTE_TOOLTIP), prop.getAttribute(ATTRIBUTE_TOOLTIP), true));
 
-        propObj.setTags(prop.getAttribute("tags"));
-        addToTagList(prop.getAttribute("tags"));
+        propObj.setTags(prop.getAttribute(ATTRIBUTE_TAGS));
+        addToTagList(prop.getAttribute(ATTRIBUTE_TAGS));
 
         propObj.setInputType(prop.getAttribute("inputtype"));
-        propObj.setCrudButtons(prop.getAttribute("crudButtons").equals("true"));
-        propObj.setRequired(prop.getAttribute("required").equals("true"));
-        propObj.setInitialFocus(prop.getAttribute("focus").equals("true"));
-        propObj.setEditable(prop.getAttribute("editable").equals("true"));
-        propObj.setVisible(prop.getAttribute("visible").equals("true"));
-        propObj.setURL(prop.getAttribute("isURL").equals("true"));
-        propObj.setReportable(prop.getAttribute("report").equals("true"));
+        propObj.setCrudButtons(prop.getAttribute("crudButtons").equals(BOOLEAN_TRUE));
+        propObj.setRequired(prop.getAttribute(ATTRIBUTE_REQUIRED).equals(BOOLEAN_TRUE));
+        propObj.setInitialFocus(prop.getAttribute("focus").equals(BOOLEAN_TRUE));
+        propObj.setEditable(prop.getAttribute("editable").equals(BOOLEAN_TRUE));
+        propObj.setVisible(prop.getAttribute("visible").equals(BOOLEAN_TRUE));
+        propObj.setURL(prop.getAttribute("isURL").equals(BOOLEAN_TRUE));
+        propObj.setReportable(prop.getAttribute("report").equals(BOOLEAN_TRUE));
         propObj.setTextRows(prop.getAttribute("textrows"));
         propObj.setReferencedEntityType(readReferencedEntityId(prop));
+        propObj.setReferencedCnaLinkType(readReferencedCnaLinkType(prop));
         // read options for property
         propObj.setPredefinedValues(this.getOptionsForPropertyType(id));
         propObj.setDependencies(readDependencies(prop));
@@ -363,17 +314,17 @@ public class HUITypeFactory {
         if (propObj.isNumericSelect()) {
             propObj.setNumericMin(prop.getAttribute("min"));
             propObj.setNumericMax(prop.getAttribute("max"));
-            propObj.setNumericDefault(prop.getAttribute("defaultValue"));
+            propObj.setNumericDefault(prop.getAttribute(ATTRIBUTE_DEFAULTVALUE));
         }
         
         if (propObj.isBooleanSelect()) {
             propObj.setNumericMin("0");
             propObj.setNumericMax("1");
-            propObj.setNumericDefault(prop.getAttribute("defaultValue"));
+            propObj.setNumericDefault(prop.getAttribute(ATTRIBUTE_DEFAULTVALUE));
         }
 
         // the shortcut to set a "NotEmpty" validator:
-        if (prop.getAttribute("required").equals("true")) {
+        if (prop.getAttribute(ATTRIBUTE_REQUIRED).equals(BOOLEAN_TRUE)) {
             propObj.addValidator(new NotEmpty());
         }
         // add additional validations
@@ -387,14 +338,27 @@ public class HUITypeFactory {
     }
 
     /**
+     * @return
+     */
+    private String readReferencedCnaLinkType(Element prop) {
+        NodeList list = prop.getElementsByTagName("references");
+        for (int i = 0; i < list.getLength(); ++i) {
+            Element referencesElmt = (Element) list.item(i);
+            return referencesElmt.getAttribute("linkType");
+        }
+        return "";
+    }
+
+
+    /**
      * @param attribute
      */
     private void addToTagList(String tags) {
-        if (tags == null || tags.length()<1)
+        if (tags == null || tags.length()<1){
             return;
-        
-        tags = tags.replaceAll("\\s+", "");
-        String[] individualTags = tags.split(",");
+        }
+        String newTags = tags.replaceAll("\\s+", "");
+        String[] individualTags = newTags.split(",");
         allTags.addAll(Arrays.asList(individualTags));
     }
     
@@ -421,10 +385,10 @@ public class HUITypeFactory {
         }
 
         PropertyGroup groupObj = new PropertyGroup();
-        groupObj.setId(group.getAttribute("id"));
-        groupObj.setName( getMessage(id, group.getAttribute("name")) );
-        groupObj.setTags(group.getAttribute("tags"));
-        addToTagList(group.getAttribute("tags"));
+        groupObj.setId(group.getAttribute(ATTRIBUTE_ID));
+        groupObj.setName( getMessage(id, group.getAttribute(ATTRIBUTE_NAME)) );
+        groupObj.setTags(group.getAttribute(ATTRIBUTE_TAGS));
+        addToTagList(group.getAttribute(ATTRIBUTE_TAGS));
 
         groupObj.setDependencies(readDependencies(group));
         return groupObj;
@@ -434,8 +398,8 @@ public class HUITypeFactory {
      * @param prop
      * @return
      */
-    private HashSet<String> readDependencies(Element prop) {
-        HashSet<String> depends = new HashSet<String>();
+    private Set<DependsType> readDependencies(Element prop) {
+        Set<DependsType> depends = new HashSet<DependsType>();
         NodeList nodes = prop.getChildNodes();
         allChildren: for (int i = 0; i < nodes.getLength(); ++i) {
             if (!(nodes.item(i) instanceof Element)) {
@@ -443,10 +407,12 @@ public class HUITypeFactory {
             }
             Element child = (Element) nodes.item(i);
             if (child.getTagName().equals("depends")) {
-                depends.add(child.getAttribute("option"));
+                String option = child.getAttribute("option");
+                String value = child.getAttribute(ATTRIBUTE_VALUE);
+                boolean inverse = Boolean.TRUE.toString().equals(child.getAttribute("inverse"));
+                depends.add(new DependsType(option, value, inverse));
             }
         }
-        this.allDependecies.addAll(depends);
         return depends;
     }
     
@@ -458,13 +424,13 @@ public class HUITypeFactory {
             String className = ruleElement.getAttribute("class");
             IValidationRule rule = (IValidationRule)RuleFactory.getValidationRule(className);
             String hint = ruleElement.getAttribute("hint");
-            rule.init(readValidationRuleParams(ruleElement, rule), hint);
+            rule.init(readValidationRuleParams(ruleElement), hint);
             ruleList.add(rule);
         }
         return ruleList;
     }
     
-    private String[] readValidationRuleParams(Element ruleElement, IValidationRule rule){
+    private String[] readValidationRuleParams(Element ruleElement){
         NodeList paramNodeList = ruleElement.getElementsByTagName("param");
         String[] params = new String[paramNodeList.getLength()];
         for(int i = 0; i < paramNodeList.getLength(); i++){
@@ -499,31 +465,31 @@ public class HUITypeFactory {
             Element paramNode = (Element) paramNodeList.item(i);
             params[i] = paramNode.getTextContent();
             if(rule.isMultiLanguage()) {
-                params[i] = getMessage(paramNode.getAttribute("id"), params[i]);
+                params[i] = getMessage(paramNode.getAttribute(ATTRIBUTE_ID), params[i]);
             }
             // TODO read rules from file
         }
         return params;
     }
 
-    private ArrayList getOptionsForPropertyType(String id) {
+    private List getOptionsForPropertyType(String id) {
         Element prop = doc.getElementById(id);
         NodeList values = prop.getElementsByTagName("option");
         ArrayList possibleValues = new ArrayList(values.getLength());
         for (int i = 0; i < values.getLength(); ++i) {
             Element value = (Element) values.item(i);
             PropertyOption dv = new PropertyOption();
-            final String idOption = value.getAttribute("id");
+            final String idOption = value.getAttribute(ATTRIBUTE_ID);
             dv.setId(idOption);
             // name is loaded from SNCAMessages (resource bundles)
-            dv.setName(getMessage(idOption, value.getAttribute("name")));
+            dv.setName(getMessage(idOption, value.getAttribute(ATTRIBUTE_NAME)));
             
-            if (value.getAttribute("value") != null && value.getAttribute("value").length()>0) {
+            if (value.getAttribute(ATTRIBUTE_VALUE) != null && value.getAttribute(ATTRIBUTE_VALUE).length()>0) {
 			    try {
-			        dv.setValue( Integer.parseInt(value.getAttribute("value")) );
+			        dv.setValue( Integer.parseInt(value.getAttribute(ATTRIBUTE_VALUE)) );
 			    } catch (Exception e) {
-			        if (log.isDebugEnabled()) {
-			            log.debug("Not a valid number for option " + value.getAttribute("value"));
+			        if (LOG.isDebugEnabled()) {
+			            LOG.debug("Not a valid number for option " + value.getAttribute(ATTRIBUTE_VALUE));
 			        }
 			        dv.setValue(null);
 			    }
@@ -543,8 +509,8 @@ public class HUITypeFactory {
             return null;
         }
         PropertyOption dv = new PropertyOption();
-        dv.setId(value.getAttribute("id"));
-        dv.setName(value.getAttribute("name"));
+        dv.setId(value.getAttribute(ATTRIBUTE_ID));
+        dv.setName(value.getAttribute(ATTRIBUTE_NAME));
         return dv;
     }
 
@@ -695,25 +661,25 @@ public class HUITypeFactory {
         }
         String message = messages.getString(key);
         if (message != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("returning translated message: " + message + ", key: " + key);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("returning translated message: " + message + ", key: " + key);
             }
         } else {
             message = defaultMessage;
-            if (log.isDebugEnabled() && message!=null) {
-                log.debug("returning message from SNCA.XML: " + message + ", key: " + key);
+            if (LOG.isDebugEnabled() && message!=null) {
+                LOG.debug("returning message from SNCA.XML: " + message + ", key: " + key);
                 // mark missing resource bundle entries
                 message = message + " (SNCA.xml)";
             }
             if(message==null) {
                 if(emptyIfNotFound) {
                     // message is optional may be empty
-                    if (log.isDebugEnabled()) {
-                        log.debug("SNCA message not found, key is: " + key);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("SNCA message not found, key is: " + key);
                     }
                     message = "";
                 } else {
-                    log.warn("SNCA message not found, key is: " + key);
+                    LOG.warn("SNCA message not found, key is: " + key);
                     message = key + " (!)";
                 }
             }

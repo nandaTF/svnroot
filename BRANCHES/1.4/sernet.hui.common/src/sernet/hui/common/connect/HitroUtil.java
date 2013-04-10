@@ -27,7 +27,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import sernet.hui.common.VeriniceContext;
-import sernet.hui.common.multiselectionlist.IMLPropertyOption;
 import sernet.snutils.DBException;
 
 /**
@@ -54,7 +53,7 @@ import sernet.snutils.DBException;
  */
 public class HitroUtil {
 
-	private static final Logger log = Logger.getLogger(HitroUtil.class);
+	private static final Logger LOG = Logger.getLogger(HitroUtil.class);
 
 	private HUITypeFactory typeFactory;
 	
@@ -68,11 +67,11 @@ public class HitroUtil {
 
 	/** Used from within the server only. */
 	public void initForServer() {
-		if (typeFactory == null)
+		if (typeFactory == null){
 			throw new IllegalStateException(
 					"type factory instance does not exist yet. This is not expected for the server!");
-
-		log.debug("Initializing server's HitroUI framework");
+		}
+		LOG.debug("Initializing server's HitroUI framework");
 		resolverFactory.createResolvers(typeFactory);
 	}
 
@@ -81,15 +80,15 @@ public class HitroUtil {
 		// For the client no HUITypeFactory instance should be available at this
 		// point.
 		// If it is, something went wrong (called this method twice?).
-		if (typeFactory != null)
+		if (typeFactory != null){
 			throw new IllegalStateException(
 					"Type factory instance already exists. This is not expected for the client!");
-
-		if (url == null)
+		}
+		if (url == null){
 			throw new IllegalStateException(
 					"Property 'url' is not set. This is not expected for the client!");
-
-		log.debug("Initializing client's HitroUI framework");
+		}
+		LOG.debug("Initializing client's HitroUI framework");
 		initForClientImpl(url, resolverFactory);
 	}
 
@@ -116,9 +115,9 @@ public class HitroUtil {
 
 	public void setTypeFactory(HUITypeFactory typeFactory) {
 		// This method must be called only once (by the Spring IoC container).
-		if (this.typeFactory != null)
+		if (this.typeFactory != null){
 			throw new IllegalStateException("Type factory instance already exists. This method must not be called twice.");
-
+		}
 		this.typeFactory = typeFactory;
 	}
 
@@ -149,7 +148,7 @@ public class HitroUtil {
 	 */
 	static class DelegatingHUITypeFactory extends HUITypeFactory {
 		
-		private static final Logger log = Logger.getLogger(DelegatingHUITypeFactory.class);
+		private static final Logger LOG_0 = Logger.getLogger(DelegatingHUITypeFactory.class);
 		
 		// dont't use typeFactory directly, use getTypeFactory() instead !
 		private HUITypeFactory typeFactory;
@@ -167,15 +166,15 @@ public class HitroUtil {
 		private void initDelegate()
 		{
 			synchronized (url) {
-				if (typeFactory != null)
+				if (typeFactory != null){
 					return;
-				
+				}
 				try {
 					typeFactory = HUITypeFactory.createInstance(url);
 					
 					resolverFactory.createResolvers(typeFactory);
 				} catch (DBException e) {
-					log.warn("Unable to reach document: " + url);
+					LOG_0.error("Unable to reach document: " + url, e);
 					
 					// TODO rschuster: Provide a message which is informative
 					// to the user.
@@ -190,27 +189,29 @@ public class HitroUtil {
 		    return typeFactory;
 		}
 		
-		public EntityType getEntityType(String id) {
+		@Override
+        public EntityType getEntityType(String id) {
 			return getTypeFactory().getEntityType(id);
 		}
 		
-		public Collection<EntityType> getAllEntityTypes() {
+		@Override
+        public Collection<EntityType> getAllEntityTypes() {
 			return getTypeFactory().getAllEntityTypes();
 		}
 		
-		public List<PropertyType> getURLPropertyTypes() {
+		@Override
+        public List<PropertyType> getURLPropertyTypes() {
 			return getTypeFactory().getURLPropertyTypes();
 		}
 
-		public PropertyType getPropertyType(String entityTypeID, String id) {
+		@Override
+        public PropertyType getPropertyType(String entityTypeID, String id) {
 			return getTypeFactory().getPropertyType(entityTypeID, id);
 		}
 
-		public boolean isDependency(IMLPropertyOption opt) {
-			return getTypeFactory().isDependency(opt);
-		}
 		
-		public HuiRelation getRelation(String typeId) {
+		@Override
+        public HuiRelation getRelation(String typeId) {
 			return getTypeFactory().getRelation(typeId);
 		}
 		

@@ -95,9 +95,17 @@ be displayed when one of the given options has been previously selected.
 	<xs:attribute name="tags" type="xs:string"/> <!-- Tags can be used to filter properties in the view, enter comma separated. -->
     <xs:attribute name="columns" type="xs:int" default="1" />
 </xs:complexType>
-    
+
+<!-- 
+    Complex type to define dependency to other properties of an entity.
+ -->    
 <xs:complexType name="dependstype">
-	<xs:attribute name="option" type="xs:IDREF" />
+    <!-- id of a property to depend on -->
+	<xs:attribute name="option" type="xs:IDREF" use="required" />
+    <!-- value of the property, if this value is set property is enabled -->
+    <xs:attribute name="value" type="xs:string" />
+    <!-- if true dependency evaluation is inverted-->
+    <xs:attribute name="inverse" type="xs:boolean" default="false"/>
 </xs:complexType>
 
 <!-- 
@@ -106,6 +114,7 @@ be displayed when one of the given options has been previously selected.
 <xs:complexType name="referencestype">
 	<!-- Which entities should be listed to create references? -->
 	<xs:attribute name="entitytype" type="xs:IDREF" />
+    <xs:attribute name="linkType" type="xs:IDREF" use="optional" />
 	
 </xs:complexType>
 	    	
@@ -243,6 +252,7 @@ be displayed when one of the given options has been previously selected.
 		<xs:enumeration value="multioption"/>
 		<xs:enumeration value="text"/>
 		<xs:enumeration value="reference"/>
+        <xs:enumeration value="cnalink-reference"/>
 		<xs:enumeration value="date"/>
 		<xs:enumeration value="numericoption"/>
 		<xs:enumeration value="booleanoption"/>

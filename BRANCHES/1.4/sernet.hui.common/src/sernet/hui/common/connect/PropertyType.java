@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -56,7 +58,7 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 		return crudButtons;
 	}
 
-	private HashSet dependencies = new HashSet();
+	private Set<DependsType> dependencies = new HashSet<DependsType>();
 
 	private String inputName;
 	
@@ -79,6 +81,10 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	private static final byte INPUT_NUMERICOPTION = 7;
 
 	private static final byte INPUT_BOOLEANOPTION = 8;
+	
+	private static final byte INPUT_CNALINK_REFERENCE = 9;
+	
+	
 
 	private List<IValidationRule> validators = new ArrayList<IValidationRule>();
 
@@ -86,7 +92,7 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 
 	private boolean required = false;
 
-	private ArrayList options = new ArrayList();
+	private List options = new ArrayList();
 
 	private String tooltiptext = "";
 
@@ -98,6 +104,8 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	private boolean isURL;
 
 	private String referencedEntityTypeId;
+
+	private String referencedCnaLinkType;
 
 	private IReferenceResolver referenceResolver;
 
@@ -116,6 +124,7 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
     private String tags;
 
     private int textrows;
+
 
 	/**
      * @param numericDefault the numericDefault to set
@@ -160,7 +169,8 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	/**
 	 * @return Returns the id.
 	 */
-	public String getId() {
+	@Override
+    public String getId() {
 		return id;
 	}
 
@@ -175,7 +185,8 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	/**
 	 * @return Returns the name.
 	 */
-	public String getName() {
+	@Override
+    public String getName() {
 		return name;
 	}
 
@@ -192,7 +203,8 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	 * 
 	 * @return Returns the predefinedValues.
 	 */
-	public ArrayList<IMLPropertyOption> getOptions() {
+	@Override
+    public List<IMLPropertyOption> getOptions() {
 		return options;
 	}
 
@@ -222,7 +234,7 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	 * @param predefinedValues
 	 *            The predefinedValues to set.
 	 */
-	public void setPredefinedValues(ArrayList predefinedValues) {
+	public void setPredefinedValues(List predefinedValues) {
 		this.options = predefinedValues;
 	}
 
@@ -250,46 +262,17 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	}
 
 	/**
-	 * Check if necessary dependencies are fulfilled to display this type List
-	 * of dependencies is OR, one of them is sufficient to display the property
-	 * type.
-	 * 
-	 * @return
-	 */
-	public boolean dependenciesFulfilled(Entity entity) {
-		// no deps defined:
-		if (dependencies.size() < 1) {
-			return true;
-		}
-
-		// if deps defined, at least one of them must be there:
-		for (Iterator iter = dependencies.iterator(); iter.hasNext();) {
-			String dep = (String) iter.next();
-			if (entity.isSelected(dep)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if this property depends on the given option.
-	 * 
-	 * @param optionId
-	 * @return
-	 */
-	public boolean isDependency(String optionId) {
-		return dependencies.contains(optionId);
-	}
-
-	/**
 	 * Set the option that this property depends on. It is only valid when one
 	 * of the options given as dependencies is selected in another property.
 	 * 
 	 * @param set
 	 */
-	public void setDependencies(HashSet set) {
+	public void setDependencies(Set<DependsType> set) {
 		this.dependencies = set;
+	}
+	
+	public Set<DependsType> getDependencies() {
+	    return this.dependencies;
 	}
 
 	/*
@@ -298,7 +281,8 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	 * @see
 	 * sernet.snkdb.guiswt.multiselectionlist.MLPropertyType#isMultiselect()
 	 */
-	public boolean isMultiselect() {
+	@Override
+    public boolean isMultiselect() {
 		return inputtype == INPUT_MULTIOPTION;
 	}
 
@@ -325,6 +309,10 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	public boolean isReference() {
 		return inputtype == INPUT_REFERENCE;
 	}
+	
+	public boolean isCnaLinkReference() {
+        return inputtype == INPUT_CNALINK_REFERENCE;
+    }
 
 	public boolean isText() {
 		return inputtype == INPUT_TEXT;
@@ -355,7 +343,9 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 			inputtype = INPUT_NUMERICOPTION;
 		} else if (attribute.equals("booleanoption")) {
             inputtype = INPUT_BOOLEANOPTION;
-        }
+        } else if (attribute.equals("cnalink-reference")) {
+            inputtype = INPUT_CNALINK_REFERENCE;
+        } 
 	}
 	
 	public String getInputName() {
@@ -378,7 +368,7 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 		this.validators = validators;
 	}
 
-	public HashMap<String, Boolean> validate(String text, String[] params) {
+	public Map<String, Boolean> validate(String text, String[] params) {
 	    HashMap<String, Boolean> validationResults = new HashMap<String, Boolean>();
 	    for (Iterator iter = validators.iterator(); iter.hasNext();) {
 			final IValidationRule validator = (IValidationRule) iter.next();
@@ -410,9 +400,24 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	public void setReferencedEntityType(String attribute) {
 		this.referencedEntityTypeId = attribute;
 	}
+	
+	public void setReferencedCnaLinkType(String attribute) {
+        this.referencedCnaLinkType = attribute;
+    }
+	
+	
 
 	public String getReferencedEntityTypeId() {
 		return referencedEntityTypeId;
+	}
+	
+	/**
+	 * Return the linkType Parameter from SNCA.xml's reference tag.
+	 * This is always a reference to a relation ID  i.e. "rel_document_person"
+	 * @return
+	 */
+	public String getReferencedCnaLinkType() {
+	    return this.referencedCnaLinkType;
 	}
 
 	public List<IMLPropertyOption> getReferencedEntities() {
@@ -548,13 +553,13 @@ public class PropertyType implements IMLPropertyType, IEntityElement, Comparable
 	 */
 	@Override
 	public int compareTo(PropertyType o) {
-		final int LESS = -1;
-		final int EQUAL = 0;
-		final int GREATER = 1;
-		int result = LESS;
+		final int less = -1;
+		final int equal = 0;
+		final int greater = 1;
+		int result = less;
 		if(o!=null) {
 			if(getName()==null) {
-				result = (o.getName()==null) ? EQUAL : GREATER;
+				result = (o.getName()==null) ? equal : greater;
 			} else if(o.getName()!=null) {
 				result = this.getName().compareTo(o.getName());
 			}

@@ -25,7 +25,9 @@ public class NotEmpty implements IValidationRule {
 	public boolean validate(String userInput, String[] args) {
 	    if(userInput != null){
 	        return userInput.length() > 0;
-	    } else return false;
+	    } else {
+	        return false;
+	    }
 	}
 
     /* (non-Javadoc)
@@ -41,11 +43,12 @@ public class NotEmpty implements IValidationRule {
      */
     @Override
     public void init(String[] params, String hint) {
+        String hintInternal = hint;
         if(params != null && params.length == 1){
-            hint = params[0];
+            hintInternal = params[0];
         }
-        if(hint != null && !hint.equals("")){
-            this.hint = hint;
+        if(hintInternal != null && !hintInternal.equals("")){
+            this.hint = hintInternal;
         }
         else {
             this.hint = Messages.NotEmptyDefaultHint;

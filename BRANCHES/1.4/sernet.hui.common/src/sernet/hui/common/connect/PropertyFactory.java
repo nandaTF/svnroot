@@ -25,7 +25,9 @@ package sernet.hui.common.connect;
 
 
 
-public class PropertyFactory {
+public final class PropertyFactory {
+    
+    private PropertyFactory(){};
 
     protected static Property create(PropertyType type, String value, Entity ent) {
 		Property newProp = new Property(ent);
