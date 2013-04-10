@@ -21,24 +21,19 @@ package sernet.springclient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpHost;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScheme;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.auth.CredentialsNotAvailableException;
 import org.apache.commons.httpclient.auth.CredentialsProvider;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.internal.net.NetUIMessages;
 import org.eclipse.ui.internal.net.auth.Authentication;
 import org.eclipse.ui.internal.net.auth.UserValidationDialog;
 import org.springframework.remoting.httpinvoker.CommonsHttpInvokerRequestExecutor;
@@ -75,9 +70,11 @@ public class CommonsExecuter extends CommonsHttpInvokerRequestExecutor {
      * This method is configured as Spring init-method in veriniceclient.xml
      */
     public void init() {
+        final int maxConPerHost = 5;
+        final int maxTotalCon = 20;
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
-        connectionManager.getParams().setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, 5);
-        connectionManager.getParams().setMaxTotalConnections(20);
+        connectionManager.getParams().setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, maxConPerHost);
+        connectionManager.getParams().setMaxTotalConnections(maxTotalCon);
         connectionManager.getParams().setConnectionTimeout(getConnectionTimeout()); //set connection timeout (how long it takes to connect to remote host)
         connectionManager.getParams().setSoTimeout(getReadTimeout()); 
         HttpClient httpClient = new HttpClient(connectionManager);
@@ -186,13 +183,11 @@ public class CommonsExecuter extends CommonsHttpInvokerRequestExecutor {
 
 class AuthDialog extends UserValidationDialog {
     
-    private static final Logger LOG = Logger.getLogger(AuthDialog.class);
-    
     private static boolean canceled = false;
     
     public static Authentication getAuthentication(final String host, final String message) {
         class UIOperation implements Runnable {
-            public Authentication authentication;
+            private Authentication authentication;
             public void run() {
                 authentication = AuthDialog.askForAuthentication(host, message);
             }
