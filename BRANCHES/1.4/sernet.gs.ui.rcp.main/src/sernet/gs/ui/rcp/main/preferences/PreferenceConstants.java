@@ -43,6 +43,7 @@ public class PreferenceConstants {
 	public static final String INFO_ELEMENTS_CUT = "info_elements_cut";  //$NON-NLS-1$
 	public static final String INFO_IMPORT_LDAP = "info_import_ldap"; //$NON-NLS-1$
     public static final String INFO_PROCESSES_STARTED = "info_processes_started"; //$NON-NLS-1$
+    public static final String INFO_PROCESS_VALIDATE = "info_processes_validate"; //$NON-NLS-1$
     public static final String INFO_STATUS_DERIVED = "info_status_derived"; //$NON-NLS-1$
     public static final String SHOW_ALIEN_DECORATOR = "show_alien_decorator"; //$NON-NLS-1$
     public static final String SHOW_DBID_DECORATOR = "show_dbid_decorator"; //$NON-NLS-1$
@@ -66,9 +67,9 @@ public class PreferenceConstants {
 	public static final String DB_URL_MYSQL = "jdbc:mysql://127.0.0.1:3306/verinicedb"; //$NON-NLS-1$
 
 	public static final String DB_DIALECT = "cna_dbdialect"; //$NON-NLS-1$
-	public static final String DB_DIALECT_derby = "sernet.verinice.hibernate.ByteArrayDerbyDialect"; //$NON-NLS-1$
-	public static final String DB_DIALECT_postgres= "org.hibernate.dialect.PostgreSQLDialect"; //$NON-NLS-1$
-	public static final String DB_DIALECT_mysql = "org.hibernate.dialect.MySQLInnoDBDialect"; //$NON-NLS-1$
+	public static final String DB_DIALECT_DERBY = "sernet.verinice.hibernate.ByteArrayDerbyDialect"; //$NON-NLS-1$
+	public static final String DB_DIALECT_POSTGRE= "org.hibernate.dialect.PostgreSQLDialect"; //$NON-NLS-1$
+	public static final String DB_DIALECT_MYSQL = "org.hibernate.dialect.MySQLInnoDBDialect"; //$NON-NLS-1$
 	
 	//gstool db for import:
 	public static final String GS_DB_USER = "gs_cna_dbuser"; //$NON-NLS-1$
@@ -121,6 +122,10 @@ public class PreferenceConstants {
 	public static final String CRYPTO_PKCS11_LIBRARY_ENABLED = "gs_cna_pkcs11_library_enabled";
 	public static final String CRYPTO_SERVER_AUTHENTICATION_VIA_CERTIFICATE_ENABLED = "gs_cna_server_authentication_via_certificate_enabled";
 	public static final String CRYPTO_PKCS11_CERTIFICATE_ALIAS = "gs_cna_pkcs11_certificate_alias";
+	
+	public static final String DEFAULT_FOLDER_IMPORT = "default_folder_import";
+	public static final String DEFAULT_FOLDER_EXPORT = "default_folder_export";
+    public static final String DEFAULT_FOLDER_REPORT = "default_folder_report";
 	
 	// additional gui preferences
 	public static final String SWITCH_PERSPECTIVE = "switch_perspective";

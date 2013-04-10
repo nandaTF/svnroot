@@ -19,7 +19,6 @@ package sernet.gs.ui.rcp.main.service.crudcommands;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -92,8 +91,6 @@ public class FindSGCommand extends GenericCommand implements ICachedCommand{
     @Override
     public void execute() {
         if(!resultInjectedFromCache){
-            IBaseDao<ControlGroup, Serializable> dao = getDaoFactory().getDAO(ControlGroup.class);
-
             LoadReportElements command = new LoadReportElements(ControlGroup.TYPE_ID, dbId, true);
             try {
                 command = getCommandService().executeCommand(command);
@@ -133,8 +130,9 @@ public class FindSGCommand extends GenericCommand implements ICachedCommand{
 
             if (resultList != null && !resultList.isEmpty()) {
                 selfAssessmentGroup = determineRootControlgroup(resultList);
-                if(selfAssessmentGroup != null)
+                if(selfAssessmentGroup != null){
                     hydrate(selfAssessmentGroup);
+                }
             }
         }
     }
@@ -142,10 +140,8 @@ public class FindSGCommand extends GenericCommand implements ICachedCommand{
     private ControlGroup determineRootControlgroup(List<ControlGroup> list){
         ArrayList<ControlGroup> cList = new ArrayList<ControlGroup>(0);
         for(ControlGroup g : list){
-            if(hasSamtTopicChildrenOnly(g)){
-                if(g.getParent() instanceof ControlGroup){
-                    cList.add(g);
-                }
+            if(hasSamtTopicChildrenOnly(g) && g.getParent() instanceof ControlGroup){
+                cList.add(g);
             } 
         }
         ControlGroup parent = null;
@@ -214,28 +210,12 @@ public class FindSGCommand extends GenericCommand implements ICachedCommand{
         return size;
     }
 
-    private boolean isSamtTopicCollection(Collection<CnATreeElement> collection) {
-        boolean isSamtTopicSet = true;
-        for (CnATreeElement element : collection) {
-            if (element != null) {
-                if (ControlGroup.TYPE_ID.equals(element.getTypeId())) {
-                    isSamtTopicSet = isSamtTopicCollection(element.getChildren());
-                } else {
-                    isSamtTopicSet = SamtTopic.TYPE_ID.equals(element.getTypeId());
-                }
-                if (!isSamtTopicSet) {
-                    break;
-                }
-            }
-        }
-        return isSamtTopicSet;
-    }
-
     private void hydrate(ControlGroup selfAssessmentGroup) {
         selfAssessmentGroup.getTitle();
 
-        if (hydrateParent)
+        if (hydrateParent){
             selfAssessmentGroup.getParent().getTitle();
+        }
     }
 
     private boolean isISO27kControlGroup(ControlGroup group) {

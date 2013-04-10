@@ -25,7 +25,7 @@ import org.eclipse.osgi.util.NLS;
  * @author Daniel Murygin <dm@sernet.de>
  * 
  */
-public class Messages extends NLS {
+public final class Messages extends NLS {
     private static final String BUNDLE_NAME = "sernet.gs.ui.rcp.main.bsi.dialogs.messages"; //$NON-NLS-1$
     public static String AccessControlEditDialog_0;
     public static String AccessControlEditDialog_1;
@@ -170,6 +170,7 @@ public class Messages extends NLS {
     public static String XMLImportDialog_35;
     public static String XMLImportDialog_36;
     public static String XMLImportDialog_37;
+    public static String XMLImportDialog_38;
     public static String XMLImportDialog_4;
     public static String XMLImportDialog_5;
     public static String XMLImportDialog_6;

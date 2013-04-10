@@ -20,21 +20,19 @@ package sernet.gs.ui.rcp.main.reports;
 import java.text.Collator;
 import java.util.Comparator;
 
-import sernet.gs.service.NumericStringComparator;
 import sernet.verinice.model.bsi.MassnahmenUmsetzung;
 import sernet.verinice.model.common.CnATreeElement;
 
 public class CnAElementByTitleComparator implements
 		Comparator<CnATreeElement> {
 
-	NumericStringComparator comparator = new NumericStringComparator();
-	
 	public int compare(CnATreeElement o1, CnATreeElement o2) {
+	    final int chapterFactor = 1000;
 		if (o1 instanceof MassnahmenUmsetzung && o2 instanceof MassnahmenUmsetzung) {
 			int[] kap1 = ((MassnahmenUmsetzung) o1).getKapitelValue();
 			int[] kap2 = ((MassnahmenUmsetzung) o2).getKapitelValue();
-			return (new Integer(kap1[0] * 1000 + kap1[1])
-					.compareTo((kap2[0] * 1000 + kap2[1])));
+			return (Integer.valueOf(kap1[0] * chapterFactor + kap1[1])
+					.compareTo((kap2[0] * chapterFactor + kap2[1])));
 		}
 		return Collator.getInstance().compare(o1.getTitle(), o2.getTitle());
 	}

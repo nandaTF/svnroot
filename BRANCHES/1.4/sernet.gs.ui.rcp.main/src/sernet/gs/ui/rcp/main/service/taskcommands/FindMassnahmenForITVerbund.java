@@ -20,7 +20,6 @@ package sernet.gs.ui.rcp.main.service.taskcommands;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -35,13 +34,11 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.lob.SerializableClob;
 import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.util.StopWatch.TaskInfo;
 
 import sernet.gs.service.RuntimeCommandException;
 import sernet.gs.ui.rcp.main.bsi.model.TodoViewItem;
 import sernet.gs.ui.rcp.main.bsi.views.AuditView;
 import sernet.gs.ui.rcp.main.bsi.views.TodoView;
-import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.model.bsi.MassnahmenUmsetzung;
 
@@ -144,7 +141,8 @@ public class FindMassnahmenForITVerbund extends FindMassnahmenAbstract {
 			if (getLog().isDebugEnabled()) {
 			    getLog().debug("FindMassnahmenForITVerbund, itverbundDbId: " + itverbundDbId);
 			}
-			List<MassnahmenUmsetzung> list = new ArrayList<MassnahmenUmsetzung>();
+//			List<MassnahmenUmsetzung> list = new ArrayList<MassnahmenUmsetzung>();
+			List<MassnahmenUmsetzung> list = null;
 			IBaseDao<MassnahmenUmsetzung, Serializable> dao = getDaoFactory().getDAO(MassnahmenUmsetzung.class);
 			list = dao.findByCallback(new FindMassnahmenForITVerbundCallback(itverbundDbId,loadBlockNumber,filter,sortBy));
 			
@@ -205,8 +203,7 @@ public class FindMassnahmenForITVerbund extends FindMassnahmenAbstract {
         public Object doInHibernate(Session session) throws HibernateException, SQLException {
             long start = System.currentTimeMillis();
             // select _ALL_ id
-            String sql = (filter.get(MassnahmenUmsetzung.P_UMSETZUNGBIS)!=null ? SQL : SQL);
-            SQLQuery sqlQuery = session.createSQLQuery(sql);
+            SQLQuery sqlQuery = session.createSQLQuery(SQL);
             sqlQuery.setInteger("id", itverbundDbId).setInteger("id2", itverbundDbId);
             List<TaskItem> idList = createIdList(sqlQuery.list());
             if(getLog().isDebugEnabled()) {
@@ -298,19 +295,17 @@ public class FindMassnahmenForITVerbund extends FindMassnahmenAbstract {
          * @return
          */
         private boolean checkSiegelFilter(Object prop, Object filter) {
-            if(prop!=null) {
-                // for Oracle prop is SerializableClob (bug 165)
-                if(prop instanceof SerializableClob) {
-                    SerializableClob clob = (SerializableClob) prop;
-                    try {
-                        prop = clob.getSubString(Long.valueOf(1).longValue(), Long.valueOf(clob.length()).intValue());
-                    } catch (SQLException e) {
-                        log.error("Error while getting string value from clob", e);
-                    }
+            // for Oracle prop is SerializableClob (bug 165)
+            if(prop instanceof SerializableClob) {
+                SerializableClob clob = (SerializableClob) prop;
+                try {
+                    prop = clob.getSubString(Long.valueOf(1).longValue(), Long.valueOf(clob.length()).intValue());
+                } catch (SQLException e) {
+                    log.error("Error while getting string value from clob", e);
                 }
             }
             return (filter==null) 
-            || ((Set) filter).contains(prop);
+                    || ((Set) filter).contains(prop);
         }
 
         /**
@@ -319,23 +314,21 @@ public class FindMassnahmenForITVerbund extends FindMassnahmenAbstract {
          */
         private boolean checkUmsetzungFilter(Object prop, Object filter) {
             String value = null;
-            if(prop!=null) {
-                // for Oracle prop is SerializableClob (bug 165)
-                if(prop instanceof SerializableClob) {
-                    SerializableClob clob = (SerializableClob) prop;
-                    try {
-                        value = clob.getSubString(Long.valueOf(1).longValue(), Long.valueOf(clob.length()).intValue());
-                    } catch (SQLException e) {
-                        log.error("Error while getting string value from clob", e);
-                    }
-                } else {
-                    value = (String) prop;
+            // for Oracle prop is SerializableClob (bug 165)
+            if(prop instanceof SerializableClob) {
+                SerializableClob clob = (SerializableClob) prop;
+                try {
+                    value = clob.getSubString(Long.valueOf(1).longValue(), Long.valueOf(clob.length()).intValue());
+                } catch (SQLException e) {
+                    log.error("Error while getting string value from clob", e);
                 }
+            } else {
+                value = (String) prop;
             }
             return (filter==null) 
-            || ((Set) filter).contains(value)
-            || (((Set) filter).contains(MassnahmenUmsetzung.P_UMSETZUNG_UNBEARBEITET) && (value==null || value.isEmpty()));
-            
+                    || ((Set) filter).contains(value)
+                    || (((Set) filter).contains(MassnahmenUmsetzung.P_UMSETZUNG_UNBEARBEITET) && (value==null || value.isEmpty()));
+
         }
 
         /**

@@ -106,6 +106,14 @@ public class LinkBean {
     }
     
     private void doInit() throws CommandException {
+        CnATreeElement element = getElement();
+        if(element==null) {
+            // (sometimes) his is not an error, GSM workflow tasks doesn't have an element
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Element is null. Can not init link bean.");
+            }
+            return;
+        }
         RetrieveInfo ri = new RetrieveInfo();
         ri.setLinksDownProperties(true);
         ri.setLinksUpProperties(true);
@@ -210,23 +218,7 @@ public class LinkBean {
                     // try to link from target to dragged elements first:
                     // use first relation type (user can change it later):
                     if (!possibleRelations.isEmpty()) {
-                        boolean reverse = false;
-                        HuiRelation selectedRelation = huiRelationMap.get(getSelectedLinkType());
-                        CnALink link = createLink(getElement(), target, selectedRelation.getId(), "Created by web client");
-                        if(link==null) {
-                            // if none found: try reverse direction from dragged element to target (link is always modelled from one side only)
-                            possibleRelations = getHuiService().getPossibleRelations(target.getTypeId(), getTypeId());
-                            if ( !possibleRelations.isEmpty()) {
-                                link = createLink(target, getElement(), selectedRelation.getId(), "Created by web client");
-                            }
-                            reverse = true;
-                        } 
-                        if(link!=null) {
-                            LinkInformation linkInformation = map(link,reverse);
-                            linkInformation.setType(getTypeName(link));
-                            linkList.add(linkInformation);
-                            Util.addInfo("addLink", Util.getMessage(EditBean.BOUNDLE_NAME, "linkAdded", new String[] {target.getTitle()})); 
-                        }
+                        createLinkLookupRelations(target);
                     }
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("addLink, type-id: " + typeId);
@@ -236,6 +228,27 @@ public class LinkBean {
         } catch (Exception t) {
             LOG.error("Error while creating link, typeId: " + typeId, t);
             ExceptionHandler.handle(t);
+        }
+    }
+
+    private void createLinkLookupRelations(CnATreeElement target) throws CommandException {
+        Set<HuiRelation> possibleRelations;
+        boolean reverse = false;
+        HuiRelation selectedRelation = huiRelationMap.get(getSelectedLinkType());
+        CnALink link = createLink(getElement(), target, selectedRelation.getId(), "Created by web client");
+        if(link==null) {
+            // if none found: try reverse direction from dragged element to target (link is always modelled from one side only)
+            possibleRelations = getHuiService().getPossibleRelations(target.getTypeId(), getTypeId());
+            if ( !possibleRelations.isEmpty()) {
+                link = createLink(target, getElement(), selectedRelation.getId(), "Created by web client");
+            }
+            reverse = true;
+        } 
+        if(link!=null) {
+            LinkInformation linkInformation = map(link,reverse);
+            linkInformation.setType(getTypeName(link));
+            linkList.add(linkInformation);
+            Util.addInfo("addLink", Util.getMessage(EditBean.BOUNDLE_NAME, "linkAdded", new String[] {target.getTitle()})); 
         }
     }
     
@@ -249,11 +262,6 @@ public class LinkBean {
     public void selectLink() {
         if (LOG.isDebugEnabled()) {
             LOG.debug("selectLink() called ...");
-        }
-        try {
-            
-        } catch (Throwable t) {
-            LOG.error("Error while selecting link", t);
         }
     }
     
@@ -300,7 +308,7 @@ public class LinkBean {
                 setSelectedLink(null);
                 deleteVisible = false;
             }
-        } catch (Throwable t) {
+        } catch (CommandException t) {
             LOG.error("Error while deleting link", t);
             ExceptionHandler.handle(t);
         }

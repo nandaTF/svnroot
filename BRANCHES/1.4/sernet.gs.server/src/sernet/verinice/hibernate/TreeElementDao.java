@@ -36,7 +36,7 @@ import sernet.verinice.model.iso27k.InheritLogger;
 
 public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, ID> implements IBaseDao<T, ID> {
 
-    private static final Logger log = Logger.getLogger(TreeElementDao.class);
+    private static final Logger LOG = Logger.getLogger(TreeElementDao.class);
     private static final InheritLogger LOG_INHERIT = InheritLogger.getLogger(TreeElementDao.class);
     
     public TreeElementDao(Class<T> type) {
@@ -95,11 +95,9 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
         // List results = getHibernateTemplate().findByCriteria(criteria, 0,
         // 1000);
         // return results;
-        if (ri == null) {
-            ri = new RetrieveInfo();
-        }
+        IRetrieveInfo ri0 = (ri == null) ? new RetrieveInfo() : ri;
         DetachedCriteria criteria = DetachedCriteria.forClass(type);
-        configureCriteria(criteria, ri);
+        configureCriteria(criteria, ri0);
         return findByCriteria(criteria);
     }
 
@@ -111,21 +109,22 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
     }
     
     public T findByUuid(String uuid, IRetrieveInfo ri) {
-        if (ri == null) {
-            ri = new RetrieveInfo();
-        }
+        IRetrieveInfo ri0 = (ri == null) ? new RetrieveInfo() : ri;
         DetachedCriteria criteria = DetachedCriteria.forClass(type);
         criteria.add(Restrictions.eq("uuid", uuid));
-        configureCriteria(criteria, ri);
+        configureCriteria(criteria, ri0);
         return loadByCriteria(criteria);
     }
 
     public T retrieve(ID id, IRetrieveInfo ri) {
-        if(log.isDebugEnabled()) {
-            log.debug("retrieve - id: " + id + " " + ri);
+        IRetrieveInfo ri0 = null;
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("retrieve - id: " + id + " " + ri);
         }
         if (ri == null) {
-            ri = new RetrieveInfo();
+            ri0 = new RetrieveInfo();
+        } else {
+            ri0 = ri;
         }
 
         DetachedCriteria criteria = DetachedCriteria.forClass(type);
@@ -134,7 +133,7 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
         } else {
             criteria.add(Restrictions.eq("dbId", id));
         }
-        configureCriteria(criteria, ri);
+        configureCriteria(criteria, ri0);
 
         return loadByCriteria(criteria);
     }
@@ -212,7 +211,7 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
         if (resultList != null) {
             if (resultList.size() > 1) {
                 final String message = "More than one entry found, criteria is: " + criteria.toString();
-                log.error(message);
+                LOG.error(message);
                 throw new RuntimeException(message);
             }
             if (resultList.size() == 1) {

@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 import org.eclipse.core.expressions.PropertyTester;
 
 import sernet.verinice.iso27k.rcp.CnPItems;
-import sernet.verinice.iso27k.service.CopyService;
 import sernet.verinice.model.bsi.risikoanalyse.RisikoMassnahmenUmsetzung;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.service.commands.CopyCommand;
@@ -75,10 +74,10 @@ public class GroupTester extends PropertyTester {
 				
 				List<String> currentBlacklist;
                 if (isCutOperation) {
-                    currentBlacklist = CopyCommand.CUT_BLACKLIST;    
+                    currentBlacklist = CopyCommand.cut_blacklist;    
 				}
 				else {
-				    currentBlacklist = CopyCommand.COPY_BLACKLIST;
+				    currentBlacklist = CopyCommand.copy_blacklist;
 				}
 				
 				if(currentBlacklist.contains(element.getTypeId())) {

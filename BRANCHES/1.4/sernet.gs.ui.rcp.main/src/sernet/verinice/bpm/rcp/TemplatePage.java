@@ -19,25 +19,18 @@
  ******************************************************************************/
 package sernet.verinice.bpm.rcp;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Hashtable;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -62,8 +55,8 @@ public class TemplatePage extends WizardPage {
     private Preferences bpmPreferences;
     private Hashtable<String, IndividualServiceParameter> templateMap;
     
-    Label title, date, reminder, assignee, assigneeRelation;
-    Text description, properties;
+    private Label title, date, reminder, assignee, assigneeRelation;
+    private Text description, properties;
 
     protected TemplatePage() {
         super(NAME);
@@ -73,6 +66,9 @@ public class TemplatePage extends WizardPage {
 
     private void addFormElements(Composite container) {
  
+        final int descriptionGdHeightHint = 100;
+        final int propertyLabelHeightHint = 50;
+        
         final Label titleLabel = new Label(container, SWT.NONE);
         titleLabel.setText(Messages.TemplatePage_3);
         title = new Label(container, SWT.NONE);
@@ -87,9 +83,11 @@ public class TemplatePage extends WizardPage {
 
         final Label descriptionLabel = new Label(container, SWT.NONE);
         descriptionLabel.setText(Messages.TemplatePage_4);
-        description = new Text(container, SWT.MULTI | SWT.LEAD | SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
+        int style = SWT.MULTI | SWT.LEAD | SWT.WRAP;
+        style = style | SWT.READ_ONLY | SWT.V_SCROLL;
+        description = new Text(container, style);
         gd = new GridData(SWT.FILL, SWT.TOP, true, false);
-        gd.heightHint = 100;
+        gd.heightHint = descriptionGdHeightHint;
         description.setLayoutData(gd);
         description.setFont(newFont);
 
@@ -125,9 +123,10 @@ public class TemplatePage extends WizardPage {
 
         final Label propertyLabel = new Label(container, SWT.NONE);
         propertyLabel.setText(Messages.TemplatePage_11);
-        properties = new Text(container, SWT.MULTI | SWT.LEAD | SWT.WRAP | SWT.READ_ONLY | SWT.V_SCROLL);
+        int propertiesStyle = SWT.MULTI | SWT.LEAD | SWT.WRAP;
+        properties = new Text(container, propertiesStyle | SWT.READ_ONLY | SWT.V_SCROLL);
         gd = new GridData(SWT.FILL, SWT.TOP, true, false);
-        gd.heightHint = 50;
+        gd.heightHint = propertyLabelHeightHint;
         properties.setLayoutData(gd);
         properties.setFont(newFont);
 
@@ -232,35 +231,21 @@ public class TemplatePage extends WizardPage {
      */
     @Override
     public void createControl(Composite parent) {
+        final int layotMarginWidth = 10;
         final Composite composite = new Composite(parent, SWT.NULL);
         GridLayout layout = new GridLayout(1, true);
-        layout.marginWidth = 10;
+        layout.marginWidth = layotMarginWidth;
         composite.setLayout(layout);
-        // layout.marginHeight = 10;
         GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
         composite.setLayoutData(gd);
 
         addFormElements(composite);
-
-        // Build the separator line
-        // Label separator = new Label(composite, SWT.HORIZONTAL |
-        // SWT.SEPARATOR);
-        // separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         composite.pack();
 
         // Required to avoid an error in the system
         setControl(composite);
         setPageComplete(true);
-    }
-
-    private String trimTitleByWidthSize(GC gc, String elementTitle, int width) {
-        String newTitle = elementTitle.substring(0, elementTitle.length() - 1);
-        Point size = gc.textExtent(newTitle + "..."); //$NON-NLS-1$
-        if (size.x > width) {
-            newTitle = trimTitleByWidthSize(gc, newTitle, width);
-        }
-        return newTitle;
     }
 
     public Preferences getPreferences() {

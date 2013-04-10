@@ -22,9 +22,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -62,8 +62,6 @@ import sernet.verinice.model.bsi.MassnahmenUmsetzung;
  */
 public class BSIModelFilterDialog extends FilterDialog {
 
-    private static final Logger log = Logger.getLogger(BSIModelFilterDialog.class);
-
     private String lebenszyklus = ""; //$NON-NLS-1$
     private Combo combo;
     private Set<Class<?>> filteredClasses;
@@ -71,12 +69,11 @@ public class BSIModelFilterDialog extends FilterDialog {
     private String objektLebenszyklus = ""; //$NON-NLS-1$
     private CheckboxTableViewer viewer;
     private String[] tagPattern;
-    private Composite container;
     private Group tagGroup;
     private Button filterItVerbundCheckbox;
     private boolean filterItVerbund;
 
-    private static HashMap<String, Class<?>> possibleFilters = new HashMap<String, Class<?>>();
+    private static Map<String, Class<?>> possibleFilters = new HashMap<String, Class<?>>();
 
     static {
         // Initializes the set of classes which can be filtered. The key to the
@@ -88,7 +85,6 @@ public class BSIModelFilterDialog extends FilterDialog {
         // code.
         possibleFilters.put(Messages.BSIModelFilterDialog_2, BausteinUmsetzung.class);
         possibleFilters.put(Messages.BSIModelFilterDialog_3, MassnahmenUmsetzung.class);
-        // possibleFilters.put("Verknüpfungen", LinkKategorie.class);
     }
 
     private static final String[] LZ_ITEMS = new String[] { Messages.BSIModelFilterDialog_4, Messages.BSIModelFilterDialog_5, Messages.BSIModelFilterDialog_6, Messages.BSIModelFilterDialog_7, Messages.BSIModelFilterDialog_8, Messages.BSIModelFilterDialog_9, Messages.BSIModelFilterDialog_10 };
@@ -106,20 +102,22 @@ public class BSIModelFilterDialog extends FilterDialog {
     		String[] tags, 
     		boolean filterItVerbund) {
         super(parent, umsetzung, siegel, null);
-        setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.RESIZE);
+        int style = SWT.CLOSE | SWT.TITLE | SWT.BORDER;
+        style = style | SWT.APPLICATION_MODAL | SWT.RESIZE;
+        setShellStyle(style);
         this.lebenszyklus = lebenszyklus;
         this.objektLebenszyklus = objektLebenszyklus;
         this.filteredClasses = filteredClasses;
         if (this.filteredClasses == null) {
             this.filteredClasses = new HashSet<Class<?>>();
         }
-        this.tagPattern = tags;
+        this.tagPattern = (tags != null) ? tags.clone() : null;
         this.filterItVerbund = filterItVerbund;
     }
 
     @Override
     protected Control createDialogArea(Composite parent) {
-        container = (Composite) super.createDialogArea(parent);
+        Composite container = (Composite) super.createDialogArea(parent);
         GridLayout layout = new GridLayout();
         layout.numColumns = 2;
         container.setLayout(layout);
@@ -148,6 +146,12 @@ public class BSIModelFilterDialog extends FilterDialog {
     }
 
     private Group createTagfilterGroup(Composite parent) {
+        
+        final int scrolledCompositeWidth = 100;
+        final int scrolledCompositeHeight = scrolledCompositeWidth;
+        final int checkboxColumnWidth = 35;
+        final int imageColumnWidth = scrolledCompositeHeight;
+        
         Group groupComposite = new Group(parent, SWT.BORDER);
         groupComposite.setText(Messages.BSIModelFilterDialog_22);
         GridData gridData = new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1);
@@ -169,15 +173,15 @@ public class BSIModelFilterDialog extends FilterDialog {
         comp.setContent(viewer.getControl());
 
         // workaround to prevent tableviewer size from exceeding shell size:
-        comp.setMinSize(100, 100);
+        comp.setMinSize(scrolledCompositeWidth, scrolledCompositeHeight);
 
         TableColumn checkboxColumn = new TableColumn(table, SWT.LEFT);
         checkboxColumn.setText(""); //$NON-NLS-1$
-        checkboxColumn.setWidth(35);
+        checkboxColumn.setWidth(checkboxColumnWidth);
 
         TableColumn imageColumn = new TableColumn(table, SWT.LEFT);
         imageColumn.setText(Messages.BSIModelFilterDialog_24);
-        imageColumn.setWidth(100);
+        imageColumn.setWidth(imageColumnWidth);
 
         viewer.setContentProvider(new ArrayContentProvider());
 
@@ -205,7 +209,7 @@ public class BSIModelFilterDialog extends FilterDialog {
     }
 
     public String[] getCheckedElements() {
-        return checkedElements;
+        return (checkedElements != null) ? checkedElements.clone() : null;
     }
 
     private Group createAusblendenGroup(Composite parent) {
@@ -252,11 +256,6 @@ public class BSIModelFilterDialog extends FilterDialog {
         button2.setText(Messages.BSIModelFilterDialog_27);
         button2.setSelection(getFilterSelectionForButton(button2));
         button2.addSelectionListener(new SelectionHelper(button2));
-
-        // final Button button3 = new Button(parent, SWT.CHECK);
-        // button3.setText("Verknüpfungen");
-        // button3.setSelection(getFilterSelectionForButton(button3));
-        // button3.addSelectionListener(new SelectionHelper(button3));
 
     }
 
@@ -319,6 +318,8 @@ public class BSIModelFilterDialog extends FilterDialog {
     @Override
     protected void initContent() {
         super.initContent();
+        final int viewerTableWidth = 200;
+        final int viewerTableHeight = viewerTableWidth;
         if (CnAElementFactory.isModelLoaded()) {
             List<String> tags;
             try {
@@ -330,7 +331,7 @@ public class BSIModelFilterDialog extends FilterDialog {
             }
 
             // workaround to prevent tableviewer size from exceeding shell size:
-            viewer.getTable().setSize(200, 200);
+            viewer.getTable().setSize(viewerTableWidth, viewerTableHeight);
 
             if (tagPattern != null) {
                 viewer.setCheckedElements(tagPattern);
@@ -353,10 +354,12 @@ public class BSIModelFilterDialog extends FilterDialog {
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
+        final int shellWidth = 400;
+        final int shellHeight = 500;
         newShell.setText(Messages.BSIModelFilterDialog_35);
 
         // workaround to prevent tableviewer size from exceeding shell size:
-        newShell.setSize(400, 500);
+        newShell.setSize(shellWidth, shellHeight);
     }
 
     public Set<Class<?>> getFilteredClasses() {

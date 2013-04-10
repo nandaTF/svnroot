@@ -65,7 +65,7 @@ import sernet.verinice.model.validation.CnAValidation;
  */
 class MassnahmenUmsetzungContentProvider implements IStructuredContentProvider {
 	
-	private static final Logger log = Logger.getLogger(MassnahmenUmsetzungContentProvider.class);
+	private static final Logger LOG = Logger.getLogger(MassnahmenUmsetzungContentProvider.class);
 
 	private static final int ADD     = 0;
 	private static final int UPDATE  = 1;
@@ -75,19 +75,21 @@ class MassnahmenUmsetzungContentProvider implements IStructuredContentProvider {
 	private TableViewer viewer;
 	private GenericMassnahmenView todoView;
 	
-	IBSIModelListener modelListener = new IBSIModelListener()
+	private IBSIModelListener modelListener = new IBSIModelListener()
 	{
 
 		public void childAdded(CnATreeElement category, CnATreeElement child) {
-			if (child instanceof BausteinUmsetzung && isOfInterest(child))
+			if (child instanceof BausteinUmsetzung && isOfInterest(child)){
 				reloadMeasures();
-			else if (child instanceof ITVerbund)
+			} else if (child instanceof ITVerbund){
 				todoView.compoundAdded((ITVerbund) child);
+			}
 		}
 		
 		public void linkChanged(CnALink old, CnALink link, Object source) {
-			if (link.getDependency() instanceof Person)
+			if (link.getDependency() instanceof Person){
 				updateViewer(REFRESH, null);
+			}
 		}
 		
 		public void linkAdded(CnALink link) {
@@ -107,7 +109,7 @@ class MassnahmenUmsetzungContentProvider implements IStructuredContentProvider {
 				try {
 					if (!isOfInterest(child))
 					{
-						log.debug("MassnahmenUmsetzung is not of interest for view: " + child);
+						LOG.debug("MassnahmenUmsetzung is not of interest for view: " + child);
 						return;
 					}
 					Activator.inheritVeriniceContextState();
@@ -151,15 +153,16 @@ class MassnahmenUmsetzungContentProvider implements IStructuredContentProvider {
 
 		public void modelRefresh(Object source) {
 			if (source != null) {
-			    todoView.loadBlockNumber=0;
-		        todoView.loadMoreAction.setEnabled(true);
+			    todoView.setLoadBlockNumber(0);
+		        todoView.getLoadMoreAction().setEnabled(true);
 				reloadMeasures();
 			}
 		}
 		
 		public void databaseChildAdded(CnATreeElement child) {
-			if (child instanceof BausteinUmsetzung && isOfInterest(child))
+			if (child instanceof BausteinUmsetzung && isOfInterest(child)){
 				reloadMeasures();
+			}
 		}
 
 		public void databaseChildChanged(CnATreeElement child) {
@@ -177,7 +180,6 @@ class MassnahmenUmsetzungContentProvider implements IStructuredContentProvider {
 			 * 
 			 * @see IModelLoadListener
 			 */
-            //reloadMeasures();
 		}
 
 		/* (non-Javadoc)
@@ -218,9 +220,9 @@ class MassnahmenUmsetzungContentProvider implements IStructuredContentProvider {
 
 	@SuppressWarnings("unchecked")
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof PlaceHolder)
+		if (inputElement instanceof PlaceHolder){
 			return new Object[] {inputElement};
-		
+		}
 		List<TodoViewItem> mns = (List<TodoViewItem>) inputElement;
 		return mns.toArray(new Object[mns.size()]);
 		
@@ -299,16 +301,16 @@ class MassnahmenUmsetzungContentProvider implements IStructuredContentProvider {
 		ITVerbund expectedCompound = todoView.getCurrentCompound();
 		
 		// No compound selected -> nothing is of interest.
-		if (expectedCompound == null)
+		if (expectedCompound == null){
 			return false;
-		
+		}
 		// Otherwise climb the tree.
 		CnATreeElement parent = child.getParent();
 		while (! (parent instanceof ITVerbund))
 		{
 			if (parent == null)
 			{
-				log.warn("Element with no IT-Verbund ancestor. Skipping ...");
+				LOG.warn("Element with no IT-Verbund ancestor. Skipping ...");
 				return false;
 			}
 			parent = Retriever.checkRetrieveParent(parent);
@@ -330,8 +332,9 @@ class MassnahmenUmsetzungContentProvider implements IStructuredContentProvider {
 		
 		for (Class<?> c : classes)
 		{
-			if (c.isAssignableFrom(child.getClass()))
+			if (c.isAssignableFrom(child.getClass())){
 				return true;
+			}
 		}
 		
 		return false;

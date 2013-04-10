@@ -20,6 +20,7 @@ package sernet.gs.ui.rcp.main.bsi.dialogs;
 
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -36,6 +37,9 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import sernet.gs.ui.rcp.main.Activator;
+import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 
 /**
  * Dialog class for the export dialog.
@@ -59,6 +63,9 @@ public class ExportSelectedObjectsDialog extends TitleAreaDialog
 	@Override
 	protected Control createDialogArea(Composite parent)
 	{
+	    final int gridLayoutDefaultMarginHeight = 10;
+	    final int gridLayoutDefaultMarginWidth = gridLayoutDefaultMarginHeight;
+	    final int rowLayoutDefaultMarginTop = 15;
 		/*++++
 		 * Dialog title, message and layout:
 		 *++++++++++++++++++++++++++++++++++*/
@@ -67,8 +74,8 @@ public class ExportSelectedObjectsDialog extends TitleAreaDialog
 		setMessage(Messages.ExportSelectedObjectsDialog_0, IMessageProvider.INFORMATION);
 		
 		final Composite composite = (Composite) super.createDialogArea(parent);
-		((GridLayout)composite.getLayout()).marginWidth = 10;
-		((GridLayout)composite.getLayout()).marginHeight = 10;
+		((GridLayout)composite.getLayout()).marginWidth = gridLayoutDefaultMarginWidth;
+		((GridLayout)composite.getLayout()).marginHeight = gridLayoutDefaultMarginHeight;
 		
 		/*++++
 		 * Widgets for source ID:
@@ -94,7 +101,7 @@ public class ExportSelectedObjectsDialog extends TitleAreaDialog
 		
 		final Composite encryptionOptionComposite = new Composite(composite, SWT.NONE);
 		encryptionOptionComposite.setLayout(new RowLayout(SWT.HORIZONTAL));
-		((RowLayout) encryptionOptionComposite.getLayout()).marginTop = 15;
+		((RowLayout) encryptionOptionComposite.getLayout()).marginTop = rowLayoutDefaultMarginTop;
 		
 		final Button encryptionCheckbox = new Button(encryptionOptionComposite, SWT.CHECK);
 		encryptionCheckbox.setText("Encrypt output");
@@ -116,12 +123,13 @@ public class ExportSelectedObjectsDialog extends TitleAreaDialog
 		
 		final Composite compositeSaveLocation = new Composite(composite,SWT.NONE);
 		compositeSaveLocation.setLayout(new RowLayout(SWT.HORIZONTAL));
-		((RowLayout) compositeSaveLocation.getLayout()).marginTop = 15;
+		((RowLayout) compositeSaveLocation.getLayout()).marginTop = rowLayoutDefaultMarginTop;
 		final Label labelLocation = new Label(compositeSaveLocation, SWT.NONE);
 		labelLocation.setText(Messages.ExportDialog_5);
 		final Text txtLocation = new Text(compositeSaveLocation, SWT.SINGLE | SWT.BORDER);
-		short textLocationWidth = 300;
-		txtLocation.setSize(textLocationWidth, 30);
+		final short textLocationWidth = 300;
+		final short textLocationHeight = 30;
+		txtLocation.setSize(textLocationWidth, textLocationHeight);
 		final RowData textLocationData = new RowData();
 		textLocationData.width = textLocationWidth;
 		txtLocation.setLayoutData(textLocationData);
@@ -134,8 +142,11 @@ public class ExportSelectedObjectsDialog extends TitleAreaDialog
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
+			    IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
+                String defaultFolder = prefs.getString(PreferenceConstants.DEFAULT_FOLDER_EXPORT);
 				FileDialog dialog = new FileDialog(Display.getCurrent().getActiveShell());
 				dialog.setFilterExtensions(new String[]{ "*.xml" }); //$NON-NLS-1$
+				dialog.setFilterPath(defaultFolder);
 				String exportPath = dialog.open();
 				if( exportPath != null )
 				{

@@ -18,51 +18,52 @@
 package sernet.gs.ui.rcp.main;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.PlatformUI;
 
 import sernet.gs.ui.rcp.main.bsi.views.BSIMassnahmenView;
 import sernet.gs.ui.rcp.main.bsi.views.BrowserView;
 import sernet.gs.ui.rcp.main.bsi.views.BsiModelView;
-import sernet.hui.common.VeriniceContext;
-import sernet.springclient.RightsServiceClient;
+import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.iso27k.rcp.CatalogView;
 import sernet.verinice.iso27k.rcp.ISMView;
-import sernet.verinice.interfaces.ActionRightIDs;
 
 public class Perspective implements IPerspectiveFactory {
 	public static final String ID = "sernet.gs.ui.rcp.main.perspective";
 	
-	public static HashMap<String, String> viewsRightIDs;
+	private static final Map<String, String> VIEWSRIGHTIDS;
+	
+	private static final float RATIO_CONTROL_FOLDER = 0.3f;
+	private static final float RATIO_MODEL_FOLDER = 0.4f;
+	private static final float RATIO_DETAILS_FOLDER = 0.5f;
 	
 	static{
-	    viewsRightIDs = new HashMap<String, String>();
-	    viewsRightIDs.put(BSIMassnahmenView.ID, ActionRightIDs.BSIMASSNAHMEN);
-	    viewsRightIDs.put(BrowserView.ID, ActionRightIDs.BSIBROWSER);
-	    viewsRightIDs.put(BsiModelView.ID, ActionRightIDs.BSIMODELVIEW);
+	    VIEWSRIGHTIDS = new HashMap<String, String>();
+	    VIEWSRIGHTIDS.put(BSIMassnahmenView.ID, ActionRightIDs.BSIMASSNAHMEN);
+	    VIEWSRIGHTIDS.put(BrowserView.ID, ActionRightIDs.BSIBROWSER);
+	    VIEWSRIGHTIDS.put(BsiModelView.ID, ActionRightIDs.BSIMODELVIEW);
 	}
 
 	public void createInitialLayout(IPageLayout layout) {
 		String editorArea = layout.getEditorArea();
 		layout.setEditorAreaVisible(true);
 		
-		IFolderLayout controlFolder = layout.createFolder("control", IPageLayout.LEFT, 0.3f, editorArea);
+		IFolderLayout controlFolder = layout.createFolder("control", IPageLayout.LEFT, RATIO_CONTROL_FOLDER, editorArea);
 		controlFolder.addView(BSIMassnahmenView.ID);
 		controlFolder.addPlaceholder(CatalogView.ID + ":*");
 		layout.getViewLayout(BSIMassnahmenView.ID).setCloseable(true);
 		layout.getViewLayout(CatalogView.ID).setCloseable(true);
 		
-		IFolderLayout modelFolder = layout.createFolder("model", IPageLayout.LEFT, 0.4f, editorArea);
+		IFolderLayout modelFolder = layout.createFolder("model", IPageLayout.LEFT, RATIO_MODEL_FOLDER, editorArea);
 		modelFolder.addView(BsiModelView.ID);
 		modelFolder.addPlaceholder(ISMView.ID + ":*");
 		layout.getViewLayout(BSIMassnahmenView.ID).setCloseable(true);
 		layout.getViewLayout(ISMView.ID).setCloseable(true);
 		
-		IFolderLayout folder = layout.createFolder("datails",IPageLayout.BOTTOM, 0.5f, editorArea);
+		IFolderLayout folder = layout.createFolder("datails",IPageLayout.BOTTOM, RATIO_DETAILS_FOLDER, editorArea);
 		folder.addView(BrowserView.ID);
 		layout.getViewLayout(BSIMassnahmenView.ID).setCloseable(true);
 		

@@ -20,6 +20,7 @@ package sernet.gs.ui.rcp.main.bsi.risikoanalyse.wizard;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -27,7 +28,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
 
-import sernet.gs.ui.rcp.main.bsi.dnd.DNDItems;
 import sernet.gs.ui.rcp.main.bsi.risikoanalyse.model.RisikoMassnahmenUmsetzungFactory;
 import sernet.verinice.model.bsi.MassnahmenUmsetzung;
 import sernet.verinice.model.bsi.risikoanalyse.RisikoMassnahmenUmsetzung;
@@ -47,7 +47,7 @@ public class RisikoMassnahmenUmsetzungDragListener implements DragSourceListener
     private CnATreeElement cnaElement;
 
 
-    ArrayList<RisikoMassnahmenUmsetzung> risikoMassnahmenUmsetzungen;
+    private List<RisikoMassnahmenUmsetzung> risikoMassnahmenUmsetzungen;
     
     /**
      * Constructor sets the needed data.
@@ -127,7 +127,7 @@ public class RisikoMassnahmenUmsetzungDragListener implements DragSourceListener
             if (LOG.isDebugEnabled()) {
                 LOG.debug("dragStart finished");
             }
-        } catch( Throwable t) {
+        } catch(Exception t) {
             LOG.error("Error in dragStart", t);
         }
         
@@ -137,7 +137,7 @@ public class RisikoMassnahmenUmsetzungDragListener implements DragSourceListener
      * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData(org.eclipse.swt.dnd.DragSourceEvent)
      */
     public void dragSetData(DragSourceEvent event) {
-        event.data = risikoMassnahmenUmsetzungen.toArray(new RisikoMassnahmenUmsetzung[risikoMassnahmenUmsetzungen.size()]);;
+        event.data = risikoMassnahmenUmsetzungen.toArray(new RisikoMassnahmenUmsetzung[risikoMassnahmenUmsetzungen.size()]);
     }
 
     /**

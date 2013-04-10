@@ -24,21 +24,21 @@ package sernet.verinice.web;
  *
  */
 public class UploadedFile {
-    private String Name;
+    private String name;
     private String mime;
     private long length;
     private byte[] data;
     public byte[] getData() {
-        return data;
+        return (data != null) ? data.clone() : null;
     }
     public void setData(byte[] data) {
-        this.data = data;
+        this.data = (data != null) ? data.clone() : null;
     }
     public String getName() {
-        return Name;
+        return name;
     }
-    public void setName(String name) {
-        Name = name;
+    public void setName(String name0) {
+        name = name0;
         int extDot = name.lastIndexOf('.');
         if(extDot > 0){
             String extension = name.substring(extDot +1);

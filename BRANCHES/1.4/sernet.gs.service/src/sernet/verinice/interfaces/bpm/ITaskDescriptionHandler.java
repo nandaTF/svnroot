@@ -21,27 +21,30 @@ package sernet.verinice.interfaces.bpm;
 
 import java.util.Map;
 
-import org.jbpm.api.task.Task;
-
 /**
- * A ITaskDescriptionHandler loads a description of a jBPM task
+ * Instances of ITaskDescriptionHandler loads titles and descriptions of jBPM tasks.
+ * Task-Description-Handlers are configured in veriniceserver-jbpm.xml.
+ * 
+ * Task-Description-Handlers are an optional configuration feature. If no
+ * Task-Description-Handler is configured for a task 
+ * sernet.verinice.bpm.DefaultTaskDescriptionHandler is used to load title and description.
  *
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
 public interface ITaskDescriptionHandler {
 
     /**
-     * @param task a jBPM task
-     * @param varMap 
+     * @param taskId a jBPM task-id
+     * @param processVars jBPM process variables
      * @return The description of a task
      */
-    String loadDescription(String taskId, Map<String, Object> varMap);
+    String loadDescription(String taskId, Map<String, Object> processVars);
 
     /**
-     * @param task a jBPM task
-     * @param varMap 
+     * @param taskId a jBPM task-id
+     * @param processVars jBPM process variables
      * @return The title of a task
      */
-    String loadTitle(String taskId, Map<String, Object> varMap);
+    String loadTitle(String taskId, Map<String, Object> processVars);
     
 }

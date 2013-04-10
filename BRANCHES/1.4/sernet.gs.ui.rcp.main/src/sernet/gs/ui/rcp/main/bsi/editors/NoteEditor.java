@@ -43,8 +43,8 @@ import sernet.hui.common.multiselectionlist.IMLPropertyOption;
 import sernet.hui.common.multiselectionlist.IMLPropertyType;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ICommandService;
-import sernet.verinice.model.bsi.Note;
 import sernet.verinice.model.bsi.Addition.INoteChangedListener;
+import sernet.verinice.model.bsi.Note;
 import sernet.verinice.service.commands.SaveNote;
 
 public class NoteEditor extends EditorPart {
@@ -53,11 +53,9 @@ public class NoteEditor extends EditorPart {
 	
 	public static final String EDITOR_ID = "sernet.gs.ui.rcp.main.bsi.editors.noteeditor"; //$NON-NLS-1$
 	
-	Note note;
+	private Note note;
 	
-	Composite contentComp;
-	
-	Text textNote;
+	private Text textNote;
 	
 	private ICommandService	commandService;
 
@@ -79,8 +77,9 @@ public class NoteEditor extends EditorPart {
 		boolean wasDirty = isDirty();
 		isModelModified = true;
 		
-		if (!wasDirty)
+		if (!wasDirty){
 			firePropertyChange(IEditorPart.PROP_DIRTY);
+		}
 	}
 	
 	@Override
@@ -137,7 +136,14 @@ public class NoteEditor extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		contentComp = new Composite(parent, SWT.NULL);
+	    final int contentCompLayoutMarginWidth = 5;
+        final int contentCompLayoutMarginHeight = contentCompLayoutMarginWidth;
+        final int contentCompLayoutHorizontalSpacing = contentCompLayoutMarginHeight;
+        final int contentCompLayoutVerticalSpacing = contentCompLayoutMarginWidth;
+        final int contentCompLayoutNumColumns = 2;
+        final int gdTextHeightHint = 200;
+        
+        Composite contentComp = new Composite(parent, SWT.NULL);
 		
 		GridData contentCompLD = new GridData();
 		contentCompLD.grabExcessHorizontalSpace = true;
@@ -146,11 +152,11 @@ public class NoteEditor extends EditorPart {
 		contentComp.setLayoutData(contentCompLD);
 		
 		GridLayout contentCompLayout = new GridLayout(2, false);
-		contentCompLayout.marginWidth = 5;
-		contentCompLayout.marginHeight = 5;
-		contentCompLayout.numColumns = 2;
-		contentCompLayout.horizontalSpacing = 5;
-		contentCompLayout.verticalSpacing = 5;
+		contentCompLayout.marginWidth = contentCompLayoutMarginWidth;
+		contentCompLayout.marginHeight = contentCompLayoutMarginHeight;
+		contentCompLayout.numColumns = contentCompLayoutNumColumns;
+		contentCompLayout.horizontalSpacing = contentCompLayoutHorizontalSpacing;
+		contentCompLayout.verticalSpacing = contentCompLayoutVerticalSpacing;
 		
 		contentComp.setLayout(contentCompLayout);
 		
@@ -188,7 +194,7 @@ public class NoteEditor extends EditorPart {
 		gdText.grabExcessVerticalSpace = false;
 		gdText.horizontalAlignment = GridData.FILL;
 		gdText.verticalAlignment = GridData.CENTER;
-		gdText.heightHint=200;
+		gdText.heightHint=gdTextHeightHint;
 		textNote = new Text(contentComp,SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		textNote.setLayoutData(gdText);
 		textNote.addListener(SWT.Modify, new Listener() {

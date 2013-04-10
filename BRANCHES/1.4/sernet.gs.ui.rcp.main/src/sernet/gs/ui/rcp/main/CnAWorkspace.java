@@ -77,7 +77,7 @@ public class CnAWorkspace {
 
 	protected static final String TEMPIMPORTDB = "tempGstoolImportDb"; //$NON-NLS-1$
 
-    private static CnAWorkspace instance;
+    private static volatile CnAWorkspace instance;
 
 	private final IPropertyChangeListener prefChangeListener = new IPropertyChangeListener() {
 		@Override
@@ -111,7 +111,7 @@ public class CnAWorkspace {
 		return CnAWorkspace.getInstance().getWorkdir() + File.separator + TEMPIMPORTDB;
 	}
 
-	public static CnAWorkspace getInstance() {
+	public static synchronized CnAWorkspace getInstance() {
 		if (instance == null) {
 			instance = new CnAWorkspace();
 			Activator.getDefault().getPluginPreferences().addPropertyChangeListener(instance.prefChangeListener);
@@ -262,7 +262,8 @@ public class CnAWorkspace {
 	}
 
 	public void createGstoolImportDatabaseConfig(String url, String user, String pass) throws IOException {
-		HashMap<String, String> settings = new HashMap<String, String>(5);
+	    final int settingsSize = 5;
+		HashMap<String, String> settings = new HashMap<String, String>(settingsSize);
 		settings.put("url", url.replace("\\", "\\\\")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		settings.put("user", user); //$NON-NLS-1$
 		settings.put("pass", pass); //$NON-NLS-1$
@@ -274,7 +275,7 @@ public class CnAWorkspace {
 			String dbUrl = createTempImportDbUrl();
 			settings.put("url", dbUrl); //$NON-NLS-1$
 			settings.put("driver", PreferenceConstants.DB_DRIVER_DERBY); //$NON-NLS-1$
-			settings.put("dialect", PreferenceConstants.DB_DIALECT_derby); //$NON-NLS-1$
+			settings.put("dialect", PreferenceConstants.DB_DIALECT_DERBY); //$NON-NLS-1$
 		} else {
 			// direct import from ms sql server or desktop engine:
 			settings.put("driver", PreferenceConstants.GS_DB_DRIVER_JTDS); //$NON-NLS-1$

@@ -60,9 +60,9 @@ public class StringPropertyFilter extends ViewerFilter {
 		if (newPattern != null && newPattern.length() > 0) {
 			pattern = newPattern;
 			regex = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-			if (active)
+			if (active){
 				viewer.refresh();
-			else {
+			} else {
 				viewer.addFilter(this);
 				active = true;
 			}
@@ -72,27 +72,23 @@ public class StringPropertyFilter extends ViewerFilter {
 		// else deactivate:
 		pattern = null;
 		regex=null;
-		if (active)
+		if (active){
 			viewer.removeFilter(this);
+		}
 	}
 	
 	
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (!(element instanceof CnATreeElement))
+		if (!(element instanceof CnATreeElement)){
 			return true;
-		
+		}
 		Entity entity = ((CnATreeElement)element).getEntity();
 		String value = entity.getSimpleValue(this.propertyType);
 		Matcher matcher = regex.matcher(value);
-		if (matcher.find())
+		if (matcher.find()){
 			return true;
+		}
 		return false;
 	}
-
-	
-
-//	public boolean isFilterProperty(Object element, String property) {
-//		return true;
-//	}
 }

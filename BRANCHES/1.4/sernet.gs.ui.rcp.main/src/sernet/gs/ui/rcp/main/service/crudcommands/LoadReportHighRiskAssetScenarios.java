@@ -50,7 +50,7 @@ public class LoadReportHighRiskAssetScenarios extends GenericCommand implements 
     
     private boolean resultInjectedFromCache = false;
     
-    public static String[] COLUMNS = new String[]{
+    public static final String[] COLUMNS = new String[]{
                                     "assetName",
                                     "scenarioName",
                                     "riskC",
@@ -69,6 +69,8 @@ public class LoadReportHighRiskAssetScenarios extends GenericCommand implements 
      */
     @Override
     public void execute() {
+        final int fourYellowFields = 4;
+        final int threeYellowFields = 3;
         if(!resultInjectedFromCache){
             results = new ArrayList<List<String>>(0);
             try{
@@ -95,6 +97,14 @@ public class LoadReportHighRiskAssetScenarios extends GenericCommand implements 
                                     impactI = reducedImpact[1];
                                     impactA = reducedImpact[2];
                                 }
+                                
+                                boolean isCRelevant = false;
+                                boolean isIRelevant = false;
+                                boolean isARelevant = false;
+                                
+                                isCRelevant = scenario.getEntity().getProperties("scenario_value_method_confidentiality").getProperty(0).getPropertyValue().equals("1");
+                                isIRelevant = scenario.getEntity().getProperties("scenario_value_method_integrity").getProperty(0).getPropertyValue().equals("1");
+                                isARelevant = scenario.getEntity().getProperties("scenario_value_method_availability").getProperty(0).getPropertyValue().equals("1");
 
                                 String scenProbType = "";
                                 switch(riskType){
@@ -113,9 +123,9 @@ public class LoadReportHighRiskAssetScenarios extends GenericCommand implements 
                                 }
 
                                 Integer probability = scenario.getNumericProperty(scenProbType);            
-                                Integer riskC = impactC + probability;
-                                Integer riskI = impactI + probability;
-                                Integer riskA = impactA + probability;
+                                Integer riskC = (isCRelevant) ? impactC + probability : Integer.valueOf(0);
+                                Integer riskI = (isIRelevant) ? impactI + probability : Integer.valueOf(0);
+                                Integer riskA = (isARelevant) ? impactA + probability : Integer.valueOf(0);
 
                                 char[] cia = new char[]{'c', 'i', 'a'};
                                 boolean isRedRisk = false;
@@ -123,9 +133,9 @@ public class LoadReportHighRiskAssetScenarios extends GenericCommand implements 
                                 for(char c : cia){
                                     int yellowFields = 0;
                                     if(c == 'i'){
-                                        yellowFields = 4;
+                                        yellowFields = fourYellowFields;
                                     } else {
-                                        yellowFields = 3;
+                                        yellowFields = threeYellowFields;
                                     }
                                     int riskColor = raService.getRiskColor(asset, scenario, c, yellowFields, scenProbType);
                                     if(!isRedRisk && riskColor == IRiskAnalysisService.RISK_COLOR_RED){

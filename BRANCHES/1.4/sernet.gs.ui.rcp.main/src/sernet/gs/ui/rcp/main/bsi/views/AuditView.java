@@ -27,10 +27,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
@@ -39,7 +36,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import sernet.gs.ui.rcp.main.bsi.filter.MassnahmenSiegelFilter;
 import sernet.gs.ui.rcp.main.bsi.filter.MassnahmenUmsetzungFilter;
 import sernet.gs.ui.rcp.main.bsi.model.TodoViewItem;
-import sernet.gs.ui.rcp.main.bsi.views.GenericMassnahmenView.SortSelectionAdapter;
 import sernet.gs.ui.rcp.main.bsi.views.actions.AuditViewFilterAction;
 import sernet.gs.ui.rcp.main.common.model.PlaceHolder;
 import sernet.verinice.model.bsi.MassnahmenUmsetzung;
@@ -54,43 +50,50 @@ import sernet.verinice.model.bsi.MassnahmenUmsetzung;
 public class AuditView extends GenericMassnahmenView {
 	public static final String ID = "sernet.gs.ui.rcp.main.bsi.views.auditview"; //$NON-NLS-1$
 
-	AuditTableSorter tableSorter = new AuditTableSorter();
+	private AuditTableSorter tableSorter = new AuditTableSorter();
 	
 	@Override
 	protected void createPartControlImpl(Composite parent) {
-		Table table = viewer.getTable();
+		Table table = getViewer().getTable();
+		
+		final int iconColumnWidth = 25;
+		final int dateColumnWidth = 200;
+		final int bearbeiterColumnWidth = 100;
+		final int siegelColumnWidth = 20;
+		final int zielColumnWidth = 150;
+		final int titleColumnWidth = 250;
 		
 		iconColumn = new TableColumn(table, SWT.LEFT);
 		iconColumn.setText(" "); //$NON-NLS-1$
-		iconColumn.setWidth(25);
+		iconColumn.setWidth(iconColumnWidth);
 		iconColumn.addSelectionListener(new SortSelectionAdapter(this,iconColumn,0));
 		
 		dateColumn = new TableColumn(table, SWT.LEFT);
 		dateColumn.setText(Messages.AuditView_8);
-		dateColumn.setWidth(200);
+		dateColumn.setWidth(dateColumnWidth);
 		dateColumn.addSelectionListener(new SortSelectionAdapter(this,dateColumn,1));
 		
 		bearbeiterColumn = new TableColumn(table, SWT.LEFT);
 		bearbeiterColumn.setText(Messages.AuditView_9);
-		bearbeiterColumn.setWidth(100);
+		bearbeiterColumn.setWidth(bearbeiterColumnWidth);
 		bearbeiterColumn.addSelectionListener(new SortSelectionAdapter(this,bearbeiterColumn,2));
 		
 		siegelColumn = new TableColumn(table, SWT.LEFT);
 		siegelColumn.setText(Messages.AuditView_10);
-		siegelColumn.setWidth(20);
+		siegelColumn.setWidth(siegelColumnWidth);
 		siegelColumn.addSelectionListener(new SortSelectionAdapter(this,siegelColumn,3));
 		
 		zielColumn = new TableColumn(table, SWT.LEFT);
 		zielColumn.setText(Messages.AuditView_11);
-		zielColumn.setWidth(150);
+		zielColumn.setWidth(zielColumnWidth);
 		zielColumn.addSelectionListener(new SortSelectionAdapter(this,zielColumn,4));
 		
 		titleColumn = new TableColumn(table, SWT.LEFT);
 		titleColumn.setText(Messages.AuditView_12);
-		titleColumn.setWidth(250);
+		titleColumn.setWidth(titleColumnWidth);
 		titleColumn.addSelectionListener(new SortSelectionAdapter(this,titleColumn,5));
 		
-		viewer.setColumnProperties(new String[] {
+		getViewer().setColumnProperties(new String[] {
 				"_icon", //$NON-NLS-1$
 				"_date", //$NON-NLS-1$
 				"_bearbeiter", //$NON-NLS-1$
@@ -114,7 +117,7 @@ public class AuditView extends GenericMassnahmenView {
 	protected Action createFilterAction(
 			MassnahmenUmsetzungFilter umsetzungFilter,
 			MassnahmenSiegelFilter siegelFilter) {
-		return new AuditViewFilterAction(this,viewer, Messages.AuditView_19,
+		return new AuditViewFilterAction(this,getViewer(), Messages.AuditView_19,
 				umsetzungFilter, siegelFilter);
 	}
 
@@ -196,8 +199,9 @@ public class AuditView extends GenericMassnahmenView {
 				return ""; //$NON-NLS-1$
 			case 1: // date
 				Date date = mn.getNaechsteRevision();
-				if (date == null)
+				if (date == null){
 					return Messages.TodoView_3;
+				}
 				return dateFormat.format(date);
 			case 2: // bearbeiter
 				return mn.getRevisionDurch();
@@ -230,12 +234,10 @@ public class AuditView extends GenericMassnahmenView {
                         rc = 1;
                     }
                 } else if(o2==null) {
-                    if(o1!=null) {
-                        rc = -1;
-                    }
+                    rc = -1;
                 } else {
                     // e1 and e2 != null    
-                    switch (propertyIndex) {
+                    switch (getPropertyIndex()) {
                     case 0:
                         rc = sortByString(mn1.getUmsetzung(),mn2.getUmsetzung());
                         break;
@@ -259,7 +261,7 @@ public class AuditView extends GenericMassnahmenView {
                     }
                 }
                 // If descending order, flip the direction
-                if (direction == DESCENDING) {
+                if (getDirection() == DESCENDING) {
                     rc = -rc;
                 }
             } catch(Exception e) {

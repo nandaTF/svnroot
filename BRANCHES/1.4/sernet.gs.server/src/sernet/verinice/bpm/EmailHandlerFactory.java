@@ -22,11 +22,13 @@ package sernet.verinice.bpm;
 import java.util.Hashtable;
 import java.util.Map;
 
+import sernet.verinice.bpm.gsm.GsmExecuteEmailHandler;
 import sernet.verinice.bpm.isam.AuditEmailHandler;
 import sernet.verinice.bpm.isam.DeadlineEmailHandler;
 import sernet.verinice.bpm.isam.NotResponsibleEmailHandler;
 import sernet.verinice.bpm.qm.IssueFixedEmailHandler;
 import sernet.verinice.bpm.qm.IssueNotFixedEmailHandler;
+import sernet.verinice.interfaces.bpm.IGsmIsmExecuteProzess;
 import sernet.verinice.interfaces.bpm.IIndividualProcess;
 import sernet.verinice.interfaces.bpm.IIsaControlFlowProcess;
 
@@ -35,32 +37,35 @@ import sernet.verinice.interfaces.bpm.IIsaControlFlowProcess;
  *
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
-public class EmailHandlerFactory {
+public final class EmailHandlerFactory {
 
-    private static final Map<String, IEmailHandler> handlerMap;
+    private static final Map<String, IEmailHandler> HANDLERMAP;
     
     static {
-        handlerMap = new Hashtable<String, IEmailHandler>();
+        HANDLERMAP = new Hashtable<String, IEmailHandler>();
         // task reminder
         IEmailHandler taskReminder = new TaskReminderEmailHandler();
-        handlerMap.put(IIsaControlFlowProcess.TASK_ASSIGN, taskReminder);
-        handlerMap.put(IIsaControlFlowProcess.TASK_EXECUTE, taskReminder);
-        handlerMap.put(IIndividualProcess.TASK_EXECUTE, taskReminder);
-        handlerMap.put(IIndividualProcess.TASK_ASSIGN, taskReminder);
+        HANDLERMAP.put(IIsaControlFlowProcess.TASK_ASSIGN, taskReminder);
+        HANDLERMAP.put(IIsaControlFlowProcess.TASK_EXECUTE, taskReminder);
+        HANDLERMAP.put(IIndividualProcess.TASK_EXECUTE, taskReminder);
+        HANDLERMAP.put(IIndividualProcess.TASK_ASSIGN, taskReminder);
         // special reminder
-        handlerMap.put(IIsaControlFlowProcess.DEADLINE_PASSED, new DeadlineEmailHandler());
-        handlerMap.put(IIsaControlFlowProcess.NOT_RESPONSIBLE, new NotResponsibleEmailHandler());
-        handlerMap.put(IIsaControlFlowProcess.AUDIT_STARTS, new AuditEmailHandler());
-        handlerMap.put(IIsaControlFlowProcess.REMINDER_FIXED, new IssueFixedEmailHandler());
-        handlerMap.put(IIsaControlFlowProcess.REMINDER_NOT_CHANGED, new IssueNotFixedEmailHandler());      
+        HANDLERMAP.put(IIsaControlFlowProcess.DEADLINE_PASSED, new DeadlineEmailHandler());
+        HANDLERMAP.put(IIsaControlFlowProcess.NOT_RESPONSIBLE, new NotResponsibleEmailHandler());
+        HANDLERMAP.put(IIsaControlFlowProcess.AUDIT_STARTS, new AuditEmailHandler());
+        HANDLERMAP.put(IIsaControlFlowProcess.REMINDER_FIXED, new IssueFixedEmailHandler());
+        HANDLERMAP.put(IIsaControlFlowProcess.REMINDER_NOT_CHANGED, new IssueNotFixedEmailHandler()); 
+        HANDLERMAP.put(IGsmIsmExecuteProzess.TASK_EXECUTE, new GsmExecuteEmailHandler());      
     }
+    
+    private EmailHandlerFactory(){};
     
     /**
      * @param taskId
      * @return
      */
     public static IEmailHandler getHandler(String taskId) {
-        return handlerMap.get(taskId);
+        return HANDLERMAP.get(taskId);
     }
 
 }

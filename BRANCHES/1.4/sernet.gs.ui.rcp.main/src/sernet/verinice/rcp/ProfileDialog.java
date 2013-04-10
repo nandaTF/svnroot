@@ -27,10 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -57,7 +54,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.hui.common.VeriniceContext;
 import sernet.verinice.interfaces.ActionRightIDs;
@@ -83,20 +79,20 @@ public class ProfileDialog extends TitleAreaDialog {
     private TableViewer tableSelected;
     private TableViewer table;
     
-    Button addAllButton;
-    Button removeAllButton;
+    private Button addAllButton;
+    private Button removeAllButton;
     
-    Auth auth;
-    String profileName;
-    String profileNameOld;
-    Profile profile;  
+    private Auth auth;
+    private String profileName;
+    private String profileNameOld;
+    private Profile profile;  
     private List<Action> selectedActions = new ArrayList<Action>(); 
     private List<Action> selectedActionsOld = new ArrayList<Action>();   
     private List<Action> unselectedActions;
     private List<String> allActions;
     
 
-    IRightsServiceClient rightsService;
+    private IRightsServiceClient rightsService;
 
     public ProfileDialog(Shell parent) {
         super(parent);
@@ -129,6 +125,12 @@ public class ProfileDialog extends TitleAreaDialog {
 
     @Override
     protected Control createDialogArea(Composite parent) {
+        final int numColumnsCombo = 4;
+        final int numColumns4ColComposite = 3;
+        final int minWidthGridLayout = 200;
+        final int gridDataHeightCharacterAmount = 20;
+        final int gridDataWidthCharacterAmount = 40;
+        
         setTitle(Messages.ProfileDialog_1);
         setMessage(Messages.ProfileDialog_2);
         setTitleImage(ImageCache.getInstance().getImage(ImageCache.PROFILE_64));
@@ -143,7 +145,7 @@ public class ProfileDialog extends TitleAreaDialog {
         GridData gridData = new GridData(SWT.FILL, SWT.NONE, true, false);
         gridData.horizontalAlignment=GridData.HORIZONTAL_ALIGN_FILL;
         comboComposite.setLayoutData(gridData);
-        GridLayout gridLayout = new GridLayout(4, false);
+        GridLayout gridLayout = new GridLayout(numColumnsCombo, false);
         gridLayout.marginHeight = 0;
         gridLayout.marginWidth = 0;
         comboComposite.setLayout(gridLayout);
@@ -153,7 +155,7 @@ public class ProfileDialog extends TitleAreaDialog {
 
         textName = new Text(comboComposite,SWT.BORDER);
         gridData = new GridData(GridData.GRAB_HORIZONTAL);
-        gridData.minimumWidth = 200;
+        gridData.minimumWidth = minWidthGridLayout;
         textName.setLayoutData(gridData);
         textName.addFocusListener(new FocusListener() {
             
@@ -177,16 +179,16 @@ public class ProfileDialog extends TitleAreaDialog {
         
         Composite fourColumnComposite = new Composite(composite, SWT.NONE);
         gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        gridData.heightHint = convertHeightInCharsToPixels(20);
+        gridData.heightHint = convertHeightInCharsToPixels(gridDataHeightCharacterAmount);
         fourColumnComposite.setLayoutData(gridData);
-        gridLayout = new GridLayout(3, false);
+        gridLayout = new GridLayout(numColumns4ColComposite, false);
         gridLayout.marginHeight = 0;
         gridLayout.marginWidth = 0;
         fourColumnComposite.setLayout(gridLayout);
 
         Composite leftComposite = new Composite(fourColumnComposite, SWT.NONE);
         gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        gridData.widthHint = convertWidthInCharsToPixels(40);
+        gridData.widthHint = convertWidthInCharsToPixels(gridDataWidthCharacterAmount);
         leftComposite.setLayoutData(gridData);
         gridLayout = new GridLayout(1, false);
         gridLayout.marginHeight = 0;
@@ -202,7 +204,7 @@ public class ProfileDialog extends TitleAreaDialog {
 
         Composite rightComposite = new Composite(fourColumnComposite, SWT.NONE);
         gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        gridData.widthHint = convertWidthInCharsToPixels(40);
+        gridData.widthHint = convertWidthInCharsToPixels(gridDataWidthCharacterAmount);
         rightComposite.setLayoutData(gridData);
         gridLayout = new GridLayout(1, false);
         gridLayout.marginHeight = 0;
@@ -247,14 +249,14 @@ public class ProfileDialog extends TitleAreaDialog {
         table.remove(unselectedActions);
         tableSelected.remove(selectedActions);
         if(profileName!=null) {
-            for (Profile profile :  auth.getProfiles().getProfile()) {
-                if(profileName.equals(profile.getName())) {
-                    this.profile = profile;
-                    selectedActions = profile.getAction();
+            for (Profile prf :  auth.getProfiles().getProfile()) {
+                if(profileName.equals(prf.getName())) {
+                    this.profile = prf;
+                    selectedActions = prf.getAction();
                     selectedActionsOld = new ArrayList<Action>(selectedActions);
-                    textName.setText(profile.getName());
-                    profileNameOld = profile.getName();
-                    translated.setText(getRightService().getMessage(profile.getName()));
+                    textName.setText(prf.getName());
+                    profileNameOld = prf.getName();
+                    translated.setText(getRightService().getMessage(prf.getName()));
                     break;
                 }
             }
@@ -276,8 +278,8 @@ public class ProfileDialog extends TitleAreaDialog {
     
     private void setUnselected() {
         Map<String, String> mapSelected = new HashMap<String, String>(allActions.size());
-        for (Action profile : selectedActions) {
-            mapSelected.put(profile.getId(), profile.getId());
+        for (Action action : selectedActions) {
+            mapSelected.put(action.getId(), action.getId());
         }
         unselectedActions.clear();
         for (String name : allActions) {
@@ -341,14 +343,14 @@ public class ProfileDialog extends TitleAreaDialog {
         label.setText(title);
         label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
-        TableViewer table = new TableViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
+        TableViewer table0 = new TableViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 
         GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-        table.getControl().setLayoutData(gd);
+        table0.getControl().setLayoutData(gd);
 
-        table.setUseHashlookup(true);
+        table0.setUseHashlookup(true);
 
-        return table;
+        return table0;
     }
     
     private void createButtons(Composite parent) {
@@ -525,7 +527,7 @@ public class ProfileDialog extends TitleAreaDialog {
         private static final int ASCENDING = 0;
         private static final int DESCENDING = 1;
         private int direction = ASCENDING;
-        Collator collator = Collator.getInstance();
+        private Collator collator = Collator.getInstance();
 
         public ActionTableComparator() {
             this.propertyIndex = 0;

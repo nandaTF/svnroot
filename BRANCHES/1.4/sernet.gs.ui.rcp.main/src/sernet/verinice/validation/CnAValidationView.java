@@ -57,7 +57,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
 import sernet.gs.ui.rcp.main.Activator;
-import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.gs.ui.rcp.main.bsi.editors.BSIElementEditorInput;
 import sernet.gs.ui.rcp.main.bsi.editors.EditorFactory;
@@ -70,7 +69,6 @@ import sernet.hui.common.VeriniceContext;
 import sernet.hui.common.connect.HUITypeFactory;
 import sernet.springclient.RightsServiceClient;
 import sernet.verinice.interfaces.ActionRightIDs;
-import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ICommandService;
 import sernet.verinice.iso27k.rcp.ILinkedWithEditorView;
 import sernet.verinice.iso27k.rcp.JobScheduler;
@@ -88,13 +86,11 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
     static final Logger LOG = Logger.getLogger(CnAValidationView.class);
     
     public static final String ID = "sernet.verinice.validation.CnAValidationView";
+    private static final String STD_LOAD_ERRMSG = "Error while loading data";
     
     private TableViewer viewer;
-    protected TableColumn elementTypeColumn;
-    protected TableColumn elementNameColumn;
-    protected TableColumn propertyColumn;
-    protected TableColumn hintColumn;
-    TableSorter tableSorter = new TableSorter();
+
+    private TableSorter tableSorter = new TableSorter();
     private ICommandService commandService;
     
     private Action doubleClickAction;
@@ -163,7 +159,7 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
                         } else {
                             MessageDialog.openError(getSite().getShell(), "Error", "Object not found.");
                         }
-                    } catch (Throwable t){
+                    } catch (Exception t){
                         LOG.error("Error while opening element.", t); //$NON-NLS-1$
                     }
                 }
@@ -196,46 +192,40 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
         }
     }
     
-    private void openValidationElement() {
-        CnAValidation validation = (CnAValidation) ((IStructuredSelection) viewer.getSelection()).getFirstElement();
-        if (validation != null) {
-            try {
-                LoadPolymorphicCnAElementById command = new LoadPolymorphicCnAElementById(new Integer[]{validation.getElmtDbId()});
-                command = getCommandService().executeCommand(command);
-                EditorFactory.getInstance().updateAndOpenObject(command.getElements().get(0));
-                
-            } catch (CommandException e) {
-                LOG.error("Error while loading element", e); //$NON-NLS-1$
-                ExceptionUtil.log(e, Messages.ValidationView_2);
-            }
-        }
-    }
-    
-    
     private void createTable(Composite parent) {
+        TableColumn elementTypeColumn;
+        TableColumn elementNameColumn;
+        TableColumn propertyColumn;
+        TableColumn hintColumn;
+        
+        final int typeColumnWidth = 80;
+        final int nameColumnWidth = 150;
+        final int propertyColumnWidth = 100;
+        final int hintColumnWidth = 200;
+        
         viewer = new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
         viewer.setContentProvider(contentProvider);
         viewer.setLabelProvider(new ValidationLabelProvider());
         Table table = viewer.getTable();
         
         elementTypeColumn = new TableColumn(table, SWT.LEFT);
-        elementTypeColumn.setWidth(80);
+        elementTypeColumn.setWidth(typeColumnWidth);
         elementTypeColumn.setText(Messages.ValidationView_5);
         elementTypeColumn.addSelectionListener(new SortSelectionAdapter(this, elementTypeColumn, 0));
              
         elementNameColumn = new TableColumn(table, SWT.LEFT);
-        elementNameColumn.setWidth(150);
+        elementNameColumn.setWidth(nameColumnWidth);
         elementNameColumn.setText(Messages.ValidationView_4);
         elementNameColumn.addSelectionListener(new SortSelectionAdapter(this, elementNameColumn, 1));
         
         propertyColumn = new TableColumn(table, SWT.LEFT);
-        propertyColumn.setWidth(100);
+        propertyColumn.setWidth(propertyColumnWidth);
         propertyColumn.setText(Messages.ValidationView_6);
         propertyColumn.addSelectionListener(new SortSelectionAdapter(this, propertyColumn, 2));
 
         hintColumn = new TableColumn(table, SWT.LEFT);
         hintColumn.setText(Messages.ValidationView_7);
-        hintColumn.setWidth(200);
+        hintColumn.setWidth(hintColumnWidth);
         hintColumn.addSelectionListener(new SortSelectionAdapter(this, hintColumn, 3));
 
         table.setHeaderVisible(true);
@@ -261,8 +251,8 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
                     Activator.inheritVeriniceContextState();
                     loadValidations();
                 } catch (Exception e) {
-                    LOG.error("Error while loading data.", e); //$NON-NLS-1$
-                    status = new Status(Status.ERROR, "sernet.gs.ui.rcp.main", "Error while loading data.", e); //$NON-NLS-1$ //$NON-NLS-2$
+                    LOG.error(STD_LOAD_ERRMSG, e); //$NON-NLS-1$
+                    status = new Status(Status.ERROR, "sernet.gs.ui.rcp.main", STD_LOAD_ERRMSG, e); //$NON-NLS-1$ //$NON-NLS-2$
                 } finally {
                     monitor.done();
                 }
@@ -293,8 +283,9 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
     public static Display getDisplay() {
         Display display = Display.getCurrent();
         //may be null if outside the UI thread
-        if (display == null)
+        if (display == null){
            display = Display.getDefault();
+        }
         return display;       
      }
     
@@ -324,7 +315,7 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
                         CnAElementFactory.getInstance().getISO27kModel().addISO27KModelListener(contentProvider);
                     }
                 } catch (Exception e) {
-                    LOG.error("Error while loading data.", e); //$NON-NLS-1$
+                    LOG.error(STD_LOAD_ERRMSG, e); //$NON-NLS-1$
                     status= new Status(Status.ERROR, "sernet.gs.ui.rcp.main", Messages.ValidationView_3,e); //$NON-NLS-1$
                 } finally {
                     monitor.done();
@@ -345,7 +336,7 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
                         CnAElementFactory.getInstance().getLoadedModel().addBSIModelListener(contentProvider);
                     }
                 } catch (Exception e) {
-                    LOG.error("Error while loading data.", e); //$NON-NLS-1$
+                    LOG.error(STD_LOAD_ERRMSG, e); //$NON-NLS-1$
                     status= new Status(Status.ERROR, "sernet.gs.ui.rcp.main", Messages.ValidationView_3,e); //$NON-NLS-1$
                 } finally {
                     monitor.done();
@@ -485,9 +476,7 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
                     rc = 1;
                 }
             } else if (e2 == null) {
-                if (e1 != null) {
-                    rc = -1;
-                }
+                rc = -1;
             } else {
                 // e1 and e2 != null
                 switch (propertyIndex) {
@@ -522,9 +511,9 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
     }
 
     private static class SortSelectionAdapter extends SelectionAdapter {
-        CnAValidationView validationView;
-        TableColumn column;
-        int index;
+        private CnAValidationView validationView;
+        private TableColumn column;
+        private int index;
 
         public SortSelectionAdapter(CnAValidationView validationView, TableColumn column, int index) {
             super();
@@ -598,19 +587,7 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
                     selectedValidation = (CnAValidation)selection.getFirstElement();
                 }
                 Object input = viewer.getInput();
-                CnAValidation validationToSelect = null;
-                if(input != null && input instanceof ArrayList){
-                    ArrayList inputList = (ArrayList)input;
-                    for(Object o : inputList){
-                        if(o instanceof CnAValidation){
-                            CnAValidation validation = (CnAValidation)o;
-                            if(validation.getElmtDbId().equals(this.currentCnaElement.getDbId())){
-                                validationToSelect = validation;
-                                break;
-                            }
-                        }
-                    }
-                }
+                CnAValidation validationToSelect = determineValidationToSelect(input);
                 boolean changeSelectedElement = false;
                 
                 if((selectedValidation != null && !selectedValidation.getElmtDbId().equals(this.currentCnaElement.getDbId())) || selectedValidation == null){
@@ -621,6 +598,21 @@ public class CnAValidationView extends ViewPart implements ILinkedWithEditorView
                 }
             }
         }
+    }
+
+    private CnAValidation determineValidationToSelect(Object input) {
+        if(input instanceof ArrayList){
+            ArrayList inputList = (ArrayList)input;
+            for(Object o : inputList){
+                if(o instanceof CnAValidation){
+                    CnAValidation validation = (CnAValidation)o;
+                    if(validation.getElmtDbId().equals(this.currentCnaElement.getDbId())){
+                        return validation;
+                    }
+                }
+            }
+        }
+        return null;
     }
     
     public void reloadAll(){

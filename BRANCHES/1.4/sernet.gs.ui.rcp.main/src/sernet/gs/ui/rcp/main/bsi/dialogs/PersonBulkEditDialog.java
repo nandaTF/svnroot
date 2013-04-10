@@ -44,7 +44,6 @@ import sernet.gs.ui.rcp.main.bsi.editors.InputHelperFactory;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.hui.common.VeriniceContext;
 import sernet.hui.common.connect.Entity;
-import sernet.hui.common.connect.EntityType;
 import sernet.hui.common.connect.HUITypeFactory;
 import sernet.hui.swt.widgets.HitroUIComposite;
 import sernet.snutils.DBException;
@@ -59,8 +58,6 @@ public class PersonBulkEditDialog extends TitleAreaDialog {
     
     private static final Logger LOG = Logger.getLogger(PersonBulkEditDialog.class);
     
-    private EntityType entType;
-    private boolean b = false;
     private String title;
     private boolean isScopeOnly;
     private boolean useRules = true;
@@ -84,21 +81,24 @@ public class PersonBulkEditDialog extends TitleAreaDialog {
      * @param title
      * @param entity
      */
-    public PersonBulkEditDialog(Shell shell, boolean b, String title) {
+    public PersonBulkEditDialog(Shell shell, String title) {
         this(shell);
-        this.b = b;
         this.title = title;
     }
 
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
+        final int shellWidth = 460;
+        final int shellHeight = 640;
+        final int cursorLocationXSubtrahend = 200;
+        final int cursorLocationYSubtrahend = 400;
         newShell.setText(title);
-        newShell.setSize(460, 640);
+        newShell.setSize(shellWidth, shellHeight);
         
         // open the window right under the mouse pointer:
         Point cursorLocation = Display.getCurrent().getCursorLocation();
-        newShell.setLocation(new Point(cursorLocation.x-200, cursorLocation.y-400));
+        newShell.setLocation(new Point(cursorLocation.x-cursorLocationXSubtrahend, cursorLocation.y-cursorLocationYSubtrahend));
     }
     
     
@@ -111,7 +111,6 @@ public class PersonBulkEditDialog extends TitleAreaDialog {
             setMessage(Messages.AccountDialog_0);
             
             Composite container = (Composite) super.createDialogArea(parent);
-            GridLayout layoutRoot = (GridLayout) container.getLayout();
             GridData gd = new GridData(GridData.GRAB_HORIZONTAL);
             gd.grabExcessHorizontalSpace = true;
             gd.grabExcessVerticalSpace = true;
@@ -130,7 +129,7 @@ public class PersonBulkEditDialog extends TitleAreaDialog {
             innerComposite.setLayout(new GridLayout (1, false));
             
             createPasswordComposite(innerComposite);
-            HitroUIComposite huiComposite = new HitroUIComposite(innerComposite, SWT.NULL, false);
+            HitroUIComposite huiComposite = new HitroUIComposite(innerComposite, false);
             try {
                 // is always Configuration here
                 entity = new Entity(Configuration.TYPE_ID);
@@ -145,7 +144,6 @@ public class PersonBulkEditDialog extends TitleAreaDialog {
                 configureScopeOnly((Combo) huiComposite.getField(Configuration.PROP_SCOPE));
                 
                 InputHelperFactory.setInputHelpers(HUITypeFactory.getInstance().getEntityType(entity.getEntityType()), huiComposite);
-                //return huiComposite;
             } catch (DBException e) {
                 ExceptionUtil.log(e, Messages.BulkEditDialog_1);
             }

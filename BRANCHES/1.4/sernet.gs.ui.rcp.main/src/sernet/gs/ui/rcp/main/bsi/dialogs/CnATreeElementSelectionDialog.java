@@ -42,7 +42,7 @@ import sernet.verinice.rcp.ElementSelectionComponent;
  */
 public class CnATreeElementSelectionDialog extends Dialog {
 
-    private String entityType;
+    private String entityType; 
 
     private CnATreeElement inputElmt;
     
@@ -56,21 +56,35 @@ public class CnATreeElementSelectionDialog extends Dialog {
      */
     public CnATreeElementSelectionDialog(Shell shell, String selectedType, CnATreeElement inputElmt) {
         super(shell);
-        setShellStyle(SWT.MAX | SWT.CLOSE | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.RESIZE);
+        int style = SWT.MAX | SWT.CLOSE | SWT.TITLE;
+        style = style | SWT.BORDER | SWT.APPLICATION_MODAL;
+        setShellStyle(style | SWT.RESIZE);
         this.entityType = selectedType;
         this.inputElmt = inputElmt;
         
     }
     
+    /**
+     * @param referencedEntityType
+     * @param inputElmt2
+     */
+    public CnATreeElementSelectionDialog(String referencedEntityType, CnATreeElement inputElmt2) {
+        this(Display.getCurrent().getActiveShell(), referencedEntityType, inputElmt2);
+    }
+
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
+        final int shellWidth = 400;
+        final int shellHeight = 500;
+        final int cursorLocationXSubtrahend = 200;
+        final int cursorLocationYSubtrahend = 250;
         newShell.setText(Messages.CnATreeElementSelectionDialog_2);
-        newShell.setSize(400, 500);
+        newShell.setSize(shellWidth, shellHeight);
         
         // open the window right under the mouse pointer:
         Point cursorLocation = Display.getCurrent().getCursorLocation();
-        newShell.setLocation(new Point(cursorLocation.x-200, cursorLocation.y-250));
+        newShell.setLocation(new Point(cursorLocation.x-cursorLocationXSubtrahend, cursorLocation.y-cursorLocationYSubtrahend));
     }
     
     @Override

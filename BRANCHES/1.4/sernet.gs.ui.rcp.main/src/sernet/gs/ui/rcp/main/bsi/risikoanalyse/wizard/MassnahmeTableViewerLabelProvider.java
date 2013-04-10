@@ -80,7 +80,6 @@ public class MassnahmeTableViewerLabelProvider implements ITableLabelProvider {
         		RisikoMassnahmeHome.getInstance().initRisikoMassnahmeUmsetzung(massnahme);
                 return shorten(massnahme.getDescription());
             }
-            ;
         } else {
             MassnahmenUmsetzung massnahme = (MassnahmenUmsetzung) element;
             switch (columnIndex) {
@@ -93,7 +92,6 @@ public class MassnahmeTableViewerLabelProvider implements ITableLabelProvider {
             case 3:
                 return Messages.MassnahmeTableViewerLabelProvider_4;
             }
-            ;
         }
         return ""; //$NON-NLS-1$
     }
@@ -144,9 +142,10 @@ public class MassnahmeTableViewerLabelProvider implements ITableLabelProvider {
      * @return shortened version of the description without newline-characters
      */
     private String shorten(String description) {
+        final int maxLineLength = 100;
         String oneline = description.replaceAll(System.getProperty("line.separator"), " "); //$NON-NLS-1$ //$NON-NLS-2$
-        if (oneline.length() > 100) {
-            return oneline.substring(0, 100) + "..."; //$NON-NLS-1$
+        if (oneline.length() > maxLineLength) {
+            return oneline.substring(0, maxLineLength) + "..."; //$NON-NLS-1$
         }
         return oneline;
 

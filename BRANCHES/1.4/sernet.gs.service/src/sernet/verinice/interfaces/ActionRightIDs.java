@@ -40,7 +40,6 @@ public class ActionRightIDs {
     public static final String ADDITVERBUND = "additverbund";
     public static final String ADDNOTE = "addnote";
     public static final String ADDSECURITYASSESSMENT = "addsecurityassessment";
-    public static final String ADDSECURITYASSESSMENTWC = "addsecurityassessmentwc";
     public static final String ADDOWNMODUL = "addownmodul";
     public static final String ASSIGNALLISATOPICS = "assignallisatopics";
     public static final String AUDITVIEW = "auditview";
@@ -92,6 +91,7 @@ public class ActionRightIDs {
     public static final String GROUP_BY_TAG = "groupbytag";
     public static final String CREATE_INDIVIDUAL_TASKS = "createindividualtasks";
     public static final String CNAVALIDATION = "cnavalidation";
+    public static final String SHOWALLFILES = "showallfiles";
     
     public static String[] getAllRightIDs(){
         ArrayList<String> retVal = new ArrayList<String>(0);

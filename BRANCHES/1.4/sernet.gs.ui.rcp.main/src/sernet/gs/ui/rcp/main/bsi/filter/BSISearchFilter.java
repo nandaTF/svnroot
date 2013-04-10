@@ -36,27 +36,28 @@ public class BSISearchFilter extends TextFilter {
 
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (regex==null)
+		if (getRegex()==null){
 			return true;
-		
+		}
 		if (element instanceof Baustein) {
 			Baustein bs = (Baustein) element;
-			Matcher matcher = regex.matcher(bs.getTitel());
-			if (matcher.find())
+			Matcher matcher = getRegex().matcher(bs.getTitel());
+			if (matcher.find()){
 				return true;
+			}
 			// show baustein if one child matches:
 			return checkMassnahmen(bs) || checkGefaehrdungen(bs);
 		}
 		
 		if (element instanceof Massnahme) {
 			Massnahme mn = (Massnahme) element;
-			Matcher matcher = regex.matcher(mn.getTitel());
+			Matcher matcher = getRegex().matcher(mn.getTitel());
 			return (matcher.find());
 		}
 		
 		if (element instanceof Gefaehrdung) {
 			Gefaehrdung gef = (Gefaehrdung) element;
-			Matcher matcher = regex.matcher(gef.getTitel());
+			Matcher matcher = getRegex().matcher(gef.getTitel());
 			return (matcher.find());
 		}
 		
@@ -66,9 +67,10 @@ public class BSISearchFilter extends TextFilter {
 	private boolean checkMassnahmen(Baustein bs) {
 		List<Massnahme> massnahmen = bs.getMassnahmen();
 		for (Massnahme mn : massnahmen) {
-			Matcher matcher = regex.matcher(mn.getTitel());
-			if (matcher.find())
+			Matcher matcher = getRegex().matcher(mn.getTitel());
+			if (matcher.find()){
 				return true;
+			}
 		}
 		return false;
 	}
@@ -76,9 +78,10 @@ public class BSISearchFilter extends TextFilter {
 	private boolean checkGefaehrdungen(Baustein bs) {
 		List<Gefaehrdung> gefaehrdungen= bs.getGefaehrdungen();
 		for (Gefaehrdung gefaehrdung : gefaehrdungen) {
-			Matcher m = regex.matcher(gefaehrdung.getTitel());
-			if (m.find())
+			Matcher m = getRegex().matcher(gefaehrdung.getTitel());
+			if (m.find()){
 				return true;
+			}
 		}
 		return false;
 	}

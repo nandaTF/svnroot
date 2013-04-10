@@ -35,7 +35,7 @@ import sernet.verinice.model.samt.SamtTopic;
  */
 public class ProcessDao extends HibernateDaoSupport {
     
-    public final static String HQL = "select props.propertyValue " +
+    public static final String HQL = "select props.propertyValue " +
     "from Configuration as conf " +
     "join conf.person as person " +
     "join conf.entity as entity " +
@@ -68,7 +68,7 @@ public class ProcessDao extends HibernateDaoSupport {
         return loadUsername(uuidAssignee);
     }
 
-    private String loadUsername(String uuidAssignee) {
+    public String loadUsername(String uuidAssignee) {
         String username = null;
         if(uuidAssignee!=null) {
             List<String> result = getHibernateTemplate().find(ProcessDao.HQL, new String[] {uuidAssignee,Configuration.PROP_USERNAME});

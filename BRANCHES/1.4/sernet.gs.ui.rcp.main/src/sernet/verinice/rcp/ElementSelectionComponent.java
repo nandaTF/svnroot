@@ -50,7 +50,6 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -65,6 +64,7 @@ import sernet.gs.ui.rcp.main.common.model.PlaceHolder;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnAElementByEntityTypeId;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadElementsForScope;
+import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.IISO27kElement;
 
@@ -75,11 +75,9 @@ import sernet.verinice.model.iso27k.IISO27kElement;
  */
 public class ElementSelectionComponent {
 
-    Composite container;
+    private Composite container;
 
     private TableViewer viewer;
-    private TableViewerColumn column1;
-    private TableViewerColumn column2;
     private Text text;
     private Button checkbox;
     
@@ -88,8 +86,8 @@ public class ElementSelectionComponent {
     private List<CnATreeElement> elementList;
     private CnATreeElement inputElmt;
     private String entityType;
-    protected boolean scopeOnly;
-    protected boolean showScopeCheckbox;
+    private boolean scopeOnly;
+    private boolean showScopeCheckbox;
     private static final String COLUMN_IMG = "_img"; //$NON-NLS-1$
     private static final String COLUMN_LABEL = "_label"; //$NON-NLS-1$
     
@@ -105,22 +103,28 @@ public class ElementSelectionComponent {
     }
     
     public void init() {
+        
+        final int formAttachmentDefaultOffset = 5;
+        final int column1Width = 25;
+        final int column2Width = 200;
+        final int formData2Numerator = 100;
+        final int formData3Numerator = formData2Numerator;
         container.setLayout(new FormLayout());
              
         Label label1 = new Label(container, SWT.NULL);
         label1.setText(Messages.CnATreeElementSelectionDialog_3);
 
         FormData formData = new FormData();
-        formData.top = new FormAttachment(0, 5);
-        formData.left = new FormAttachment(0, 5);
+        formData.top = new FormAttachment(0, formAttachmentDefaultOffset);
+        formData.left = new FormAttachment(0, formAttachmentDefaultOffset);
         label1.setLayoutData(formData);
         label1.pack();
         
         text = new Text(container, SWT.BORDER);
         FormData formData2 = new FormData();
-        formData2.top = new FormAttachment(0, 5);
-        formData2.left = new FormAttachment(label1, 5);
-        formData2.right = new FormAttachment(100, -5);
+        formData2.top = new FormAttachment(0, formAttachmentDefaultOffset);
+        formData2.left = new FormAttachment(label1, formAttachmentDefaultOffset);
+        formData2.right = new FormAttachment(formData2Numerator, (-1) * formAttachmentDefaultOffset);
         text.setLayoutData(formData2);
         text.addKeyListener(new KeyListener() {
             @Override
@@ -134,49 +138,51 @@ public class ElementSelectionComponent {
         });
         
         if(isShowScopeCheckbox()) {
-            checkbox = new Button(container, SWT.CHECK);
-            checkbox.setText(Messages.CnATreeElementSelectionDialog_4);
-            checkbox.setSelection(true);
-            FormData checkboxFD = new FormData();
-            checkboxFD.top = new FormAttachment(text, 5);
-            checkboxFD.left = new FormAttachment(0, 5);
-            checkbox.setLayoutData(checkboxFD);
-            checkbox.pack();
-            checkbox.addSelectionListener(new SelectionListener() {
+            SelectionListener listener = new SelectionListener() {
+                @Override
                 public void widgetSelected(SelectionEvent e) {
-                    scopeOnly = checkbox.getSelection();
-                    loadElements();
+                    Button button = (e.getSource() instanceof Button) ? (Button)e.getSource() : null;
+                    if(button != null){
+                        scopeOnly = button.getSelection();
+                        loadElements();
+                    }
                 }
-                
+                @Override
                 public void widgetDefaultSelected(SelectionEvent e) {
                 }
-            });
+            };
+            checkbox = SWTElementFactory.generateCheckboxButton(container, Messages.CnATreeElementSelectionDialog_4, true, listener);
+            FormData checkboxFD = new FormData();
+            checkboxFD.top = new FormAttachment(text, formAttachmentDefaultOffset);
+            checkboxFD.left = new FormAttachment(0, formAttachmentDefaultOffset);
+            checkbox.setLayoutData(checkboxFD);
+            checkbox.pack();
         }
         
         viewer = new TableViewer(container, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
         FormData formData3 = new FormData();
         if(isShowScopeCheckbox()) {
-            formData3.top = new FormAttachment(checkbox, 5);
+            formData3.top = new FormAttachment(checkbox, formAttachmentDefaultOffset);
         } else {
-            formData3.top = new FormAttachment(text, 5);
+            formData3.top = new FormAttachment(text, formAttachmentDefaultOffset);
         }
-        formData3.left = new FormAttachment(0, 5);
-        formData3.right = new FormAttachment(100, -5);
-        formData3.bottom = new FormAttachment(100, -5);
+        formData3.left = new FormAttachment(0, formAttachmentDefaultOffset);
+        formData3.right = new FormAttachment(formData3Numerator, (-1) * formAttachmentDefaultOffset);
+        formData3.bottom = new FormAttachment(formData3Numerator, (-1) * formAttachmentDefaultOffset);
         viewer.getTable().setLayoutData(formData3);
         viewer.getTable().setHeaderVisible(false);
         viewer.getTable().setLinesVisible(true);
         
         // image column:
-        column1 = new TableViewerColumn(viewer, SWT.LEFT);
+        TableViewerColumn column1 = new TableViewerColumn(viewer, SWT.LEFT);
         column1.getColumn().setText(""); //$NON-NLS-1$
-        column1.getColumn().setWidth(25);
+        column1.getColumn().setWidth(column1Width);
         column1.getColumn().setResizable(false);
         column1.setLabelProvider(new CellLabelProvider() {
             public void update(ViewerCell cell) {
-                if (cell.getElement() instanceof PlaceHolder)
+                if (cell.getElement() instanceof PlaceHolder){
                     return;
-                
+                }
                 CnATreeElement element = (CnATreeElement)cell.getElement();
                 Image image = CnAImageProvider.getCustomImage(element);
                 if(image==null) {
@@ -187,8 +193,8 @@ public class ElementSelectionComponent {
         });
         
         // label column:
-        column2 = new TableViewerColumn(viewer, SWT.LEFT);
-        column2.getColumn().setWidth(200);
+        TableViewerColumn column2 = new TableViewerColumn(viewer, SWT.LEFT);
+        column2.getColumn().setWidth(column2Width);
         column2.setLabelProvider(new CellLabelProvider() {
             public void update(ViewerCell cell) {
                 if (cell.getElement() instanceof PlaceHolder) {
@@ -231,13 +237,12 @@ public class ElementSelectionComponent {
     }
 
     public void loadElementsAndSelect(final CnATreeElement selected) {
-        if (entityType == null || entityType.length()==0)
+        if (entityType == null || entityType.length()==0){
             return;
-        
+        }
         ArrayList temp = new ArrayList(1);
         temp.add(new PlaceHolder(Messages.CnATreeElementSelectionDialog_6));
         viewer.setInput(temp);
-        
         
         WorkspaceJob job = new WorkspaceJob(Messages.CnATreeElementSelectionDialog_7) {
             @Override
@@ -246,39 +251,7 @@ public class ElementSelectionComponent {
 
                 try {
                     monitor.setTaskName(Messages.CnATreeElementSelectionDialog_8);
-
-                    if (scopeOnly && inputElmt!=null) {
-                        LoadElementsForScope command = new LoadElementsForScope(entityType, inputElmt.getDbId());
-                        command = ServiceFactory.lookupCommandService().executeCommand(command);
-                        elementList = command.getElements();
-                        Display.getDefault().asyncExec(new Runnable() {
-                            public void run() {
-                                if (elementList!=null)
-                                    viewer.setInput(elementList);
-                                else {
-                                    ArrayList temp = new ArrayList(0);
-                                    viewer.setInput(temp);
-                                }
-                                setSelectedElement(selected);
-                            }
-                        });
-                        
-                    } else {
-                        LoadCnAElementByEntityTypeId command = new LoadCnAElementByEntityTypeId(entityType);
-                        command = ServiceFactory.lookupCommandService().executeCommand(command);
-                        elementList = command.getElements();
-                        Display.getDefault().asyncExec(new Runnable() {
-                            public void run() {
-                                if (elementList!=null)
-                                    viewer.setInput(elementList);
-                                else {
-                                    ArrayList temp = new ArrayList(0);
-                                    viewer.setInput(temp);
-                                }
-                                setSelectedElement(selected);
-                            }
-                        });
-                    }                 
+                    scopeAndElmntDpntElmntSlctn(selected);                 
                 } catch (Exception e) {
                     ExceptionUtil.log(e, Messages.CnATreeElementSelectionDialog_0);
                 }
@@ -353,6 +326,34 @@ public class ElementSelectionComponent {
                 getViewer().setSelection(new StructuredSelection(selectedElement));
                 selectedElements = ((IStructuredSelection)viewer.getSelection()).toList();
             }
+        }
+    }
+
+    private void loadAndSelectElements(final CnATreeElement selected, final List<CnATreeElement> list) {
+        Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+                if (list !=null){
+                    viewer.setInput(list);
+                } else {
+                    ArrayList temp = new ArrayList(0);
+                    viewer.setInput(temp);
+                }
+                setSelectedElement(selected);
+            }
+        });
+        elementList = list;
+    }
+
+    private void scopeAndElmntDpntElmntSlctn(final CnATreeElement selected) throws CommandException {
+        if (scopeOnly && inputElmt!=null) {
+            LoadElementsForScope command = new LoadElementsForScope(entityType, inputElmt.getDbId());
+            command = ServiceFactory.lookupCommandService().executeCommand(command);
+            loadAndSelectElements(selected, command.getElements());
+            
+        } else {
+            LoadCnAElementByEntityTypeId command = new LoadCnAElementByEntityTypeId(entityType);
+            command = ServiceFactory.lookupCommandService().executeCommand(command);
+            loadAndSelectElements(selected, command.getElements());
         }
     }
 }

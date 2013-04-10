@@ -53,7 +53,6 @@ import sernet.gs.ui.rcp.main.actions.RightsEnabledAction;
 import sernet.gs.ui.rcp.main.bsi.editors.BSIElementEditorInput;
 import sernet.gs.ui.rcp.main.bsi.editors.EditorFactory;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
-import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.crudcommands.DeleteNote;
@@ -73,13 +72,9 @@ public class NoteView extends ViewPart implements ILinkedWithEditorView {
 
     private static final Logger LOG = Logger.getLogger(NoteView.class);
 
-    private CnATreeElement inputElmt;
-
     public static final String ID = "sernet.gs.ui.rcp.main.bsi.views.NoteView"; //$NON-NLS-1$
 
-    Composite parent;
-
-    ExpandBar expandBar;
+    private ExpandBar expandBar;
 
     private ISelectionListener selectionListener;
 
@@ -90,8 +85,6 @@ public class NoteView extends ViewPart implements ILinkedWithEditorView {
     private RightsEnabledAction addNoteAction;
 
     private IBSIModelListener modelListener;
-
-    List<Note> noteList;
 
     private IPartListener2 linkWithEditorPartListener = new LinkWithEditorPartListener(this);
 
@@ -108,14 +101,15 @@ public class NoteView extends ViewPart implements ILinkedWithEditorView {
 
     @Override
     public void createPartControl(Composite parent) {
-
-        this.parent = parent;
+        
+        final int expandBarSpacing = 4;
+        
         parent.setLayout(new FillLayout());
         toggleLinking(Activator.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.LINK_TO_EDITOR));
 
         try {
             expandBar = new ExpandBar(parent, SWT.V_SCROLL);
-            expandBar.setSpacing(4);
+            expandBar.setSpacing(expandBarSpacing);
             hookPageSelection();
         } catch (Exception e) {
             ExceptionUtil.log(e, Messages.BrowserView_3);
@@ -148,14 +142,15 @@ public class NoteView extends ViewPart implements ILinkedWithEditorView {
     }
 
     protected void pageSelectionChanged(IWorkbenchPart part, ISelection selection) {
-        if (part == this)
+        if (part == this){
             return;
-
-        if (!(selection instanceof IStructuredSelection))
+        }
+        if (!(selection instanceof IStructuredSelection)){
             return;
-
-        if (((IStructuredSelection) selection).size() != 1)
+        }
+        if (((IStructuredSelection) selection).size() != 1){
             return;
+        }
         try {
             Object element = ((IStructuredSelection) selection).getFirstElement();
             elementSelected(element);
@@ -222,10 +217,13 @@ public class NoteView extends ViewPart implements ILinkedWithEditorView {
     }
 
     public void loadNotes() {
+        final int defaultMargin = 4;
+        final int layoutVerticalSpacing = 10;
+        final int gdHeightHint = 100;
         try {
             LoadNotes command = new LoadNotes(getCurrentCnaElement().getDbId());
             command = getCommandService().executeCommand(command);
-            noteList = command.getNoteList();
+            List<Note> noteList = command.getNoteList();
             if (noteList != null && noteList.size() > 0) {
                 for (final Note note : noteList) {
                     note.addListener(new Note.INoteChangedListener() {
@@ -239,8 +237,11 @@ public class NoteView extends ViewPart implements ILinkedWithEditorView {
                     note.setCnAElementTitel(getCurrentCnaElement().getTitle());
                     Composite composite = new Composite(expandBar, SWT.NONE);
                     GridLayout layout = new GridLayout(2, false);
-                    layout.marginLeft = layout.marginTop = layout.marginRight = layout.marginBottom = 4;
-                    layout.verticalSpacing = 10;
+                    layout.marginLeft = defaultMargin;
+                    layout.marginTop = defaultMargin;
+                    layout.marginRight = defaultMargin;
+                    layout.marginBottom = defaultMargin;
+                    layout.verticalSpacing = layoutVerticalSpacing;
                     composite.setLayout(layout);
 
                     GridData gdText = new GridData();
@@ -248,9 +249,10 @@ public class NoteView extends ViewPart implements ILinkedWithEditorView {
                     gdText.grabExcessVerticalSpace = false;
                     gdText.horizontalAlignment = GridData.FILL;
                     gdText.verticalAlignment = GridData.CENTER;
-                    gdText.heightHint = 100;
+                    gdText.heightHint = gdHeightHint;
                     gdText.verticalSpan = 2;
-                    Text text = new Text(composite, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
+                    int style = SWT.BORDER | SWT.MULTI | SWT.READ_ONLY;
+                    Text text = new Text(composite, style | SWT.WRAP | SWT.V_SCROLL);
                     text.setLayoutData(gdText);
                     if (note.getText() != null) {
                         text.setText(note.getText());
@@ -305,7 +307,7 @@ public class NoteView extends ViewPart implements ILinkedWithEditorView {
     protected void deleteNote(Note note) {
         DeleteNote command = new DeleteNote(note);
         try {
-            command = getCommandService().executeCommand(command);
+            getCommandService().executeCommand(command);
         } catch (CommandException e) {
             LOG.error("Error while saving note", e); //$NON-NLS-1$
             ExceptionUtil.log(e, Messages.NoteView_12);
@@ -382,7 +384,6 @@ public class NoteView extends ViewPart implements ILinkedWithEditorView {
     }
 
     private void setNewInput(CnATreeElement elmt) {
-        this.inputElmt = elmt;
         setViewTitle(Messages.NoteView_8 + " " + elmt.getTitle());
     }
 

@@ -20,13 +20,13 @@ package sernet.gs.ui.rcp.main.reports;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import sernet.gs.ui.rcp.office.IOOTableRow;
-import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.bsi.BausteinUmsetzung;
 import sernet.verinice.model.bsi.ITVerbund;
 import sernet.verinice.model.common.CnALink;
@@ -50,8 +50,8 @@ public class ModellierungReport extends BsiReport
 	private Modellierung modell = null;
 	
 	private class Modellierung {
-		private HashMap<String, ZielobjektListe> zuordnungen = null;
-		private ArrayList<CnATreeElement> flatlist = null;
+		private Map<String, ZielobjektListe> zuordnungen = null;
+		private List<CnATreeElement> flatlist = null;
 		
 		Modellierung() {
 			zuordnungen = new HashMap<String, ZielobjektListe>();
@@ -83,23 +83,26 @@ public class ModellierungReport extends BsiReport
 		}
 		
 		public List<ZielobjektListe> getBausteineMitZielobjekten(int schicht) {
-			List<ZielobjektListe> bausteine = new ArrayList<ZielobjektListe>(100);
+		    final int zielObjekteListSize = 100;
+			List<ZielobjektListe> bausteine = new ArrayList<ZielobjektListe>(zielObjekteListSize);
 			Bausteine: for (ZielobjektListe liste : zuordnungen.values()) {
-				if (liste.bausteinUmsetzung.getKapitelValue()[0] != schicht)
+				if (liste.bausteinUmsetzung.getKapitelValue()[0] != schicht){
 					continue Bausteine;
-				else
+				} else {
 					bausteine.add(liste);
+				}
 			}
 			return bausteine;
 		}
 
-		public ArrayList<CnATreeElement> getFlatList() {
+		public List<CnATreeElement> getFlatList() {
 			return flatlist;
 		}
 	}
 	
-	private class ZielobjektListe {
-		private List<CnATreeElement> zielobjekte = new ArrayList<CnATreeElement>(5);
+	private final class ZielobjektListe {
+	    private static final int ZIEL_OBJEKTE_LIST_SIZE = 5;
+		private List<CnATreeElement> zielobjekte = new ArrayList<CnATreeElement>(ZIEL_OBJEKTE_LIST_SIZE);
 		private BausteinUmsetzung bausteinUmsetzung;
 
 		public ZielobjektListe(BausteinUmsetzung umsetzung) {
@@ -115,10 +118,10 @@ public class ModellierungReport extends BsiReport
 		return "[BSI] Modellierung nach BSI-GS";
 	}
 
-	public ArrayList<CnATreeElement> getItems() {
-		if (modell != null)
+	public List<CnATreeElement> getItems() {
+		if (modell != null){
 			return modell.getFlatList();
-
+		}
 		modell = new Modellierung();
 
 		ITVerbund verbund = getItverbund();
@@ -136,7 +139,7 @@ public class ModellierungReport extends BsiReport
 	}
 
 	
-	public ArrayList<IOOTableRow> getReport(PropertySelection shownColumns) {
+	public List<IOOTableRow> getReport(PropertySelection shownColumns) {
 		ArrayList<IOOTableRow> rows = new ArrayList<IOOTableRow>();
 		
 		int i=0;

@@ -19,6 +19,8 @@ package sernet.verinice.model.iso27k;
 
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+
 import sernet.hui.common.connect.Entity;
 import sernet.verinice.model.bsi.TagHelper;
 import sernet.verinice.model.common.CnATreeElement;
@@ -29,12 +31,16 @@ import sernet.verinice.model.common.CnATreeElement;
 @SuppressWarnings("serial")
 public class IncidentScenario extends CnATreeElement implements IISO27kElement {
 
+    private static final Logger LOG = Logger.getLogger(IncidentScenario.class);
+    
 	public static final String TYPE_ID = "incident_scenario";  //$NON-NLS-1$
 	public static final String PROP_ABBR = "incident_scenario_abbr"; //$NON-NLS-1$
 	public static final String PROP_NAME = "incident_scenario_name"; //$NON-NLS-1$
 	public static final String PROP_TAG = "incident_scenario_tag"; //$NON-NLS-1$
-
 	public static final String PROP_PROBABILITY = "incscen_likelihood"; //$NON-NLS-1$
+	public static final String PROP_GSM_ISM_SCENARIO_CVSS = "gsm_ism_scenario_cvss"; //$NON-NLS-1$
+
+    public static final String REL_INCSCEN_ASSET = "rel_incscen_asset"; //$NON-NLS-1$
 	
 	
 	/**
@@ -70,11 +76,13 @@ public class IncidentScenario extends CnATreeElement implements IISO27kElement {
 		return getEntity().getSimpleValue(PROP_NAME);
 	}
 	
-	public void setTitel(String name) {
+	@Override
+    public void setTitel(String name) {
 		getEntity().setSimpleValue(getEntityType().getPropertyType(PROP_NAME), name);
 	}
 	
-	public String getAbbreviation() {
+	@Override
+    public String getAbbreviation() {
 		return getEntity().getSimpleValue(PROP_ABBR);
 	}
 
@@ -82,11 +90,34 @@ public class IncidentScenario extends CnATreeElement implements IISO27kElement {
 	    return getEntity().getSimpleValue(PROP_PROBABILITY);
 	}
 	
-	public void setAbbreviation(String abbreviation) {
+	public Double getGsmCvss() {  
+	    String value = getEntity().getSimpleValue(PROP_GSM_ISM_SCENARIO_CVSS);
+	    if(value==null || value.isEmpty()) {
+	        return null;
+	    }	    
+        try {
+            return convertToDouble(value);
+        } catch (java.lang.NumberFormatException e) {
+            LOG.error("Can not convert CVSS string to number (Double), string is: " + value, e);
+            return null;
+        }
+    }
+	
+    private Double convertToDouble(String value) {
+        if(value==null || value.isEmpty()) {
+            return null;
+        }
+        // replace "," with "."
+        value = value.replace(',', '.');
+        return Double.valueOf(value);
+    }
+
+    public void setAbbreviation(String abbreviation) {
 		getEntity().setSimpleValue(getEntityType().getPropertyType(PROP_ABBR), abbreviation);
 	}
 	
-	public Collection<? extends String> getTags() {
+	@Override
+    public Collection<? extends String> getTags() {
 		return TagHelper.getTags(getEntity().getSimpleValue(PROP_TAG));
 	}
 	

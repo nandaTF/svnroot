@@ -30,6 +30,8 @@ import sernet.verinice.model.iso27k.IISO27kGroup;
 public class ElementInformation {
 
     private CnATreeElement element;
+    
+    private static final int MAX_TITLE_LENGTH = 100;
 
     public ElementInformation(CnATreeElement element) {
         super();
@@ -49,8 +51,8 @@ public class ElementInformation {
 
     public String getTitle() {
         String title = element.getTitle();
-        if(title.length()>100) {
-            title = title.substring(0, 99) + "...";
+        if(title.length()>MAX_TITLE_LENGTH) {
+            title = title.substring(0, MAX_TITLE_LENGTH - 1) + "...";
         }
         return title;
     }
@@ -73,18 +75,23 @@ public class ElementInformation {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj){
             return true;
-        if (obj == null)
+        }
+        if (obj == null){
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()){
             return false;
+        }
         ElementInformation other = (ElementInformation) obj;
         if (element == null) {
-            if (other.element != null)
+            if (other.element != null){
                 return false;
-        } else if (!element.equals(other.element))
+            }
+        } else if (!element.equals(other.element)){
             return false;
+        }
         return true;
     }
     

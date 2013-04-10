@@ -28,13 +28,15 @@ import javax.faces.application.FacesMessage.Severity;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
-public class Util {
+public final class Util {
 
 	private static final String DEFAULT_COMPONENT_ID = "massagePanel";
 
 	private static String lastComponentId;
 	
 	private static FacesMessage lastMessage;
+	
+	private Util(){}
 	
     public static String getMessage(String key) {
 		return getMessage(ToDoBean.BOUNDLE_NAME, key, null);

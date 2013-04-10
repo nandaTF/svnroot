@@ -19,7 +19,6 @@ package sernet.gs.ui.rcp.main.bsi.views;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -49,7 +48,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -72,7 +70,6 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
 
-import sernet.gs.service.VeriniceCharset;
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.ImageCache;
@@ -97,7 +94,6 @@ import sernet.verinice.model.bsi.AttachmentFile;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.ISO27KModel;
-import sernet.verinice.rcp.ImageCellProvider;
 import sernet.verinice.service.commands.LoadAttachmentFile;
 import sernet.verinice.service.commands.LoadAttachments;
 
@@ -113,7 +109,6 @@ import sernet.verinice.service.commands.LoadAttachments;
 public class FileView extends ViewPart implements ILinkedWithEditorView, IPropertyChangeListener {
     
     static final Logger LOG = Logger.getLogger(FileView.class);
-    private CnATreeElement inputElmt;
 
     public static final String ID = "sernet.gs.ui.rcp.main.bsi.views.FileView"; //$NON-NLS-1$
     
@@ -121,53 +116,53 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
 
     private static Map<String, String> mimeImageMap = new Hashtable<String, String>();
     static {
-        for (int i = 0; i < Attachment.ARCHIVE_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.ARCHIVE_MIME_TYPES[i], ImageCache.MIME_ARCHIVE);
+        for (int i = 0; i < Attachment.getArchiveMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getArchiveMimeTypes()[i], ImageCache.MIME_ARCHIVE);
         }
-        for (int i = 0; i < Attachment.AUDIO_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.AUDIO_MIME_TYPES[i], ImageCache.MIME_AUDIO);
+        for (int i = 0; i < Attachment.getAudioMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getAudioMimeTypes()[i], ImageCache.MIME_AUDIO);
         }
-        for (int i = 0; i < Attachment.DOCUMENT_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.DOCUMENT_MIME_TYPES[i], ImageCache.MIME_DOCUMENT);
+        for (int i = 0; i < Attachment.getDocumentMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getDocumentMimeTypes()[i], ImageCache.MIME_DOCUMENT);
         }
-        for (int i = 0; i < Attachment.HTML_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.HTML_MIME_TYPES[i], ImageCache.MIME_HTML);
+        for (int i = 0; i < Attachment.getHtmlMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getHtmlMimeTypes()[i], ImageCache.MIME_HTML);
         }
-        for (int i = 0; i < Attachment.IMAGE_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.IMAGE_MIME_TYPES[i], ImageCache.MIME_IMAGE);
+        for (int i = 0; i < Attachment.getImageMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getImageMimeTypes()[i], ImageCache.MIME_IMAGE);
         }
-        for (int i = 0; i < Attachment.PDF_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.PDF_MIME_TYPES[i], ImageCache.MIME_PDF);
+        for (int i = 0; i < Attachment.getPdfMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getPdfMimeTypes()[i], ImageCache.MIME_PDF);
         }
-        for (int i = 0; i < Attachment.PRESENTATION_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.PRESENTATION_MIME_TYPES[i], ImageCache.MIME_PRESENTATION);
+        for (int i = 0; i < Attachment.getPresentationMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getPresentationMimeTypes()[i], ImageCache.MIME_PRESENTATION);
         }
-        for (int i = 0; i < Attachment.SPREADSHEET_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.SPREADSHEET_MIME_TYPES[i], ImageCache.MIME_SPREADSHEET);
+        for (int i = 0; i < Attachment.getSpreadsheetMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getSpreadsheetMimeTypes()[i], ImageCache.MIME_SPREADSHEET);
         }
-        for (int i = 0; i < Attachment.TEXT_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.TEXT_MIME_TYPES[i], ImageCache.MIME_TEXT);
+        for (int i = 0; i < Attachment.getTextMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getTextMimeTypes()[i], ImageCache.MIME_TEXT);
         }
-        for (int i = 0; i < Attachment.VIDEO_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.VIDEO_MIME_TYPES[i], ImageCache.MIME_VIDEO);
+        for (int i = 0; i < Attachment.getVideoMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getVideoMimeTypes()[i], ImageCache.MIME_VIDEO);
         }
-        for (int i = 0; i < Attachment.XML_MIME_TYPES.length; i++) {
-            mimeImageMap.put(Attachment.XML_MIME_TYPES[i], ImageCache.MIME_XML);
+        for (int i = 0; i < Attachment.getXmlMimeTypes().length; i++) {
+            mimeImageMap.put(Attachment.getXmlMimeTypes()[i], ImageCache.MIME_XML);
         }
 
     }
 
     private ICommandService commandService;
 
-    protected TableViewer viewer;
-    protected TableColumn iconColumn;
-    protected TableViewerColumn imageColumn;
-    protected TableColumn fileNameColumn;
-    protected TableColumn mimeTypeColumn;
-    protected TableColumn textColumn;
-    protected TableColumn dateColumn;
-    protected TableColumn versionColumn;
-    TableSorter tableSorter = new TableSorter();
+    private TableViewer viewer;
+
+    private TableViewerColumn imageColumn;
+
+    
+    
+    
+    
+    private TableSorter tableSorter = new TableSorter();
 
     private List<Attachment> attachmentList;
 
@@ -238,6 +233,21 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
     }
 
     private void createTable(Composite parent) {
+        TableColumn iconColumn;
+        TableColumn fileNameColumn;
+        TableColumn mimeTypeColumn;
+        TableColumn textColumn;
+        TableColumn dateColumn;
+        TableColumn versionColumn;
+        
+        final int widthHeightPadding = 4;
+        final int itemColumnWidth = 26;
+        final int filenameColumnWidth = 152;
+        final int mimeTypeColumnWidth = 50;
+        final int textColumnWidth = 250;
+        final int dateColumnWidth = 120;
+        final int versionColumnWidth = 60;
+        
         viewer = new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
         viewer.setContentProvider(contentProvider);
         viewer.setLabelProvider(new AttachmentLabelProvider());
@@ -246,46 +256,46 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
         table.addListener(SWT.MeasureItem, new Listener() {   
             public void handleEvent(Event event) {
                // height cannot be per row so simply set
-               event.height = getThumbnailSize() + 4;
+               event.height = getThumbnailSize() + widthHeightPadding;
             }
          });
            
         imageColumn = new TableViewerColumn(viewer, SWT.LEFT);
         imageColumn.setLabelProvider(getImageCellProvider());
         if(getThumbnailSize()>0) {         
-            imageColumn.getColumn().setWidth(getThumbnailSize() + 4);          
+            imageColumn.getColumn().setWidth(getThumbnailSize() + widthHeightPadding);          
         } else {
             // dummy column
             imageColumn.getColumn().setWidth(0);
         }
         
         iconColumn = new TableColumn(table, SWT.LEFT);
-        iconColumn.setWidth(26);
+        iconColumn.setWidth(itemColumnWidth);
         iconColumn.addSelectionListener(new SortSelectionAdapter(this, iconColumn, 0));
 
         fileNameColumn = new TableColumn(table, SWT.LEFT);
         fileNameColumn.setText(Messages.FileView_2);
-        fileNameColumn.setWidth(152);
+        fileNameColumn.setWidth(filenameColumnWidth);
         fileNameColumn.addSelectionListener(new SortSelectionAdapter(this, fileNameColumn, 1));
         
         mimeTypeColumn = new TableColumn(table, SWT.LEFT);
         mimeTypeColumn.setText(Messages.FileView_3);
-        mimeTypeColumn.setWidth(50);
+        mimeTypeColumn.setWidth(mimeTypeColumnWidth);
         mimeTypeColumn.addSelectionListener(new SortSelectionAdapter(this, mimeTypeColumn, 2));
 
         textColumn = new TableColumn(table, SWT.LEFT);
         textColumn.setText(Messages.FileView_4);
-        textColumn.setWidth(250);
+        textColumn.setWidth(textColumnWidth);
         textColumn.addSelectionListener(new SortSelectionAdapter(this, textColumn, 3));
 
         dateColumn = new TableColumn(table, SWT.LEFT);
         dateColumn.setText(Messages.FileView_5);
-        dateColumn.setWidth(120);
-        dateColumn.addSelectionListener(new SortSelectionAdapter(this, dateColumn, 4));
+        dateColumn.setWidth(dateColumnWidth);
+        dateColumn.addSelectionListener(new SortSelectionAdapter(this, dateColumn, widthHeightPadding));
 
         versionColumn = new TableColumn(table, SWT.LEFT);
         versionColumn.setText(Messages.FileView_6);
-        versionColumn.setWidth(60);
+        versionColumn.setWidth(versionColumnWidth);
         versionColumn.addSelectionListener(new SortSelectionAdapter(this, versionColumn, 5));
 
         table.setHeaderVisible(true);
@@ -445,7 +455,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
     protected void deleteFile(Attachment attachment) {
         DeleteNote command = new DeleteNote(attachment);
         try {
-            command = getCommandService().executeCommand(command);
+            getCommandService().executeCommand(command);
         } catch (CommandException e) {
             LOG.error("Error while saving attachment", e); //$NON-NLS-1$
             ExceptionUtil.log(e, Messages.FileView_13);
@@ -468,18 +478,18 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
      */
     @Override
     public void propertyChange(PropertyChangeEvent changeEvent) {
-        if(changeEvent.getProperty().equals(PreferenceConstants.THUMBNAIL_SIZE) && imageCellProvider!=null) {
-            if(!changeEvent.getNewValue().equals(changeEvent.getOldValue())) {
-                imageCellProvider.setThumbSize(Integer.valueOf(changeEvent.getNewValue().toString()));
-                imageCellProvider.clearCache();
-                if(getThumbnailSize()>0) {
-                    imageColumn.getColumn().setWidth(getThumbnailSize() + 4);
-                } else {
-                    imageColumn.getColumn().setWidth(0);
-                }
-                loadFiles();
+        final int thumbnailWidthPadding = 4;
+        if(changeEvent.getProperty().equals(PreferenceConstants.THUMBNAIL_SIZE) && imageCellProvider!=null
+                && !changeEvent.getNewValue().equals(changeEvent.getOldValue())) {
+            imageCellProvider.setThumbSize(Integer.valueOf(changeEvent.getNewValue().toString()));
+            imageCellProvider.clearCache();
+            if(getThumbnailSize()>0) {
+                imageColumn.getColumn().setWidth(getThumbnailSize() + thumbnailWidthPadding);
+            } else {
+                imageColumn.getColumn().setWidth(0);
             }
-        }        
+            loadFiles();
+        }
     }
 
     private void fillLocalToolBar() {
@@ -499,24 +509,8 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
                 fd.setText(Messages.FileView_14);
                 fd.setFilterPath(System.getProperty("user.home")); //$NON-NLS-1$
                 String selected = fd.open();
-                if (selected != null && selected.length() > 0) {
-                    File file = new File(selected);
-                    if (file.isDirectory())
-                        return;
-
-                    Attachment attachment = new Attachment();
-                    attachment.setCnATreeElementId(getCurrentCnaElement().getDbId());
-                    attachment.setCnAElementTitel(getCurrentCnaElement().getTitle());
-                    attachment.setTitel(file.getName());
-                    attachment.setDate(Calendar.getInstance().getTime());
-                    attachment.setFilePath(selected);
-                    attachment.addListener(new Attachment.INoteChangedListener() {
-                        public void noteChanged() {
-                            loadFiles();
-
-                        }
-                    });
-                    EditorFactory.getInstance().openEditor(attachment);
+                if (selected != null && selected.length() > 0 && !createAndOpenAttachment(selected)){
+                    return;
                 }
             }
         };
@@ -529,22 +523,10 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
             public void run() {
                 int count = ((IStructuredSelection) viewer.getSelection()).size();
                 boolean confirm = MessageDialog.openConfirm(getViewer().getControl().getShell(), Messages.FileView_18, NLS.bind(Messages.FileView_19, count));
-
-                if (!confirm)
+                if (!confirm){
                     return;
-
-                Iterator iterator = ((IStructuredSelection) viewer.getSelection()).iterator();
-                while (iterator.hasNext()) {
-                    Attachment sel = (Attachment) iterator.next();
-                    DeleteNote command = new DeleteNote(sel);
-                    try {
-                        command = getCommandService().executeCommand(command);
-                    } catch (CommandException e) {
-                        LOG.error("Error while saving note", e); //$NON-NLS-1$
-                        ExceptionUtil.log(e, Messages.FileView_22);
-                    }
                 }
-
+                deleteAttachments();
                 loadFiles();
             }
         };
@@ -577,37 +559,15 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
         openAction.setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.VIEW));
         openAction.setEnabled(false);
 
-        toggleLinkAction = new Action(Messages.FileView_24, SWT.TOGGLE) {
+        toggleLinkAction = new RightsEnabledAction(ActionRightIDs.SHOWALLFILES, Messages.FileView_24, SWT.TOGGLE){
             public void run() {
                 isLinkingActive = !isLinkingActive;
                 toggleLinkAction.setChecked(isLinkingActive());
-                if (CnAElementFactory.isModelLoaded()) {
-                    loadFiles();
-                } else if (modelLoadListener == null) {
-                    // model is not loaded yet: add a listener to load data when
-                    // it's laoded
-                    modelLoadListener = new IModelLoadListener() {
-
-                        public void closed(BSIModel model) {
-                            // nothing to do
-                        }
-
-                        public void loaded(BSIModel model) {
-                            startInitDataJob();
-                        }
-
-                        @Override
-                        public void loaded(ISO27KModel model) {
-                            // work is done in loaded(BSIModel model)
-                        }
-
-                    };
-                    CnAElementFactory.getInstance().addLoadListener(modelLoadListener);
-                }
+                checkModelAndLoadFiles();
             }
         };
         toggleLinkAction.setImageDescriptor(ImageCache.getInstance().getImageDescriptor(ImageCache.LINKED));
-        toggleLinkAction.setChecked(isLinkingActive());
+        toggleLinkAction.setChecked(false);
     }
 
     private void openFile() {
@@ -703,8 +663,9 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
     public static Display getDisplay() {
         Display display = Display.getCurrent();
         //may be null if outside the UI thread
-        if (display == null)
+        if (display == null){
            display = Display.getDefault();
+        }
         return display;       
      }
     
@@ -796,50 +757,13 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
             Attachment a1 = (Attachment) e1;
             Attachment a2 = (Attachment) e2;
             int rc = 0;
-            if (e1 == null) {
-                if (e2 != null) {
-                    rc = 1;
-                }
-            } else if (e2 == null) {
-                if (e1 != null) {
-                    rc = -1;
-                }
+            if (e1 == null && e2 != null) {
+                rc = 1;
+            } else if (e2 == null && e1 != null) {
+                rc = -1;
             } else {
                 // e1 and e2 != null
-                switch (propertyIndex) {
-                case 0:
-                    String mimeType1 = a1.getMimeType();
-                    String mimeType2 = a2.getMimeType();
-                    if (mimeType1 == null || mimeType2 == null)
-                        return 0;
-                    String image1 = mimeImageMap.get(mimeType1);
-                    String image2 = mimeImageMap.get(mimeType2);
-                    if (image1 != null && image2 != null) {
-                        rc = image1.compareTo(image2);
-                    }
-                    break;
-                case 1:
-                    rc = a1.getFileName().compareTo(a2.getFileName());
-                    break;
-                case 2:
-                    mimeType1 = a1.getMimeType();
-                    mimeType2 = a2.getMimeType();
-                    if (mimeType1 == null || mimeType2 == null)
-                        return 0;
-                    rc = mimeType1.compareTo(mimeType2);
-                    break;
-                case 3:
-                    rc = a1.getText().compareTo(a2.getText());
-                    break;
-                case 4:
-                    rc = a1.getDate().compareTo(a2.getDate());
-                    break;
-                case 5:
-                    rc = a1.getVersion().compareTo(a2.getVersion());
-                    break;
-                default:
-                    rc = 0;
-                }
+                rc = compareNullSafe(a1, a2);
             }
             // If descending order, flip the direction
             if (direction == DESCENDING) {
@@ -848,12 +772,53 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
             return rc;
         }
 
+        private int compareNullSafe(Attachment a1, Attachment a2) {
+            int rc = 0;
+            switch (propertyIndex) {
+            case 0:
+                String mimeType1 = a1.getMimeType();
+                String mimeType2 = a2.getMimeType();
+                if (mimeType1 == null || mimeType2 == null){
+                    return 0;
+                }
+                String image1 = mimeImageMap.get(mimeType1);
+                String image2 = mimeImageMap.get(mimeType2);
+                if (image1 != null && image2 != null) {
+                    rc = image1.compareTo(image2);
+                }
+                break;
+            case 1:
+                rc = a1.getFileName().compareTo(a2.getFileName());
+                break;
+            case 2:
+                mimeType1 = a1.getMimeType();
+                mimeType2 = a2.getMimeType();
+                if (mimeType1 == null || mimeType2 == null){
+                    return 0;
+                }
+                rc = mimeType1.compareTo(mimeType2);
+                break;
+            case 3:
+                rc = a1.getText().compareTo(a2.getText());
+                break;
+            case 4:
+                rc = a1.getDate().compareTo(a2.getDate());
+                break;
+            case 5:
+                rc = a1.getVersion().compareTo(a2.getVersion());
+                break;
+            default:
+                rc = 0;
+            }
+            return rc;
+        }
+
     }
 
     private static class SortSelectionAdapter extends SelectionAdapter {
-        FileView fileView;
-        TableColumn column;
-        int index;
+        private FileView fileView;
+        private TableColumn column;
+        private int index;
 
         public SortSelectionAdapter(FileView fileView, TableColumn column, int index) {
             super();
@@ -918,12 +883,72 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
     }
 
     private void setNewInput(CnATreeElement elmt) {
-        this.inputElmt = elmt;
         setViewTitle(Messages.FileView_7 + " " + elmt.getTitle());
     }
 
     private void setViewTitle(String title) {
         this.setContentDescription(title);
+    }
+
+    private boolean createAndOpenAttachment(String selected) {
+        File file = new File(selected);
+        if (file.isDirectory()){
+            return false;
+        }
+        Attachment attachment = new Attachment();
+        attachment.setCnATreeElementId(getCurrentCnaElement().getDbId());
+        attachment.setCnAElementTitel(getCurrentCnaElement().getTitle());
+        attachment.setTitel(file.getName());
+        attachment.setDate(Calendar.getInstance().getTime());
+        attachment.setFilePath(selected);
+        attachment.addListener(new Attachment.INoteChangedListener() {
+            public void noteChanged() {
+                loadFiles();
+
+            }
+        });
+        EditorFactory.getInstance().openEditor(attachment);
+        return true;
+    }
+
+    private void deleteAttachments() {
+        Iterator iterator = ((IStructuredSelection) viewer.getSelection()).iterator();
+        while (iterator.hasNext()) {
+            Attachment sel = (Attachment) iterator.next();
+            DeleteNote command = new DeleteNote(sel);
+            try {
+                command = getCommandService().executeCommand(command);
+            } catch (CommandException e) {
+                LOG.error("Error while saving note", e); //$NON-NLS-1$
+                ExceptionUtil.log(e, Messages.FileView_22);
+            }
+        }
+    }
+
+    private void checkModelAndLoadFiles() {
+        if (CnAElementFactory.isModelLoaded()) {
+            loadFiles();
+        } else if (modelLoadListener == null) {
+            // model is not loaded yet: add a listener to load data when
+            // it's laoded
+            modelLoadListener = new IModelLoadListener() {
+
+                public void closed(BSIModel model) {
+                    // nothing to do
+                }
+
+                public void loaded(BSIModel model) {
+                    startInitDataJob();
+                }
+
+                @Override
+                public void loaded(ISO27KModel model) {
+                    // work is done in loaded(BSIModel model)
+                }
+
+            };
+            CnAElementFactory.getInstance().addLoadListener(modelLoadListener);
+        }
     }
 
 }

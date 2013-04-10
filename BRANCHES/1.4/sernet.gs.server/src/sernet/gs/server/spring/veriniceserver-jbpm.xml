@@ -27,6 +27,7 @@
                 <value>sernet/verinice/bpm/isam/isa-control-flow.jpdl.xml</value>
                 <value>sernet/verinice/bpm/qm/isa-quality-management.jpdl.xml</value>
                 <value>sernet/verinice/bpm/indi/individual-task.jpdl.xml</value>
+                <value>sernet/verinice/bpm/gsm/gsm-ism-execute.jpdl.xml</value>
             </set>
         </property>
         <property name="jbpmExecutionDao" ref="jbpmExecutionDao" />
@@ -65,6 +66,61 @@
         <property name="authService" ref="authService" />
     </bean>
     
+    <bean id="gsmService" class="sernet.verinice.bpm.gsm.GsmService">
+        <property name="processEngine" ref="processEngine" />
+        <property name="authService" ref="authService" />
+        <property name="jbpmExecutionDao" ref="jbpmExecutionDao" />
+        <property name="processDao" ref="processDao" /> 
+        
+        <property name="processValidatorFactory">
+            <bean class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+                <property name="targetBeanName">
+                    <idref local="gsmProcessValidator" />
+                </property>
+            </bean>
+        </property>
+        
+        <property name="processStarterFactory">
+            <bean class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+                <property name="targetBeanName">
+                    <idref local="gsmProcessParameterCreater" />
+                </property>
+            </bean>
+        </property>
+        
+        <property name="assetScenarioRemoverFactory">
+            <bean class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+                <property name="targetBeanName">
+                    <idref local="gsmAssetScenarioRemover" />
+                </property>
+            </bean>
+        </property>          
+    </bean>
+    
+    <bean id="gsmProcessValidator" class="sernet.verinice.bpm.gsm.GsmProcessValidator" scope="prototype">
+        <!-- Scope of graphService is prototype -->
+        <property name="graphService" ref="graphService" />
+    </bean>
+    
+    <bean id="gsmProcessParameterCreater" class="sernet.verinice.bpm.gsm.GsmProcessParameterCreater" scope="prototype">
+        <!-- Scope of graphService is prototype -->
+        <property name="graphService" ref="graphService" />
+        <property name="jbpmExecutionDao" ref="jbpmExecutionDao" />
+        <property name="elementDao" ref="cnaTreeElementDao" />
+        <!-- Process with risk value below lowPriorityRiskLimit: priority low -->
+        <!-- Process with risk value above lowPriorityRiskLimit: priority normal -->
+        <property name="lowPriorityRiskLimit" value="100" />
+        <!-- Process with risk value above normalPriorityRiskLimit: priority high -->
+        <property name="normalPriorityRiskLimit" value="1000" />
+    </bean>
+    
+    <bean id="gsmAssetScenarioRemover" class="sernet.verinice.bpm.gsm.GsmAssetScenarioRemover" scope="prototype">
+        <!-- Scope of graphService is prototype -->
+        <property name="graphService" ref="graphService" />  
+        <property name="linkDao" ref="cnaLinkDao" /> 
+        <property name="elementDao" ref="cnaTreeElementDao" />
+    </bean>
+    
     <!-- Provides methods to interact with jBPM tasks.                                          -->
     <!-- Server side implementation of the ITaskService interface.                              -->
     <!-- TaskService is accessible from verinice client by Spring remoting, configured in       -->
@@ -81,6 +137,7 @@
             <set>
                 <value>icf.trans.reminderDeadline</value>
                 <value>indi.trans.reminderDeadline</value>
+                <value>gsm.ism.execute.trans.reminder</value>
             </set>
         </property>
         <!-- Add task complete handler here -->
@@ -92,7 +149,7 @@
             </map>
         </property>
         <property name="defaultCompleteServerHandler" ref="defaultCompleteServerHandler" />
-        <!-- Add task description handler here -->
+        <!-- Add Task-Description-Handler here -->
         <!-- Key is <TASK_ID> from jbpm file -->
         <!-- See ITaskDescriptionHandler for more documentation. -->
         <!-- If no handler is set for a task bean "defaultDescriptionHandler" is used  -->
@@ -104,8 +161,8 @@
                 <entry key="indi.task.check" value-ref="indiCheckDescriptionHandler"/>
                 <entry key="indi.task.assign" value-ref="indiAssignDescriptionHandler"/>
                 <entry key="indi.task.assign.deadline" value-ref="indiDeadlineDescriptionHandler"/>
-                <entry key="indi.task.assign.nr" value-ref="indiNrDescriptionHandler"/>
-                
+                <entry key="indi.task.assign.nr" value-ref="indiNrDescriptionHandler"/>                      
+                <entry key="gsm.ism.execute.task.execute" value-ref="gsmIsmDescriptionHandler"/>            
             </map>
         </property>
         <property name="defaultDescriptionHandler" ref="defaultDescriptionHandler" />
@@ -127,6 +184,10 @@
     <bean id="indiAssignDescriptionHandler" class="sernet.verinice.bpm.indi.IndividualAssignDescriptionHandler" />
     <bean id="indiDeadlineDescriptionHandler" class="sernet.verinice.bpm.indi.IndividualDeadlineDescriptionHandler" />
     <bean id="indiNrDescriptionHandler" class="sernet.verinice.bpm.indi.IndividualNotResponsibleDescriptionHandler" />
+    
+    <bean id="gsmIsmDescriptionHandler" class="sernet.verinice.bpm.gsm.GsmServiceTaskDescriptionHandler">      
+        <property name="velocityEngine" ref="velocityEngine"/>
+    </bean>
     
     <bean id="remindServiceImpl" class="sernet.verinice.bpm.RemindService">   
         <property name="mailSender" ref="mailSender" />

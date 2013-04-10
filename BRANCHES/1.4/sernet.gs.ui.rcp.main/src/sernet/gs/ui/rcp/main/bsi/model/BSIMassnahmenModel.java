@@ -34,7 +34,6 @@ import sernet.gs.model.Baustein;
 import sernet.gs.model.Gefaehrdung;
 import sernet.gs.model.Massnahme;
 import sernet.gs.scraper.GSScraper;
-import sernet.gs.scraper.IGSPatterns;
 import sernet.gs.scraper.IGSSource;
 import sernet.gs.scraper.PatternBfDI2008;
 import sernet.gs.scraper.PatternGSHB2005_2006;
@@ -56,8 +55,6 @@ public class BSIMassnahmenModel {
 	
 	private static final Logger LOG = Logger.getLogger(BSIMassnahmenModel.class);
 	
-	private static final Logger log = Logger.getLogger(BSIMassnahmenModel.class);
-
 	private static final String DS_B01005_BFDI = "b01005_bfdi"; //$NON-NLS-1$
 
 	private static final String DS_B_1_5 = "B 1.5"; //$NON-NLS-1$
@@ -98,17 +95,18 @@ public class BSIMassnahmenModel {
 	public synchronized List<Baustein> loadBausteine(IProgress mon)
 			throws GSServiceException, IOException {
 		if (config instanceof BSIConfigurationRemoteSource) {
-			log.debug(Messages.BSIMassnahmenModel_0);
+			LOG.debug(Messages.BSIMassnahmenModel_0);
 			return loadBausteineRemote();
 		}
-
+		final int maxTaskSteps = 5;
+		
 		String gsPath = config.getGsPath();
 		String dsPath = config.getDsPath();
 		boolean fromZipFile = config.isFromZipFile();
 		IGSSource gsSource = null;
 		String cacheDir = config.getCacheDir();
 
-		log.debug(Messages.BSIMassnahmenModel_1 + gsPath);
+		LOG.debug(Messages.BSIMassnahmenModel_1 + gsPath);
 
 		// did user really change the path to file?
 		if (! (previouslyReadFile.equals(gsPath) && previouslyReadFileDS.equals(dsPath))
@@ -117,10 +115,11 @@ public class BSIMassnahmenModel {
 			previouslyReadFileDS = dsPath;
 
 			try {
-				if (fromZipFile)
+				if (fromZipFile){
 					gsSource = new ZIPGSSource(gsPath);
-				else
+				} else {
 					gsSource = new URLGSSource(gsPath);
+				}
 			} catch (IOException e) {
 				LOG.error(Messages.BSIMassnahmenModel_9 + gsPath + Messages.BSIMassnahmenModel_2); 
 				if (LOG.isDebugEnabled()) {
@@ -129,61 +128,28 @@ public class BSIMassnahmenModel {
 				return null;
 			}
 
-			if (gsSource.getVintage().equals(IGSSource.VINTAGE_2009))
+			if (gsSource.getVintage().equals(IGSSource.VINTAGE_2009)){
 				scrape = new GSScraper(gsSource, new PatternGSHB2009());
-			else
+			} else {
 				scrape = new GSScraper(gsSource, new PatternGSHB2005_2006());
-				
+			}
 			
 			scrape.setCacheDir(cacheDir); //$NON-NLS-1$
 			
 			Logger.getLogger(BSIMassnahmenModel.class).debug("Setting GS-Cache to " + scrape.getCacheDir()); //$NON-NLS-1$
-			mon.beginTask(Messages.BSIMassnahmenModel_3, 5);
+			mon.beginTask(Messages.BSIMassnahmenModel_3, maxTaskSteps);
 			List<Baustein> alleBst = new ArrayList<Baustein>();
 
-			mon.subTask(BausteinUmsetzung.getSchichtenBezeichnung()[0]);
-			alleBst.addAll(scrapeBausteine("b01")); //$NON-NLS-1$
-			mon.worked(1);
-
-			mon.subTask(BausteinUmsetzung.getSchichtenBezeichnung()[1]);
-			alleBst.addAll(scrapeBausteine("b02")); //$NON-NLS-1$
-			mon.worked(1);
-
-			mon.subTask(BausteinUmsetzung.getSchichtenBezeichnung()[2]);
-			alleBst.addAll(scrapeBausteine("b03")); //$NON-NLS-1$
-			mon.worked(1);
-
-			mon.subTask(BausteinUmsetzung.getSchichtenBezeichnung()[3]);
-			alleBst.addAll(scrapeBausteine("b04")); //$NON-NLS-1$
-			mon.worked(1);
-
-			mon.subTask(BausteinUmsetzung.getSchichtenBezeichnung()[4]);
-			alleBst.addAll(scrapeBausteine("b05")); //$NON-NLS-1$
-			mon.worked(1);
+			processBausteinLayer(mon, alleBst, "b01", 0);
+            processBausteinLayer(mon, alleBst, "b02", 1);
+            processBausteinLayer(mon, alleBst, "b03", 2);
+            processBausteinLayer(mon, alleBst, "b04", 3);
+            processBausteinLayer(mon, alleBst, "b05", 4);
+			
 			
 			// if a source for data privacy module is defined, replace the temporary module with the real one:
-			if (dsPath != null && dsPath.length() > 0) {
-				try {
-					ZIPGSSource dsSource = new ZIPGSSource(dsPath);
-					dsScrape = new GSScraper(dsSource, new PatternBfDI2008());
-					dsScrape.setCacheDir(cacheDir); //$NON-NLS-1$
-					
-					Baustein dsBaustein = scrapeDatenschutzBaustein();
-					
-					searchDataPrivacyModule: for (Iterator iterator = alleBst.iterator(); iterator.hasNext();) {
-						Baustein baustein = (Baustein) iterator.next();
-						if (baustein.getUrl().indexOf(B01005) > -1) {
-							alleBst.remove(baustein);
-							break searchDataPrivacyModule;
-						}
-					}
-					alleBst.add(dsBaustein);
-				} catch (Exception e) {
-					Logger.getLogger(BSIMassnahmenModel.class).debug("Datenschutz-Baustein nicht gefunden."); //$NON-NLS-1$
-				}
-			}
+			cache = handleDataPrivacyModule(dsPath, cacheDir, alleBst);
 			
-			cache = alleBst;
 			mon.done();
 			Logger.getLogger(BSIMassnahmenModel.class).debug(
 					Messages.BSIMassnahmenModel_4);
@@ -192,6 +158,37 @@ public class BSIMassnahmenModel {
 		return cache;
 	}
 
+    private List<Baustein> handleDataPrivacyModule(String dsPath, String cacheDir, List<Baustein> alleBst) {
+        if (dsPath != null && dsPath.length() > 0) {
+        	try {
+        		ZIPGSSource dsSource = new ZIPGSSource(dsPath);
+        		dsScrape = new GSScraper(dsSource, new PatternBfDI2008());
+        		dsScrape.setCacheDir(cacheDir); //$NON-NLS-1$
+        		
+        		Baustein dsBaustein = scrapeDatenschutzBaustein();
+        		
+        		searchDataPrivacyModule: for (Iterator iterator = alleBst.iterator(); iterator.hasNext();) {
+        			Baustein baustein = (Baustein) iterator.next();
+        			if (baustein.getUrl().indexOf(B01005) > -1) {
+        				alleBst.remove(baustein);
+        				break searchDataPrivacyModule;
+        			}
+        		}
+        		alleBst.add(dsBaustein);
+        	} catch (Exception e) {
+        		Logger.getLogger(BSIMassnahmenModel.class).debug("Datenschutz-Baustein nicht gefunden."); //$NON-NLS-1$
+        	}
+        }
+        return alleBst;
+    }
+
+    private void processBausteinLayer(IProgress mon, List<Baustein> alleBst, String layer, int layerDescription ) 
+            throws GSServiceException, IOException {
+        mon.subTask(BausteinUmsetzung.getSchichtenBezeichnung()[layerDescription]);
+        alleBst.addAll(scrapeBausteine(layer));
+        mon.worked(1);
+    }
+
 	private List<Baustein> loadBausteineRemote() throws GSServiceException {
 		// use remote source
 		try {
@@ -199,11 +196,11 @@ public class BSIMassnahmenModel {
 			command = ServiceFactory.lookupCommandService().executeCommand(command);
 			return command.getBausteine();
 		} catch (CommandException e) {
-			log.warn(Messages.BSIMassnahmenModel_5 + e.getLocalizedMessage());;
+			LOG.warn(Messages.BSIMassnahmenModel_5 + e.getLocalizedMessage());
 			throw new GSServiceException(e.getCause());
 		} catch(RemoteConnectFailureException re)
 		{
-			log.error(Messages.BSIMassnahmenModel_6 + re.getLocalizedMessage());
+			LOG.error(Messages.BSIMassnahmenModel_6 + re.getLocalizedMessage());
 			
 			// TODO rschuster: Display a nice error dialog and asking the user to
 			// check whether the server URL is valid (or the server is down?)
@@ -213,7 +210,7 @@ public class BSIMassnahmenModel {
 		}
 	}
 
-	private Baustein scrapeDatenschutzBaustein() throws GSServiceException {
+	private Baustein scrapeDatenschutzBaustein() throws GSServiceException, IOException {
     	Baustein b = new Baustein();
     	b.setStand(DS_2008);
     	b.setId(DS_B_1_5);
@@ -241,8 +238,9 @@ public class BSIMassnahmenModel {
 		try {
 			bausteinText = scrape.getBausteinText(url, stand);
 		} catch (Exception e) {
-			if (dsScrape != null)
+			if (dsScrape != null){
 				bausteinText = dsScrape.getBausteinText(url, stand);
+			}
 		}
 		return bausteinText;
 	}
@@ -275,15 +273,17 @@ public class BSIMassnahmenModel {
 		try {
 			massnahme = scrape.getMassnahme(url, stand);
 		} catch (Exception e) {
-			if (dsScrape != null)
+			if (dsScrape != null){
 				massnahme = dsScrape.getMassnahme(url, stand);
+			}
 		}
 		return massnahme;
 	}
 	
 	public String getMassnahmeHtml(String url, String stand) throws GSServiceException {
-		try {
-			InputStreamReader read = new InputStreamReader(getMassnahme(url, stand), VeriniceCharset.CHARSET_UTF_8 ); //$NON-NLS-1$
+	    final int utf8NoBreakSpace = 160;
+	    try {
+	        InputStreamReader read = new InputStreamReader(getMassnahme(url, stand), VeriniceCharset.CHARSET_UTF_8 ); //$NON-NLS-1$
 			BufferedReader buffRead = new BufferedReader(read);
 			StringBuilder b = new StringBuilder();
 			String line;
@@ -291,17 +291,17 @@ public class BSIMassnahmenModel {
 			boolean skipComplete = false;
 			
 			String cssFile = getLayoutConfig().getCssFilePath();
-				
+
 			while ((line = buffRead.readLine()) != null) {
-				if (!skipComplete) {
-					if (line.matches(".*div.*id=\"menuoben\".*") //$NON-NLS-1$
-							|| line.matches(".*div.*class=\"standort\".*")) //$NON-NLS-1$
-						skip = true;
-					else if (line.matches(".*div.*id=\"content\".*")) { //$NON-NLS-1$
-						skip = false;
-						skipComplete = true;
-					}
-				}
+			    if (!skipComplete) {
+			        if (line.matches(".*div.*id=\"menuoben\".*") //$NON-NLS-1$
+			                || line.matches(".*div.*class=\"standort\".*")){ //$NON-NLS-1$
+			            skip = true;
+			        } else if(line.matches(".*div.*id=\"content\".*")) { //$NON-NLS-1$
+			            skip = false;
+			            skipComplete = true;
+			        }
+			    }
 	
 				// we strip away images et al to keep just the information we
 				// need:
@@ -312,15 +312,17 @@ public class BSIMassnahmenModel {
 				line = line.replaceAll("<a.*?>", ""); //$NON-NLS-1$ //$NON-NLS-2$
 				line = line.replaceAll("</a.*?>", ""); //$NON-NLS-1$ //$NON-NLS-2$
 				line = line.replaceAll("<img.*?>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-				line = line.replace((char) 160, ' '); // replace non-breaking spaces
+				line = line.replace((char) utf8NoBreakSpace, ' '); // replace non-breaking spaces
 	
 				if (!skip) {
 					b.append(line);
 				}
 			}
+			buffRead.close();
+			read.close();
 			return b.toString();
 		} catch(Exception e) {
-			log.error(Messages.BSIMassnahmenModel_7, e);
+			LOG.error(Messages.BSIMassnahmenModel_7, e);
 			throw new GSServiceException(Messages.BSIMassnahmenModel_8, e);
 		}
 	}
@@ -341,7 +343,7 @@ public class BSIMassnahmenModel {
 	}
 
 	private List<Baustein> scrapeBausteine(String schicht)
-			throws GSServiceException {
+			throws GSServiceException, IOException {
 		List<Baustein> bausteine = scrape.getBausteine(schicht);
 		for (Baustein baustein : bausteine) {
 			List<Massnahme> massnahmen = scrape
@@ -365,9 +367,12 @@ public class BSIMassnahmenModel {
 		InputStream gefaehrdung = null;
 		try {
 			gefaehrdung = scrape.getGefaehrdung(url, stand);
-		} catch (Exception e) {
-			if (dsScrape != null)
+		} catch (GSServiceException e) {
+			LOG.error("Error while getting gefaehrdung",e);
+		    if (dsScrape != null){
 				gefaehrdung = dsScrape.getGefaehrdung(url, stand);
+			}
+			
 		}
 		return gefaehrdung;
 	}
@@ -391,10 +396,12 @@ public class BSIMassnahmenModel {
 	 * Discards already loaded data.
 	 */
 	private void flushCache() {
-		if (scrape!= null)
+		if (scrape!= null){
 			scrape.flushCache();
-		if (dsScrape!= null)
+		}
+		if (dsScrape!= null){
 			dsScrape.flushCache();
+		}
 	}
 
 	/**
@@ -429,11 +436,12 @@ public class BSIMassnahmenModel {
 	}
 	
 	public String getEncoding() {
-		if (scrape != null )
+		if (scrape != null ){
 			return scrape.getPatterns().getEncoding();
-		if (this.encoding != null)
+		}
+		if (this.encoding != null){
 			return encoding;
-		
+		}
 		return "iso-8859-1"; //$NON-NLS-1$
 	}
 	

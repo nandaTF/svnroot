@@ -30,18 +30,15 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import sernet.gs.common.ApplicationRoles;
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.bsi.dialogs.AccountDialog;
 import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
-import sernet.gs.ui.rcp.main.service.AuthenticationHelper;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.commands.PasswordException;
 import sernet.gs.ui.rcp.main.service.commands.UsernameExistsException;
@@ -74,13 +71,11 @@ public class ConfigurationAction implements IObjectActionDelegate,  RightEnabled
 	
 	public static final String ID = "sernet.gs.ui.rcp.main.personconfiguration"; //$NON-NLS-1$
 
-	private static final String[] ALLOWED_ROLES = new String[] { ApplicationRoles.ROLE_ADMIN };
-
 	private Configuration configuration;
 
 	private IWorkbenchPart targetPart;
 	
-	ICommandService commandService;
+	private ICommandService commandService;
 
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 		this.targetPart = targetPart;
@@ -130,7 +125,7 @@ public class ConfigurationAction implements IObjectActionDelegate,  RightEnabled
 			}
 		}
 
-		final AccountDialog dialog = new AccountDialog(window.getShell(), entType, true, Messages.ConfigurationAction_4, configuration.getEntity());
+		final AccountDialog dialog = new AccountDialog(window.getShell(), entType, Messages.ConfigurationAction_4, configuration.getEntity());
 		if (dialog.open() != Window.OK) {
 			return;
 		}

@@ -37,7 +37,6 @@ public class UmsetzungDurchFilter extends ViewerFilter {
 
 	private StructuredViewer viewer;
 	private String pattern=null;
-	protected String propertyType;
 	protected Pattern regex;
 
 	/**
@@ -58,9 +57,9 @@ public class UmsetzungDurchFilter extends ViewerFilter {
 		if (newPattern != null && newPattern.length() > 0) {
 			pattern = newPattern;
 			regex = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-			if (active)
+			if (active){
 				viewer.refresh();
-			else {
+			} else {
 				viewer.addFilter(this);
 				active = true;
 			}
@@ -70,26 +69,22 @@ public class UmsetzungDurchFilter extends ViewerFilter {
 		// else deactivate:
 		pattern = null;
 		regex=null;
-		if (active)
+		if (active){
 			viewer.removeFilter(this);
+		}
 	}
 	
 	
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (!(element instanceof IMassnahmeUmsetzung))
+		if (!(element instanceof IMassnahmeUmsetzung)){
 			return true;
-		
+		}
 		IMassnahmeUmsetzung mnums = (IMassnahmeUmsetzung)element;
 		Matcher matcher = regex.matcher(mnums.getUmsetzungDurch());
-		if (matcher.find())
+		if (matcher.find()){
 			return true;
+		}
 		return false;
 	}
-
-	
-
-//	public boolean isFilterProperty(Object element, String property) {
-//		return true;
-//	}
 }

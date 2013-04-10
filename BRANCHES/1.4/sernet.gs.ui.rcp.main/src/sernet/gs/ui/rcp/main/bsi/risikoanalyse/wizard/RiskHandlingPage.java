@@ -50,7 +50,6 @@ import sernet.verinice.model.bsi.risikoanalyse.GefaehrdungsUmsetzung;
  */
 public class RiskHandlingPage extends WizardPage {
 
-	private Composite composite;
 	private TableColumn imgColumn;
 	private TableColumn numberColumn;
 	private TableColumn nameColumn;
@@ -78,7 +77,13 @@ public class RiskHandlingPage extends WizardPage {
 	 *  @param parent the parent Composite
 	 */
 	public void createControl(Composite parent) {
-		composite = new Composite(parent, SWT.NULL);
+	    
+	    final int imgColWidth = 35;
+	    final int numColWidth = 100;
+	    final int nameColWidth = numColWidth;
+	    final int choiceColWidth = 200;
+	    
+	    Composite composite = new Composite(parent, SWT.NULL);
 		final GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 2;
 		composite.setLayout(gridLayout);
@@ -99,19 +104,19 @@ public class RiskHandlingPage extends WizardPage {
 	    
 		imgColumn = new TableColumn(table, SWT.LEFT);
 		imgColumn.setText(""); //$NON-NLS-1$
-		imgColumn.setWidth(35);
+		imgColumn.setWidth(imgColWidth);
 		
 		numberColumn = new TableColumn(table, SWT.LEFT);
 		numberColumn.setText(Messages.RiskHandlingPage_8);
-		numberColumn.setWidth(100);
+		numberColumn.setWidth(numColWidth);
 		
 		nameColumn = new TableColumn(table, SWT.LEFT);
 		nameColumn.setText(Messages.RiskHandlingPage_9);
-		nameColumn.setWidth(100);
+		nameColumn.setWidth(nameColWidth);
 		
 		choiceColumn = new TableColumn(table, SWT.LEFT);
 		choiceColumn.setText(Messages.RiskHandlingPage_10);
-		choiceColumn.setWidth(200);
+		choiceColumn.setWidth(choiceColWidth);
 		
 		/* needed for PropertiesComboBoxCellModifier */
 		viewer.setColumnProperties(new String[] {
@@ -122,7 +127,7 @@ public class RiskHandlingPage extends WizardPage {
 		});
 		
 		final ComboBoxCellEditor choiceEditor = new ComboBoxCellEditor(table, 
-				GefaehrdungsUmsetzung.ALTERNATIVEN_TEXT, 
+				GefaehrdungsUmsetzung.getAlternativenText(), 
 				SWT.READ_ONLY);
 		choiceEditor.setActivationStyle(ComboBoxCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
 		
@@ -294,9 +299,8 @@ public class RiskHandlingPage extends WizardPage {
 			
 			if (matcher.find()) {
 				return true;
-			} else {
-				return false;
-			}
+			} 
+			return false;
 		}
 	}
 }

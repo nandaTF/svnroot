@@ -37,7 +37,7 @@ import sernet.verinice.model.bsi.MassnahmenUmsetzung;
 @SuppressWarnings("serial")
 public class IncompleteZyklusSummary extends MassnahmenSummary {
 
-	private static final Logger log = Logger.getLogger(IncompleteZyklusSummary.class);
+	private static final Logger LOG = Logger.getLogger(IncompleteZyklusSummary.class);
 	
 	private HibernateCallback hcb = new Callback();
 
@@ -46,6 +46,7 @@ public class IncompleteZyklusSummary extends MassnahmenSummary {
 	}
 	
 	public Map<String, Integer> getNotCompletedZyklusSummary() {
+	    final int maxLcLength = 5;
 		Map<String, Integer> result = new HashMap<String, Integer>();
 		
 		List<Object[]> list = (List<Object[]>) getDaoFactory().getDAO(BSIModel.class).findByCallback(hcb);
@@ -54,9 +55,9 @@ public class IncompleteZyklusSummary extends MassnahmenSummary {
 			String lc = (String) l[0];
 			Integer count = (Integer) l[1];
 
-			if (lc == null || lc.length() <5)
+			if (lc == null || lc.length() < maxLcLength){
 				lc = "sonstige";
-			
+			}
 			result.put(lc, count);
 		}
 		
@@ -87,9 +88,9 @@ public class IncompleteZyklusSummary extends MassnahmenSummary {
 					.setString("p2type", MassnahmenUmsetzung.P_UMSETZUNG)
 					.setParameterList("p2values", new Object[] { MassnahmenUmsetzung.P_UMSETZUNG_JA, MassnahmenUmsetzung.P_UMSETZUNG_ENTBEHRLICH }, Hibernate.STRING);
 			
-			if (log.isDebugEnabled())
-				log.debug("generated query:" + query.getQueryString());
-					
+			if (LOG.isDebugEnabled()){
+				LOG.debug("generated query:" + query.getQueryString());
+			}
 			return query.list();
 		}
 		

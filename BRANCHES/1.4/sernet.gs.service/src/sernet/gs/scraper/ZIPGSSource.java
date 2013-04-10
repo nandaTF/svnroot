@@ -53,7 +53,7 @@ import sernet.gs.service.GSServiceException;
  */
 public class ZIPGSSource implements IGSSource {
 	
-	Logger log = Logger.getLogger(ZIPGSSource.class);
+	private Logger log = Logger.getLogger(ZIPGSSource.class);
 	
 	private ZipFile zf;
 	private static final String BAUSTEIN_PATH_2005 = "gshb/deutsch/baust/";
@@ -72,7 +72,7 @@ public class ZIPGSSource implements IGSSource {
 	private static final String SUFFIX = ".htm";
 	private static final String SUFFIX_2009 = ".html";
 	
-	static final Pattern relPath = Pattern.compile("^../baust/");
+	private static final Pattern REL_PATH = Pattern.compile("^../baust/");
 	
 	private static final String GEFAEHRDUNG_PATH_2005 = "gshb/deutsch/g/";
 	private static final String GEFAEHRDUNG_PATH_2006 = "g/";
@@ -85,41 +85,43 @@ public class ZIPGSSource implements IGSSource {
 		// temp file from which it is accessed normally.
 		// However if what we have is a 'file:' url then we extract
 		// the filesystem path out of it.
-		if (fileName.startsWith("file://"))
-			fileName = fileName.substring(7);
-		
-		File file = new File(fileName);
+	    final int prefixLength = 7;
+	    String fileName0 = fileName;
+		if (fileName0.startsWith("file://")){
+			fileName0 = fileName.substring(prefixLength);
+		}
+		File file = new File(fileName0);
 		if (!file.exists())
 		{
 			log.debug("Catalogue file is not in local filesystem. Retrieving it from URL and placing into temp file.");
 			file = File.createTempFile("verinice", "zip");
-			FileUtils.copyURLToFile(new URL(fileName), file);
+			FileUtils.copyURLToFile(new URL(fileName0), file);
 		}
 		
 		zf = new ZipFile(file);
 	}
 	
 	public InputStream getBausteinAsStream(String baustein) throws GSServiceException {
-		Matcher matcher = relPath.matcher(baustein);
-		baustein = matcher.replaceAll("");	
+		Matcher matcher = REL_PATH.matcher(baustein);
+		String baustein0 = matcher.replaceAll("");	
 		try {
-			ZipEntry entry = zf.getEntry(BAUSTEIN_PATH_2006 + baustein + SUFFIX); 
+			ZipEntry entry = zf.getEntry(BAUSTEIN_PATH_2006 + baustein0 + SUFFIX); 
 			return zf.getInputStream(entry);
 		} catch (Exception e) {
 			try {
-				ZipEntry entry = zf.getEntry(BAUSTEIN_PATH_2005 + baustein + SUFFIX); 
+				ZipEntry entry = zf.getEntry(BAUSTEIN_PATH_2005 + baustein0 + SUFFIX); 
 				return zf.getInputStream(entry);
 			} catch (Exception e1) {
 				try {
-					ZipEntry entry = zf.getEntry(BAUSTEIN_PATH_DATENSCHUTZ + baustein + SUFFIX); 
+					ZipEntry entry = zf.getEntry(BAUSTEIN_PATH_DATENSCHUTZ + baustein0 + SUFFIX); 
 					return zf.getInputStream(entry);
 				} catch (Exception e2) {
 					try {
-						ZipEntry entry = getBausteinPath2009(zf, baustein); 
+						ZipEntry entry = getBausteinPath2009(zf, baustein0); 
 						return zf.getInputStream(entry);
 					} catch (Exception e3) {
 	                    try {
-	                        ZipEntry entry = getBausteinPath2012(zf, baustein); 
+	                        ZipEntry entry = getBausteinPath2012(zf, baustein0); 
 	                        return zf.getInputStream(entry);
 	                    } catch (Exception e4) {
 	                        throw new GSServiceException(e4);
@@ -158,22 +160,25 @@ public class ZIPGSSource implements IGSSource {
 	public Node parseBausteinDocument(String bausteinFileName) throws GSServiceException {
 		try {
 			
-			Matcher matcher = relPath.matcher(bausteinFileName);
-			bausteinFileName = matcher.replaceAll("");	
+			Matcher matcher = REL_PATH.matcher(bausteinFileName);
+			String bausteinFileName0 = matcher.replaceAll("");	
 			
-			ZipEntry entry = zf.getEntry(BAUSTEIN_PATH_2006 + bausteinFileName + SUFFIX); 
-			if (entry == null)
-				entry = zf.getEntry(BAUSTEIN_PATH_2005 + bausteinFileName + SUFFIX);
-			if (entry == null)
-				entry = zf.getEntry(BAUSTEIN_PATH_DATENSCHUTZ + bausteinFileName + SUFFIX);
-			if (entry == null)
-				entry = getBausteinPath2009(zf, bausteinFileName);
-			if (entry == null)
-                entry = getBausteinPath2012(zf, bausteinFileName);	
-				
-			if (entry == null)
-				throw new GSServiceException("Feler beim Laden des Bausteins: " + bausteinFileName);
-			
+			ZipEntry entry = zf.getEntry(BAUSTEIN_PATH_2006 + bausteinFileName0 + SUFFIX); 
+			if (entry == null){
+				entry = zf.getEntry(BAUSTEIN_PATH_2005 + bausteinFileName0 + SUFFIX);
+			}
+			if (entry == null){
+				entry = zf.getEntry(BAUSTEIN_PATH_DATENSCHUTZ + bausteinFileName0 + SUFFIX);
+			}
+			if (entry == null){
+				entry = getBausteinPath2009(zf, bausteinFileName0);
+			}
+			if (entry == null){
+                entry = getBausteinPath2012(zf, bausteinFileName0);	
+			}
+			if (entry == null){
+				throw new GSServiceException("Feler beim Laden des Bausteins: " + bausteinFileName0);
+			}
 			return parseDocument(zf.getInputStream(entry), getVintage().equals(IGSSource.VINTAGE_2009) ? "utf-8" : "iso-8859-1");
 			
 		
@@ -207,38 +212,62 @@ public class ZIPGSSource implements IGSSource {
     }
 
 	public InputStream getMassnahmeAsStream(String massnahme) throws GSServiceException {
-		try {
+		return getPath2006InputStream(massnahme);
+	}
+
+    private InputStream getPath2006InputStream(String massnahme) throws GSServiceException {
+        try {
 			ZipEntry entry = zf.getEntry(MASSNAHME_PATH_2006 + massnahme + SUFFIX); 
 			return zf.getInputStream(entry);
 		} catch (Exception e) {
-			try {
-				ZipEntry entry = zf.getEntry(MASSNAHME_PATH_2005 + massnahme + SUFFIX); 
-				return zf.getInputStream(entry);
-			} catch (Exception e2) {
-				try {
-					ZipEntry entry = zf.getEntry(MASSNAHME_PATH_DATENSCHUTZ1 + massnahme + SUFFIX); 
-					return zf.getInputStream(entry);
-				} catch (Exception e3) {
-					try {
-						ZipEntry entry = zf.getEntry(MASSNAHME_PATH_DATENSCHUTZ2 + massnahme + SUFFIX); 
-						return zf.getInputStream(entry);
-					} catch (Exception e4) {
-						try {
-							ZipEntry entry = zf.getEntry(getPath2009("m", massnahme)); 
-							return zf.getInputStream(entry);
-						} catch (Exception e5) {
-	                        try {
-	                            ZipEntry entry = zf.getEntry(getPath2012("m", massnahme)); 
-	                            return zf.getInputStream(entry);
-	                        } catch (Exception e6) {
-	                            throw new GSServiceException("Massnahme nicht gefunden: " + massnahme, e6);
-	                        }
-						}
-					}
-				}
-			}
+			return getPath2005InputStream(massnahme);
 		}
-	}
+    }
+
+    private InputStream getPath2005InputStream(String massnahme) throws GSServiceException {
+        try {
+        	ZipEntry entry = zf.getEntry(MASSNAHME_PATH_2005 + massnahme + SUFFIX); 
+        	return zf.getInputStream(entry);
+        } catch (Exception e2) {
+        	return getPathDS1InputStream(massnahme);
+        }
+    }
+
+    private InputStream getPathDS1InputStream(String massnahme) throws GSServiceException {
+        try {
+        	ZipEntry entry = zf.getEntry(MASSNAHME_PATH_DATENSCHUTZ1 + massnahme + SUFFIX); 
+        	return zf.getInputStream(entry);
+        } catch (Exception e3) {
+        	return getPathDS2InputStream(massnahme);
+        }
+    }
+
+    private InputStream getPathDS2InputStream(String massnahme) throws GSServiceException {
+        try {
+        	ZipEntry entry = zf.getEntry(MASSNAHME_PATH_DATENSCHUTZ2 + massnahme + SUFFIX); 
+        	return zf.getInputStream(entry);
+        } catch (Exception e4) {
+        	return getPath2009InputStream(massnahme);
+        }
+    }
+
+    private InputStream getPath2009InputStream(String massnahme) throws GSServiceException {
+        try {
+        	ZipEntry entry = zf.getEntry(getPath2009("m", massnahme)); 
+        	return zf.getInputStream(entry);
+        } catch (Exception e5) {
+            return getPath2012InputStream(massnahme);
+        }
+    }
+
+    private InputStream getPath2012InputStream(String massnahme) throws GSServiceException {
+        try {
+            ZipEntry entry = zf.getEntry(getPath2012("m", massnahme)); 
+            return zf.getInputStream(entry);
+        } catch (Exception e6) {
+            throw new GSServiceException("Massnahme nicht gefunden: " + massnahme, e6);
+        }
+    }
 	
 	private String getPath2009(String dir, String fileName) {
 	   return getPath(PREFIX_2009, dir, fileName); 
@@ -261,45 +290,57 @@ public class ZIPGSSource implements IGSSource {
 	}
 
 	public InputStream getGefaehrdungAsStream(String gefaehrdung) throws GSServiceException {
+		return getGefPath2006InputStream(gefaehrdung);
+	}
 
-		try {
+    private InputStream getGefPath2006InputStream(String gefaehrdung) throws GSServiceException {
+        try {
 			ZipEntry entry = zf.getEntry(GEFAEHRDUNG_PATH_2006 + gefaehrdung + SUFFIX); 
 			return zf.getInputStream(entry);
 		} catch (Exception e) {
-			try {
-				ZipEntry entry = zf.getEntry(GEFAEHRDUNG_PATH_2005 + gefaehrdung + SUFFIX); 
-				return zf.getInputStream(entry);
-			} catch (Exception e2) {
-				try {
-					ZipEntry entry = zf.getEntry(GEFAEHRDUNG_PATH_DATENSCHUTZ + gefaehrdung + SUFFIX); 
-					return zf.getInputStream(entry);
-				} catch (Exception e3) {
-					try {
-						ZipEntry entry = zf.getEntry(getPath2009("g", gefaehrdung)); 
-						return zf.getInputStream(entry);
-					} catch (Exception e4) {
-	                    try {
-	                        ZipEntry entry = zf.getEntry(getPath2012("g", gefaehrdung)); 
-	                        return zf.getInputStream(entry);
-	                    } catch (Exception e5) {
-	                        throw new GSServiceException("Massnahme nicht gefunden: " + gefaehrdung, e5);
-	                    }
-					}
-				}
-			}
+			return getGefPath2005InputStream(gefaehrdung);
 		}
-	}
+    }
+
+    private InputStream getGefPath2005InputStream(String gefaehrdung) throws GSServiceException {
+        try {
+        	ZipEntry entry = zf.getEntry(GEFAEHRDUNG_PATH_2005 + gefaehrdung + SUFFIX); 
+        	return zf.getInputStream(entry);
+        } catch (Exception e2) {
+        	return getGefPathDSInputStream(gefaehrdung);
+        }
+    }
+
+    private InputStream getGefPathDSInputStream(String gefaehrdung) throws GSServiceException {
+        try {
+        	ZipEntry entry = zf.getEntry(GEFAEHRDUNG_PATH_DATENSCHUTZ + gefaehrdung + SUFFIX); 
+        	return zf.getInputStream(entry);
+        } catch (Exception e3) {
+        	return getGefPath2009InputStream(gefaehrdung);
+        }
+    }
+
+    private InputStream getGefPath2009InputStream(String gefaehrdung) throws GSServiceException {
+        try {
+        	ZipEntry entry = zf.getEntry(getPath2009("g", gefaehrdung)); 
+        	return zf.getInputStream(entry);
+        } catch (Exception e4) {
+            return getGefPath2012InputStream(gefaehrdung);
+        }
+    }
+
+    private InputStream getGefPath2012InputStream(String gefaehrdung) throws GSServiceException {
+        try {
+            ZipEntry entry = zf.getEntry(getPath2012("g", gefaehrdung)); 
+            return zf.getInputStream(entry);
+        } catch (Exception e5) {
+            throw new GSServiceException("Massnahme nicht gefunden: " + gefaehrdung, e5);
+        }
+    }
 
 	public Node parseMassnahmenDocument(String path) throws GSServiceException {
 		try {
 			InputStream stream = getMassnahmeAsStream(path);
-			
-//			InputStreamReader reader = new InputStreamReader(stream, "ISO-8859-1");
-//			BufferedReader buffRead2 = new BufferedReader(reader);
-//			String line;
-//			while ((line = buffRead2.readLine()) != null ) {
-//				System.out.println(line);
-//			}
 			
 			return parseDocument(stream, getVintage().equals(IGSSource.VINTAGE_2009) ? "utf-8" : "iso-8859-1");
 			
@@ -316,10 +357,11 @@ public class ZIPGSSource implements IGSSource {
 	 * @see sernet.gs.scraper.IGSSource#getVintage()
 	 */
 	public String getVintage() {
-		if (getBausteinPath2009(zf, "b01001") != null || getBausteinPath2012(zf, "b01001") != null)
+		if (getBausteinPath2009(zf, "b01001") != null || getBausteinPath2012(zf, "b01001") != null){
 			return IGSSource.VINTAGE_2009;
-		else
+		} else {
 			return IGSSource.VINTAGE_2006;
+		}
 	}
 
 }

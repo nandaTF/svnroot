@@ -19,11 +19,8 @@
  ******************************************************************************/
 package sernet.verinice.bpm;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.log4j.Logger;
 
 import sernet.verinice.bpm.rcp.TaskChangeRegistry;
 import sernet.verinice.interfaces.bpm.ITask;
@@ -43,8 +40,6 @@ import sernet.verinice.model.bpm.TaskParameter;
  */
 public class TaskLoader {
 
-    private static final Logger LOG = Logger.getLogger(TaskLoader.class);
-    
     private ITaskService taskService;
     
     private Date lastChecked = null;
@@ -54,7 +49,6 @@ public class TaskLoader {
      * and loads newly created tasks after last call.
      */
     public void load() {
-        List<ITask> taskList = Collections.emptyList();
         Date now = new Date(System.currentTimeMillis());
         if(lastChecked!=null) {
             // loadNewTasks() does not detects delete task

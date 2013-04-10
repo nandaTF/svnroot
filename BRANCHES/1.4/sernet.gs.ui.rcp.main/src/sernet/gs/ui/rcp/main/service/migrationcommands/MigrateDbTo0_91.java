@@ -38,8 +38,9 @@ public class MigrateDbTo0_91 extends DbMigration {
 			
 			ITVerbund verbund = model.getItverbuende().iterator().next();
 			for (CnATreeElement child : verbund.getChildren()) {
-				if (child instanceof SonstigeITKategorie)
+				if (child instanceof SonstigeITKategorie){
 					return;
+				}
 
 			}
 			SonstigeITKategorie kategorie = new SonstigeITKategorie(verbund);
@@ -47,11 +48,11 @@ public class MigrateDbTo0_91 extends DbMigration {
 			
 			
 			SaveElement<SonstigeITKategorie> command2 = new SaveElement<SonstigeITKategorie>(kategorie);
-			command2 = getCommandService().executeCommand(command2);
+			getCommandService().executeCommand(command2);
 			
 			model.setDbVersion(getVersion());
 			SaveElement<BSIModel> command3 = new SaveElement<BSIModel>(model);
-			command3 = getCommandService().executeCommand(command3);
+			getCommandService().executeCommand(command3);
 			
 	}
 

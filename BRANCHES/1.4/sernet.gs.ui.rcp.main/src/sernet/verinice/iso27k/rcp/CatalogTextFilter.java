@@ -19,13 +19,11 @@ package sernet.verinice.iso27k.rcp;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.regex.Matcher;
 
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import sernet.gs.model.Baustein;
 import sernet.gs.ui.rcp.main.bsi.filter.TextFilter;
 import sernet.verinice.interfaces.iso27k.IItem;
 
@@ -46,14 +44,14 @@ public class CatalogTextFilter extends TextFilter {
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		boolean match = true;
-		if (regex!=null) {
+		if (getRegex()!=null) {
 			IItem item = (IItem) element;
 			if(item.getName()!=null) {
-				Matcher matcherName = regex.matcher(item.getName());
+				Matcher matcherName = getRegex().matcher(item.getName());
 				match = matcherName.find();
 			}
 			if(item.getDescription()!=null) {
-				Matcher matcherDesc = regex.matcher(item.getDescription());
+				Matcher matcherDesc = getRegex().matcher(item.getDescription());
 				match = match || matcherDesc.find();
 			}
 			

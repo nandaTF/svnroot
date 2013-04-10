@@ -82,7 +82,7 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
 
     // FIXME server: bulk edit does not notify changes on self
 
-    private static transient final Logger LOG = Logger.getLogger(ShowBulkEditAction.class);
+    private static final transient Logger LOG = Logger.getLogger(ShowBulkEditAction.class);
 
     public static final String ID = "sernet.gs.ui.rcp.main.actions.showbulkeditaction"; //$NON-NLS-1$
     private final IWorkbenchWindow window;
@@ -201,18 +201,19 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
         if(entType != null && !(entType.getId().equals(Person.TYPE_ID) || entType.getId().equals(PersonIso.TYPE_ID))){
             dialog = new BulkEditDialog(window.getShell(), entType);
         } else {
-            dialog = new PersonBulkEditDialog(window.getShell(), true, Messages.ShowBulkEditAction_14);
+            dialog = new PersonBulkEditDialog(window.getShell(), Messages.ShowBulkEditAction_14);
         }
         if (dialog.open() != Window.OK) {
             return;
         }
         
         Entity tmpEntity = null;
-        if(dialog instanceof BulkEditDialog)
+        if(dialog instanceof BulkEditDialog){
             tmpEntity = ((BulkEditDialog)dialog).getEntity();
-        if(dialog instanceof PersonBulkEditDialog)
+        }
+        if(dialog instanceof PersonBulkEditDialog){
             tmpEntity = ((PersonBulkEditDialog)dialog).getEntity();
-        
+        }
         final Entity dialogEntity = tmpEntity;
         final Dialog chosenDialog = dialog;
         
@@ -289,7 +290,7 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
                     changePassword = true;
                 }
             }
-            command = new ConfigurationBulkEditUpdate(clazz, dbIDs, dialogEntity, changePassword, newPassword);
+            command = new ConfigurationBulkEditUpdate(dbIDs, dialogEntity, changePassword, newPassword);
         }
         command = ServiceFactory.lookupCommandService().executeCommand(command);
         if(((ConfigurationBulkEditUpdate)command).getFailedUpdates().size() > 0){
@@ -313,9 +314,7 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
             IStructuredSelection selection = (IStructuredSelection) input;
 
             // check for listitems:
-            TodoViewItem item;
             if (selection.size() > 0 && selection.getFirstElement() instanceof TodoViewItem) {
-                item = ((TodoViewItem) selection.getFirstElement());
                 for (Iterator iter = selection.iterator(); iter.hasNext();) {
                     if (!(iter.next() instanceof TodoViewItem)) {
                         setEnabled(false);
@@ -341,7 +340,6 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
 
             if (elmt != null) {
                 String type = elmt.getEntity().getEntityType();
-                EntityType entType = HUITypeFactory.getInstance().getEntityType(type);
 
                 for (Iterator iter = selection.iterator(); iter.hasNext();) {
                     Object o = iter.next();
@@ -354,15 +352,11 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
                     }
                 }
 
-                if (elmt == null) {
+                if (elmt == null || elmt.getEntity() == null || !elmt.getEntity().getEntityType().equals(type)) {
                     setEnabled(false);
                     return;
                 }
 
-                if (elmt.getEntity() == null || !elmt.getEntity().getEntityType().equals(type)) {
-                    setEnabled(false);
-                    return;
-                }
                 if(checkRights()){
                     setEnabled(true);
                 }
@@ -372,11 +366,8 @@ public class ShowBulkEditAction extends RightsEnabledAction implements ISelectio
         setEnabled(false);
     }
 
-    private void dispose() {
-        window.getSelectionService().removeSelectionListener(this);
-    }
 
-    private void editLocally(ArrayList<CnATreeElement> selectedElements, Entity dialogEntity, IProgressMonitor monitor) {
+    private void editLocally(List<CnATreeElement> selectedElements, Entity dialogEntity, IProgressMonitor monitor) {
         monitor.setTaskName(Messages.ShowBulkEditAction_9);
         monitor.beginTask(Messages.ShowBulkEditAction_10, selectedElements.size() + 1);
 

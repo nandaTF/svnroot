@@ -20,13 +20,11 @@
 package sernet.verinice.iso27k.service.commands;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import sernet.gs.service.RetrieveInfo;
 import sernet.verinice.interfaces.GenericCommand;
-import sernet.verinice.model.iso27k.ISO27KModel;
 import sernet.verinice.model.iso27k.Organization;
 
 /**
@@ -35,8 +33,6 @@ import sernet.verinice.model.iso27k.Organization;
  */
 public class LoadOrganizations extends GenericCommand {
 
-	final Comparator<Organization> orgComparator = new OrgSorter();
-	
 	private List<Organization> organizationList;
 	
 	/* (non-Javadoc)
@@ -49,7 +45,6 @@ public class LoadOrganizations extends GenericCommand {
 		for (Organization organization : orgList) {
 			hydrate(organization);
 		}
-		//Collections.sort(orgList, orgComparator);
 		setOrganizationList(orgList);
 	}
 	
@@ -58,11 +53,6 @@ public class LoadOrganizations extends GenericCommand {
 	 */
 	private void hydrate(Organization organization) {
 		organization.getTitle();
-		/*
-		if(organization.getChildren()!=null) {
-			organization.getChildren().size();
-		}
-		*/
 	}
 
 	public List<Organization> getOrganizationList() {

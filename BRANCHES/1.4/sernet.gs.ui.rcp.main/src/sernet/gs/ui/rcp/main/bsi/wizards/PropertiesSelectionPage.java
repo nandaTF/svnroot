@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
@@ -50,7 +49,7 @@ public class PropertiesSelectionPage extends WizardPage {
     private File csvDatei;
     private Table mainTable;
     private TableItem[] items;
-    private TableEditor editor;
+
     private List<Text> texts;
     private List<CCombo> combos;
     private List<String> propertyIDs;
@@ -79,14 +78,23 @@ public class PropertiesSelectionPage extends WizardPage {
      */
     @Override
     public void createControl(Composite parent) {
+        
+        final int layoutMarginWidth = 5;
+        final int layoutMarginHeight = 10;
+        final int layoutSpacing = 3;
+        final int gdVerticalSpan = 4;
+        final int mainTableItemHeightFactor = 20;
+        final int tableColumnDefaultWidth = 225;
+        
         FillLayout layout = new FillLayout();
         layout.type = SWT.VERTICAL;
-        layout.marginWidth = 5;
-        layout.marginHeight = 10;
-        layout.spacing = 3;
+        layout.marginWidth = layoutMarginWidth;
+        layout.marginHeight = layoutMarginHeight;
+        layout.spacing = layoutSpacing;
 
         GridLayout gridLayout = new GridLayout(1, false);
-        gridLayout.marginWidth = gridLayout.marginHeight = 0;
+        gridLayout.marginWidth = 0;
+        gridLayout.marginHeight = 0;
 
         Composite container = new Composite(parent, SWT.NONE);
         container.setLayout(gridLayout);
@@ -98,8 +106,8 @@ public class PropertiesSelectionPage extends WizardPage {
 
         mainTable = new Table(container, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
         GridData gridData = new GridData(GridData.FILL, GridData.FILL, true, true);
-        gridData.verticalSpan = 4;
-        int listHeight = mainTable.getItemHeight() * 20;
+        gridData.verticalSpan = gdVerticalSpan;
+        int listHeight = mainTable.getItemHeight() * mainTableItemHeightFactor;
         Rectangle trim = mainTable.computeTrim(0, 0, 0, listHeight);
         gridData.heightHint = trim.height;
         mainTable.setLayoutData(gridData);
@@ -112,7 +120,7 @@ public class PropertiesSelectionPage extends WizardPage {
         for (int i = 0; i < 2; i++) {
             TableColumn column = new TableColumn(mainTable, SWT.NONE);
             column.setText(titles[i]);
-            column.setWidth(225);
+            column.setWidth(tableColumnDefaultWidth);
         }
     }
 
@@ -122,10 +130,11 @@ public class PropertiesSelectionPage extends WizardPage {
 
     // if next is pressed call this method to fill the table with content
     public void fillTable() throws IOException {
+        TableEditor editor;
         // get entities from verinice
-        if (propertyIDs.size() > 0)
+        if (propertyIDs.size() > 0){
             propertyIDs.clear();
-
+        }
         String[] propertyNames = null;
         
         if (entityId != null) {
@@ -143,8 +152,9 @@ public class PropertiesSelectionPage extends WizardPage {
         }
 
         if (items != null) {
-            for (int i = 0; i < items.length; i++)
+            for (int i = 0; i < items.length; i++){
                 items[i].dispose();
+            }
         }
 
         String[] propertyColumns = getFirstLine();
@@ -230,11 +240,9 @@ public class PropertiesSelectionPage extends WizardPage {
                 for (int j = i + 1; j < this.combos.size() - 1; j++) {
                     int is = combos.get(i).getSelectionIndex();
                     int js = combos.get(j).getSelectionIndex();
-                    if(is>-1 && js>-1) {
-                        if (combos.get(i).getItem(is).equals(combos.get(j).getItem(js))) {
-                            valid = false;
-                            break;
-                        }
+                    if(is>-1 && js>-1 && combos.get(i).getItem(is).equals(combos.get(j).getItem(js))) {
+                        valid = false;
+                        break;
                     }
                 }
             }
@@ -248,8 +256,8 @@ public class PropertiesSelectionPage extends WizardPage {
         return valid;
     }
 
-    public Vector<Vector<String>> getPropertyTable() throws IOException {
-        Vector<Vector<String>> table = new Vector<Vector<String>>();
+    public List<Vector<String>> getPropertyTable() throws IOException {
+        List<Vector<String>> table = new Vector<Vector<String>>();
         String[] spalten = getFirstLine();
         for (int i = 1; i < spalten.length; i++) {
             Vector<String> temp = new Vector<String>();
@@ -287,7 +295,7 @@ public class PropertiesSelectionPage extends WizardPage {
         if (columnHeaders == null) {
             readFile();
         }
-        return columnHeaders;
+        return columnHeaders.clone();
     }
 
     public List<List<String>> getContent() throws IOException {

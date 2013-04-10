@@ -36,6 +36,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
 	 */
 	public void initializeDefaultPreferences() {
+	    final int defaultThumbnailSize = 50;
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 
 		store.setDefault(PreferenceConstants.GSACCESS,
@@ -57,7 +58,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 				PreferenceConstants.DB_DRIVER_DERBY);
 		
 		store.setDefault(PreferenceConstants.DB_DIALECT,
-				PreferenceConstants.DB_DIALECT_derby);
+				PreferenceConstants.DB_DIALECT_DERBY);
 		
 		String derbyUrl = PreferenceConstants.DB_URL_DERBY.replace("%s",CnAWorkspace //$NON-NLS-1$
 				.getInstance().getWorkdir().replaceAll("\\\\", "/") );
@@ -83,7 +84,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		
 		store.setDefault(PreferenceConstants.SHOW_LINK_MAKER_IN_EDITOR, true);
 		
-		store.setDefault(PreferenceConstants.THUMBNAIL_SIZE, 50);
+		store.setDefault(PreferenceConstants.THUMBNAIL_SIZE, defaultThumbnailSize);
 		
 		store.setDefault(PreferenceConstants.RESTART, false);
 	}

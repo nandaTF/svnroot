@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
@@ -28,6 +29,7 @@ import org.hibernate.Hibernate;
 
 import sernet.gs.service.RetrieveInfo;
 import sernet.gs.service.RuntimeCommandException;
+import sernet.gs.service.ServerInitializer;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadScopeElementsById;
 import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.EntityType;
@@ -56,7 +58,12 @@ public class ValidationService implements IValidationService {
     private HibernateDao<CnAValidation, Long> cnaValidationDAO;
     private HibernateDao<CnATreeElement, Long> cnaTreeElementDAO;
     
+    // values from CnAValidation.hbm.xml
+    private static final int MAXLENGTH_DBSTRING = 250;
+    
     private HUITypeFactory huiTypeFactory;
+    
+    private static final String VALIDATION_SQL_SELECT_BASE = "from sernet.verinice.model.validation.CnAValidation validation where";
     
 
     /* (non-Javadoc)
@@ -67,37 +74,40 @@ public class ValidationService implements IValidationService {
         if(elmt == null){
             throw new RuntimeCommandException("validated element not existent");
         }
-
+        ServerInitializer.inheritVeriniceContextState();
         HashMap<PropertyType, List<String>> hintsOfFailedValidationsMap = new HashMap<PropertyType, List<String>>();
         EntityType eType = getHuiTypeFactory().getEntityType(elmt.getTypeId());
         if(eType != null){
             for(Object pElement : eType.getAllPropertyTypes()){
                 if(pElement instanceof PropertyType){
-                    hintsOfFailedValidationsMap = updateValueMap(hintsOfFailedValidationsMap, (PropertyType)pElement, elmt);
+                    hintsOfFailedValidationsMap = (HashMap<PropertyType, List<String>>)updateValueMap(hintsOfFailedValidationsMap, (PropertyType)pElement, elmt);
                 } else if(pElement instanceof PropertyGroup){
                     PropertyGroup pGroup = (PropertyGroup)pElement;
                     for(PropertyType pType : pGroup.getPropertyTypes()){
-                        hintsOfFailedValidationsMap = updateValueMap(hintsOfFailedValidationsMap, pType, elmt);
+                        hintsOfFailedValidationsMap = (HashMap<PropertyType, List<String>>)updateValueMap(hintsOfFailedValidationsMap, pType, elmt);
                     }
                 }
             }
             for(Entry<PropertyType, List<String>> entry : hintsOfFailedValidationsMap.entrySet()){
                 for(String hint : entry.getValue()){
-                    CnAValidation validation = new CnAValidation();
-                    validation.setElmtDbId(elmt.getDbId());
-                    validation.setPropertyId(entry.getKey().getId());
-                    validation.setHintId(hint);
-                    validation.setElmtTitle(elmt.getTitle());
-                    validation.setScopeId(elmt.getScopeId());
-                    validation.setElementType(elmt.getTypeId());
-                    if(!isValidationExistant(elmt.getDbId(), entry.getKey().getId(), hint, elmt.getScopeId())){
-                        getCnaValidationDAO().saveOrUpdate(validation);
-                    }
-                    if(log.isDebugEnabled()){
-                        log.debug("Created Validation for : " + elmt.getTitle() + "(" + entry.getKey().getId() + ")\tHint:\t" + hint);
-                    }
+                    createCnAValidationObject(elmt, entry, hint);
                 }
             }
+        }
+    }
+    private void createCnAValidationObject(CnATreeElement elmt, Entry<PropertyType, List<String>> entry, String hint) {
+        CnAValidation validation = new CnAValidation();
+        validation.setElmtDbId(elmt.getDbId());
+        validation.setPropertyId(truncateString(entry.getKey().getId(), MAXLENGTH_DBSTRING));
+        validation.setHintId(truncateString(hint, MAXLENGTH_DBSTRING));
+        validation.setElmtTitle(truncateString(elmt.getTitle(), MAXLENGTH_DBSTRING));
+        validation.setScopeId(elmt.getScopeId());
+        validation.setElementType(truncateString(elmt.getTypeId(), MAXLENGTH_DBSTRING));
+        if(!isValidationExistant(elmt.getDbId(), entry.getKey().getId(), hint, elmt.getScopeId())){
+            getCnaValidationDAO().saveOrUpdate(validation);
+        }
+        if(log.isDebugEnabled()){
+            log.debug("Created Validation for : " + elmt.getTitle() + "(" + entry.getKey().getId() + ")\tHint:\t" + hint);
         }
     }
     /* (non-Javadoc)
@@ -105,7 +115,7 @@ public class ValidationService implements IValidationService {
      */
     @Override
     public List<CnAValidation> getValidations(Integer scopeId) {
-        String hqlQuery = "from sernet.verinice.model.validation.CnAValidation validation where validation.scopeId = ?";
+        String hqlQuery = VALIDATION_SQL_SELECT_BASE + " validation.scopeId = ?";
         return getCnaValidationDAO().findByQuery(hqlQuery, new Object[]{scopeId});
     }
     
@@ -119,17 +129,17 @@ public class ValidationService implements IValidationService {
      */
     @Override
     public List<CnAValidation> getValidations(Integer scopeId, Integer cnaId) {
-        String hqlQuery = "from sernet.verinice.model.validation.CnAValidation validation where ";
+        String hqlQuery = VALIDATION_SQL_SELECT_BASE;
         ArrayList<Object> paramList = new ArrayList<Object>(0);
         if(cnaId != null && scopeId == null){
-            hqlQuery = hqlQuery + "validation.elmtDbId = ?";
+            hqlQuery = hqlQuery + " validation.elmtDbId = ?";
             paramList.add(cnaId);
         } else if(cnaId != null && scopeId != null){
-            hqlQuery = hqlQuery + "validation.elmtDbId = ? AND validation.scopeId = ?";
+            hqlQuery = hqlQuery + " validation.elmtDbId = ? AND validation.scopeId = ?";
             paramList.add(cnaId);
             paramList.add(scopeId);
         } else if(cnaId == null && scopeId != null){
-                hqlQuery = hqlQuery +  "validation.scopeId = ?";
+                hqlQuery = hqlQuery +  " validation.scopeId = ?";
                 paramList.add(scopeId);
         }
         return getCnaValidationDAO().findByQuery(hqlQuery, paramList.toArray(new Object[paramList.size()]));
@@ -137,8 +147,8 @@ public class ValidationService implements IValidationService {
 
     @Override
     public List<CnAValidation> getValidations(Integer elmtDbId, String propertyType){
-        String hqlQuery = "from sernet.verinice.model.validation.CnAValidation validation where " +
-        		"validation.elmtDbId = ? AND " +
+        String hqlQuery = VALIDATION_SQL_SELECT_BASE +
+        		" validation.elmtDbId = ? AND " +
         		"validation.propertyId = ?";
         if(elmtDbId != null){
             return getCnaValidationDAO().findByQuery(hqlQuery, new Object[]{elmtDbId, propertyType});
@@ -149,7 +159,7 @@ public class ValidationService implements IValidationService {
     
     public boolean isValidationExistant(Integer elmtDbId, String propertyType, String hintID, Integer scopeId){
         if(scopeId != null && elmtDbId != null){
-            String hqlQuery = "from sernet.verinice.model.validation.CnAValidation validation where validation.elmtDbId = ?" +
+            String hqlQuery = VALIDATION_SQL_SELECT_BASE + " validation.elmtDbId = ?" +
                     " AND validation.propertyId = ?" +
                     " AND validation.hintId = ?"+ 
                     " AND validation.scopeId = ?";
@@ -166,7 +176,7 @@ public class ValidationService implements IValidationService {
     
     @Override
     public boolean isValidationExistant(Integer elmtDbId, String propertyType) {
-        String hqlQuery = "from sernet.verinice.model.validation.CnAValidation validation where validation.elmtDbId = ?" +
+        String hqlQuery = VALIDATION_SQL_SELECT_BASE + " validation.elmtDbId = ?" +
                 " AND validation.propertyId = ?";
         return getCnaValidationDAO().findByQuery(hqlQuery, new Object[]{elmtDbId, propertyType}).size() > 0;
     }
@@ -208,7 +218,7 @@ public class ValidationService implements IValidationService {
      */
     @Override
     public CnAValidation deleteValidation(Integer elmtDbId, String propertyType, String hintID, Integer scopeId) {
-        String hqlQuery = "from sernet.verinice.model.validation.CnAValidation validation where validation.elmtDbId = ?" +
+        String hqlQuery = VALIDATION_SQL_SELECT_BASE + " validation.elmtDbId = ?" +
                 " AND validation.propertyId = ? " +
                 "AND validation.hintId = ?"+ 
                 " AND validation.scopeId = ?";
@@ -230,7 +240,7 @@ public class ValidationService implements IValidationService {
         return hintsOfFailedValidations;
     }
     
-    private ArrayList<String> processValidationMap(HashMap<String, Boolean> validationMap, CnATreeElement elmt, PropertyType type){
+    private List<String> processValidationMap(Map<String, Boolean> validationMap, CnATreeElement elmt, PropertyType type){
         ArrayList<String> hintsOfFailedValidations = new ArrayList<String>(0);
         for(Entry<String, Boolean> entry : validationMap.entrySet()){
             boolean validationExists = isValidationExistant(elmt.getDbId(), type.getId(), entry.getKey(), elmt.getScopeId());
@@ -258,7 +268,7 @@ public class ValidationService implements IValidationService {
         return hintsOfFailedValidations;
     }
     
-    private HashMap<PropertyType, List<String>> updateValueMap(HashMap<PropertyType, List<String>> map, PropertyType type, CnATreeElement elmt){
+    private Map<PropertyType, List<String>> updateValueMap(Map<PropertyType, List<String>> map, PropertyType type, CnATreeElement elmt){
         List<String> invalidHints = getInvalidPropertyHints(type, elmt);
         if(map.containsKey(type)){
             List<String> listWithNewValues = map.get(type);
@@ -275,7 +285,7 @@ public class ValidationService implements IValidationService {
      */
     @Override
     public CnAValidation deleteValidation(Integer elmtDbId, String propertyType, Integer scopeId) {
-        String hqlQuery = "from sernet.verinice.model.validation.CnAValidation validation where validation.elmtDbId = ?" +
+        String hqlQuery = VALIDATION_SQL_SELECT_BASE + " validation.elmtDbId = ?" +
                 " AND validation.propertyId = ? " + 
                 " AND validation.scopeId = ?";
         CnAValidation validation = getCnaValidationDAO().findByQuery(hqlQuery, new Object[]{elmtDbId, propertyType, scopeId}).get(0);
@@ -285,7 +295,6 @@ public class ValidationService implements IValidationService {
     
     @Override
     public CnAValidation deleteValidation(CnAValidation validation){
-        Integer scopeId = validation.getScopeId();
         getCnaValidationDAO().delete(validation);
         return validation;
     }
@@ -295,7 +304,7 @@ public class ValidationService implements IValidationService {
      */
     @Override
     public CnAValidation getValidation(Integer cnaDbId, String propertyType, String hint, Integer scopeId) {
-        String hqlQuery = "from sernet.verinice.model.validation.CnAValidation validation where validation.elmtDbId = ?" +
+        String hqlQuery = VALIDATION_SQL_SELECT_BASE + " validation.elmtDbId = ?" +
                 " AND validation.propertyId = ? " +
                 "AND validation.hintId = ?"+ 
                 " AND validation.scopeId = ?";
@@ -344,7 +353,7 @@ public class ValidationService implements IValidationService {
     @Override
     public void updateValidations(Integer scopeId, Integer elmtDbId,  String title) {
         for(CnAValidation validation : getValidations(scopeId, elmtDbId)){
-            validation.setElmtTitle(title);
+            validation.setElmtTitle(truncateString(title, MAXLENGTH_DBSTRING));
             getCnaValidationDAO().saveOrUpdate(validation); 
         }
     }
@@ -354,7 +363,7 @@ public class ValidationService implements IValidationService {
      */
     @Override
     public void deleteValidations(Integer scopeId, Integer elmtDbId) {
-        String hqlQuery = "from sernet.verinice.model.validation.CnAValidation validation where validation.elmtDbId = ?" +
+        String hqlQuery = VALIDATION_SQL_SELECT_BASE + " validation.elmtDbId = ?" +
                 " AND validation.scopeId = ?";
         for(CnAValidation validation : getCnaValidationDAO().findByQuery(hqlQuery, new Object[]{elmtDbId, scopeId})){
             getCnaValidationDAO().delete(validation);
@@ -423,7 +432,20 @@ public class ValidationService implements IValidationService {
         createValidationsForSubTree(elementLoader.getElement());
     }
     
-    
-
+    private String truncateString(String input, int maxLength){
+        String output;
+        int dotAmount = 3;
+        if(input.length() >= maxLength){
+            StringBuilder sb = new StringBuilder();
+            sb.append(input.substring(0, maxLength - dotAmount));
+            for(int i = 0; i < dotAmount; i++){
+                sb.append(".");
+            }
+            output = sb.toString();
+        } else {
+            output = input;
+        }
+        return output;
+    }
 }
 

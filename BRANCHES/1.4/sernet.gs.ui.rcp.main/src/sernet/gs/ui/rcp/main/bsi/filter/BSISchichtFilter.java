@@ -53,11 +53,12 @@ public class BSISchichtFilter extends ViewerFilter {
 		boolean active = pattern != null;
 		if (newPattern != null && newPattern.length > 0) {
 			pattern = new HashSet<String>();
-			for (String type : newPattern) 
+			for (String type : newPattern){ 
 				pattern.add(type);
-			if (active)
+			}
+			if (active){
 				viewer.refresh();
-			else {
+			} else {
 				viewer.addFilter(this);
 				active = true;
 			}
@@ -66,21 +67,18 @@ public class BSISchichtFilter extends ViewerFilter {
 		
 		// else deactivate:
 		pattern = null;
-		if (active)
+		if (active){
 			viewer.removeFilter(this);
+		}
 	}
 	
 	
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (!(element instanceof Baustein))
+		if (!(element instanceof Baustein)){
 			return true;
-
+		}
 		Baustein bs = (Baustein) element;
 		return pattern.contains(Integer.toString(bs.getSchicht()));
 	}
-	
-//	public boolean isFilterProperty(Object element, String property) {
-//		return true;
-//	}
 }

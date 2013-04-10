@@ -8,20 +8,19 @@ public class ServiceComponent {
     private IEncryptionService encryptionService;
 
     private IReportService reportService;
-
     
-    private static ServiceComponent INSTANCE;
+    private static ServiceComponent instance;
     
     /**
      * The constructor
      */
     public ServiceComponent() {
-    	INSTANCE = this; 
+    	instance = this; 
     }
     
     public static ServiceComponent getDefault()
     {
-    	return INSTANCE;
+    	return instance;
     }
 
     public IEncryptionService getEncryptionService()
@@ -36,8 +35,9 @@ public class ServiceComponent {
     
     public void unbindEncryptionService(IEncryptionService encryptionService)
     {
-    	if (this.encryptionService == encryptionService)
+    	if (this.encryptionService == encryptionService){
     		this.encryptionService = null;
+    	}
     }
     
     public IReportService getReportService()
@@ -52,7 +52,8 @@ public class ServiceComponent {
     
     public void unbindReportService(IReportService reportService)
     {
-        if (this.reportService == reportService)
+        if (this.reportService == reportService){
             this.reportService = null;
+        }
     }
 }

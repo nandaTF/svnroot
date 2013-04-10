@@ -19,23 +19,15 @@
  ******************************************************************************/
 package sernet.verinice.bpm.rcp;
 
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -43,7 +35,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 /**
  * Wizard page of wizard {@link IndividualProcessWizard}.
@@ -57,17 +48,17 @@ public class DatePage extends WizardPage {
     
     public static final String NAME = "DATE_PAGE"; //$NON-NLS-1$
 
-    public final static String ASSIGNEE_SELECTION_DIRECT = "ASSIGNEE_SELECTION_DIRECT"; //$NON-NLS-1$
+    public static final String ASSIGNEE_SELECTION_DIRECT = "ASSIGNEE_SELECTION_DIRECT"; //$NON-NLS-1$
 
-    public final static String ASSIGNEE_SELECTION_RELATION = "ASSIGNEE_SELECTION_RELATION"; //$NON-NLS-1$
+    public static final String ASSIGNEE_SELECTION_RELATION = "ASSIGNEE_SELECTION_RELATION"; //$NON-NLS-1$
 
-    DateTime datePicker;
+    private DateTime datePicker;
 
     private Calendar dueDate;
     
-    Combo priorityCombo;
+    private Combo priorityCombo;
     
-    Button[] radios = new Button[2];
+    private Button[] radios = new Button[2];
 
     private String period;
 
@@ -196,22 +187,15 @@ public class DatePage extends WizardPage {
      */
     @Override
     public void createControl(Composite parent) {
+        final int defaultMarginWidthHeight = 10;
         final Composite composite = new Composite(parent, SWT.NULL);
         GridLayout layout = new GridLayout(1, true);
-        layout.marginWidth = 10;
+        layout.marginWidth = defaultMarginWidthHeight;
         composite.setLayout(layout);
-        // layout.marginHeight = 10;
         GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
         composite.setLayoutData(gd);
 
         addFormElements(composite);
-
-        // Build the separator line
-        // Label separator = new Label(composite, SWT.HORIZONTAL |
-        // SWT.SEPARATOR);
-        // separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        // getWizard().getContainer().getShell().setSize(500, 700);
 
         composite.pack();
 
@@ -232,11 +216,13 @@ public class DatePage extends WizardPage {
             setErrorMessage(Messages.DatePage_10);
         }
         if (valid) {
-            Calendar reminderDate = (Calendar) dueDate.clone();
-            reminderDate.add(Calendar.DATE, Integer.valueOf(period) * (-1));
-            if (reminderDate.before(now)) {
-                valid = false;
-                setErrorMessage(Messages.DatePage_11);
+            Calendar reminderDate = (dueDate != null) ? (Calendar) dueDate.clone() : null;
+            if(reminderDate != null){
+                reminderDate.add(Calendar.DATE, Integer.valueOf(period) * (-1));
+                if (reminderDate.before(now)) {
+                    valid = false;
+                    setErrorMessage(Messages.DatePage_11);
+                }
             }
         }
         return valid;
@@ -252,15 +238,6 @@ public class DatePage extends WizardPage {
             LOG.debug("page complete: " + complete); //$NON-NLS-1$
         }
         return complete;
-    }
-
-    private String trimTitleByWidthSize(GC gc, String elementTitle, int width) {
-        String newTitle = elementTitle.substring(0, elementTitle.length() - 1);
-        Point size = gc.textExtent(newTitle + "..."); //$NON-NLS-1$
-        if (size.x > width) {
-            newTitle = trimTitleByWidthSize(gc, newTitle, width);
-        }
-        return newTitle;
     }
 
     private void initPeriodArray() {

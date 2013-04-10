@@ -21,11 +21,7 @@ package sernet.verinice.bpm.rcp;
 
 import java.util.List;
 
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TreeColumn;
 
 import sernet.verinice.interfaces.bpm.ITask;
 
@@ -45,22 +41,16 @@ public class RefreshTaskView {
         this.viewer = viewer;
     }
 
-
-
     public void refresh() {
-     // Get the content for the viewer, setInput will call getElements in the
+        // Get the content for the viewer, setInput will call getElements in the
         // contentProvider
         try {
-            Display.getDefault().syncExec(new Runnable(){
-                public void run() {
-                    viewer.setInput(taskList);
-                    if(((TaskContentProvider)viewer.getContentProvider()).getNumberOfGroups()==1) {
-                        viewer.expandToLevel(2);
-                    }              
-                }
-            });
+            viewer.setInput(taskList);
+            if(((TaskContentProvider)viewer.getContentProvider()).getNumberOfGroups()==1) {
+                viewer.expandToLevel(2);
+            }
             
-        } catch (Throwable t) {
+        } catch (Exception t) {
             TaskView.LOG.error("Error while setting table data", t); //$NON-NLS-1$
         }
     }

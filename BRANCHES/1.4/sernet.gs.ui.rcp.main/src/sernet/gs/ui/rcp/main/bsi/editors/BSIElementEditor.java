@@ -18,7 +18,6 @@
 package sernet.gs.ui.rcp.main.bsi.editors;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -62,11 +61,8 @@ import sernet.verinice.model.bsi.BausteinUmsetzung;
 import sernet.verinice.model.bsi.IBSIStrukturElement;
 import sernet.verinice.model.bsi.IBSIStrukturKategorie;
 import sernet.verinice.model.common.CnATreeElement;
-import sernet.verinice.model.iso27k.Control;
-import sernet.verinice.model.iso27k.ControlGroup;
 import sernet.verinice.model.iso27k.Group;
 import sernet.verinice.model.iso27k.IISO27kElement;
-import sernet.verinice.model.iso27k.IncidentScenario;
 import sernet.verinice.model.iso27k.Organization;
 
 /**
@@ -92,20 +88,7 @@ public class BSIElementEditor extends EditorPart {
     // (simplified view):
     private static final String SAMT_PERSPECTIVE_DEFAULT_TAGS = "VDA-ISA";
 
-    /**
-     * {
-     * 
-     * @link IEditorBehavior} instances implementing special "behavior" of this
-     *       editor See method addBehavior.
-     */
-    List<IEditorBehavior> editorBehaviorList = new ArrayList<IEditorBehavior>(1);
-
     private IEntityChangedListener modelListener = new IEntityChangedListener() {
-
-        @Override
-        public void dependencyChanged(IMLPropertyType arg0, IMLPropertyOption arg1) {
-            // not relevant
-        }
 
         @Override
         public void selectionChanged(IMLPropertyType arg0, IMLPropertyOption arg1) {
@@ -122,94 +105,6 @@ public class BSIElementEditor extends EditorPart {
     private LinkMaker linkMaker;
 
     @Override
-    public void doSave(IProgressMonitor monitor) {
-        if (isModelModified) {
-
-            monitor.beginTask(Messages.BSIElementEditor_1, IProgressMonitor.UNKNOWN);
-            save(true);
-           
-            // Refresh other views in background
-            Job job = new RefreshJob("Refresh application...");
-            job.setRule(new RefreshJobRule());
-            job.schedule();
-
-            // TODO akoderman we need a way to close (with save dialog) or
-            // update editors of objects that have been changed in the database,
-            // i.e. by triggers (protection level)
-            // // close all other open editors on save (but only the ones
-            // without changes):
-
-            IEditorReference[] editorReferences = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-            ArrayList<IEditorReference> closeOthers = new ArrayList<IEditorReference>();
-            BSIElementEditorInput myInput = (BSIElementEditorInput) getEditorInput();
-
-            allEditors: for (IEditorReference editorReference : editorReferences) {
-                IEditorInput input;
-                try {
-                    if (editorReference.isPinned() || editorReference.isDirty())
-                        continue allEditors;
-
-                    input = editorReference.getEditorInput();
-                    if (input instanceof BSIElementEditorInput) {
-                        BSIElementEditorInput bsiInput = (BSIElementEditorInput) input;
-                        if (!bsiInput.getId().equals(myInput.getId())) {
-                            closeOthers.add(editorReference);
-                        }
-                    }
-                } catch (PartInitException e) {
-                    ExceptionUtil.log(e, Messages.BSIElementEditor_2);
-                }
-            }
-
-            IEditorReference[] closeArray = closeOthers.toArray(new IEditorReference[closeOthers.size()]);
-            PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeEditors(closeArray, true);
-            
-            monitor.done();
-        }
-    }
-
-    private void save(boolean completeRefresh) {
-        if (!getIsWriteAllowed()) {
-            ExceptionUtil.log(new IllegalStateException(), Messages.BSIElementEditor_3);
-            return;
-        }
-        try {
-            // save element, refresh etc:
-            CnAElementHome.getInstance().updateEntity(cnAElement);
-            isModelModified = false;
-            this.setPartName(cnAElement.getTitle());
-            this.setTitleToolTip(cnAElement.getTitle());
-            firePropertyChange(IEditorPart.PROP_DIRTY);
-        } catch (StaleObjectStateException se) {
-            // close editor, loosing changes:
-            ExceptionUtil.log(se, Messages.BSIElementEditor_0);
-        } catch (Exception e) {
-            ExceptionUtil.log(e, Messages.BSIElementEditor_5);
-        }
-    }
-
-    private void refresh() {
-        // notify all views of change:
-        CnAElementFactory.getModel(cnAElement).childChanged(cnAElement);
-
-        // removed CnAElementFactory.getModel(cnAElement).refreshAllListeners here
-        // before release 1.4.2
-   }
-
-    @Override
-    public void doSaveAs() {
-        // not supported
-    }
-
-    void modelChanged() {
-        boolean wasDirty = isDirty();
-        isModelModified = true;
-
-        if (!wasDirty)
-            firePropertyChange(IEditorPart.PROP_DIRTY);
-    }
-
-    @Override
     public void init(IEditorSite site, IEditorInput input) throws PartInitException {
         if (!(input instanceof BSIElementEditorInput)) {
             throw new PartInitException("invalid input"); //$NON-NLS-1$
@@ -222,8 +117,7 @@ public class BSIElementEditor extends EditorPart {
     private void initContent() {
         try {
             cnAElement = ((BSIElementEditorInput) getEditorInput()).getCnAElement();
-            editorBehaviorList.clear();
-
+            
             CnATreeElement elementWithChildren = Retriever.checkRetrieveChildren(cnAElement);          
             LoadElementForEditor command = new LoadElementForEditor(cnAElement,false);
             command = ServiceFactory.lookupCommandService().executeCommand(command);
@@ -265,35 +159,101 @@ public class BSIElementEditor extends EditorPart {
                 linkMaker.createPartControl(getIsWriteAllowed());
                 linkMaker.setInputElmt(cnAElement);
             }
-
-            addBehavior();
         } catch (Exception e) {
             ExceptionUtil.log(e, Messages.BSIElementEditor_8);
         }
 
     }
 
-    /**
-     * Adds special behavior to this editor. "Behaviors" are implemented in
-     * {@link IEditorBehavior} instances. Every IEditorBehavior must be added to
-     * editorBehaviorList.
-     */
-    private void addBehavior() {
-        if (cnAElement.getSchutzbedarfProvider() != null) {
-            initBehaviour(new InheritanceBehavior(huiComposite));
-        } else if(cnAElement instanceof IncidentScenario){
-            initBehaviour(new LikelihoodBehaviour(huiComposite));
-        } else if(cnAElement instanceof ControlGroup){
-            initBehaviour(new ControlgroupRoomNetworkBehaviour(huiComposite));
-        } else if(cnAElement instanceof Control){
-            initBehaviour(new ControlIsSelectedBehaviour(huiComposite));
+
+    
+    @Override
+    public void doSave(IProgressMonitor monitor) {
+        if (isModelModified) {
+
+            monitor.beginTask(Messages.BSIElementEditor_1, IProgressMonitor.UNKNOWN);
+            save();
+           
+            // Refresh other views in background
+            Job job = new RefreshJob("Refresh application...");
+            job.setRule(new RefreshJobRule());
+            job.schedule();
+
+            // TODO akoderman we need a way to close (with save dialog) or
+            // update editors of objects that have been changed in the database,
+            // i.e. by triggers (protection level)
+            // // close all other open editors on save (but only the ones
+            // without changes):
+
+            IEditorReference[] editorReferences = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+            ArrayList<IEditorReference> closeOthers = new ArrayList<IEditorReference>();
+            BSIElementEditorInput myInput = (BSIElementEditorInput) getEditorInput();
+
+            allEditors: for (IEditorReference editorReference : editorReferences) {
+                IEditorInput input;
+                try {
+                    if (editorReference.isPinned() || editorReference.isDirty()){
+                        continue allEditors;
+                    }
+                    input = editorReference.getEditorInput();
+                    if (input instanceof BSIElementEditorInput) {
+                        BSIElementEditorInput bsiInput = (BSIElementEditorInput) input;
+                        if (!bsiInput.getId().equals(myInput.getId())) {
+                            closeOthers.add(editorReference);
+                        }
+                    }
+                } catch (PartInitException e) {
+                    ExceptionUtil.log(e, Messages.BSIElementEditor_2);
+                }
+            }
+
+            IEditorReference[] closeArray = closeOthers.toArray(new IEditorReference[closeOthers.size()]);
+            PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeEditors(closeArray, true);
+            
+            monitor.done();
         }
     }
-    
-    private void initBehaviour(IEditorBehavior behaviour){
-        editorBehaviorList.add(behaviour);
-        behaviour.addBehavior();
-        behaviour.init();
+
+    private void save() {
+        if (!getIsWriteAllowed()) {
+            ExceptionUtil.log(new IllegalStateException(), Messages.BSIElementEditor_3);
+            return;
+        }
+        try {
+            // save element, refresh etc:
+            CnAElementHome.getInstance().updateEntity(cnAElement);
+            isModelModified = false;
+            this.setPartName(cnAElement.getTitle());
+            this.setTitleToolTip(cnAElement.getTitle());
+            firePropertyChange(IEditorPart.PROP_DIRTY);
+        } catch (StaleObjectStateException se) {
+            // close editor, loosing changes:
+            ExceptionUtil.log(se, Messages.BSIElementEditor_0);
+        } catch (Exception e) {
+            ExceptionUtil.log(e, Messages.BSIElementEditor_5);
+        }
+    }
+
+    private void refresh() {
+        // notify all views of change:
+        CnAElementFactory.getModel(cnAElement).childChanged(cnAElement);
+
+        // removed CnAElementFactory.getModel(cnAElement).refreshAllListeners here
+        // before release 1.4.2
+   }
+
+    @Override
+    public void doSaveAs() {
+        // not supported
+    }
+
+    void modelChanged() {
+        boolean wasDirty = isDirty();
+        isModelModified = true;
+
+        if (!wasDirty){
+            firePropertyChange(IEditorPart.PROP_DIRTY);
+        }
     }
 
     /**
@@ -305,8 +265,8 @@ public class BSIElementEditor extends EditorPart {
             return new String[] {};
         }
 
-        tags = tags.replaceAll("\\s+", "");
-        return tags.split(",");
+        String tags0 = tags.replaceAll("\\s+", "");
+        return tags0.split(",");
     }
 
     /**
@@ -344,14 +304,6 @@ public class BSIElementEditor extends EditorPart {
         return icon;
     }
 
-    private Image getCustomImage(CnATreeElement element) {
-        Image image = null;
-        if(element.getIconPath()!=null) {
-            image = ImageCache.getInstance().getCustomImage(element.getIconPath());
-        }
-        return image;
-    }
-    
     @Override
     public boolean isDirty() {
         return isModelModified;
@@ -387,12 +339,15 @@ public class BSIElementEditor extends EditorPart {
      */
     @Override
     public void createPartControl(Composite parent) {
+        final int sashWeight1 = 66;
+        final int sashWeight2 = 33;
+        final int sashWidth = 4;
         SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
-        huiComposite = new HitroUIComposite(sashForm, SWT.NULL, false);
+        huiComposite = new HitroUIComposite(sashForm, false);
         if (showLinkMaker()) {
             linkMaker = new LinkMaker(sashForm);
-            sashForm.setWeights(new int[] { 66, 33});
-            sashForm.setSashWidth(4);
+            sashForm.setWeights(new int[] { sashWeight1, sashWeight2});
+            sashForm.setSashWidth(sashWidth);
             sashForm.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_GRAY));
         }   
         
@@ -400,8 +355,9 @@ public class BSIElementEditor extends EditorPart {
         setIcon();
         
         // if opened the first time, save initialized entity:
-        if (isDirty())
-            save(false);
+        if (isDirty()){
+            save();
+        }
     }
     
     private boolean showLinkMaker() {
@@ -424,7 +380,6 @@ public class BSIElementEditor extends EditorPart {
 
     @Override
     public void setFocus() {
-        // huiComposite.setFocus();
         huiComposite.resetInitialFocus();
     }
 
@@ -432,11 +387,6 @@ public class BSIElementEditor extends EditorPart {
     public void dispose() {
         if (linkMaker != null) {
             linkMaker.dispose();
-        }
-        if (editorBehaviorList != null) {
-            for (IEditorBehavior behavior : editorBehaviorList) {
-                behavior.removeBehavior();
-            }
         }
         huiComposite.closeView();
         cnAElement.getEntity().removeListener(modelListener);

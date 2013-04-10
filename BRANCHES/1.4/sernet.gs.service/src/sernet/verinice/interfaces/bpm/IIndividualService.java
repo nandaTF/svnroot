@@ -20,7 +20,8 @@
 package sernet.verinice.interfaces.bpm;
 
 /**
- * Process service interface to create individual task.
+ * Process service interface to create individual tasks
+ * defined in jBPM definition: individual-task.jpdl.xml
  *
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */

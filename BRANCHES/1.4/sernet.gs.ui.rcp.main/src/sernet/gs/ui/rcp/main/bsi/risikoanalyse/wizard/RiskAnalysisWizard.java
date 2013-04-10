@@ -39,7 +39,6 @@ import sernet.gs.ui.rcp.main.bsi.risikoanalyse.model.RisikoMassnahmeHome;
 import sernet.gs.ui.rcp.main.bsi.risikoanalyse.model.RisikoMassnahmenUmsetzungFactory;
 import sernet.gs.ui.rcp.main.bsi.views.BSIKatalogInvisibleRoot;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
-import sernet.gs.ui.rcp.main.common.model.NullModel;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadChildrenForExpansion;
 import sernet.gs.ui.rcp.main.service.taskcommands.riskanalysis.AssociateGefaehrdungsUmsetzung;
@@ -66,10 +65,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
 
     private boolean canFinish = false;
     private CnATreeElement cnaElement;
-    private ChooseGefaehrdungPage chooseGefaehrdungPage;
-    private EstimateGefaehrdungPage estimateGefaehrdungPage;
-    private RiskHandlingPage riskHandlingPage;
-    private AdditionalSecurityMeasuresPage additionalSecurityMeasuresPage;
+
 
     /**
      * Element to save all relevant data in DB on completion of wizard. Also
@@ -78,7 +74,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
     private FinishedRiskAnalysis finishedRiskAnalysis = null;
 
     /* list of all Gefaehrdungen - ChooseGefaehrungPage_OK */
-    private ArrayList<Gefaehrdung> allGefaehrdungen = new ArrayList<Gefaehrdung>();
+    private List<Gefaehrdung> allGefaehrdungen = new ArrayList<Gefaehrdung>();
 
     /*
      * list of all own Gefaehrdungen of type OwnGefaehrdung -
@@ -87,7 +83,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
     private List<OwnGefaehrdung> allOwnGefaehrdungen = new ArrayList<OwnGefaehrdung>();
 
     /* list of all MassnahmenUmsetzungen - AdditionalSecurityMeasuresPage */
-    private ArrayList<MassnahmenUmsetzung> allMassnahmenUmsetzungen = new ArrayList<MassnahmenUmsetzung>();
+    private List<MassnahmenUmsetzung> allMassnahmenUmsetzungen = new ArrayList<MassnahmenUmsetzung>();
 
     // Are we editing a previous Risk Analysis?
     private boolean previousAnalysis = false;
@@ -189,16 +185,16 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
     public void addPages() {
         setWindowTitle(Messages.RiskAnalysisWizard_3);
 
-        chooseGefaehrdungPage = new ChooseGefaehrdungPage();
+        ChooseGefaehrdungPage chooseGefaehrdungPage = new ChooseGefaehrdungPage();
         addPage(chooseGefaehrdungPage);
 
-        estimateGefaehrdungPage = new EstimateGefaehrdungPage();
+        EstimateGefaehrdungPage estimateGefaehrdungPage = new EstimateGefaehrdungPage();
         addPage(estimateGefaehrdungPage);
 
-        riskHandlingPage = new RiskHandlingPage();
+        RiskHandlingPage riskHandlingPage = new RiskHandlingPage();
         addPage(riskHandlingPage);
 
-        additionalSecurityMeasuresPage = new AdditionalSecurityMeasuresPage();
+        AdditionalSecurityMeasuresPage additionalSecurityMeasuresPage = new AdditionalSecurityMeasuresPage();
         addPage(additionalSecurityMeasuresPage);
     }
 
@@ -208,7 +204,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
      * @param newAssociatedGefaehrdungen
      *            ArrayList of Gefaehrdungen
      */
-    public void setAssociatedGefaehrdungen(ArrayList<GefaehrdungsUmsetzung> newAssociatedGefaehrdungen) {
+    public void setAssociatedGefaehrdungen(List<GefaehrdungsUmsetzung> newAssociatedGefaehrdungen) {
         finishedRiskLists.setAssociatedGefaehrdungen(newAssociatedGefaehrdungen);
     }
 
@@ -251,13 +247,6 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
      */
     private void loadAllMassnahmen() {
         List<Baustein> bausteine = BSIKatalogInvisibleRoot.getInstance().getBausteine();
-
-        NullModel nullModel = new NullModel() {
-            @Override
-            public boolean canContain(Object obj) {
-                return true;
-            }
-        };
 
         MassnahmenFactory massnahmenFactory = new MassnahmenFactory();
         alleBausteine: for (Baustein baustein : bausteine) {
@@ -316,7 +305,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
      * @param newAllGefaehrdungen
      *            ArrayList of all Gefaehrdungen
      */
-    public void setAllGefaehrdungen(ArrayList<Gefaehrdung> newAllGefaehrdungen) {
+    public void setAllGefaehrdungen(List<Gefaehrdung> newAllGefaehrdungen) {
         allGefaehrdungen = newAllGefaehrdungen;
     }
 
@@ -326,7 +315,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
      * 
      * @return ArrayList of all Gefaehrdungen
      */
-    public ArrayList<Gefaehrdung> getAllGefaehrdungen() {
+    public List<Gefaehrdung> getAllGefaehrdungen() {
         return allGefaehrdungen;
     }
 
@@ -336,7 +325,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
      * @param newAllOwnGefaehrdungen
      *            List of own Gefaehrdungen
      */
-    public void setAllOwnGefaehrdungen(ArrayList<OwnGefaehrdung> newAllOwnGefaehrdungen) {
+    public void setAllOwnGefaehrdungen(List<OwnGefaehrdung> newAllOwnGefaehrdungen) {
         allOwnGefaehrdungen = newAllOwnGefaehrdungen;
     }
 
@@ -433,7 +422,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
      * 
      * @return ArrayList of all Massnahmen of type MassnahmenUmsetzung
      */
-    public ArrayList<MassnahmenUmsetzung> getAllMassnahmenUmsetzungen() {
+    public List<MassnahmenUmsetzung> getAllMassnahmenUmsetzungen() {
         return allMassnahmenUmsetzungen;
     }
 
@@ -448,7 +437,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
      * @param newAllMassnahmenUmsetzungen
      *            the allMassnahmenUmsetzungen to set
      */
-    public void setAllMassnahmenUmsetzungen(ArrayList<MassnahmenUmsetzung> newAllMassnahmenUmsetzungen) {
+    public void setAllMassnahmenUmsetzungen(List<MassnahmenUmsetzung> newAllMassnahmenUmsetzungen) {
         allMassnahmenUmsetzungen = newAllMassnahmenUmsetzungen;
     }
 

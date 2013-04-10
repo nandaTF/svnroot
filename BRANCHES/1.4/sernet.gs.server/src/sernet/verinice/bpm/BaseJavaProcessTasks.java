@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Daniel Murygin.
+ * Copyright (c) 2013 Daniel Murygin.
  *
  * This program is free software: you can redistribute it and/or 
  * modify it under the terms of the GNU Lesser General Public License 
@@ -17,31 +17,38 @@
  * Contributors:
  *     Daniel Murygin <dm[at]sernet[dot]de> - initial API and implementation
  ******************************************************************************/
-package sernet.gs.ui.rcp.main.bsi.editors;
+package sernet.verinice.bpm;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
+import org.jbpm.api.ExecutionService;
+import org.jbpm.api.ProcessEngine;
+
+import sernet.hui.common.VeriniceContext;
 
 /**
- * Adds and removes a special behavior to {@link BSIElementEditor}.
- * 
- * See {@link InheritanceBehavior} for an exemplary implementation.
- * 
+ *
+ *
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
-public interface IEditorBehavior {
-    
-    /**
-     * Initializing the behavior
-     */
-    void init();
-    
-    /**
-     * Adds the behavior to the editor fields 
-     * e.g. by adding listeners to some fields
-     */
-    void addBehavior();
-    
-    /**
-     * Removes the same behavior added in addBehavior()
-     * e.g. by removing some listeners
-     */
-    void removeBehavior();
+public class BaseJavaProcessTasks {
+
+    protected Map<String, Object> loadVariablesForProcess(String executionId) {
+        Set<String> varNameSet = getExecutionService().getVariableNames(executionId);
+        Map<String, Object> varMap = Collections.emptyMap();
+        if(varNameSet!=null && !varNameSet.isEmpty()) {
+            varMap = getExecutionService().getVariables(executionId,varNameSet);
+        }
+        return varMap;
+    }
+
+    private ExecutionService getExecutionService() {
+        return getProcessEngine().getExecutionService();
+    }
+
+    protected ProcessEngine getProcessEngine() {
+        return (ProcessEngine) VeriniceContext.get(VeriniceContext.JBPM_PROCESS_ENGINE);
+    }
 }

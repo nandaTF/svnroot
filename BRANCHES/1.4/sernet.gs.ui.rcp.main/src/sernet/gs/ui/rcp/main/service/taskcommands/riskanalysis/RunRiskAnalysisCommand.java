@@ -19,17 +19,13 @@ package sernet.gs.ui.rcp.main.service.taskcommands.riskanalysis;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.iso27k.service.IRiskAnalysisService;
 import sernet.verinice.iso27k.service.RiskAnalysisServiceImpl;
-import sernet.verinice.model.common.CnALink;
-import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Asset;
 import sernet.verinice.model.iso27k.IncidentScenario;
-import sernet.verinice.model.iso27k.Organization;
 
 /**
  * 
@@ -48,9 +44,6 @@ public class RunRiskAnalysisCommand extends GenericCommand {
     @Override
     public void execute() {
         IRiskAnalysisService ra = new RiskAnalysisServiceImpl();
-        
-        IBaseDao<Organization, Serializable> dao = getDaoFactory().getDAO(Organization.class);
-        List<Organization> orgs = dao.findAll();
         
         // update asset values (business impact, CIA):
         // done on every save, no need to do it here

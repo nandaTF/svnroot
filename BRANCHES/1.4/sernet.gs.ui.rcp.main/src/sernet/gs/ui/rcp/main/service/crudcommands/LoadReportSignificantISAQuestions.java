@@ -27,7 +27,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import sernet.gs.service.NumericStringComparator;
-import sernet.gs.ui.rcp.main.bsi.editors.ControlgroupRoomNetworkBehaviour;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.GenericCommand;
@@ -56,8 +55,6 @@ public class LoadReportSignificantISAQuestions extends GenericCommand {
     
     private Integer rootElmt;
 
-    private List<List<String>> results;
-    
     public LoadReportSignificantISAQuestions(Integer root){
         this.rootElmt = root;
     }
@@ -67,7 +64,6 @@ public class LoadReportSignificantISAQuestions extends GenericCommand {
      */
     @Override
     public void execute() {
-        results = new ArrayList<List<String>>(0);
         for(SamtTopic topic : getSamtTopics(rootElmt)){
             ArrayList<String> result = new ArrayList<String>(0);
             result.add(topic.getTitle());

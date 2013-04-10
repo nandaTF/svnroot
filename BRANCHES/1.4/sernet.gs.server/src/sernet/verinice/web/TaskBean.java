@@ -95,7 +95,7 @@ public class TaskBean {
         Collections.sort(taskList);
         for (ITask task : taskList) {
             String controlTitle = task.getControlTitle();
-            if(controlTitle.length()>MAX_TITLE_LENGTH) {
+            if(controlTitle!=null && controlTitle.length()>MAX_TITLE_LENGTH) {
                 task.setControlTitle(controlTitle.substring(0, MAX_TITLE_LENGTH-1) + "...");
             }
         }
@@ -162,14 +162,12 @@ public class TaskBean {
     	boolean isNext = false;
     	for (Iterator<ITask> iterator = getTaskList().iterator(); iterator.hasNext();) {
     		ITask task = iterator.next();
-    		if(task!=null && getSelectedTask()!=null && task.equals(getSelectedTask())) {
-    		    if(iterator.hasNext()) {
-    		        setSelectedTask(iterator.next());
-    		        isNext = true;
-    		        break;
-    		    }
+    		if(task!=null && getSelectedTask()!=null && task.equals(getSelectedTask()) && iterator.hasNext()) {
+    		    setSelectedTask(iterator.next());
+    		    isNext = true;
+    		    break;
     		}
-		}
+    	}
     	if(isNext) {
     	    doOpenTask();
     	}
@@ -234,12 +232,14 @@ public class TaskBean {
     }
     
     String getUniqueName(String name, int n) {
-        if(nameAuditMap.containsKey(name)) {
-            n++;
-            name = new StringBuilder(name).append(" (").append(n).append(")").toString(); //$NON-NLS-1$ //$NON-NLS-2$
-            return getUniqueName(name, n);
+        int n0 = n;
+        String name0 = name;
+        if(nameAuditMap.containsKey(name0)) {
+            n0++;
+            name0 = new StringBuilder(name0).append(" (").append(n).append(")").toString(); //$NON-NLS-1$ //$NON-NLS-2$
+            return getUniqueName(name0, n0);
         } else {
-            return name;
+            return name0;
         }
     }
     
