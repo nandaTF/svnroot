@@ -182,7 +182,7 @@ public class GenerateReportDialog extends TitleAreaDialog {
         final int marginWidth = 10;
         final int defaultColNr = 3;
         
-        getDefaultFolder();
+        initDefaultFolder();
         
         if(useCase != null){
             filterReportTypes();
@@ -262,7 +262,8 @@ public class GenerateReportDialog extends TitleAreaDialog {
         openReportButton = new Button(reportGroup, SWT.PUSH);
         openReportButton.setText(Messages.GenerateReportDialog_3);
         openReportButton.addSelectionListener(new SelectionAdapter() {
-          public void widgetSelected(SelectionEvent event) {
+          @Override
+        public void widgetSelected(SelectionEvent event) {
             FileDialog dlg = new FileDialog(getParentShell(), SWT.SAVE);
             dlg.setFilterExtensions(new String[] { "*.rptdesign", "*.rpt", "*.xml", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             String fn = dlg.open();
@@ -295,10 +296,12 @@ public class GenerateReportDialog extends TitleAreaDialog {
         scopeCombo.setLayoutData(gridDatascopeCombo);
         
         scopeCombo.addSelectionListener(new SelectionListener() {
+            @Override
             public void widgetDefaultSelected(SelectionEvent e) {
                 widgetSelected(e);
             }
 
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 getButton(IDialogConstants.OK_ID).setEnabled(true);
                 int s = scopeCombo.getSelectionIndex();
@@ -375,9 +378,16 @@ public class GenerateReportDialog extends TitleAreaDialog {
 		openFileButton = new Button(groupFile, SWT.PUSH);
 		openFileButton.setText(Messages.GenerateReportDialog_11);
 		openFileButton.addSelectionListener(new SelectionAdapter() {
-		    public void widgetSelected(SelectionEvent event) {
+		    @Override
+            public void widgetSelected(SelectionEvent event) {
 		        FileDialog dlg = new FileDialog(getParentShell(), SWT.SAVE);
-		        dlg.setFilterPath(defaultFolder + textFile.getText());
+		        
+		        if(isFilePath()) {
+		            dlg.setFilterPath(getOldFolderPath());
+		        } else {
+		            dlg.setFilterPath(defaultFolder);
+		        }
+		        		      
 		        ArrayList<String> extensionList = new ArrayList<String>();
 		        if(chosenOutputFormat!=null && chosenOutputFormat.getFileSuffix()!=null) {
 		            extensionList.add("*." + chosenOutputFormat.getFileSuffix()); //$NON-NLS-1$
@@ -405,14 +415,10 @@ public class GenerateReportDialog extends TitleAreaDialog {
         useDefaultFolderButton.addSelectionListener(new SelectionAdapter() {
         
             @Override
-            public void widgetDefaultSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 useDefaultFolder = ((Button)e.getSource()).getSelection();
             }
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                widgetDefaultSelected(e);
-
-            }
+           
         });
 		
         Group groupCache = new Group(composite, SWT.NULL);
@@ -458,6 +464,22 @@ public class GenerateReportDialog extends TitleAreaDialog {
 		frame.pack(); 
 		return frame;
 	}
+    
+    boolean isFilePath() {
+        return textFile!=null && textFile.getText()!=null && !textFile.getText().isEmpty();
+    }
+
+    private String getOldFolderPath() {
+        return getFolderFromPath(textFile.getText());
+    }
+    
+    private String getFolderFromPath(String path) {
+        String returnPath = null;
+        if(path!=null && path.indexOf(File.separatorChar)!=-1) {
+            returnPath = path.substring(0, path.lastIndexOf(File.separatorChar)+1);
+        }
+        return returnPath;
+    }
 
 
     /**
@@ -590,7 +612,7 @@ public class GenerateReportDialog extends TitleAreaDialog {
         if(outputFileName == null || outputFileName.equals("")){
             outputFileName = "unknown";
         }
-        String scopeName = scopeCombo.getText().replaceAll("[^a-zA-Z]", "");
+        String scopeName = convertToFileName(scopeCombo.getText());
         StringBuilder sb = new StringBuilder(outputFileName).append("_").append(scopeName);
         if(chosenOutputFormat!=null) {
             sb.append(".").append(chosenOutputFormat.getFileSuffix());
@@ -643,8 +665,9 @@ public class GenerateReportDialog extends TitleAreaDialog {
         }
 
         String currentPath = setupDirPath();
-        defaultFolder = currentPath;
-        Activator.getDefault().getPreferenceStore().setValue(PreferenceConstants.DEFAULT_FOLDER_REPORT, currentPath);
+        if(useDefaultFolder){
+            Activator.getDefault().getPreferenceStore().setValue(PreferenceConstants.DEFAULT_FOLDER_REPORT, currentPath);
+        }
         outputFile = new File(f);
         resetScopeCombo();
         super.okPressed();
@@ -724,17 +747,17 @@ public class GenerateReportDialog extends TitleAreaDialog {
         return compoundLoader.getElements();
     }
     
-    public static String convertToFileName(String label) {
+    private static String convertToFileName(String label) {
         String filename = ""; //$NON-NLS-1$
         if(label!=null) {
             filename = label.replace(' ', '_');
-            filename = filename.replace("ä", "ae"); //$NON-NLS-1$ //$NON-NLS-2$
-            filename = filename.replace("ü", "ue"); //$NON-NLS-1$ //$NON-NLS-2$
-            filename = filename.replace("ö", "oe"); //$NON-NLS-1$ //$NON-NLS-2$
-            filename = filename.replace("Ä", "Ae"); //$NON-NLS-1$ //$NON-NLS-2$
-            filename = filename.replace("Ü", "Ue"); //$NON-NLS-1$ //$NON-NLS-2$
-            filename = filename.replace("Ö", "Oe"); //$NON-NLS-1$ //$NON-NLS-2$
-            filename = filename.replace("ß", "ss"); //$NON-NLS-1$ //$NON-NLS-2$
+            filename = filename.replace("ä", "\u00E4"); //$NON-NLS-1$ //$NON-NLS-2$
+            filename = filename.replace("ü", "\u00FC"); //$NON-NLS-1$ //$NON-NLS-2$
+            filename = filename.replace("ö", "\u00F6"); //$NON-NLS-1$ //$NON-NLS-2$
+            filename = filename.replace("Ä", "\u00C4"); //$NON-NLS-1$ //$NON-NLS-2$
+            filename = filename.replace("Ü", "\u00DC"); //$NON-NLS-1$ //$NON-NLS-2$
+            filename = filename.replace("Ö", "\u00D6"); //$NON-NLS-1$ //$NON-NLS-2$
+            filename = filename.replace("ß", "\u00DF"); //$NON-NLS-1$ //$NON-NLS-2$
             filename = filename.replace(":", ""); //$NON-NLS-1$ //$NON-NLS-2$
             filename = filename.replace("\\", ""); //$NON-NLS-1$ //$NON-NLS-2$
             filename = filename.replace(";", ""); //$NON-NLS-1$ //$NON-NLS-2$
@@ -768,15 +791,16 @@ public class GenerateReportDialog extends TitleAreaDialog {
     public boolean getUseReportCache(){
         return useCache;
     }
-    public boolean getUseDefaultFolder(){
-        return useDefaultFolder;
-    }
-    private String getDefaultFolder(){
+
+    private String initDefaultFolder() {
         IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
-         defaultFolder = prefs.getString(PreferenceConstants.DEFAULT_FOLDER_REPORT);
-         if(defaultFolder != null && !defaultFolder.isEmpty() && !defaultFolder.endsWith(System.getProperty("file.separator"))){
-             defaultFolder=defaultFolder+System.getProperty("file.separator"); 
-         }        
-        return defaultFolder; 
+        defaultFolder = prefs.getString(PreferenceConstants.DEFAULT_FOLDER_REPORT);
+        if (defaultFolder != null && !defaultFolder.isEmpty() && !defaultFolder.endsWith(System.getProperty("file.separator"))) {
+            defaultFolder = defaultFolder + System.getProperty("file.separator");
+        }
+        if (defaultFolder == null || defaultFolder.isEmpty()) {
+            defaultFolder = System.getProperty("user.home");
+        }
+        return defaultFolder;
     }
 }

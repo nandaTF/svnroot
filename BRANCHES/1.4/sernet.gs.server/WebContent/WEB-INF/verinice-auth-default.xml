@@ -46,6 +46,7 @@
         <action id="bulkedit" />
         <action id="changeicon" />
         <action id="cnavalidation" />
+        <action id="creategreenbonetasks" />
         <action id="createindividualtasks" />
         <action id="createisatasks" />
         <action id="deletecatalog" />
@@ -93,14 +94,14 @@
             "addismorg"
             "additverbund"
             "xmlimport" 
-            "showallfiles"-->
+            "showallfiles"
+            "addsecurityassessment"-->
 	        <action id="addbsielement" />
 	        <action id="addcatalog" />
 	        <action id="addfile" />
 	        <action id="addismelement" />
 	        <action id="addismgroup" />
 	        <action id="addnote" />
-	        <action id="addsecurityassessment" />
 	        <action id="addownmodul"/>
 	        <action id="assignallisatopics" />
 	        <action id="auditview" />
@@ -112,6 +113,7 @@
 	        <action id="bulkedit" />
             <action id="changeicon" />
 	        <action id="cnavalidation" />
+            <action id="creategreenbonetasks" />
             <action id="createindividualtasks" />
 	        <action id="createisatasks" />
 	        <action id="deletecatalog" />
@@ -153,7 +155,8 @@
         	"addismorg"
         	"additverbund"
         	"xmlimport"
-        	"showallfiles" -->
+        	"showallfiles" 
+    		"addsecurityassessment"-->
            	<action id="accesscontrol" />
 	        <action id="accountsettings" />
 	        <action id="addbsielement" />
@@ -163,7 +166,6 @@
 	        <action id="addismgroup" />
 	        <action id="addnote" />
 	        <action id="addownmodul"/>
-	        <action id="addsecurityassessment" />
 	        <action id="assignallisatopics" />
 	        <action id="auditview" />
 	        <action id="bausteinzuordnung" />
@@ -174,6 +176,7 @@
 	        <action id="bulkedit" />
             <action id="changeicon" />
 	        <action id="cnavalidation" />
+            <action id="creategreenbonetasks" />
             <action id="createindividualtasks" />
 	        <action id="createisatasks" />
 	        <action id="deletecatalog" />
@@ -237,6 +240,7 @@
 	        <action id="bulkedit" />
             <action id="changeicon" />
 	        <action id="cnavalidation" />
+            <action id="creategreenbonetasks" />
             <action id="createindividualtasks" />
 	        <action id="createisatasks" />
 	        <action id="deletecatalog" />

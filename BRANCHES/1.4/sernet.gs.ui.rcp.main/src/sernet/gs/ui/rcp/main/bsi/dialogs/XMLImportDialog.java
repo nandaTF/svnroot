@@ -105,11 +105,14 @@ public class XMLImportDialog extends Dialog {
         } else if ((!insert && !update && !delete)) {
             createErrorMessage(2);
         } else {
+            if(useDefaultFolder) {
+                setDefaultFolder(dataFile.getAbsolutePath());
+            }
             WorkspaceJob importJob = new WorkspaceJob(Messages.XMLImportDialog_4) {
                 @Override
                 public IStatus runInWorkspace(final IProgressMonitor monitor) {
                     IStatus status = Status.OK_STATUS;
-                    try {                        
+                    try {                       
                         monitor.beginTask(NLS.bind(Messages.XMLImportDialog_5, new Object[] {dataFile.getName()}), IProgressMonitor.UNKNOWN);
                         doImport();
                     } catch (PasswordException e) {
@@ -125,6 +128,23 @@ public class XMLImportDialog extends Dialog {
             };
             JobScheduler.scheduleJob(importJob, iSchedulingRule);
             close();
+        }
+    }
+
+    private void setDefaultFolder(String dataPath) {
+        String currentPath = "";    
+        try {
+            if (dataPath != null && !dataPath.isEmpty()) {
+                int lastSlash = dataPath.lastIndexOf(System.getProperty("file.separator"));
+                if (lastSlash != -1) {
+                    currentPath = dataPath.substring(0, lastSlash + 1);
+                } else {
+                    currentPath = dataPath.substring(0, lastSlash);
+                }
+            }
+            Activator.getDefault().getPreferenceStore().setValue(PreferenceConstants.DEFAULT_FOLDER_IMPORT, currentPath);
+        } catch (Exception exe) {
+            LOG.error("Error while setting Preference Constants", exe);
         }
     }
 
@@ -172,9 +192,7 @@ public class XMLImportDialog extends Dialog {
         final int privateKeyPathWidthHint = 280;
         final int privateKeyPasswordWidthHint = 280;
         
-        Button useDefaultFolderButton;
-        
-        getDefaultFolder();
+        initDefaultFolder();
         final Composite container = (Composite) super.createDialogArea(parent);
 
         GridLayout layout = new GridLayout();
@@ -294,6 +312,7 @@ public class XMLImportDialog extends Dialog {
                 useNoEncryptionRadio.setSelection(false);
                 selectedEncryptionMethod = EncryptionMethod.PASSWORD;
             }
+            @Override
             public void focusLost(FocusEvent e) {
                 
             }
@@ -417,6 +436,7 @@ public class XMLImportDialog extends Dialog {
                 passwordEncryptionRadio.setSelection(false);
                 selectedEncryptionMethod = EncryptionMethod.X509_CERTIFICATE;
             }
+            @Override
             public void focusLost(FocusEvent e) {
                 
             }
@@ -448,6 +468,7 @@ public class XMLImportDialog extends Dialog {
         dataPathText = new Text(dataGroup, SWT.BORDER);
         dataPathText.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, dataPathHorizontalSpan, 1));
         dataPathText.addModifyListener(new ModifyListener() {
+            @Override
             public void modifyText(ModifyEvent e) {
                 dataFile = new File(dataPathText.getText());
                 if (dataFile.exists()) {
@@ -457,39 +478,31 @@ public class XMLImportDialog extends Dialog {
                 }
             }
         });
+        
 
+        useDefaultFolder = true;
+        SelectionAdapter useDefaultFolderListener = new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                useDefaultFolder   = (e.getSource() instanceof Button) ? ((Button)(e.getSource())).getSelection() : useDefaultFolder;
+            }
+        };
+        
+        Button useDefaultFolderButton = SWTElementFactory.generateCheckboxButton(container, Messages.XMLImportDialog_38, true, useDefaultFolderListener);
+        useDefaultFolderButton.setLayoutData(new GridData(GridData.FILL, SWT.RIGHT, true, false, 2, 1));
+            
+        
         SelectionAdapter dataBrowseListener = new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                displayFiles(container.getShell(), dataPathText, dataFile);
+               displayFiles(container.getShell(), dataPathText, dataFile);
             }
         };
         
         final Button dataBrowse = SWTElementFactory.generatePushButton(dataGroup, Messages.XMLImportDialog_14, null, dataBrowseListener);
         dataBrowse.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1));
         
-        useDefaultFolderButton = new Button(container, SWT.CHECK);
-        useDefaultFolderButton.setText(Messages.XMLImportDialog_38);
-        useDefaultFolderButton.setSelection(true);        
-        GridData  useDefaultFolderButtonGridData = new GridData();
-        useDefaultFolderButtonGridData.horizontalSpan = 2;
-        useDefaultFolderButtonGridData.grabExcessHorizontalSpace = true;
-        useDefaultFolderButtonGridData.horizontalAlignment = GridData.FILL;
-        useDefaultFolderButtonGridData.verticalAlignment = SWT.RIGHT;
-        useDefaultFolderButton.setLayoutData(useDefaultFolderButtonGridData);
-        useDefaultFolderButton.addSelectionListener(new SelectionAdapter() {
         
-            @Override
-            public void widgetDefaultSelected(SelectionEvent e) {
-                useDefaultFolder = ((Button)e.getSource()).getSelection();
-            }
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                widgetDefaultSelected(e);
-
-            }
-        });
-
         
         
         // prevent passwordtextfield from gaining focus automatically
@@ -511,7 +524,12 @@ public class XMLImportDialog extends Dialog {
                 Messages.XMLImportDialog_33,
                 Messages.XMLImportDialog_34,
                 Messages.XMLImportDialog_35 });
-        dialog.setFilterPath(defaultFolder);
+
+        if(isFilePath()) {
+            dialog.setFilterPath(getOldFolderPath());
+        } else {
+            dialog.setFilterPath(defaultFolder);
+        }
         String path = dialog.open();
 
         if (path != null) {
@@ -524,31 +542,27 @@ public class XMLImportDialog extends Dialog {
                 pathText.setText(f.getPath());
                 pathText.setEditable(true);
             }
-            String currentPath = setupDirPath();
-            defaultFolder = currentPath;
-            Activator.getDefault().getPreferenceStore().setValue(PreferenceConstants.DEFAULT_FOLDER_IMPORT, currentPath);
-            pathText.setText(f.getPath());
+
         }
     }
     
-    protected String setupDirPath() { 
-        String currentPath = dataPathText.getText();
-        String path = currentPath;
-        if(currentPath!=null && !currentPath.isEmpty()) {
-            int lastSlash = currentPath.lastIndexOf(System.getProperty("file.separator"));
-            if(lastSlash!=-1) {
-                path = currentPath.substring(0,lastSlash+1);
-            }
-            else{
-                path = currentPath.substring(0,lastSlash);
-            }
-        }
-        if(!currentPath.equals(path)) {
-            dataPathText.setText(path);
-        }
-        return path;
+    boolean isFilePath() {
+        return dataPathText!=null && dataPathText.getText()!=null && !dataPathText.getText().isEmpty();
     }
 
+    private String getOldFolderPath() {
+        return getFolderFromPath(dataPathText.getText());
+    }
+    
+    private String getFolderFromPath(String path) {
+        String returnPath = null;
+        if(path!=null && path.indexOf(File.separatorChar)!=-1) {
+            returnPath = path.substring(0, path.lastIndexOf(File.separatorChar)+1);
+        }
+        return returnPath;
+    }
+    
+   
     @Override
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
@@ -710,12 +724,20 @@ public class XMLImportDialog extends Dialog {
             LOG.error("Error while executing validation creation command", e);
         }
     }
-    private String getDefaultFolder(){
+    private String initDefaultFolder(){
         IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
         defaultFolder = prefs.getString(PreferenceConstants.DEFAULT_FOLDER_IMPORT);
         if(defaultFolder != null && !defaultFolder.isEmpty() && !defaultFolder.endsWith(System.getProperty("file.separator"))){
             defaultFolder=defaultFolder+System.getProperty("file.separator"); 
         }
+        if(defaultFolder==null || defaultFolder.isEmpty()) {
+            defaultFolder = System.getProperty("user.home");
+        }
         return defaultFolder; 
+    }
+    
+    
+    public boolean getUseDefaultFolder(){
+        return useDefaultFolder;
     }
 }

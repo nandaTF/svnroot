@@ -182,12 +182,13 @@ public class ExportThread extends NotifyingThread {
             transaction.setTarget(syncObject);
             
             /**
-             * Save source and external id to re-import element later
+             * Save source id to re-import element later
              */
             if(isReImport()) {
-                // TODO: what happens if external and source id already set?
-                element.setextId(extId);
                 element.setSourceId(getSourceId());
+                if(element.getExtId()==null) {
+                    element.setExtId(extId);
+                }
                 getDao().merge(element);
                 getChangedElementList().add(element);
             }
