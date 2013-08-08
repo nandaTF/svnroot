@@ -17,21 +17,38 @@
  * Contributors:
  *     Daniel Murygin <dm[at]sernet[dot]de> - initial API and implementation
  ******************************************************************************/
-package sernet.verinice.graph;
+package sernet.verinice.hibernate;
 
-import sernet.verinice.model.common.CnATreeElement;
+import java.util.List;
+
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+
+import sernet.verinice.interfaces.IFinishedRiskAnalysisListsDao;
+import sernet.verinice.model.bsi.risikoanalyse.FinishedRiskAnalysisLists;
 
 /**
  *
  *
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
-public interface IElementFilter {
+public class FinishedRiskAnalysisListsDao extends HibernateDaoSupport implements IFinishedRiskAnalysisListsDao {
 
-    /**
-     * @param element
-     * @return
-     */
-    boolean check(CnATreeElement element);
-
+    @Override
+    public List<FinishedRiskAnalysisLists> findByFinishedRiskAnalysisId(Integer id) {
+        DetachedCriteria criteria = DetachedCriteria.forClass(FinishedRiskAnalysisLists.class);
+        criteria.add(Restrictions.eq("finishedRiskAnalysisId", id));
+        return getHibernateTemplate().findByCriteria(criteria);
+    }
+    
+    @Override
+    public void delete(FinishedRiskAnalysisLists ra) {
+        getHibernateTemplate().delete(ra);
+    }
+    
+    @Override
+    public void flush() {
+        getHibernateTemplate().flush();
+    }
 }

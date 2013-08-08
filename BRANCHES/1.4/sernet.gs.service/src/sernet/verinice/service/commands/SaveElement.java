@@ -23,7 +23,6 @@ import java.util.List;
 
 import sernet.hui.common.connect.ITypedElement;
 import sernet.verinice.interfaces.ChangeLoggingCommand;
-import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.interfaces.IChangeLoggingCommand;
 import sernet.verinice.model.common.ChangeLogEntry;
@@ -43,41 +42,60 @@ public class SaveElement<T extends ITypedElement> extends ChangeLoggingCommand i
 
 	protected T element;
 	protected String stationId;
+	private boolean flush = false;
 	private boolean logChanges = true;
-	protected SaveElement() {
-	 
+	
+	public SaveElement() { 
 	}
 	
 	public SaveElement(T element) {
+	    this(element,false);
 		this.element = element;
 		this.stationId = ChangeLogEntry.STATION_ID;
 	}
 	
-	public void execute() {
-		IBaseDao<T, Serializable> dao = (IBaseDao<T, Serializable>) getDaoFactory().getDAO(element.getTypeId());
+	public SaveElement(T element, boolean flush) {
+        this.element = element;
+        this.stationId = ChangeLogEntry.STATION_ID;
+        this.flush = flush;
+    }
+	
+	@Override
+    public void execute() {
+		IBaseDao<T, Serializable> dao = getDaoFactory().getDAO(element.getTypeId());
 		//dao.saveOrUpdate(element);
 		element = dao.merge(element);
+		if(flush) {
+		    //dao.flush();
+		    //dao.clear();
+		}
 	}
 
 	public T getElement() {
 		return element;
 	}
 	
-	public void setLogChanges(boolean logChanges) {
+	public void setElement(T element) {
+        this.element = element;
+    }
+
+    public void setLogChanges(boolean logChanges) {
         this.logChanges = logChanges;
     }
 
 	/* (non-Javadoc)
 	 * @see sernet.gs.ui.rcp.main.service.commands.IChangeLoggingCommand#getChangeType()
 	 */
-	public int getChangeType() {
+	@Override
+    public int getChangeType() {
 		return ChangeLogEntry.TYPE_INSERT;
 	}
 
 	/* (non-Javadoc)
 	 * @see sernet.gs.ui.rcp.main.service.commands.IChangeLoggingCommand#getChangedElements()
 	 */
-	public List<CnATreeElement> getChangedElements() {
+	@Override
+    public List<CnATreeElement> getChangedElements() {
 		ArrayList<CnATreeElement> list = new ArrayList<CnATreeElement>(1);
 		if (element instanceof CnATreeElement && logChanges) {
 			list.add((CnATreeElement) element);
@@ -89,11 +107,13 @@ public class SaveElement<T extends ITypedElement> extends ChangeLoggingCommand i
 	 * @see sernet.gs.ui.rcp.main.service.commands.IChangeLoggingCommand#getStationId()
 	 */
 	
-	public String getStationId() {
+	@Override
+    public String getStationId() {
 		return stationId;
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		
 	}
 

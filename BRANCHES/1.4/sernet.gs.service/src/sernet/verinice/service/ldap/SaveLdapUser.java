@@ -15,11 +15,11 @@ import sernet.gs.service.RuntimeCommandException;
 import sernet.hui.common.connect.Property;
 import sernet.verinice.interfaces.ChangeLoggingCommand;
 import sernet.verinice.interfaces.CommandException;
-import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IAuthAwareCommand;
 import sernet.verinice.interfaces.IAuthService;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.interfaces.IChangeLoggingCommand;
+import sernet.verinice.interfaces.IRightsService;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.bsi.IBSIStrukturElement;
 import sernet.verinice.model.bsi.ImportBsiGroup;
@@ -80,8 +80,12 @@ public class SaveLdapUser extends ChangeLoggingCommand implements IChangeLogging
 				checkUsername(personInfo.getLoginName());
 				// create person
 				PersonIso person = personInfo.getPerson();
-				person.setParentAndScope(loadContainer(person.getClass()));
-				setImportRootObject(person.getParent());
+				CnATreeElement parent = loadContainer(person.getClass());
+				person.setParentAndScope(parent);
+				if (authService.isPermissionHandlingNeeded()) {
+				    person.setPermissions(Permission.clonePermissionSet(person, parent.getPermissions()));
+		        }
+				setImportRootObject(parent);
 				IBaseDao<PersonIso, Integer> dao = getDaoFactory().getDAO(person.getTypeId());
 				person = dao.merge(person);
 				dao.flush();
@@ -169,6 +173,7 @@ public class SaveLdapUser extends ChangeLoggingCommand implements IChangeLogging
         try {
             holder = new ImportBsiGroup(model);
             addPermissions(holder);
+            addPermissions(holder,IRightsService.USERDEFAULTGROUPNAME);
             getDaoFactory().getDAO(ImportBsiGroup.class).saveOrUpdate(holder);
         } catch (Exception e1) {
             throw new RuntimeCommandException("Fehler beim Anlegen des Behaelters für importierte Objekte.");
@@ -189,6 +194,7 @@ public class SaveLdapUser extends ChangeLoggingCommand implements IChangeLogging
         try {
             holder = new ImportIsoGroup(model);
             addPermissions(holder);
+            addPermissions(holder,IRightsService.USERDEFAULTGROUPNAME);
             getDaoFactory().getDAO(ImportIsoGroup.class).saveOrUpdate(holder);
         } catch (Exception e1) {
             throw new RuntimeCommandException("Fehler beim Anlegen des Behälters für importierte Objekte.");
@@ -196,14 +202,23 @@ public class SaveLdapUser extends ChangeLoggingCommand implements IChangeLogging
         return holder;
     }
     
-    private void addPermissions(CnATreeElement element) {
-        // We use the name of the currently
-        // logged in user as a role which has read and write permissions for
-        // the new Organization.
-        HashSet<Permission> auditPerms = new HashSet<Permission>();
-        auditPerms.add(Permission.createPermission(element, getAuthService().getUsername(), true, true));
-        element.setPermissions(auditPerms);
+    private void addPermissions(/*not final*/ CnATreeElement element) {
+        String userName = authService.getUsername();
+        addPermissions(element, userName);
     }
+
+    private void addPermissions(CnATreeElement element, String userName) {
+        Set<Permission> permission = element.getPermissions();
+        if(permission==null) {
+            permission = new HashSet<Permission>();
+        }
+        permission.add(Permission.createPermission(element, userName, true, true));
+        element.setPermissions(permission);
+    }
+    
+    
+    
+    
     
     /**
 	 * Checks if the username in a {@link Configuration} is unique in the database.
@@ -220,12 +235,20 @@ public class SaveLdapUser extends ChangeLoggingCommand implements IChangeLogging
 			criteria.add(Restrictions.like("propertyValue", username));
 			IBaseDao<Property, Integer> dao = getDaoFactory().getDAO(Property.TYPE_ID);
 			List<Property>resultList = dao.findByCriteria(criteria);
-			if(resultList!=null && !resultList.isEmpty()) {
-				if (getLog().isDebugEnabled()) {
-					getLog().debug("Username exists: " + username);
-				}
-				throw new UsernameExistsRuntimeException(username,"Username already exists: " + username);
+			
+			if(resultList!=null && !resultList.isEmpty()) {			
+				for (Property property : resultList) {
+				    // check again to exclude name which start with the same characters
+				    if ( username.equals(property.getPropertyValue()) ) {
+				        if (getLog().isDebugEnabled()) {
+		                    getLog().debug("Username exists: " + username);
+		                }
+				        throw new UsernameExistsRuntimeException(username,"Username already exists: " + username);
+				    }
+                }
+				
 			}
+
 		}
 	}
 	

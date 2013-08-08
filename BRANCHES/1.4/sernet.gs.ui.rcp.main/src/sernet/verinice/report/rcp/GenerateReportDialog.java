@@ -39,6 +39,8 @@ import sernet.gs.ui.rcp.main.ServiceComponent;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadCnATreeElementTitles;
+import sernet.hui.common.VeriniceContext;
+import sernet.verinice.interfaces.ICommandCacheClient;
 import sernet.verinice.interfaces.report.IOutputFormat;
 import sernet.verinice.interfaces.report.IReportType;
 import sernet.verinice.interfaces.validation.IValidationService;
@@ -100,7 +102,7 @@ public class GenerateReportDialog extends TitleAreaDialog {
 	
     // estimated size of dialog for placement (doesnt have to be exact):
     private static final int SIZE_X = 700;
-    private static final int SIZE_Y = 470;
+    private static final int SIZE_Y = 500;
 
 	public GenerateReportDialog(Shell parentShell) {
 		super(parentShell);
@@ -262,16 +264,11 @@ public class GenerateReportDialog extends TitleAreaDialog {
         openReportButton = new Button(reportGroup, SWT.PUSH);
         openReportButton.setText(Messages.GenerateReportDialog_3);
         openReportButton.addSelectionListener(new SelectionAdapter() {
-          @Override
-        public void widgetSelected(SelectionEvent event) {
-            FileDialog dlg = new FileDialog(getParentShell(), SWT.SAVE);
-            dlg.setFilterExtensions(new String[] { "*.rptdesign", "*.rpt", "*.xml", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-            String fn = dlg.open();
-            if (fn != null) {
-              textReportTemplateFile.setText(fn);
-            }
-          }
-        });
+            @Override
+            public void widgetSelected(SelectionEvent event) {
+                selectTemplateFile();
+              }
+            });
         
         Group scopeGroup = new Group(composite, SWT.NULL);
         scopeGroup.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, defaultColNr, 1));
@@ -380,27 +377,8 @@ public class GenerateReportDialog extends TitleAreaDialog {
 		openFileButton.addSelectionListener(new SelectionAdapter() {
 		    @Override
             public void widgetSelected(SelectionEvent event) {
-		        FileDialog dlg = new FileDialog(getParentShell(), SWT.SAVE);
-		        
-		        if(isFilePath()) {
-		            dlg.setFilterPath(getOldFolderPath());
-		        } else {
-		            dlg.setFilterPath(defaultFolder);
-		        }
-		        		      
-		        ArrayList<String> extensionList = new ArrayList<String>();
-		        if(chosenOutputFormat!=null && chosenOutputFormat.getFileSuffix()!=null) {
-		            extensionList.add("*." + chosenOutputFormat.getFileSuffix()); //$NON-NLS-1$
-		        }
-		        extensionList.add("*.*"); //$NON-NLS-1$
-		        dlg.setFilterExtensions(extensionList.toArray(new String[extensionList.size()])); 
-		        dlg.setFileName(getDefaultOutputFilename());
-		        String fn = dlg.open();
-		        if (fn != null) {
-		            textFile.setText(fn);
-		            getButton(IDialogConstants.OK_ID).setEnabled(true);
-		        }
-		       }
+		        selectOutputFile();
+		    }
 		});
 
 		Button useDefaultFolderButton = new Button(groupFile, SWT.CHECK);
@@ -432,27 +410,7 @@ public class GenerateReportDialog extends TitleAreaDialog {
         gridLabelFile.grabExcessHorizontalSpace = true;
         gridLabelFile.minimumWidth = dataScopeMinimumWidth;
         
-        Button useCacheButton = new Button(groupCache, SWT.CHECK);
-        useCacheButton.setText(Messages.GenerateReportDialog_25);
-		useCacheButton.setSelection(true);
-	    GridData  useCacheButtonGridData = new GridData();
-	    useCacheButtonGridData.horizontalSpan = 2;
-	    useCacheButtonGridData.grabExcessHorizontalSpace = true;
-	    useCacheButtonGridData.horizontalAlignment = GridData.FILL;
-	    useCacheButtonGridData.verticalAlignment = SWT.RIGHT;
-	    useCacheButton.setLayoutData(useCacheButtonGridData);
-	    useCacheButton.addSelectionListener(new SelectionListener() {
-            
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                useCache = ((Button)e.getSource()).getSelection();
-            }
-            
-            @Override
-            public void widgetDefaultSelected(SelectionEvent e) {
-                widgetSelected(e);
-            }
-        });
+        createCacheResetButton(groupCache);
 	    
 		openFileButton.setEnabled(FILENAME_MANUAL);
 		
@@ -465,12 +423,66 @@ public class GenerateReportDialog extends TitleAreaDialog {
 		return frame;
 	}
     
+    public void selectTemplateFile() {
+        FileDialog dlg = new FileDialog(getParentShell(), SWT.OPEN);          
+        String path;
+        if(isTemplateFilePath()) {
+            path = getOldTemplateFolderPath();
+        } else {
+            path = System.getProperty("user.home"); //$NON-NLS-1$
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Template file dialog path set to: " + path); //$NON-NLS-1$
+        }
+        dlg.setFilterPath(path);
+        dlg.setFilterExtensions(new String[] { "*.rptdesign", "*.rpt", "*.xml", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        String fn = dlg.open();
+        if (fn != null) {
+          textReportTemplateFile.setText(fn);
+        }
+    }
+    
+    public void selectOutputFile() {
+        FileDialog dlg = new FileDialog(getParentShell(), SWT.SAVE);                    
+        ArrayList<String> extensionList = new ArrayList<String>();
+        if(chosenOutputFormat!=null && chosenOutputFormat.getFileSuffix()!=null) {
+            extensionList.add("*." + chosenOutputFormat.getFileSuffix()); //$NON-NLS-1$
+        }
+        extensionList.add("*.*"); //$NON-NLS-1$
+        dlg.setFilterExtensions(extensionList.toArray(new String[extensionList.size()])); 
+        dlg.setFileName(getDefaultOutputFilename());
+        dlg.setOverwrite(true);
+        String path;
+        if(isFilePath()) {
+            path = getOldFolderPath();
+        } else {
+            path = defaultFolder;
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("File dialog path set to: " + path); //$NON-NLS-1$
+        }
+        dlg.setFilterPath(path);
+        String fn = dlg.open();
+        if (fn != null) {
+            textFile.setText(fn);
+            getButton(IDialogConstants.OK_ID).setEnabled(true);
+        }
+    }
+    
     boolean isFilePath() {
         return textFile!=null && textFile.getText()!=null && !textFile.getText().isEmpty();
+    }
+    
+    boolean isTemplateFilePath() {
+        return isReportTemplate() && textReportTemplateFile.getText()!=null && !textReportTemplateFile.getText().isEmpty();
     }
 
     private String getOldFolderPath() {
         return getFolderFromPath(textFile.getText());
+    }
+    
+    private String getOldTemplateFolderPath() {
+        return getFolderFromPath(textReportTemplateFile.getText());
     }
     
     private String getFolderFromPath(String path) {
@@ -570,9 +582,7 @@ public class GenerateReportDialog extends TitleAreaDialog {
         }
 	}
     
-    /**
-     * 
-     */
+
     protected String setupDirPath() { 
         String currentPath = textFile.getText();
         String path = currentPath;
@@ -609,15 +619,24 @@ public class GenerateReportDialog extends TitleAreaDialog {
     
     protected String getDefaultOutputFilename() {
         String outputFileName = chosenReportType.getReportFile();
-        if(outputFileName == null || outputFileName.equals("")){
+        if(outputFileName == null || outputFileName.isEmpty() || isReportTemplate()){
             outputFileName = "unknown";
         }
+        StringBuilder sb = new StringBuilder(outputFileName);
         String scopeName = convertToFileName(scopeCombo.getText());
-        StringBuilder sb = new StringBuilder(outputFileName).append("_").append(scopeName);
+        if(scopeName!=null && !scopeName.isEmpty()) {
+            sb.append("_").append(scopeName);
+        }
         if(chosenOutputFormat!=null) {
             sb.append(".").append(chosenOutputFormat.getFileSuffix());
+        } else {
+            sb.append(".pdf");
         }
         return sb.toString();
+    }
+
+    public boolean isReportTemplate() {
+        return chosenReportType!=null && chosenReportType.getId().equals(IReportType.USER_REPORT_ID);
     }
 
 
@@ -669,17 +688,17 @@ public class GenerateReportDialog extends TitleAreaDialog {
             Activator.getDefault().getPreferenceStore().setValue(PreferenceConstants.DEFAULT_FOLDER_REPORT, currentPath);
         }
         outputFile = new File(f);
-        resetScopeCombo();
+        resetFormValues();
         super.okPressed();
     }
     
     @Override
     protected void cancelPressed(){
-        resetScopeCombo();
+        resetFormValues();
         super.cancelPressed();
     }
     
-    private void resetScopeCombo(){
+    private void resetFormValues(){
         if(preSelectedElments != null){
             preSelectedElments = null;
         }
@@ -687,6 +706,9 @@ public class GenerateReportDialog extends TitleAreaDialog {
             auditId = null;
         }
         setupComboScopes();
+        comboReportType.select(0);
+        chosenReportType = reportTypes[comboReportType.getSelectionIndex()];
+        textReportTemplateFile = null;
     }
 
 	public File getOutputFile() {
@@ -748,7 +770,7 @@ public class GenerateReportDialog extends TitleAreaDialog {
     }
     
     private static String convertToFileName(String label) {
-        String filename = ""; //$NON-NLS-1$
+        String filename = "scope"; //$NON-NLS-1$
         if(label!=null) {
             filename = label.replace(' ', '_');
             filename = filename.replace("ä", "\u00E4"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -764,6 +786,7 @@ public class GenerateReportDialog extends TitleAreaDialog {
             filename = filename.replace("<", ""); //$NON-NLS-1$ //$NON-NLS-2$
             filename = filename.replace(">", ""); //$NON-NLS-1$ //$NON-NLS-2$
             filename = filename.replace("|", ""); //$NON-NLS-1$ //$NON-NLS-2$
+            filename = filename.replace("/", ""); //$NON-NLS-1$ //$NON-NLS-2$
            }
         return filename;
     }
@@ -788,10 +811,6 @@ public class GenerateReportDialog extends TitleAreaDialog {
         this.isContextMenuCall = isContextMenuCall;
     }
     
-    public boolean getUseReportCache(){
-        return useCache;
-    }
-
     private String initDefaultFolder() {
         IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
         defaultFolder = prefs.getString(PreferenceConstants.DEFAULT_FOLDER_REPORT);    
@@ -802,5 +821,29 @@ public class GenerateReportDialog extends TitleAreaDialog {
             defaultFolder = defaultFolder + System.getProperty("file.separator");
         }
         return defaultFolder;
+    }
+    
+    private void createCacheResetButton(Control parent){
+        Button button = new Button((Composite) parent, SWT.PUSH);
+        button.setText(Messages.GenerateReportDialog_27); //$NON-NLS-1$
+        button.setLayoutData(new GridData(GridData.END, GridData.BEGINNING, true, true));
+        button.addSelectionListener(new SelectionListener() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if(MessageDialog.openConfirm(getShell(), Messages.GenerateReportDialog_28, Messages.GenerateReportDialog_29)){
+                    ICommandCacheClient commandCacheClient = (ICommandCacheClient)VeriniceContext.get(VeriniceContext.COMMAND_CACHE_SERVICE);
+                    commandCacheClient.resetCache();
+                } else {
+                    return;
+                }
+            }
+
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {
+                widgetSelected(e);
+            }
+            
+        });
     }
 }

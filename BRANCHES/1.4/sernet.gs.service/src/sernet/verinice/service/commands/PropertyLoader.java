@@ -17,58 +17,30 @@
  * Contributors:
  *     Daniel Murygin <dm[at]sernet[dot]de> - initial API and implementation
  ******************************************************************************/
-package sernet.verinice.graph;
-
-import sernet.verinice.model.common.CnATreeElement;
+package sernet.verinice.service.commands;
 
 /**
- *
+ * This class provides static direct access to properties.
+ * See configuration in veriniceserver-plain.xml.
  *
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
-public class Edge {
+public class PropertyLoader {
 
-    public static final String RELATIVES = "relatives";
+    public static final String FILESIZE_MAX = "veriniceserver.filesize.max";
     
-    private CnATreeElement source;
-    
-    private CnATreeElement target;
-    
-    private String type;
+    private static String fileSizeMax;
 
-    public Edge(CnATreeElement parent, CnATreeElement child) {
-        this(parent, child, RELATIVES);
-    }
-    
-    public Edge(CnATreeElement source, CnATreeElement target, String type) {
-        super();
-        this.source = source;
-        this.target = target;
-        this.type = type;
-    }
-   
-    public CnATreeElement getSource() {
-        return source;
+    /**
+     * Returns the value of veriniceserver.filesize.max property in file veriniceserver-plain.properties
+     * 
+     * @return value of property veriniceserver.filesize.max
+     */
+    public static String getFileSizeMax() {
+        return PropertyLoader.fileSizeMax;
     }
 
-    public void setSource(CnATreeElement source) {
-        this.source = source;
-    }
-
-    public CnATreeElement getTarget() {
-        return target;
-    }
-
-    public void setTarget(CnATreeElement target) {
-        this.target = target;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-    
+    public void setFileSizeMax(String fileSizeMax) {
+        PropertyLoader.fileSizeMax = fileSizeMax;
+    } 
 }

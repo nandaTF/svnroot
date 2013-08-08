@@ -18,6 +18,8 @@
 package sernet.gs.ui.rcp.main.service.crudcommands;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +27,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import sernet.gs.service.NumericStringComparator;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.ICachedCommand;
@@ -85,22 +88,18 @@ public class LoadReportISAQuestionLvlDescriptions extends GenericCommand impleme
                     cmg = controlReloader.getFound();
                     if(cmg instanceof Control){
                         Control mg = (Control)cmg;
-                        // check if specific measures exist
-                        LoadReportLinkedElements sMeasureLoader = new LoadReportLinkedElements(Control.TYPE_ID, mg.getDbId(), false, true);
-                        sMeasureLoader = getCommandService().executeCommand(sMeasureLoader);
-                        if(sMeasureLoader.getElements().size() > 0){
-                            //specific measures found, ignore generic measures
-                            for(CnATreeElement cms : sMeasureLoader.getElements()){
-                                if(cms instanceof Control){
-                                    measuresOfInterest.add((Control)cms);
-                                }
-                            }
-                        } else {
-                            // no specific measure found, add generic measure
-                            measuresOfInterest.add(mg);
-                        }
+                        // no specific measure found, add generic measure
+                        measuresOfInterest.add(mg);
                     }
                 }
+                Collections.sort(measuresOfInterest, new Comparator<Control>() {
+
+                    @Override
+                    public int compare(Control o1, Control o2) {
+                        NumericStringComparator c = new NumericStringComparator();
+                        return c.compare(o1.getTitle(), o2.getTitle());
+                    }
+                });
                 for(Control measure : measuresOfInterest){
 
                     if(getLevel(loadParent(measure.getParent().getDbId()).getTitle()) == requestedLvl){
@@ -179,7 +178,8 @@ public class LoadReportISAQuestionLvlDescriptions extends GenericCommand impleme
                         lvl  = 0;
                     }
                 } catch (NumberFormatException e){
-                    LOG.error("Invalid Controlgrouptitle, contains no lvl information", e);
+                    LOG.warn("Invalid Controlgrouptitle, contains no lvl information. Setting lvl to 0", e);
+                    lvl = 0;
                 }
             }
         }

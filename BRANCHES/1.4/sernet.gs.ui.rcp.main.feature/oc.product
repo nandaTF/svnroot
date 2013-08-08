@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="verinice" uid="sernet.gs.ui.rcp.main.product" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.6.2" useFeatures="true" includeLaunchers="true">
+<product name="verinice" uid="sernet.gs.ui.rcp.main.product" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.6.2.92" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/sernet.gs.ui.rcp.main/icons/product_lg.gif"/>
       <text>
-         SerNet verinice 1.6.2 - Codename &apos;Saquarema&apos;
+         SerNet verinice 1.6.3 - Codename &apos;Pichilemu&apos;
 
 (c) SerNet Service Network GmbH and others
-1996-2012
+1996-2013
 
 Contact the authors:
 verinice@sernet.de
@@ -32,8 +32,9 @@ Gregorio Levano			&lt;GregorioMagno.LevanoHuaman@HS-FURTWANGEN.DE&gt;
 Christian Ganzmann 		&lt;christian.ganzmann@HS-FURTWANGEN.DE&gt;
 Carmen Probst 			&lt;carmen.probst@hs-furtwangen.de&gt;
 Sebastian Hagedorn 		&lt;sh@sernet.de&gt;
-Johannes Stillig 			&lt;js@sernet.de&gt;
-Christian Eschenlohr 		&lt;christian.eschenlohr@leoni.com&gt;
+Johannes Stillig 		&lt;js@sernet.de&gt;
+Christian Eschenlohr 	&lt;christian.eschenlohr@leoni.com&gt;
+Julia Haas			    &lt;js@sernet.de&gt;
 
 Artwork:
 Blackbit						www.blackbit.de
@@ -62,6 +63,7 @@ VDA und das VDA Logo sind eingetragene Markenzeichen des Verband der Automobilin
    <launcherArgs>
       <programArgs>-data @user.home/verinice/workspace</programArgs>
       <vmArgs>-Xms64m -Xmx512m -XX:MaxPermSize=128m -Dorg.osgi.service.http.port=8800 -Dorg.ops4j.pax.web.listening.addresses=localhost  -Dosgi.parentClassloader=ext</vmArgs>
+      <vmArgsMac>-Djava.awt.headless=true</vmArgsMac>
    </launcherArgs>
 
    <windowImages i16="/sernet.gs.ui.rcp.main/icons/v-16.gif" i32="/sernet.gs.ui.rcp.main/icons/v-32.gif" i48="/sernet.gs.ui.rcp.main/icons/v-48.gif" i64="/sernet.gs.ui.rcp.main/icons/v-64.gif" i128="/sernet.gs.ui.rcp.main/icons/v-128.gif"/>
@@ -838,7 +840,6 @@ Public License instead of this License.  But first, please read
       <feature id="sernet.gs.server.feature" version="1.1.1.qualifier"/>
       <feature id="sernet.gs.ui.rcp.main.feature" version="1.1.1.qualifier"/>
       <feature id="org.eclipse.equinox.p2.user.ui" version="2.1.1.v20110526-6-Bg9JXOePwKUTU7X0teV1RtDu-e"/>
-      <feature id="org.eclipse.equinox.executable" version="3.5.0.v20110530-7P7NFUFFLWUl76mart"/>
    </features>
 
    <configurations>

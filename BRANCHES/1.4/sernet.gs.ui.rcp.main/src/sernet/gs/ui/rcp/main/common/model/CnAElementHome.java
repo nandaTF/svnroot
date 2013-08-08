@@ -210,6 +210,7 @@ public final class CnAElementHome {
             log.debug("Creating new instance of " + clazz.getName() + " in " + container + " with title: " + title); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
         CreateElement<T> saveCommand = new CreateElement<T>(container, clazz, title);
+        saveCommand.setInheritAuditPermissions(true);
         saveCommand = getCommandService().executeCommand(saveCommand);
         if(Activator.getDefault().getPluginPreferences().getBoolean(PreferenceConstants.USE_AUTOMATIC_VALIDATION)){
             validateElement(saveCommand.getNewElement());
@@ -445,13 +446,7 @@ public final class CnAElementHome {
     
             if (roles == null) {
                 LoadCurrentUserConfiguration lcuc = new LoadCurrentUserConfiguration();
-                try {
-                    lcuc = getCommandService().executeCommand(lcuc);
-                } catch (CommandException e) {
-                    ExceptionUtil.log(e, Messages.getString("CnAElementHome.2")); //$NON-NLS-1$
-                    return false;
-                }
-    
+                lcuc = getCommandService().executeCommand(lcuc);
                 Configuration c = lcuc.getConfiguration();
     
                 // No configuration for the current user (anymore?). Then nothing is
@@ -690,7 +685,7 @@ public final class CnAElementHome {
             getValidationService().deleteValidationsOfSubtree(element);
             CnAElementFactory.getModel(element).validationRemoved(element.getScopeId());
         } else {
-            log.info("Can't delete validations of element, scopeId or elementId not set");
+            log.error("Can't delete validations of element, scopeId or elementId not set");
         }
     }
 

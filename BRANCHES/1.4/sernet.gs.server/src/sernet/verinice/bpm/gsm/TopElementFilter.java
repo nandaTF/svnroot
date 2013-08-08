@@ -19,7 +19,7 @@
  ******************************************************************************/
 package sernet.verinice.bpm.gsm;
 
-import sernet.verinice.graph.IElementFilter;
+import sernet.verinice.interfaces.graph.IElementFilter;
 import sernet.verinice.model.common.CnATreeElement;
 
 /**

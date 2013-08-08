@@ -96,6 +96,7 @@ import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.ISO27KModel;
 import sernet.verinice.service.commands.LoadAttachmentFile;
 import sernet.verinice.service.commands.LoadAttachments;
+import sernet.verinice.service.commands.LoadFileSizeLimit;
 
 /**
  * Lists files {@link Attachment} attached to a CnATreeElement. User can view,
@@ -157,10 +158,6 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
     private TableViewer viewer;
 
     private TableViewerColumn imageColumn;
-
-    
-    
-    
     
     private TableSorter tableSorter = new TableSorter();
 
@@ -191,6 +188,8 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
     private IPartListener2 linkWithEditorPartListener = new LinkWithEditorPartListener(this);
 
     private AttachmentImageCellProvider imageCellProvider = null;
+    
+    private Integer fileSizeMax;
     
     public FileView() {
         super();
@@ -254,6 +253,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
         Table table = viewer.getTable();
         
         table.addListener(SWT.MeasureItem, new Listener() {   
+            @Override
             public void handleEvent(Event event) {
                // height cannot be per row so simply set
                event.height = getThumbnailSize() + widthHeightPadding;
@@ -328,11 +328,13 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
 
     private void hookActions() {
         viewer.addDoubleClickListener(new IDoubleClickListener() {
+            @Override
             public void doubleClick(DoubleClickEvent event) {
                 doubleClickAction.run();
             }
         });
         viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+            @Override
             public void selectionChanged(SelectionChangedEvent event) {
                 saveCopyAction.setEnabled(true);
                 openAction.setEnabled(true);
@@ -342,6 +344,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
 
     private void hookPageSelection() {
         selectionListener = new ISelectionListener() {
+            @Override
             public void selectionChanged(IWorkbenchPart part, ISelection selection) {
                 pageSelectionChanged(part, selection);
             }
@@ -391,11 +394,12 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
     }
 
     protected void startInitDataJob() {
-        WorkspaceJob initDataJob = new WorkspaceJob(sernet.verinice.iso27k.rcp.Messages.ISMView_InitData) {
+        WorkspaceJob initDataJob = new WorkspaceJob("") {
+            @Override
             public IStatus runInWorkspace(final IProgressMonitor monitor) {
                 IStatus status = Status.OK_STATUS;
                 try {
-                    monitor.beginTask(sernet.verinice.iso27k.rcp.Messages.ISMView_InitData, IProgressMonitor.UNKNOWN);
+                    monitor.beginTask("", IProgressMonitor.UNKNOWN);
                     Activator.inheritVeriniceContextState();
                     loadFiles();
                 } catch (Exception e) {
@@ -425,6 +429,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
             attachmentList = command.getAttachmentList();
             if (attachmentList != null) {
                 Display.getDefault().syncExec(new Runnable() {
+                    @Override
                     public void run() {
                         viewer.setInput(attachmentList);
                     }
@@ -435,6 +440,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
                         attachment.setCnAElementTitel(getCurrentCnaElement().getTitle());
                     }
                     attachment.addListener(new Attachment.INoteChangedListener() {
+                        @Override
                         public void noteChanged() {
                             loadFiles();
                         }
@@ -504,6 +510,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
 
     private void makeActions() {
         addFileAction = new RightsEnabledAction(ActionRightIDs.ADDFILE) {
+            @Override
             public void run() {
                 FileDialog fd = new FileDialog(FileView.this.getSite().getShell());
                 fd.setText(Messages.FileView_14);
@@ -520,6 +527,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
         addFileAction.setEnabled(false);
 
         deleteFileAction = new RightsEnabledAction(ActionRightIDs.DELETEFILE) {
+            @Override
             public void run() {
                 int count = ((IStructuredSelection) viewer.getSelection()).size();
                 boolean confirm = MessageDialog.openConfirm(getViewer().getControl().getShell(), Messages.FileView_18, NLS.bind(Messages.FileView_19, count));
@@ -535,6 +543,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
         deleteFileAction.setEnabled(false);
 
         doubleClickAction = new Action() {
+            @Override
             public void run() {
                 Object sel = ((IStructuredSelection) viewer.getSelection()).getFirstElement();
                 EditorFactory.getInstance().openEditor(sel);
@@ -542,6 +551,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
         };
 
         saveCopyAction = new Action() {
+            @Override
             public void run() {
                 Attachment attachment = (Attachment) ((IStructuredSelection) viewer.getSelection()).getFirstElement();
                 saveCopy(attachment);
@@ -551,6 +561,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
         saveCopyAction.setEnabled(false);
 
         openAction = new Action() {
+            @Override
             public void run() {
                 openFile();
             }
@@ -560,6 +571,7 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
         openAction.setEnabled(false);
 
         toggleLinkAction = new RightsEnabledAction(ActionRightIDs.SHOWALLFILES, Messages.FileView_24, SWT.TOGGLE){
+            @Override
             public void run() {
                 isLinkingActive = !isLinkingActive;
                 toggleLinkAction.setChecked(isLinkingActive());
@@ -671,22 +683,24 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
     
     private static class AttachmentLabelProvider extends LabelProvider implements ITableLabelProvider {      
         
+        @Override
         public Image getColumnImage(Object element, int columnIndex) {
             if (element instanceof PlaceHolder) {
                 return null;
             }
             Attachment attachment = (Attachment) element;
             if (columnIndex == 1) {
-                String mimeType = (attachment.getMimeType() != null) ? attachment.getMimeType().toLowerCase() : "";
+                String mimeType = (attachment.getMimeType() != null) ? attachment.getMimeType().toLowerCase() : ""; //$NON-NLS-1$
                 String imageType = mimeImageMap.get(mimeType);
                 if (imageType != null) {
-                    return ImageCache.getInstance().getImageDescriptor(mimeImageMap.get(mimeType)).createImage();
+                    return ImageCache.getInstance().getImage(mimeImageMap.get(mimeType));
                 }
                 return ImageCache.getInstance().getImage(ImageCache.UNKNOWN_FILE_TYPE);
             }
             return null;
         }
 
+        @Override
         public String getColumnText(Object element, int columnIndex) {
             try {
                 if (element instanceof PlaceHolder) {
@@ -745,12 +759,8 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
             }
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.eclipse.jface.viewers.ViewerComparator#compare(org.eclipse.jface
-         * .viewers.Viewer, java.lang.Object, java.lang.Object)
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.viewers.ViewerComparator#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
          */
         @Override
         public int compare(Viewer viewer, Object e1, Object e2) {
@@ -844,19 +854,13 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
 
     }
 
-    /**
-     * @return
-     */
     public TableViewer getViewer() {
         return this.viewer;
     }
 
-    /*
-     * (non-Javadoc)
+    /* (non-Javadoc)
      * 
-     * @see
-     * sernet.verinice.iso27k.rcp.ILinkedWithEditorView#editorActivated(org.
-     * eclipse.ui.IEditorPart)
+     * @see sernet.verinice.iso27k.rcp.ILinkedWithEditorView#editorActivated(org.eclipse.ui.IEditorPart)
      */
     @Override
     public void editorActivated(IEditorPart editor) {
@@ -868,22 +872,19 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
             return;
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Element in editor :" + element.getUuid());
+            LOG.debug("Element in editor :" + element.getUuid()); //$NON-NLS-1$
             LOG.debug("Loading attached files of element now..."); //$NON-NLS-1$
         }
         elementSelected(element);
 
     }
 
-    /**
-     * @return
-     */
     private boolean isLinkingActive() {
         return isLinkingActive;
     }
 
     private void setNewInput(CnATreeElement elmt) {
-        setViewTitle(Messages.FileView_7 + " " + elmt.getTitle());
+        setViewTitle(Messages.FileView_7 + " " + elmt.getTitle()); //$NON-NLS-1$
     }
 
     private void setViewTitle(String title) {
@@ -895,6 +896,15 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
         if (file.isDirectory()){
             return false;
         }
+        long size = file.length();
+        if(AttachmentFile.convertByteToMB(size) > getMaxFileSizeInMB()) {
+           String readableSize = AttachmentFile.formatByteToMB(size);
+           MessageDialog.openError(
+                   getSite().getShell(), 
+                   Messages.FileView_10, 
+                   NLS.bind(Messages.FileView_11, readableSize, getMaxFileSizeInMB())); 
+           return false;
+        }
         Attachment attachment = new Attachment();
         attachment.setCnATreeElementId(getCurrentCnaElement().getDbId());
         attachment.setCnAElementTitel(getCurrentCnaElement().getTitle());
@@ -902,16 +912,35 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
         attachment.setDate(Calendar.getInstance().getTime());
         attachment.setFilePath(selected);
         attachment.addListener(new Attachment.INoteChangedListener() {
+            @Override
             public void noteChanged() {
                 loadFiles();
-
             }
         });
         EditorFactory.getInstance().openEditor(attachment);
         return true;
     }
 
-    private void deleteAttachments() {
+    private int getMaxFileSizeInMB() {
+        if(fileSizeMax==null) {
+            fileSizeMax = loadFileSizeMax();
+        }
+        return fileSizeMax;
+    }
+
+    private Integer loadFileSizeMax() {
+        int result = LoadFileSizeLimit.FILE_SIZE_MAX_DEFAULT;
+        LoadFileSizeLimit loadFileSizeLimit = new LoadFileSizeLimit(); 
+        try {
+            loadFileSizeLimit = getCommandService().executeCommand(loadFileSizeLimit);
+        } catch (CommandException e) {
+            LOG.error("Error while saving note", e); //$NON-NLS-1$
+        }
+        result = loadFileSizeLimit.getFileSizeMax();
+        return result;
+    }
+
+ private void deleteAttachments() {
         Iterator iterator = ((IStructuredSelection) viewer.getSelection()).iterator();
         while (iterator.hasNext()) {
             Attachment sel = (Attachment) iterator.next();
@@ -932,20 +961,16 @@ public class FileView extends ViewPart implements ILinkedWithEditorView, IProper
             // model is not loaded yet: add a listener to load data when
             // it's laoded
             modelLoadListener = new IModelLoadListener() {
-
-                public void closed(BSIModel model) {
-                    // nothing to do
-                }
-
+                @Override
+                public void closed(BSIModel model) {}
+                @Override
                 public void loaded(BSIModel model) {
                     startInitDataJob();
                 }
-
                 @Override
                 public void loaded(ISO27KModel model) {
                     // work is done in loaded(BSIModel model)
                 }
-
             };
             CnAElementFactory.getInstance().addLoadListener(modelLoadListener);
         }
