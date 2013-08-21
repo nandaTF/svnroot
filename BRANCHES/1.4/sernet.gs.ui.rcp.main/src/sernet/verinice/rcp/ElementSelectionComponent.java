@@ -255,7 +255,6 @@ public class ElementSelectionComponent {
                 String title2 = "";
                 CnATreeElement elmt1 = (CnATreeElement) e1;
                 CnATreeElement elmt2 = (CnATreeElement) e2;
-               
                 if(titleMap!=null){
                     title1 = titleMap.get(elmt1.getScopeId());
                     title2 = titleMap.get(elmt2.getScopeId());
@@ -265,16 +264,15 @@ public class ElementSelectionComponent {
                             return makeTitle(elmt1).compareTo(makeTitle(elmt2));
                         }
                         return title1.compareTo(title2);
-                    }else{
+                    } else {
                         if(title1 == null){
-                            return -1;
-                        }
-                        if(title2 == null){
                             return 1;
+                        } if(title2 == null) {
+                            return -1;
                         }
                     }
                 }
-                return makeTitle(elmt1).compareTo(makeTitle(elmt2));  //return -1;
+                return makeTitle(elmt1).compareTo(makeTitle(elmt2));  
 
             } 
         });
