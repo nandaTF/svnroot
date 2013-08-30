@@ -31,7 +31,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
-import sernet.verinice.hibernate.HibernateDao;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.interfaces.graph.GraphElementLoader;
 import sernet.verinice.interfaces.graph.IGraphElementLoader;
@@ -67,9 +66,8 @@ public class GsmAssetScenarioRemover {
      * Spring scope of graphService in veriniceserver-jbpm.xml is 'prototype'
      */
     private IGraphService graphService;
-    private VeriniceGraph graph;
     
-    private HibernateDao<CnALink, CnALink.Id> linkDao;
+    private IBaseDao<CnALink, CnALink.Id> linkDao;
     
     private IBaseDao<CnATreeElement, Integer> elementDao;
     
@@ -137,14 +135,14 @@ public class GsmAssetScenarioRemover {
     }
 
     public VeriniceGraph getGraph() {
-        return graph;
+        return getGraphService().getGraph();
     }
 
-    public HibernateDao<CnALink, CnALink.Id> getLinkDao() {
+    public IBaseDao<CnALink, CnALink.Id> getLinkDao() {
         return linkDao;
     }
 
-    public void setLinkDao(HibernateDao<CnALink, CnALink.Id> linkDao) {
+    public void setLinkDao(IBaseDao<CnALink, CnALink.Id> linkDao) {
         this.linkDao = linkDao;
     }
     
