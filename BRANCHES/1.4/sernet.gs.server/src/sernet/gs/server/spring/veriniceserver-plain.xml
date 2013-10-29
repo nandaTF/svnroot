@@ -93,7 +93,7 @@
      <property name="cronExpression" value="0 ${veriniceserver.notification.minute} ${veriniceserver.notification.hour} * * ?" />
 </bean>
 
-<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+<bean id="quartzSchedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
     <property name="triggers">
         <list>
               <ref bean="cronTrigger" />
