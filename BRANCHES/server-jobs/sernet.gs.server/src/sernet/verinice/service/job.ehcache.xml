@@ -1,0 +1,28 @@
+<ehcache>
+
+    <!-- The following properties are translated: 
+    user.home - User's home directory 
+    user.dir - User's current working directory 
+    java.io.tmpdir - Default temp file path -->
+
+    <diskStore path="java.io.tmpdir/veriniceJobCache/" />
+    
+    <defaultCache
+        maxElementsInMemory="10000"
+        eternal="false"
+        timeToIdleSeconds="120"
+        timeToLiveSeconds="120"
+        overflowToDisk="false" />
+        
+	<cache name="sernet.verinice.service.JobCache"
+            maxElementsInMemory="100"
+            timeToIdleSeconds="0"
+            timeToLiveSeconds="0"
+            memoryStoreEvictionPolicy="LRU"
+            overflowToDisk="true"
+            eternal="true"
+            diskPersistent="true"
+            maxElementsOnDisk="200"
+            diskExpiryThreadIntervalSeconds="720"
+            diskSpoolBufferSizeMB="30" />
+</ehcache>

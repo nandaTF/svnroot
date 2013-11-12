@@ -299,6 +299,34 @@ This variant:
         <property name="cnaTreeElementDao" ref="cnaTreeElementDao" />
         <property name="cnaLinkDao" ref="cnaLinkDao" />
     </bean>
+    
+    <bean id="asyncCommandService" class="sernet.verinice.service.QuartzAsyncCommandService">
+        <property name="scheduler" ref="quartzSchedulerFactoryBean" />
+        <property name="commandExecuterJobFactory">
+            <bean class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+                <property name="targetBeanName">
+                    <idref local="commandExecuterJob" />
+                </property>
+            </bean>
+        </property>  
+        <property name="authService" ref="authService" /> 
+        <property name="jobRegister" ref="jobRegister" /> 
+    </bean>
+    
+    <bean id="commandExecuterJob" class="org.springframework.scheduling.quartz.JobDetailBean" scope="prototype">
+        <property name="jobClass" value="sernet.verinice.service.CommandExecuterJob" />
+        <property name="jobDataAsMap">
+	        <map>           
+	            <entry key="commandService" value-ref="commandService" />            
+	        </map>
+	    </property>
+    </bean>
+    
+    <bean id="jobRegister" class="sernet.verinice.service.JobRegister">
+         <property name="jobCache" ref="jobCache" />
+    </bean>
+    
+    <bean id="jobCache" class="sernet.verinice.service.JobCache"/>
 
 	<!-- uncomment to activate runtime logging of methods defined in veriniceserver-debug.xml -->
 	<!--<import resource="veriniceserver-debug.xml"/>-->

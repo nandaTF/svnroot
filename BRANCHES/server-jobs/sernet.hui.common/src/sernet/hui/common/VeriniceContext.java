@@ -83,6 +83,8 @@ public final class VeriniceContext {
 	public static final String GS_SCRAPER_UTIL = "gsScraperUtil";
 	
 	public static final String COMMAND_SERVICE = "commandService";
+    
+    public static final String ASYNC_COMMAND_SERVICE = "asyncCommandService";
 	
 	public static final String WEB_SERVICE_CLIENT = "webServiceClient";
 	

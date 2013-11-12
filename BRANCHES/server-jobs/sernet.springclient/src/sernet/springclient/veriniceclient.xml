@@ -35,6 +35,21 @@ ZO RELAXEN UND WATSCHEN DER BLINKENLIGHTS.
         <property name="httpInvokerRequestExecutor" ref="veriniceCommonsExecuter"/>
     </bean>
     
+    <bean id="asyncCommandServiceRemote"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+        <property name="serviceUrl">
+            <value>${verinice.serverURL}/service/asyncCommandServiceHttpInvoker</value>
+        </property>
+        <property name="serviceInterface">
+            <value>sernet.verinice.interfaces.IAsyncCommandService</value>
+        </property>
+        <property name="httpInvokerRequestExecutor" ref="veriniceCommonsExecuter"/>
+    </bean>
+    
+    <bean id="asyncCommandService" class="sernet.springclient.AsyncCommandServiceClient">
+        <property name="asyncCommandService" ref="asyncCommandServiceRemote" />   
+    </bean>
+    
     <bean name="veriniceCommonsExecuter" class="sernet.springclient.CommonsExecuter" init-method="init">
         <!-- Request-timeout in ms 24h = 24*60*60*1000 = 86.400.000-->
         <property name="readTimeout" value="86400000"/>
@@ -263,6 +278,7 @@ ZO RELAXEN UND WATSCHEN DER BLINKENLIGHTS.
 			<entry key="hitroUtil" value-ref="hitroUtil"/>
 			<entry key="huiTypeFactory" value-ref="huiTypeFactory"/>
 			<entry key="commandService" value-ref="commandService"/>
+            <entry key="asyncCommandService" value-ref="asyncCommandService"/>
 			<entry key="authService" value-ref="authService"/>
 			<!--<entry key="syncService" value-ref="syncService" />-->
 			<entry key="webServiceClient" value-ref="webServiceClient" />

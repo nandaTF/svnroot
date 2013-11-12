@@ -28,6 +28,7 @@
             <tx:method name="find*" propagation="REQUIRED" read-only="true"/>
             <tx:method name="load*" propagation="REQUIRED" read-only="true"/>
             <tx:method name="retrieve" propagation="REQUIRED" read-only="true"/>
+            <tx:method name="merge" propagation="REQUIRED" read-only="false"/>
         </tx:attributes>
     </tx:advice>
     

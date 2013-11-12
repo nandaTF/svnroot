@@ -13,6 +13,17 @@
             <value>sernet.verinice.interfaces.ICommandService</value>
         </property>
     </bean>
+                 
+    <bean name="/asyncCommandServiceHttpInvoker"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter"
+          lazy-init="false">
+        <property name="service">
+            <ref bean="asyncCommandService"/>
+        </property>
+        <property name="serviceInterface">
+            <value>sernet.verinice.interfaces.IAsyncCommandService</value>
+        </property>
+    </bean>
     
     <bean name="/authServiceHttpInvoker"
           class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter"
