@@ -45,6 +45,7 @@ import org.eclipse.ui.internal.cheatsheets.actions.CheatSheetCategoryBasedSelect
 import org.eclipse.ui.internal.registry.ActionSetRegistry;
 import org.eclipse.ui.internal.registry.IActionSetDescriptor;
 
+import sernet.gs.ui.rcp.main.actions.AsyncCommandCallAction;
 import sernet.gs.ui.rcp.main.actions.ChangeOwnPasswordAction;
 import sernet.gs.ui.rcp.main.actions.GSMBasicSecurityCheckAction;
 import sernet.gs.ui.rcp.main.actions.ImportCSVAction;
@@ -174,6 +175,10 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     private RunRiskAnalysisAction runRiskAnalysisAction;
     
     private ServerConnectionToggleAction serverConnectionToggleAction;
+    
+    AsyncCommandCallAction waitAction10s;
+    AsyncCommandCallAction waitAction1m;
+    AsyncCommandCallAction waitAction3m;
 
     public ApplicationActionBarAdvisor(IActionBarConfigurer configurer) {
         super(configurer);
@@ -241,6 +246,10 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         showCheatSheetListAction = new CheatSheetCategoryBasedSelectionAction(Messages.ApplicationActionBarAdvisor_20);
         
         serverConnectionToggleAction = new ServerConnectionToggleAction();
+        
+        waitAction10s = AsyncCommandCallAction.createActionForSeconds(10);
+        waitAction1m = AsyncCommandCallAction.createActionForMinutes(1);
+        waitAction3m = AsyncCommandCallAction.createActionForMinutes(3);
         
         testAction = new TestAction(window, "test command", "asset", 152); //$NON-NLS-1$ //$NON-NLS-2$
         introAction = ActionFactory.INTRO.create(window);
@@ -350,6 +359,12 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
         fileMenu.add(new Separator());
         fileMenu.add(serverConnectionToggleAction);
+
+        fileMenu.add(new Separator());
+        fileMenu.add(waitAction10s);
+        fileMenu.add(waitAction1m);
+        fileMenu.add(waitAction3m);
+        fileMenu.add(new Separator());
         fileMenu.add(exitAction);
         return fileMenu;
     }

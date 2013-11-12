@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 
 import sernet.hui.common.VeriniceContext;
 import sernet.springclient.SpringClientPlugin;
+import sernet.verinice.interfaces.IAsyncCommandService;
 import sernet.verinice.interfaces.IAuthService;
 import sernet.verinice.interfaces.ICommandService;
 import sernet.verinice.interfaces.bpm.IGsmService;
@@ -61,6 +62,10 @@ public abstract class ServiceFactory {
 	public static ICommandService lookupCommandService() {
 		return (ICommandService) VeriniceContext.get(VeriniceContext.COMMAND_SERVICE);
 	}
+	
+	public static IAsyncCommandService lookupAsyncCommandService() {
+        return (IAsyncCommandService) VeriniceContext.get(VeriniceContext.ASYNC_COMMAND_SERVICE);
+    }
 	
 	/** Retrieves the client's IAuthService instance.
 	 * 
