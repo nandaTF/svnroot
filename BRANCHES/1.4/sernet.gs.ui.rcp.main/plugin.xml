@@ -296,7 +296,7 @@
             name="verinice">
          <property
                name="aboutText"
-               value="SerNet verinice 1.6.4 - Codename 'Punta de Lobos' &#x0A;&#x0A;(c) SerNet Service Network GmbH and others 1996-2013&#x0A;&#x0A;Visit our homepage: http://www.verinice.org&#x0A;Contact the authors: verinice@sernet.de&#x0A;&#x0A;Contributors:&#x0A;Alexander Koderman 		&lt;ak@sernet.de&gt;&#x0A;Anne Hanekop 			&lt;ah@sernet.de&gt;&#x0A;Marek Seeger			&lt;ms@sernet.de&gt;&#x0A;Andreas Becker			&lt;andreas.r.becker@ruhr-uni-bochum.de&gt;&#x0A;Robert Schuster			&lt;r.schuster@tarent.de&gt;&#x0A;Daniel Murygin			&lt;dm@sernet.de&gt;&#x0A;Sebastian Engel 			&lt;s.engel@tarent.de&gt;&#x0A;Markus Joos				&lt;markus.joos@t-online.de&gt;&#x0A;Gregorio Levano			&lt;GregorioMagno.LevanoHuaman@hs-furtwangen.de&gt;&#x0A;Christian Ganzmann 		&lt;christian.ganzmann@hs-furtwangen.de&gt;&#x0A;Carmen Probst 			&lt;carmen.probst@hs-furtwangen.de&gt;&#x0A;Sebastian Hagedorn 			&lt;sh@sernet.de&gt;&#x0A;Johannes Stillig 			&lt;js@sernet.de&gt;&#x0A;Christian Eschenlohr 			&lt;christian.eschenlohr@leoni.com&gt;&#x0A;Julia Haas 			&lt;jh@sernet.de&gt;&#x0A;&#x0A;Artwork:&#x0A;Blackbit						http://www.blackbit.de&#x0A;Icons by Axialis Team						http://www.axialis.com&#x0A;Icons by Yusuke Kamiyamane      http://p.yusukekamiyamane.com&#x0A;Icons by FAMFAMFAM              http://www.famfamfam.com&#x0A;Joseph North				&lt;north@sublink.ca&gt;&#x0A;Agentur Roeder				http://www.agentur-roeder.de&#x0A;&#x0A;&#x0A;This program comes with ABSOLUTELY NO WARRANTY.&#x0A;This is free software, and you are welcome to redistribute it under certain conditions.&#x0A;Verinice is licensed to you under the conditions of the GPLv3, the Apache license, the Eclipse Public License and others.&#x0A;See the LICENSE.txt contained in the program folder, the verinice Plugin-Details in the help menu and the copyright and license header in each source file for details.&#x0A;&#x0A;VDA Information Security Assessment&#x0A;(c) Arbeitskreis Informationsschutz des Verband der Automobilindustrie e. V. (VDA)&#x0A;Lizenz: http://creativecommons.org/licenses/by-nd/3.0/de/&#x0A;VDA und das VDA Logo sind eingetragene Markenzeichen des Verband der Automobilindustrie e. V. (VDA), die zur Nutzung in verinice lizenziert sind. Alle Rechte vorbehalten."/>
+               value="SerNet verinice 1.7.0 - Codename 'Contructa' &#x0A;&#x0A;(c) SerNet Service Network GmbH and others 1996-2013&#x0A;&#x0A;Visit our homepage: http://www.verinice.org&#x0A;Contact the authors: verinice@sernet.de&#x0A;&#x0A;Contributors:&#x0A;Alexander Koderman 		&lt;ak@sernet.de&gt;&#x0A;Anne Hanekop 			&lt;ah@sernet.de&gt;&#x0A;Marek Seeger			&lt;ms@sernet.de&gt;&#x0A;Andreas Becker			&lt;andreas.r.becker@ruhr-uni-bochum.de&gt;&#x0A;Robert Schuster			&lt;r.schuster@tarent.de&gt;&#x0A;Daniel Murygin			&lt;dm@sernet.de&gt;&#x0A;Sebastian Engel 			&lt;s.engel@tarent.de&gt;&#x0A;Markus Joos				&lt;markus.joos@t-online.de&gt;&#x0A;Gregorio Levano			&lt;GregorioMagno.LevanoHuaman@hs-furtwangen.de&gt;&#x0A;Christian Ganzmann 		&lt;christian.ganzmann@hs-furtwangen.de&gt;&#x0A;Carmen Probst 			&lt;carmen.probst@hs-furtwangen.de&gt;&#x0A;Sebastian Hagedorn 			&lt;sh@sernet.de&gt;&#x0A;Johannes Stillig 			&lt;js@sernet.de&gt;&#x0A;Christian Eschenlohr 			&lt;christian.eschenlohr@leoni.com&gt;&#x0A;Julia Haas 			&lt;jh@sernet.de&gt;&#x0A;&#x0A;Artwork:&#x0A;Blackbit						http://www.blackbit.de&#x0A;Icons by Axialis Team						http://www.axialis.com&#x0A;Icons by Yusuke Kamiyamane      http://p.yusukekamiyamane.com&#x0A;Icons by FAMFAMFAM              http://www.famfamfam.com&#x0A;Joseph North				&lt;north@sublink.ca&gt;&#x0A;Agentur Roeder				http://www.agentur-roeder.de&#x0A;&#x0A;&#x0A;This program comes with ABSOLUTELY NO WARRANTY.&#x0A;This is free software, and you are welcome to redistribute it under certain conditions.&#x0A;Verinice is licensed to you under the conditions of the GPLv3, the Apache license, the Eclipse Public License and others.&#x0A;See the LICENSE.txt contained in the program folder, the verinice Plugin-Details in the help menu and the copyright and license header in each source file for details.&#x0A;&#x0A;VDA Information Security Assessment&#x0A;(c) Arbeitskreis Informationsschutz des Verband der Automobilindustrie e. V. (VDA)&#x0A;Lizenz: http://creativecommons.org/licenses/by-nd/3.0/de/&#x0A;VDA und das VDA Logo sind eingetragene Markenzeichen des Verband der Automobilindustrie e. V. (VDA), die zur Nutzung in verinice lizenziert sind. Alle Rechte vorbehalten."/>
          <property
                name="windowImages"
                value="icons/window16.gif,icons/window32.gif"/>
@@ -949,21 +949,26 @@
                icon="icons/generic_element_new.png"
                label="%command.label.newGroup">        
          	<visibleWhen>
-    			<iterate operator="and">
-             		<instanceof value="sernet.verinice.model.iso27k.IISO27kGroup" />
-	                <not>
-	                	<instanceof value="sernet.verinice.model.iso27k.Asset" />
-	               	</not>            
-	                <not>
-	                	<instanceof value="sernet.verinice.model.iso27k.Audit" />
-	               	</not>
-	                <not>
-	                	<instanceof value="sernet.verinice.model.iso27k.ImportIsoGroup" />
-	               	</not>
-	                <not>
-	                	<instanceof value="sernet.verinice.model.iso27k.Organization" />
-	               	</not>
-             	</iterate>
+         	    <with variable="activeMenuSelection">
+         	    	<and>
+	         	    	<count value="1" />
+	         	    	<iterate operator="and">	         	    		
+	                    	<instanceof value="sernet.verinice.model.iso27k.IISO27kGroup" />
+	                    	<not>
+		                		<instanceof value="sernet.verinice.model.iso27k.Asset" />
+		               		</not>
+		               		<not>
+			                	<instanceof value="sernet.verinice.model.iso27k.Audit" />
+			               	</not>
+			                <not>
+			                	<instanceof value="sernet.verinice.model.iso27k.ImportIsoGroup" />
+			               	</not>
+			                <not>
+			                	<instanceof value="sernet.verinice.model.iso27k.Organization" />
+			               	</not>            
+	                    </iterate>
+                    </and>            
+		        </with> 
          	</visibleWhen>
          </command>
       </menuContribution>
@@ -974,21 +979,26 @@
                icon="icons/generic_element_new.png"
                label="%command.label.new">
          	<visibleWhen>
-    			<iterate operator="and">
-             		<instanceof value="sernet.verinice.model.iso27k.IISO27kGroup" />
-	                <not>
-	                	<instanceof value="sernet.verinice.model.iso27k.Asset" />
-	               	</not>            
-	                <not>
-	                	<instanceof value="sernet.verinice.model.iso27k.Audit" />
-	               	</not>
-	                <not>
-	                	<instanceof value="sernet.verinice.model.iso27k.ImportIsoGroup" />
-	               	</not>
-	                <not>
-	                	<instanceof value="sernet.verinice.model.iso27k.Organization" />
-	               	</not>
-             	</iterate>
+         		<with variable="activeMenuSelection">
+         	    	<and>
+	         	    	<count value="1" />
+	         	    	<iterate operator="and">	         	    		
+	                    	<instanceof value="sernet.verinice.model.iso27k.IISO27kGroup" />
+	                    	<not>
+		                		<instanceof value="sernet.verinice.model.iso27k.Asset" />
+		               		</not>
+		               		<not>
+			                	<instanceof value="sernet.verinice.model.iso27k.Audit" />
+			               	</not>
+			                <not>
+			                	<instanceof value="sernet.verinice.model.iso27k.ImportIsoGroup" />
+			               	</not>
+			                <not>
+			                	<instanceof value="sernet.verinice.model.iso27k.Organization" />
+			               	</not>            
+	                    </iterate>
+                    </and>            
+		        </with>
          	</visibleWhen>
          </command>
       </menuContribution>
@@ -1475,52 +1485,72 @@
       <handler class="sernet.verinice.iso27k.rcp.action.CopyHandler"
             commandId="org.eclipse.ui.edit.copy">
          <activeWhen>
-         	<with variable="activePartId">
-     			<or>
-       				<equals value="sernet.verinice.iso27k.rcp.ISMView" />
-       				<equals value="sernet.gs.ui.rcp.main.views.bsimodelview" />
-       			</or>
-    		</with>
+         	<and>
+	         	<with variable="activePartId">
+	     			<or>
+	       				<equals value="sernet.verinice.iso27k.rcp.ISMView" />
+	       				<equals value="sernet.gs.ui.rcp.main.views.bsimodelview" />
+	       			</or>
+	    		</with>
+	    		<with variable="selection">
+	           		<count value="+"/>
+	            </with>
+	         </and>
          </activeWhen>
       </handler>
       <handler class="sernet.verinice.iso27k.rcp.action.CopyWithLinksHandler"
             commandId="sernet.verinice.iso27k.rcp.commands.copywithlinks">
          <activeWhen>
-         	<with variable="activePartId">
-     			<or>
-       				<equals value="sernet.verinice.iso27k.rcp.ISMView" />
-       				<equals value="sernet.gs.ui.rcp.main.views.bsimodelview" />
-       			</or>
-    		</with>
+         	<and>
+	         	<with variable="activePartId">
+	     			<or>
+	       				<equals value="sernet.verinice.iso27k.rcp.ISMView" />
+	       				<equals value="sernet.gs.ui.rcp.main.views.bsimodelview" />
+	       			</or>
+	    		</with>
+	    		<with variable="selection">
+	           		<count value="+"/>
+	            </with>
+	         </and>
          </activeWhen>
       </handler>
       <handler class="sernet.verinice.iso27k.rcp.action.CutHandler"
             commandId="org.eclipse.ui.edit.cut">
          <activeWhen>
-     		<with variable="activePartId">
-     			<or>
-       				<equals value="sernet.verinice.iso27k.rcp.ISMView" />
-       				<equals value="sernet.gs.ui.rcp.main.views.bsimodelview" />
-       			</or>
-    		</with>
+         	<and>
+	     		<with variable="activePartId">
+	     			<or>
+	       				<equals value="sernet.verinice.iso27k.rcp.ISMView" />
+	       				<equals value="sernet.gs.ui.rcp.main.views.bsimodelview" />
+	       			</or>
+	    		</with>
+	    		<with variable="selection">
+	           		<count value="+"/>
+	            </with>
+	         </and>
          </activeWhen>
       </handler>
       <handler class="sernet.gs.ui.rcp.main.bsi.actions.DeleteHandler"
             commandId="org.eclipse.ui.edit.delete">
          <activeWhen>
-     		<with variable="activePartId">
-     			<or>
-       				<equals value="sernet.verinice.iso27k.rcp.ISMView" />
-       				<equals value="sernet.gs.ui.rcp.main.views.bsimodelview" />
-       			</or>
-    		</with>
+            <and>
+	     		<with variable="activePartId">
+	     			<or>
+	       				<equals value="sernet.verinice.iso27k.rcp.ISMView" />
+	       				<equals value="sernet.gs.ui.rcp.main.views.bsimodelview" />
+	       			</or>
+	    		</with>
+	    		<with variable="selection">
+            		<count value="+"/>
+            	</with>
+            </and>
          </activeWhen>
          <enabledWhen>
-            	<with variable="selection">
-	                <iterate operator="and">
+            	<with variable="selection">         		
+            		<iterate operator="and">
 	                    <instanceof value="sernet.verinice.model.common.CnATreeElement"/>
 	                    <test property="sernet.verinice.iso27k.model.isDeletable"/>            
-	                </iterate>
+	                </iterate>           
             	</with>
 		 </enabledWhen>
       </handler>     
@@ -1574,6 +1604,9 @@
             	<with variable="selection">
 	                <iterate operator="and">
 	                    <instanceof value="sernet.verinice.model.common.CnATreeElement"/>
+	                    <not>
+	                    	<instanceof value="sernet.verinice.model.bsi.ITVerbund"/>
+	                    </not>
 	                    <test property="sernet.verinice.iso27k.model.canContain"/>
 	                    <test property="sernet.verinice.iso27k.model.cutCopy"/>              
 	                </iterate>

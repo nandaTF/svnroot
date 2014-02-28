@@ -114,6 +114,8 @@ public final class Messages extends NLS {
 
 	public static String DocumentView_6;
 
+	public static String DocumentView_7;
+
 	public static String DSModelView_0;
 
 	public static String DSModelView_1;
@@ -269,6 +271,10 @@ public final class Messages extends NLS {
 	public static String RelationViewLabelProvider_2;
 
 	public static String RelationViewLabelProvider_3;
+	
+	public static String RelationTypeEditingSupport_1;
+	
+	public static String RelationTypeEditingSupport_2;
 
 	static {
 		// initialize resource bundle

@@ -302,7 +302,7 @@ ul#listLeftNavi{
 #col3_content {
 	margin-bottom:20px;
 	float:left;
-	/*width:100%;*/
+	width:100%;
 	min-height: 565px;
 }
 
@@ -377,6 +377,11 @@ ul#listLeftNavi{
 
 #col3_content .csc-default{
 	margin-bottom:20px;
+}
+
+#ie_clearing {
+	display: block;
+	clear: both;
 }
 
 .tx-indexedsearch .tx-indexedsearch-res table {

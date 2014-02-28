@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sernet.hui.common.connect.Entity;
+import sernet.hui.common.connect.HUITypeFactory;
+import sernet.hui.common.connect.PropertyType;
 import sernet.verinice.interfaces.GenericCommand;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.model.common.CnATreeElement;
@@ -55,6 +57,7 @@ public class LoadEntityValues extends GenericCommand {
 	}
 	
 	
+    @Override
     @SuppressWarnings("unchecked")
 	public void execute() {
 		IBaseDao<CnATreeElement, Serializable> dao = (IBaseDao<CnATreeElement, Serializable>) getDaoFactory().getDAO(typeId);
@@ -92,6 +95,38 @@ public class LoadEntityValues extends GenericCommand {
 		}
 		
 		return values;
+	}
+	
+	public static List<Object> convertValuesToList(Entity entity, String[] propertyIdArray) {
+	    ArrayList<Object> values = new ArrayList<Object>(propertyIdArray.length);       
+	    for (String id : propertyIdArray) {
+	        values.add(entity.getSimpleValue(id));
+	    }       
+	    return values;
+	}
+	
+	public static List<String> retrievePropertyValues(Entity e, String[] propertyTypes, Class<?>[] classes, boolean mapNumericalOptionValues){
+        ArrayList<String> values = new ArrayList<String>(propertyTypes.length);
+        
+        int i = 0;
+        for (String name : propertyTypes)
+        {
+            PropertyType pType = HUITypeFactory.getInstance().getPropertyType(e.getEntityType(), name);
+            
+            Class<?> c = (i >= classes.length ? null : classes[i]);
+            if ((c == null || c == String.class) && (!mapNumericalOptionValues || !pType.getInputName().equals("numericoption"))){
+                values.add(e.getSimpleValue(name));
+            } else if(pType.getInputName().equals("numericoption") && mapNumericalOptionValues){
+                values.add(pType.getNameForValue(Integer.parseInt(e.getValue(name))));
+            } else if (c == Integer.class){
+                values.add(String.valueOf(e.getInt(name)));
+            } else {
+                throw new IllegalArgumentException("Invalid class for propertyType '" + name + "'.");
+            }
+            i++;
+        }
+        
+        return values;	    
 	}
 	
 	public List<List<String>> getResult()
