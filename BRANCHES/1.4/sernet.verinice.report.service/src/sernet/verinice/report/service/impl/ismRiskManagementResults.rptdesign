@@ -3,9 +3,6 @@
     <property name="author">SerNet GmbH</property>
     <property name="createdBy">Eclipse BIRT Designer Version 3.7.0.v20110602 Build &lt;3.7.0.v20110607-1526></property>
     <text-property name="title">verinice - Information Risk Assessment</text-property>
-    <simple-property-list name="includeResource">
-        <value>ismRiskManagementResults</value>
-    </simple-property-list>
     <property name="units">in</property>
     <list-property name="propertyBindings">
         <structure>
@@ -40,8 +37,8 @@
     </parameters>
     <data-sources>
         <oda-data-source extensionID="verinice.oda.driver.dataSource.id" name="verinice" id="44">
-            <property name="sncaUrl">http://localhost:8080/veriniceserver/GetHitroConfig</property>
-            <property name="serverURI">http://localhost:8080/veriniceserver</property>
+            <property name="sncaUrl">http://localhost:8088/veriniceserver-1.6.3/GetHitroConfig</property>
+            <property name="serverURI">http://localhost:8088/veriniceserver-1.6.3</property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -11213,7 +11210,7 @@ columns(cols);</value>
                                 <property name="fontWeight">bold</property>
                                 <property name="textAlign">center</property>
                                 <property name="contentType">html</property>
-                                <text-property name="content" key="title"><![CDATA[Information Risk Management Results]]></text-property>
+                                <text-property name="content" key="title"><![CDATA[IS Risk Assessment]]></text-property>
                             </text>
                         </cell>
                         <cell id="1575">
@@ -13539,6 +13536,7 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
             <property name="inheritColumns">false</property>
+            <property name="pageBreakAfter">always</property>
             <property name="dataSet">scope_countrisks_aggregated_net_command</property>
             <property name="height">3.479in</property>
             <property name="width">7.666666666666667in</property>
@@ -13598,6 +13596,7 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
         </extended-item>
         <grid id="2733">
             <property name="pageBreakAfter">always</property>
+            <property name="pageBreakBefore">always</property>
             <property name="height">12.489583333333334in</property>
             <column id="2734"/>
             <row id="2735">
@@ -16628,7 +16627,7 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;COUNT_RISK_VALUE&quot;]</Definition>
+            <Definition>Number(row[&quot;COUNT_RISK_VALUE&quot;])</Definition>
             <Grouping>
               <Enabled>false</Enabled>
               <GroupType>Text</GroupType>
@@ -17129,7 +17128,7 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                                         </structure>
                                         <structure>
                                             <property name="name">COUNT_RISK_VALUE</property>
-                                            <expression name="expression" type="javascript">dataSetRow["COUNT_RISK_VALUE"]</expression>
+                                            <expression name="expression" type="javascript">parseInt(dataSetRow["COUNT_RISK_VALUE"])</expression>
                                             <property name="dataType">javaObject</property>
                                         </structure>
                                     </list-property>
@@ -18517,7 +18516,7 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                                         </structure>
                                         <structure>
                                             <property name="name">COUNT_RISK_VALUE</property>
-                                            <expression name="expression" type="javascript">dataSetRow["COUNT_RISK_VALUE"]</expression>
+                                            <expression name="expression" type="javascript">parseInt(dataSetRow["COUNT_RISK_VALUE"])</expression>
                                             <property name="dataType">javaObject</property>
                                         </structure>
                                     </list-property>
@@ -20006,7 +20005,7 @@ Risk acceptance criteria shown on the left are defined in the risk assessment po
                                         </structure>
                                         <structure>
                                             <property name="name">COUNT_RISK_VALUE</property>
-                                            <expression name="expression" type="javascript">dataSetRow["COUNT_RISK_VALUE"]</expression>
+                                            <expression name="expression" type="javascript">parseInt(dataSetRow["COUNT_RISK_VALUE"])</expression>
                                             <property name="dataType">javaObject</property>
                                         </structure>
                                     </list-property>

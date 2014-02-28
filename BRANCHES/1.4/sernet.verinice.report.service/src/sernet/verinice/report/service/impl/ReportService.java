@@ -41,11 +41,13 @@ public class ReportService implements IReportService {
 		        new SamtComplianceReport(),
 		        new ComprehensiveSamtReportType(),
 		        
-		        new ISMRiskManagementResultsReport(), // ISO 27k1 Reports
+		        new ISMRiskManagementResultsReport(), // ISO 27k1 Reports (english)
+		        new ISMRiskManagementResultsReportDe(), // ISO 27k1 Report (german)
 		        
 		        new ControlMaturityReport(),
 		        new StatementOfApplicabilityReport(),
 		        new InventoryOfAssetsReport(),
+		        new Audits(),
 		        
 		        new VulnerabilitiesReport(), // new Export Reports, since v1.6.0
 		        new ThreatsReport(),
@@ -58,6 +60,9 @@ public class ReportService implements IReportService {
 		        new IncidentsReport(),
 		        new ExceptionsReport(),
 		        new DocumentsReport(),
+		        new TasksReport(),//Tasks in english
+                new VVBSIG_SofortMeldungReport(),
+                new VVBSIG_StatMeldungReport(),		        
 		        
 		        new StrukturanalyseReport(), // BSI reports
 		        new AbhaengigkeitenReport(),
@@ -70,6 +75,7 @@ public class ReportService implements IReportService {
 		        new RealisierungsplanReport(),
 		        new GraphischerUmsetzungsstatusReport(),
 		        new AuditberichtReport()
+		        
 		    };
 		}
 		return reportTypes.clone();

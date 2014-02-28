@@ -117,6 +117,7 @@ public class Messages extends NLS {
     public static String DocumentsReport_0;
     public static String DocumentsReport_1;
     public static String DocumentsReport_2;
+    public static String Tasks_Report_0;
     public static String GrundschutzA7_0;
     public static String GrundschutzA7_1;
     public static String GrundschutzA7_2;
@@ -124,9 +125,19 @@ public class Messages extends NLS {
     public static String ISMRiskManagementResults_0;
     public static String ISMRiskManagementResults_1;
     public static String ISMRiskManagementResults_2;
+    public static String ISMRiskManagementResultsDe_0;
+    public static String ISMRiskManagementResultsDe_1;
+    public static String ISMRiskManagementResultsDe_2;
     public static String GraphUmstzngStatus_0;
     public static String GraphUmstzngStatus_1;
     public static String GraphUmstzngStatus_2;
+    public static String AuditReport_0;
+    public static String VVBSIGStatMeldung_0;
+    public static String VVBSIGStatMeldung_1;
+    public static String VVBSIGStatMeldung_2;
+    public static String VVBSIGSofortMeldung_0;
+    public static String VVBSIGSofortMeldung_1;
+    public static String VVBSIGSofortMeldung_2;
     
     
     static {
