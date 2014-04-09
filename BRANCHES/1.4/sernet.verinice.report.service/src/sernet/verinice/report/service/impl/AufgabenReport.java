@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Julia Haas <jh@sernet.de>.
+ * Copyright (c) 2014 Julia Haas <jh@sernet.de>.
  * This program is free software: you can redistribute it and/or 
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation, either version 3 
@@ -22,6 +22,7 @@ package sernet.verinice.report.service.impl;
  * @author jhaas
  *
  */
+
 import java.net.URL;
 
 import org.eclipse.birt.report.engine.api.IDataExtractionTask;
@@ -31,17 +32,16 @@ import sernet.verinice.interfaces.report.IOutputFormat;
 import sernet.verinice.interfaces.report.IReportOptions;
 import sernet.verinice.interfaces.report.IReportType;
 
-public class TasksReport implements IReportType {
+public class AufgabenReport implements IReportType{
 
-
-    private static final String REPORT_DESIGN = "Tasks.rptdesign"; //$NON-NLS-1$
+ 
 
     /* (non-Javadoc)
      * @see sernet.verinice.interfaces.report.IReportType#getId()
      */
     @Override
     public String getId() {
-        return "tasksreport";
+        return "aufgabenreport";
     }
 
     /* (non-Javadoc)
@@ -49,7 +49,7 @@ public class TasksReport implements IReportType {
      */
     @Override
     public String getLabel() {
-        return Messages.Tasks_Report_0;
+        return Messages.Aufgaben_Report_0;
     }
 
     /* (non-Javadoc)
@@ -57,7 +57,7 @@ public class TasksReport implements IReportType {
      */
     @Override
     public String getDescription() {
-        return Messages.Tasks_Report_0;
+        return Messages.Aufgaben_Report_0;
     }
 
     /* (non-Javadoc)
@@ -74,8 +74,7 @@ public class TasksReport implements IReportType {
     @Override
     public void createReport(IReportOptions reportOptions) {
         BIRTReportService brs = new BIRTReportService();
-        URL	 reportDesign = TasksReport.class.getResource(REPORT_DESIGN);
-        
+       	URL reportDesign = TasksReport.class.getResource("Aufgaben.rptdesign");
         
         if (((AbstractOutputFormat) reportOptions.getOutputFormat()).isRenderOutput())
         {
@@ -94,7 +93,7 @@ public class TasksReport implements IReportType {
      */
     @Override
     public String getReportFile() {
-        return Messages.Tasks_Report_0;
+        return Messages.Aufgaben_Report_0;
     }
 
     /* (non-Javadoc)
@@ -111,5 +110,6 @@ public class TasksReport implements IReportType {
     public String getUseCaseID() {
         return IReportType.USE_CASE_ID_GENERAL_REPORT;
     }
+
 
 }
