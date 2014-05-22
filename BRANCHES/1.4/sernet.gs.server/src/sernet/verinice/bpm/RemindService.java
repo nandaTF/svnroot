@@ -38,6 +38,7 @@ import sernet.gs.service.VeriniceCharset;
 import sernet.verinice.interfaces.IBaseDao;
 import sernet.verinice.model.bpm.Messages;
 import sernet.verinice.model.bpm.MissingParameterException;
+import sernet.verinice.model.bsi.Person;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.configuration.Configuration;
 import sernet.verinice.model.iso27k.PersonIso;
@@ -50,6 +51,9 @@ import sernet.verinice.model.iso27k.PersonIso;
 public class RemindService implements IRemindService {
 
     private static final Logger LOG = Logger.getLogger(RemindService.class);
+    
+    public static final String P_ANREDE = "person_anrede"; //$NON-NLS-1$
+    public static final String P_NAME = "nachname"; //$NON-NLS-1$
     
     private static final String DEFAULT_ADDRESS = Messages.getString("NotificationJob.0"); //$NON-NLS-1$
      
@@ -162,15 +166,27 @@ public class RemindService implements IRemindService {
             List<Configuration> configurationList = getConfigurationDao().findByQuery(hql,params);
             for (Configuration configuration : configurationList) {
                 CnATreeElement element = configuration.getPerson();
+                String anrede = null;
+                String name = null;
                 if(element instanceof PersonIso) {
                     PersonIso person = (PersonIso) element;
-                    model.put(TEMPLATE_NAME, person.getSurname());
-                    String anrede = person.getAnrede();
-                    if(anrede!=null && !anrede.isEmpty()) {
-                        model.put(TEMPLATE_ADDRESS, person.getAnrede());
-                    } else {
-                        model.put(TEMPLATE_ADDRESS, DEFAULT_ADDRESS);
-                    }
+                    name = person.getSurname();
+                    anrede = person.getAnrede();              
+                }
+                if(element instanceof Person) {
+                    Person person = (Person) element;
+                    name = person.getEntity().getSimpleValue(P_NAME);
+                    anrede = person.getEntity().getSimpleValue(P_ANREDE);                  
+                }              
+                if(anrede!=null && !anrede.isEmpty()) {
+                    model.put(TEMPLATE_ADDRESS, anrede);
+                } else {
+                    model.put(TEMPLATE_ADDRESS, DEFAULT_ADDRESS);
+                }
+                if(name!=null ) {
+                    model.put(TEMPLATE_NAME, name);
+                } else {
+                    model.put(TEMPLATE_NAME, "");
                 }
             }
         }   
