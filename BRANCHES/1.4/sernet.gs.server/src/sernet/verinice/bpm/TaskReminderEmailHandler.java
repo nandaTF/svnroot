@@ -34,10 +34,6 @@ public class TaskReminderEmailHandler extends GenericEmailHandler implements IEm
     
     private static final String TEMPLATE = "TaskReminder";
     
-    private static final String TEMPLATE_TASK_TITLE = "taskTitle";
-    private static final String TEMPLATE_TASK_DESCRIPTION = "taskDescription";    
-    private static final String TEMPLATE_ELEMENT_TITLE = "elementTitle";
-    
     /* (non-Javadoc)
      * @see sernet.verinice.bpm.IEmailHandler#addParameter(java.lang.String, java.util.Map)
      */
@@ -64,22 +60,6 @@ public class TaskReminderEmailHandler extends GenericEmailHandler implements IEm
         }
         emailParameter.put(TEMPLATE_TASK_DESCRIPTION, description);      
         emailParameter.put(IRemindService.TEMPLATE_SUBJECT, "verinice task reminder: " + taskTitle); 
-    }
-    
-    /**
-     * @param description
-     * @return
-     */
-    private String replaceSpecialChars(String description) {
-        String result = description.replace("ä", "&auml;");
-        result = result.replace("Ä", "&Auml;");
-        result = result.replace("ü", "&uuml;");
-        result = result.replace("Ü", "&Uuml;");
-        result = result.replace("ö", "&ouml;");
-        result = result.replace("Ö", "&Ouml;");
-        result = result.replace("ß", "&szlig;");
-        result = result.replace("€", "&euro;");
-        return result;
     }
 
     /* (non-Javadoc)

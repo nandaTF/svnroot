@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -40,17 +39,20 @@ import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadConfiguration;
 import sernet.hui.common.VeriniceContext;
 import sernet.verinice.bpm.PersonTypeSelectDialog;
+import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.bpm.ITask;
 import sernet.verinice.interfaces.bpm.ITaskService;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.configuration.Configuration;
+import sernet.verinice.rcp.RightsEnabledHandler;
 
 /**
- *
+ * Sets the assignee of one or more selected tasks in {@link TaskView}.
+ * This handler is configured in plugin.xml
  *
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
-public class AssignHandler extends AbstractHandler {
+public class AssignHandler extends RightsEnabledHandler {
 
     private static final Logger LOG = Logger.getLogger(AssignHandler.class);
     
@@ -64,18 +66,12 @@ public class AssignHandler extends AbstractHandler {
         try {
             ISelection selection = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getSelection();
             if (selection != null && selection instanceof IStructuredSelection) {
-                Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();
-                
-                String type = selectElementType(); 
-                
+                Shell shell = HandlerUtil.getActiveWorkbenchWindow(event).getShell();            
+                String type = selectElementType();                
                 CnATreeElementSelectionDialog dialog = new CnATreeElementSelectionDialog(shell, type, null);
                 dialog.setShowScopeCheckbox(false);
                 if (dialog.open() == Window.OK) {
-                    Set<String> taskIdSet = new HashSet<String>();
-                    for (Iterator iterator = ((IStructuredSelection)selection).iterator(); iterator.hasNext();) {
-                        ITask task = (ITask) iterator.next();
-                        taskIdSet.add(task.getId());
-                    }
+                    Set<String> taskIdSet = getSelectedTasks(selection);
                     List<CnATreeElement> userList = dialog.getSelectedElements();
                     if(userList.size()==1) {
                         CnATreeElement element = userList.get(0);                
@@ -99,6 +95,15 @@ public class AssignHandler extends AbstractHandler {
         }
         return null;
     }
+
+    private Set<String> getSelectedTasks(ISelection selection) {
+        Set<String> taskIdSet = new HashSet<String>();
+        for (Iterator iterator = ((IStructuredSelection)selection).iterator(); iterator.hasNext();) {
+            ITask task = (ITask) iterator.next();
+            taskIdSet.add(task.getId());
+        }
+        return taskIdSet;
+    }
     
     private String selectElementType() {
         final PersonTypeSelectDialog typeDialog = new PersonTypeSelectDialog(shell);
@@ -111,6 +116,14 @@ public class AssignHandler extends AbstractHandler {
     
     private ITaskService getTaskService() {
         return (ITaskService) VeriniceContext.get(VeriniceContext.TASK_SERVICE);
+    }
+
+    /* (non-Javadoc)
+     * @see sernet.verinice.interfaces.RightEnabledUserInteraction#getRightID()
+     */
+    @Override
+    public String getRightID() {
+        return ActionRightIDs.TASKCHANGEASSIGNEE;
     }
 
 }

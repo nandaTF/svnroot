@@ -200,6 +200,8 @@ public final class Messages extends NLS {
 
 	public static String GenericMassnahmenView_9;
 
+    public static String ISMView_InitData;
+	
 	public static String TodoView_10;
 
 	public static String TodoView_11;

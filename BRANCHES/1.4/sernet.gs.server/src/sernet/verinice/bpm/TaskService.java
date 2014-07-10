@@ -16,11 +16,15 @@
  * 
  * Contributors:
  *     Daniel Murygin <dm[at]sernet[dot]de> - initial API and implementation
+ *     Sebastian Hagedorn <sh[at]sernet[dot]de> - grouping by title for non-audit tasks
  ******************************************************************************/
 package sernet.verinice.bpm;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -58,8 +62,10 @@ import sernet.verinice.interfaces.bpm.KeyValue;
 import sernet.verinice.model.bpm.Messages;
 import sernet.verinice.model.bpm.TaskInformation;
 import sernet.verinice.model.bpm.TaskParameter;
+import sernet.verinice.model.bsi.ITVerbund;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Audit;
+import sernet.verinice.model.iso27k.Organization;
 import sernet.verinice.model.samt.SamtTopic;
 import sernet.verinice.service.IConfigurationService;
 
@@ -132,6 +138,7 @@ public class TaskService implements ITaskService {
     
     private ITaskDescriptionHandler defaultDescriptionHandler;
     
+    private Set<String> taskReminderBlacklist;
     
     /* (non-Javadoc)
      * @see sernet.verinice.interfaces.bpm.ITaskService#getTaskList()
@@ -157,25 +164,29 @@ public class TaskService implements ITaskService {
         if (log.isDebugEnabled()) {
             log.debug("getTaskList called..."); //$NON-NLS-1$
         }
-        ServerInitializer.inheritVeriniceContextState();      
+        ServerInitializer.inheritVeriniceContextState();
+        
+        // Workaround for null index column (JBPM4_EXECUTION.PARENT_IDX_) for collection: org.jbpm.pvm.internal.model.ExecutionImpl.executions
+        getElementDao().executeCallback(ParentIdxFixCallback.getInstance());
+        
         if(!parameter.getAllUser() && parameter.getUsername()==null) {
-            parameter.setUsername(getAuthService().getUsername());          
+            parameter.setUsername(getAuthService().getUsername());
         }
         List<ITask> taskList = Collections.emptyList();
         if(doSearch(parameter)) {      
             Object[] queryElements = prepareSearchQuery(parameter);
-            List<Object> paramList = (List<Object>)queryElements[0];
+            List<?> paramList = (List<Object>)queryElements[0];
             final String hql = (String)queryElements[1];
             if (log.isDebugEnabled()) {
                 log.debug("getTaskList, hql: " + hql); //$NON-NLS-1$
             }
-            List jbpmTaskList = getJbpmTaskDao().findByQuery(hql,paramList.toArray());
+            List<Object> jbpmTaskList = getJbpmTaskDao().findByQuery(hql,paramList.toArray());
             if (log.isDebugEnabled()) {
                 log.debug("getTaskList, number of tasks: " + jbpmTaskList.size()); //$NON-NLS-1$
             }
             
             if(jbpmTaskList!=null && !jbpmTaskList.isEmpty()) {
-                taskList = populateTaskList(jbpmTaskList);                
+                taskList = populateTaskList(jbpmTaskList);
             }
         }    
         if (log.isDebugEnabled()) {
@@ -184,11 +195,11 @@ public class TaskService implements ITaskService {
         return taskList;
     }
 
-    private List<ITask> populateTaskList(List jbpmTaskList) {
+    private List<ITask> populateTaskList(List<?> jbpmTaskList) {
         List<ITask> taskList;
         taskList = new ArrayList<ITask>();
         Task task=null;
-        for (Iterator iterator = jbpmTaskList.iterator(); iterator.hasNext();) {
+        for (Iterator<?> iterator = jbpmTaskList.iterator(); iterator.hasNext();) {
             Object object = iterator.next();
             if(object instanceof Task ) {
                 task = (Task) object;
@@ -197,19 +208,30 @@ public class TaskService implements ITaskService {
                 task = (Task)((Object[])object)[0];
             }       
             if(task!=null) {
-                ITask taskInfo = map(task);
-                Set<String> outcomeSet = getTaskService().getOutcomes(task.getId());
-                List<KeyValue> outcomeList = new ArrayList<KeyValue>(outcomeSet.size());
-                for (String id : outcomeSet) {
-                    if(!getTaskOutcomeBlacklist().contains(id)) {
-                        outcomeList.add(new KeyValue(id, Messages.getString(id)));
+                try {
+                    ITask taskInfo = map(task);
+                    taskInfo.setOutcomes(getOutcomeList(task));
+                    taskList.add(taskInfo);  
+                } catch(ElementNotFoundException enfe) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("populateTaskList, element not found (no read permission?): " + enfe.getUuid()); //$NON-NLS-1$
                     }
+                    // ignore task
                 }
-                taskInfo.setOutcomes(outcomeList);
-                taskList.add(taskInfo);  
             }
         }
         return taskList;
+    }
+
+    private List<KeyValue> getOutcomeList(Task task) {
+        Set<String> outcomeSet = getTaskService().getOutcomes(task.getId());
+        List<KeyValue> outcomeList = new ArrayList<KeyValue>(outcomeSet.size());
+        for (String id : outcomeSet) {
+            if(!getTaskOutcomeBlacklist().contains(id)) {
+                outcomeList.add(new KeyValue(id, Messages.getString(id)));
+            }
+        }
+        return outcomeList;
     }
 
     private Object[] prepareSearchQuery(ITaskParameter parameter) {
@@ -243,6 +265,14 @@ public class TaskService implements ITaskService {
             where = concat(sb,where);
             sb.append("task.name=? "); //$NON-NLS-1$
             paramList.add(parameter.getTaskId()); 
+        }
+        
+        if(parameter.getBlacklist()!=null && !parameter.getBlacklist().isEmpty()) {
+            where = concat(sb,where);
+            for (String taskId : parameter.getBlacklist()) {
+                sb.append("task.name!=? "); //$NON-NLS-1$
+                paramList.add(taskId); 
+            }
         }
         
         if(parameter.getSince()!=null) {
@@ -311,7 +341,6 @@ public class TaskService implements ITaskService {
     
     /**
      * @param task
-     * @param taskInformation
      */
     private TaskInformation map(Task task) {
         TaskInformation taskInformation = new TaskInformation();
@@ -319,9 +348,8 @@ public class TaskService implements ITaskService {
         taskInformation.setType(task.getName());
         taskInformation.setCreateDate(task.getCreateTime()); 
         taskInformation.setAssignee(getConfigurationService().getName(task.getAssignee()));
-        if (log.isDebugEnabled()) {
-            log.debug("map, setting read status..."); //$NON-NLS-1$
-        }          
+      
+        log.debug("map, setting read status..."); //$NON-NLS-1$             
         
         Map<String, Object> varMap = loadVariables(task);  
         taskInformation.setName(loadTaskTitle(task.getName(), varMap));
@@ -340,8 +368,8 @@ public class TaskService implements ITaskService {
             taskInformation.setProperties((Set<String>) value);
         }
         
-        mapControl(taskInformation, varMap);       
-        mapAudit(taskInformation, varMap);
+        taskInformation = mapElement(taskInformation, varMap);       
+        taskInformation = mapAudit(taskInformation, varMap);
         
         if (log.isDebugEnabled()) {
             log.debug("map, loading type..."); //$NON-NLS-1$
@@ -356,10 +384,6 @@ public class TaskService implements ITaskService {
         return taskInformation;
     }
 
-    /**
-     * @param task
-     * @return
-     */
     private String getProcessName(Task task) {
         String executionId = task.getExecutionId();
         String processKey = executionId.substring(0,executionId.indexOf('.'));        
@@ -384,10 +408,6 @@ public class TaskService implements ITaskService {
         return handler.loadTitle(taskId, varMap);
     }
 
-    /**
-     * @param task
-     * @return
-     */
     private Map<String, Object> loadVariables(Task task) {
         if (log.isDebugEnabled()) {
             log.debug("map, loading element..."); //$NON-NLS-1$
@@ -396,60 +416,123 @@ public class TaskService implements ITaskService {
         return loadVariablesForProcess(executionId);
     }
 
-    /**
-     * @param executionId
-     * @return
-     */
     private Map<String, Object> loadVariablesForProcess(String executionId) {
-        Set<String> varNameSet = getExecutionService().getVariableNames(executionId);      
+        Set<String> varNameSet = getExecutionService().getVariableNames(executionId);  
         return getExecutionService().getVariables(executionId,varNameSet);
     }
 
-    /**
-     * @param taskInformation
-     * @param varMap
-     */
-    private void mapAudit(TaskInformation taskInformation, Map<String, Object> varMap) {
-        if (log.isDebugEnabled()) {
-            log.debug("map, loading audit..."); //$NON-NLS-1$
-        }
+    private TaskInformation mapAudit(TaskInformation taskInformation, Map<String, Object> varMap) {
+        
+        log.debug("map, loading audit..."); //$NON-NLS-1$
+                
         CnATreeElement audit = null;
-        String uuidAudit = (String) varMap.get(IIsaExecutionProcess.VAR_AUDIT_UUID);     
-        if(uuidAudit!=null) {
-            taskInformation.setUuidAudit(uuidAudit);
-            RetrieveInfo ri = new RetrieveInfo();
-            ri.setProperties(true);
-            audit = getElementDao().findByUuid(uuidAudit, ri);           
-        } 
-        if(audit!=null) {
-            taskInformation.setAuditTitle(audit.getTitle());
-        } else {
-            taskInformation.setAuditTitle(Messages.getString("TaskService.0")); //$NON-NLS-1$
+        String uuidAudit = (String) varMap.get(IIsaExecutionProcess.VAR_AUDIT_UUID); 
+        String elementUuid = (String) varMap.get(IIsaExecutionProcess.VAR_UUID);
+        
+        if(uuidAudit!=null) {// task references child of Audit
+            return handleAuditElement(taskInformation, uuidAudit, elementUuid); 
+        } else { // task references child of ITVerbund or Organization
+            return handleNonAuditElement(taskInformation, elementUuid);
         }
     }
 
-    /**
-     * @param taskInformation
-     * @param varMap
-     * @return
-     */
-    private void mapControl(TaskInformation taskInformation, Map<String, Object> varMap) {
-        String uuidControl = (String) varMap.get(IGenericProcess.VAR_UUID);       
-        taskInformation.setUuid(uuidControl);
-        taskInformation.setControlTitle("no object");
-        if(uuidControl==null) {
-            return;
+    private TaskInformation handleNonAuditElement(TaskInformation taskInformation, String elementUuid) {
+
+        String[] dbResult = getTitlefromDB(elementUuid);
+        String title = dbResult[0];
+        String uuid = dbResult[1];
+        
+        if(title == null || title.equals("")){
+            taskInformation.setAuditTitle(Messages.getString("TaskService.0")); //$NON-NLS-1$
+        } else {
+            taskInformation.setAuditTitle(title);
+            taskInformation.setUuidAudit(uuid);
         }
+        
+        return taskInformation;
+    }
+
+    private TaskInformation handleAuditElement(TaskInformation taskInformation, String uuidAudit, String elementUuid) {
+        CnATreeElement audit;
+        taskInformation.setUuidAudit(uuidAudit);
         RetrieveInfo ri = new RetrieveInfo();
         ri.setProperties(true);
-        CnATreeElement element = getElementDao().findByUuid(uuidControl, ri);
+        audit = getElementDao().findByUuid(uuidAudit, ri);
+        
+        if(audit!=null) { 
+            taskInformation.setAuditTitle(audit.getTitle());
+        }
+        
+        return taskInformation;
+    }
+    
+    private String[] getTitlefromDB(String elementUuid){
+        String[] results = null;
+        String hql = "select distinct props.propertyValue, elmt.uuid from CnATreeElement elmt " +
+                "inner join elmt.entity as entity " + 
+                "inner join entity.typedPropertyLists as propertyList " + 
+                "inner join propertyList.properties as props " +
+                "where  elmt.dbId = (" +
+                "select scopeId from CnATreeElement element2 where element2.uuid = :uuid " +
+                ") " +
+                "AND props.propertyType IN (:titleProperties)";
+        List hqlResult = getElementDao().findByQuery(hql, new String[]{"uuid", "titleProperties"}, new Object[]{
+                elementUuid, Arrays.asList(new String[]{ITVerbund.PROP_NAME, Organization.PROP_NAME})});
+        if(hqlResult instanceof Collection && hqlResult.size() == 1){
+            results = getValuesFromHQLResult(hqlResult);
+        }
+        if(results != null 
+                && results.length == 2 
+                && results[0] != null 
+                && results[1] != null){
+            return results;
+        } else {
+            return new String[]{"", ""};
+        }
+    }
+
+    private String[] getValuesFromHQLResult(List hqlResult) {
+        String[] results = new String[2];
+        if(hqlResult.get(0) instanceof Object[]){
+            Object[] hqlResultArr = (Object[])hqlResult.get(0);
+            if(hqlResultArr.length == 2){
+                if(hqlResultArr[0] instanceof String){
+                    results[0] = (String)hqlResultArr[0];
+                }
+                if(hqlResultArr[1] instanceof String){
+                    results[1] = (String)hqlResultArr[1];
+                }
+            }
+        }
+        return results;
+    }
+    
+    private TaskInformation mapElement(TaskInformation taskInformation, Map<String, Object> varMap) {
+        
+        String uuid = (String) varMap.get(IGenericProcess.VAR_UUID);       
+        taskInformation.setUuid(uuid);
+        taskInformation.setControlTitle("no object");
+    
+        if(uuid==null) {
+            return taskInformation;
+        }
+        
+        RetrieveInfo ri = new RetrieveInfo();
+        ri.setProperties(true);
+        CnATreeElement element = getElementDao().findByUuid(uuid, ri);
+        
         if(element!=null) {
             taskInformation.setControlTitle(element.getTitle());
             taskInformation.setSortValue(createSortableString(taskInformation.getControlTitle()));
             if(element instanceof SamtTopic) {
                 taskInformation.setIsProcessed(((SamtTopic)element).getMaturity()!=SamtTopic.IMPLEMENTED_NOTEDITED_NUMERIC);
             }          
+        } else {
+            // uuid exits, but no element found
+            throw new ElementNotFoundException(uuid);
         }
+        
+        return taskInformation;
     }
     
     private String createSortableString(String text) {
@@ -600,6 +683,23 @@ public class TaskService implements ITaskService {
         }
     }
     
+    /* (non-Javadoc)
+     * @see sernet.verinice.interfaces.bpm.ITaskService#setAssignee(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void setDuedate(Set<String> taskIdset, Date duedate) {
+        if(taskIdset!=null && !taskIdset.isEmpty() && duedate!=null) {
+            Map<String, Date> param = new HashMap<String, Date>();
+            param.put(IGenericProcess.VAR_DUEDATE, duedate);
+            for (String taskId : taskIdset) {
+                Task task = getTaskService().getTask(taskId);     
+                task.setDuedate(duedate);
+                getTaskService().saveTask(task);
+                getTaskService().setVariables(taskId, param);
+            }           
+        }
+    }
+    
     @Override
     public void setAssigneeVar(Set<String> taskIdset, String username) {
         if(taskIdset!=null && !taskIdset.isEmpty() && username!=null) {
@@ -611,7 +711,6 @@ public class TaskService implements ITaskService {
             
         }
     }
-    
     
     /* (non-Javadoc)
      * @see sernet.verinice.interfaces.bpm.ITaskService#setVariables(java.lang.String, java.util.Map)
@@ -740,6 +839,15 @@ public class TaskService implements ITaskService {
 
     public void setDefaultDescriptionHandler(ITaskDescriptionHandler defaultDescriptionHandler) {
         this.defaultDescriptionHandler = defaultDescriptionHandler;
+    }
+
+    @Override
+    public Set<String> getTaskReminderBlacklist() {
+        return taskReminderBlacklist;
+    }
+
+    public void setTaskReminderBlacklist(Set<String> taskReminderBlacklist) {
+        this.taskReminderBlacklist = taskReminderBlacklist;
     }
 
 }

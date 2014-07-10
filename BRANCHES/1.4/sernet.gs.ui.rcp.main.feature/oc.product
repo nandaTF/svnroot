@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="verinice" uid="sernet.gs.ui.rcp.main.product" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.7.0" useFeatures="true" includeLaunchers="true">
+<product name="verinice" uid="sernet.gs.ui.rcp.main.product" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.7.93" useFeatures="true" includeLaunchers="false">
 
    <aboutInfo>
       <image path="/sernet.gs.ui.rcp.main/icons/product_lg.gif"/>
       <text>
-         SerNet verinice 1.7.0 - Codename &apos;Nazaré&apos;
+         SerNet verinice 1.8 - Codename &apos;Florianópolis&apos;
 
 (c) SerNet Service Network GmbH and others
 1996-2014

@@ -30,6 +30,7 @@ import sernet.hui.common.VeriniceContext;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ICommandService;
 import sernet.verinice.interfaces.bpm.ITaskService;
+import sernet.verinice.model.bpm.AbortException;
 import sernet.verinice.model.bpm.MissingParameterException;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.service.commands.LoadElementByUuid;
@@ -52,6 +53,10 @@ public abstract class GenericEmailHandler implements IEmailHandler {
     private static final String TEMPLATE_BASE_PATH = "sernet/verinice/bpm/"; //$NON-NLS-1$
     protected static final String TEMPLATE_EXTENSION = ".vm"; //$NON-NLS-1$
     
+    protected static final String TEMPLATE_TASK_TITLE = "taskTitle";
+    protected static final String TEMPLATE_TASK_DESCRIPTION = "taskDescription";    
+    protected static final String TEMPLATE_ELEMENT_TITLE = "elementTitle";
+    
     private IRemindService remindService;
     
     private ICommandService commandService;
@@ -65,11 +70,17 @@ public abstract class GenericEmailHandler implements IEmailHandler {
     @Override
     public void send(String assignee, String type, Map<String, Object> processVariables, String uuid) {
         try { 
-            ServerInitializer.inheritVeriniceContextState();
-            Map<String , String> parameter = getRemindService().loadUserData(assignee);
-            parameter.put(IRemindService.TEMPLATE_PATH, getTemplatePath());
-            addParameter(type, processVariables, uuid, parameter);                          
-            getRemindService().sendEmail(parameter, isHtml());
+            ServerInitializer.inheritVeriniceContextState();        
+            Map<String , String> userParameter = getRemindService().loadUserData(assignee);
+            userParameter.put(IRemindService.TEMPLATE_PATH, getTemplatePath());
+            addParameter(type, processVariables, uuid, userParameter);  
+            validate(processVariables, userParameter); // throws AbortException if it fails
+            getRemindService().sendEmail(userParameter, isHtml());
+        } catch(AbortException e) {
+            LOG.info("Execution aborted: " + e.getMessage());
+            if (LOG.isDebugEnabled()) {
+                LOG.error("stacktrace: ", e);
+            }         
         } catch(MissingParameterException e) {
             LOG.error("Email can not be send: " + e.getMessage());
             if (LOG.isDebugEnabled()) {
@@ -107,6 +118,18 @@ public abstract class GenericEmailHandler implements IEmailHandler {
         return path;
     }
     
+    protected String replaceSpecialChars(String description) {
+        String result = description.replace("ä", "&auml;");
+        result = result.replace("Ä", "&Auml;");
+        result = result.replace("ü", "&uuml;");
+        result = result.replace("Ü", "&Uuml;");
+        result = result.replace("ö", "&ouml;");
+        result = result.replace("Ö", "&Ouml;");
+        result = result.replace("ß", "&szlig;");
+        result = result.replace("€", "&euro;");
+        return result;
+    }
+    
     protected CnATreeElement retrieveElement(String uuid, RetrieveInfo ri) throws CommandException {
         LoadElementByUuid<CnATreeElement> command = new LoadElementByUuid<CnATreeElement>(uuid, ri);
         command = getCommandService().executeCommand(command);
@@ -129,6 +152,11 @@ public abstract class GenericEmailHandler implements IEmailHandler {
     
     protected ITaskService getTaskService() {
         return (ITaskService) VeriniceContext.get(VeriniceContext.TASK_SERVICE);
+    }
+    
+    @Override
+    public void validate(Map<String, Object> processVariables, Map<String, String> userParameter) throws AbortException {
+        // nothing means validate success
     }
 
 }

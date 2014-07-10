@@ -168,9 +168,11 @@ public class SyncInsertUpdateCommand extends GenericCommand implements IAuthAwar
             for (SyncObject so : soList) {
                 importObject(null, so);        
             } // for <syncObject>
+            
             if (getLogrt().isDebugEnabled()) {
                 getLogrt().debug("Elements: " + merged);
             }
+            
             for (SyncLink syncLink : syncData.getSyncLink()) {
                 importLink(syncLink);
             }
@@ -566,6 +568,7 @@ public class SyncInsertUpdateCommand extends GenericCommand implements IAuthAwar
     	CnATreeElement result = null;
     	// use a new crudCommand (load by external, source id):
         LoadCnAElementByExternalID command = new LoadCnAElementByExternalID(sourceId, externalId, fetchLinksDown, fetchLinksUp);
+        command.setParent(true);
         try {
 			command = getCommandService().executeCommand(command);
 		} catch (CommandException e) {

@@ -158,6 +158,7 @@
                 <value>icf.trans.reminderDeadline</value>
                 <value>indi.trans.reminderDeadline</value>
                 <value>gsm.ism.execute.trans.reminder</value>
+                <value>timeout</value>
             </set>
         </property>
         <!-- Add task complete handler here -->
@@ -166,6 +167,8 @@
         <property name="completeHandler">
             <map>
                 <entry key="iqm.task.setAssignee.iqm.trans.setAssignee" value-ref="isaQmSetAssigneeHandler"/>
+                <entry key="indi.task.execute.indi.trans.extension" value-ref="indiExtensionHandler"/>
+                <entry key="indi.task.execute.loop.indi.trans.extension" value-ref="indiExtensionHandler"/>
             </map>
         </property>
         <property name="defaultCompleteServerHandler" ref="defaultCompleteServerHandler" />
@@ -176,16 +179,26 @@
         <property name="descriptionHandler">
             <map>
                 <entry key="iqm.task.setAssignee" value-ref="setAssigneeDescriptionHandler"/>
-                <entry key="iqm.task.check" value-ref="checkFeedbackDescriptionHandler"/>              
+                <entry key="iqm.task.check" value-ref="checkFeedbackDescriptionHandler"/>
                 <entry key="indi.task.execute" value-ref="indiDescriptionHandler"/>
+                <entry key="indi.task.execute.deadline.admin" value-ref="indiDescriptionHandler"/>
+                <entry key="indi.task.execute.deadline.assignee" value-ref="indiDescriptionHandler"/>
+                <entry key="indi.task.execute.loop" value-ref="indiDescriptionHandler"/>
                 <entry key="indi.task.check" value-ref="indiCheckDescriptionHandler"/>
                 <entry key="indi.task.assign" value-ref="indiAssignDescriptionHandler"/>
                 <entry key="indi.task.assign.deadline" value-ref="indiDeadlineDescriptionHandler"/>
-                <entry key="indi.task.assign.nr" value-ref="indiNrDescriptionHandler"/>                      
-                <entry key="gsm.ism.execute.task.execute" value-ref="gsmIsmDescriptionHandler"/>            
+                <entry key="indi.task.assign.nr" value-ref="indiNrDescriptionHandler"/>
+                <entry key="gsm.ism.execute.task.execute" value-ref="gsmIsmDescriptionHandler"/>
+                <entry key="indi.task.extension" value-ref="indiExtensionDescriptionHandler"/>
+                <entry key="indi.task.extension.loop" value-ref="indiExtensionDescriptionHandler"/>
             </map>
         </property>
         <property name="defaultDescriptionHandler" ref="defaultDescriptionHandler" />
+        <property name="taskReminderBlacklist">
+            <set>
+                <value>"indi.task.execute.loop</value>
+            </set>
+        </property>
     </bean>
     
     <bean id="defaultCompleteServerHandler" class="sernet.verinice.bpm.DefaultCompleteServerHandler">
@@ -193,6 +206,10 @@
     </bean>
       
     <bean id="isaQmSetAssigneeHandler" class="sernet.verinice.bpm.qm.IsaQmSetAssigneeHandler">
+        <property name="taskService" ref="taskService" />
+    </bean>
+    
+    <bean id="indiExtensionHandler" class="sernet.verinice.bpm.indi.IndiExtensionHandler">
         <property name="taskService" ref="taskService" />
     </bean>
    
@@ -204,6 +221,9 @@
     <bean id="indiAssignDescriptionHandler" class="sernet.verinice.bpm.indi.IndividualAssignDescriptionHandler" />
     <bean id="indiDeadlineDescriptionHandler" class="sernet.verinice.bpm.indi.IndividualDeadlineDescriptionHandler" />
     <bean id="indiNrDescriptionHandler" class="sernet.verinice.bpm.indi.IndividualNotResponsibleDescriptionHandler" />
+    <bean id="indiExtensionDescriptionHandler" class="sernet.verinice.bpm.indi.IndividualExtensionDescriptionHandler">
+        <property name="remindService" ref="remindService" />
+    </bean>
     
     <bean id="gsmIsmDescriptionHandler" class="sernet.verinice.bpm.gsm.GsmServiceTaskDescriptionHandler">      
         <property name="velocityEngine" ref="velocityEngine"/>
@@ -216,7 +236,9 @@
         <property name="configurationDao" ref="configurationDao" />
         <property name="enabled" value="${veriniceserver.notification.enabled}" />
         <property name="emailFrom" value="${veriniceserver.notification.email.from}"/>
-        <property name="replyTo" value="${veriniceserver.notification.email.from}"/> 
+        <property name="replyTo" value="${veriniceserver.notification.email.from}"/>
+        <property name="emailCc" value="${veriniceserver.notification.email.cc}"/>
+        <property name="emailBcc" value="${veriniceserver.notification.email.bcc}"/>  
         <property name="url" value="${veriniceserver.notification.email.linkto}"/>    
     </bean>
     
@@ -245,7 +267,9 @@
 	            <entry key="taskListPath" value="todo/task.jsf"/>
 	            <entry key="enabled" value="${veriniceserver.notification.enabled}" />
 	            <entry key="emailFrom" value="${veriniceserver.notification.email.from}"/>
-	            <entry key="replyTo" value="${veriniceserver.notification.email.replyto}"/> 
+	            <entry key="replyTo" value="${veriniceserver.notification.email.replyto}"/>
+                <entry key="emailCc" value="${veriniceserver.notification.email.cc}"/>
+                <entry key="emailBcc" value="${veriniceserver.notification.email.bcc}"/>  
 	            <entry key="url" value="${veriniceserver.notification.email.linkto}"/>
 	        </map>
 	    </property>

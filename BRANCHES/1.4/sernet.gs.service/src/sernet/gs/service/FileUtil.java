@@ -17,7 +17,9 @@
  ******************************************************************************/
 package sernet.gs.service;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -58,6 +60,16 @@ public class FileUtil {
 	    // encode charsetTo
 	    ByteBuffer outputBuffer = charsetTo.encode(data);
 	    return outputBuffer.array();
+	}
+	
+	public static void writeStringToFile(String content, String filename) throws IOException{
+	    BufferedWriter writer = null;
+	    writer = new BufferedWriter( new FileWriter(filename));
+	    writer.write(content);
+
+	    if (writer != null){
+	        writer.close();
+	    }
 	}
 
 }

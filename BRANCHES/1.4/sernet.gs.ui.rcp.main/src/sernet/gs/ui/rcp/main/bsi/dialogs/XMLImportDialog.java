@@ -155,10 +155,10 @@ public class XMLImportDialog extends Dialog {
     }
 
     private void setDefaultFolder(String dataPath) {
-        String currentPath = "";    
+        String currentPath = "";     //$NON-NLS-1$
         try {
             if (dataPath != null && !dataPath.isEmpty()) {
-                int lastSlash = dataPath.lastIndexOf(System.getProperty("file.separator"));
+                int lastSlash = dataPath.lastIndexOf(System.getProperty("file.separator")); //$NON-NLS-1$
                 if (lastSlash != -1) {
                     currentPath = dataPath.substring(0, lastSlash + 1);
                 } else {
@@ -167,7 +167,7 @@ public class XMLImportDialog extends Dialog {
             }
             Activator.getDefault().getPreferenceStore().setValue(PreferenceConstants.DEFAULT_FOLDER_IMPORT, currentPath);
         } catch (Exception exe) {
-            LOG.error("Error while setting Preference Constants", exe);
+            LOG.error("Error while setting Preference Constants", exe); //$NON-NLS-1$
         }
     }
 
@@ -268,6 +268,20 @@ public class XMLImportDialog extends Dialog {
         Label updateText = new Label(operationGroup, SWT.LEFT);
         updateText.setText(Messages.XMLImportDialog_9);
         updateText.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 1, 1));
+        
+        delete = false;
+        SelectionAdapter deleteCheckListener = new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e){
+                delete = (e.getSource() instanceof Button) ? ((Button)(e.getSource())).getSelection() : delete;
+            }
+        };
+        Button deleteCheck = SWTElementFactory.generateCheckboxButton(operationGroup, Messages.XMLImportDialog_27, false, deleteCheckListener);
+        deleteCheck.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1));
+
+        Label deleteText = new Label(operationGroup, SWT.LEFT);
+        deleteText.setText(Messages.XMLImportDialog_10);
+        deleteText.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 1, 1));
 
         integrate = false;
         SelectionAdapter integrateListener = new SelectionAdapter() {
@@ -538,9 +552,8 @@ public class XMLImportDialog extends Dialog {
             }
         };
         
-        final Button dataBrowse = SWTElementFactory.generatePushButton(dataGroup, Messages.XMLImportDialog_14, null, dataBrowseListener);
+        final Button dataBrowse = SWTElementFactory.generateButton(dataGroup, Messages.XMLImportDialog_14, null, dataBrowseListener);
         dataBrowse.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1));
-        
         // prevent passwordtextfield from gaining focus automatically
         // which happens in osx client, and causes wrong default radio selection (bug 341)
         dataPathText.setFocus();
@@ -570,7 +583,6 @@ public class XMLImportDialog extends Dialog {
             dialog.setFilterIndex(fileDialogFilterIndex);
         }
         String path = dialog.open();
-
         if (path != null) {
             f = new File(path);
             if(dialog.getFilterIndex()<2) {
@@ -682,7 +694,7 @@ public class XMLImportDialog extends Dialog {
                         monitor.beginTask(NLS.bind(Messages.XMLImportDialog_5, new Object[] {dataFile.getName()}), IProgressMonitor.UNKNOWN);
                         createValidations(changedElement);
                     } catch (Exception e){
-                        LOG.error("Exception while executing createValidationsJob", e);
+                        LOG.error("Exception while executing createValidationsJob", e); //$NON-NLS-1$
                     } finally {
                         monitor.done();
                     }
@@ -773,17 +785,17 @@ public class XMLImportDialog extends Dialog {
                 CnAElementFactory.getModel(((CnATreeElement)elmts.toArray()[0])).validationAdded(((CnATreeElement)elmts.toArray()[0]).getScopeId());
             }
         } catch (CommandException e){
-            LOG.error("Error while executing validation creation command", e);
+            LOG.error("Error while executing validation creation command", e); //$NON-NLS-1$
         }
     }
     private String initDefaultFolder(){
         IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
         defaultFolder = prefs.getString(PreferenceConstants.DEFAULT_FOLDER_IMPORT);     
         if(defaultFolder==null || defaultFolder.isEmpty()) {
-            defaultFolder = System.getProperty("user.home");
+            defaultFolder = System.getProperty("user.home"); //$NON-NLS-1$
         }
-        if(!defaultFolder.endsWith(System.getProperty("file.separator"))){
-            defaultFolder=defaultFolder+System.getProperty("file.separator"); 
+        if(!defaultFolder.endsWith(System.getProperty("file.separator"))){ //$NON-NLS-1$
+            defaultFolder=defaultFolder+System.getProperty("file.separator");  //$NON-NLS-1$
         }
         return defaultFolder; 
     }
