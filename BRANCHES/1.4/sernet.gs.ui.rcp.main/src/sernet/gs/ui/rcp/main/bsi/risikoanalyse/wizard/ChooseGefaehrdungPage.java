@@ -467,7 +467,7 @@ public class ChooseGefaehrdungPage extends WizardPage {
 
             for (GefaehrdungsUmsetzung selectedGefaehrdung : list) {
                 for (Gefaehrdung gefaehrdung : wizard.getAllGefaehrdungen()) {
-                    if (gefaehrdung.getId().equals(selectedGefaehrdung.getId())) {
+                    if (gefaehrdung!=null && gefaehrdung.getId()!=null && gefaehrdung.getId().equals(selectedGefaehrdung.getId())) {
                         associateGefaehrdung(gefaehrdung, true);
                     }
                 }
