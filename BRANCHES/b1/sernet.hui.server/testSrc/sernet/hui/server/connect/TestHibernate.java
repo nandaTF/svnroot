@@ -22,10 +22,11 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+//import org.hibernate.classic.Session;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.classic.Session;
 
 import sernet.hui.common.connect.Entity;
 import sernet.hui.common.connect.EntityType;
