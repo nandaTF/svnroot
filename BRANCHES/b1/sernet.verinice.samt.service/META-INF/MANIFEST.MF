@@ -5,14 +5,21 @@ Bundle-SymbolicName: sernet.verinice.samt.service
 Bundle-Version: 0.1.0.qualifier
 Bundle-Activator: sernet.verinice.samt.service.Activator
 Bundle-Vendor: %Bundle-Vendor
-Require-Bundle: com.springsource.org.apache.log4j;bundle-version="1.2.15",
- com.springsource.org.hibernate;bundle-version="3.2.6",
+Require-Bundle: com.springsource.slf4j.org.apache.log4j;bundle-version="1.6.1",
+ com.springsource.org.hibernate;bundle-version="4.1.0",
  sernet.gs.service,
  sernet.hui.common
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-RegisterBuddy: com.springsource.org.hibernate
 Bundle-ActivationPolicy: lazy
-Export-Package: sernet.verinice.samt.audit.service,
- sernet.verinice.samt.service
+Export-Package: sernet.verinice.samt.audit.service;uses:="sernet.verinice.model.common,org.apache.log4j,sernet.verinice.interfaces",
+ sernet.verinice.samt.service;
+  uses:="sernet.verinice.model.common,
+   org.eclipse.core.runtime,
+   sernet.verinice.model.iso27k,
+   org.apache.log4j,
+   org.osgi.framework,
+   sernet.verinice.interfaces,
+   sernet.gs.service"
 Import-Package: org.eclipse.core.runtime,
  org.osgi.framework
