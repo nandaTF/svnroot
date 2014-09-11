@@ -24,10 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.StringType;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.verinice.interfaces.IBaseDao;
@@ -85,8 +86,10 @@ public class UmsetzungSummary extends MassnahmenSummary {
 					+ "from properties "
 					+ "where propertytype = :type "
 					+ "group by propertyvalue ")
-					.addScalar("propertyvalue", Hibernate.STRING)
-					.addScalar("amount", Hibernate.INTEGER)
+//					.addScalar("propertyvalue", Hibernate.STRING)
+					.addScalar("propertyvalue", StringType.INSTANCE)
+//					.addScalar("amount", Hibernate.INTEGER)
+					.addScalar("amount", IntegerType.INSTANCE)
 					.setString("type", MassnahmenUmsetzung.P_UMSETZUNG);
 					
 			return query.list();

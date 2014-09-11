@@ -25,10 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.StringType;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.verinice.model.bsi.BSIModel;
@@ -83,11 +84,13 @@ public class CompletedZyklusSummary extends MassnahmenSummary {
 					+ "and p2.propertytype = :p2type "
 					+ "and p2.propertyvalue in (:p2values) "
 					+ "group by p1.propertyvalue ")
-					.addScalar("pv", Hibernate.STRING)
-					.addScalar("amount", Hibernate.INTEGER)
+//					.addScalar("pv", Hibernate.STRING)
+					.addScalar("pv", StringType.INSTANCE)
+//					.addScalar("amount", Hibernate.INTEGER)
+					.addScalar("amount", IntegerType.INSTANCE)
 					.setString("p1type", MassnahmenUmsetzung.P_LEBENSZYKLUS)
 					.setString("p2type", MassnahmenUmsetzung.P_UMSETZUNG)
-					.setParameterList("p2values", new Object[] { MassnahmenUmsetzung.P_UMSETZUNG_JA, MassnahmenUmsetzung.P_UMSETZUNG_ENTBEHRLICH }, Hibernate.STRING);
+					.setParameterList("p2values", new Object[] { MassnahmenUmsetzung.P_UMSETZUNG_JA, MassnahmenUmsetzung.P_UMSETZUNG_ENTBEHRLICH }, StringType.INSTANCE);
 			
 			if (LOG.isDebugEnabled()){
 				LOG.debug("generated query:" + query.getQueryString());

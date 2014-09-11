@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.verinice.interfaces.IBaseDao;
@@ -47,6 +48,8 @@ import sernet.verinice.model.bsi.BSIModel;
 public class MigrateDbTo0_94 extends DbMigration {
 	
 	private static transient Logger log = Logger.getLogger(MigrateDbTo0_94.class);
+	
+	private static Connection globalConnection;
 
     public static Logger getLog() {
         if (log == null) {
@@ -132,8 +135,15 @@ public class MigrateDbTo0_94 extends DbMigration {
 				SQLException {
 		    final int debugModulo = 500;
 		    final int commitModulo = 10000;
-			Connection connection = session.connection();
-			connection.setAutoCommit(false);
+			globalConnection = session.doReturningWork(new ReturningWork<Connection>() {
+
+                @Override
+                public Connection execute(Connection connection) throws SQLException {
+                    return connection;
+                }
+            
+			});
+			globalConnection.setAutoCommit(false);
 			
 			int i = 0;
 			final int size = idIterator.size();
@@ -158,7 +168,7 @@ public class MigrateDbTo0_94 extends DbMigration {
 				*/
 				
 				// Create statements manually and commit every 10k rows. 
-				Statement stmt = connection.createStatement();
+				Statement stmt = globalConnection.createStatement();
 				String sql = "update " + table
 							+ " set uuid = '" + uuidString + "' "
 							+ "where dbid = " + id;
@@ -175,7 +185,7 @@ public class MigrateDbTo0_94 extends DbMigration {
 				
 				if (i % commitModulo == 0)
 				{
-					connection.commit();
+					globalConnection.commit();
 				}
 				
 				/* Not used because of Hibernate bug. See above.
@@ -185,11 +195,12 @@ public class MigrateDbTo0_94 extends DbMigration {
 			}
 			
 			// Commits after creating the final rows.
-			connection.commit();
+			globalConnection.commit();
 		
 			return null;
 		}
 		
 	}
+	
 
 }

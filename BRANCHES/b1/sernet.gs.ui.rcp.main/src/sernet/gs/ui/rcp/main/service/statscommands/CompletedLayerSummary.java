@@ -24,10 +24,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.StringType;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.gs.model.Baustein;
@@ -122,11 +123,14 @@ public class CompletedLayerSummary extends MassnahmenSummary {
 					+ "and mup.propertytype = :muptype "
 					+ "and mup.propertyvalue in (:mupvalues) "
 					+ "group by bup.propertyvalue")
-					.addScalar("pv", Hibernate.STRING)
-					.addScalar("amount", Hibernate.INTEGER)
+					.addScalar("pv", StringType.INSTANCE)
+//					.addScalar("amount", Hibernate.INTEGER)
+					.addScalar("amount", IntegerType.INSTANCE)
+//					.addScalar("amount", Hibernate.STRING)
 					.setString("buptype", BausteinUmsetzung.P_NR)
 					.setString("muptype", MassnahmenUmsetzung.P_UMSETZUNG)
-					.setParameterList("mupvalues", new Object[] { MassnahmenUmsetzung.P_UMSETZUNG_JA, MassnahmenUmsetzung.P_UMSETZUNG_ENTBEHRLICH }, Hibernate.STRING);
+//					.setParameterList("mupvalues", new Object[] { MassnahmenUmsetzung.P_UMSETZUNG_JA, MassnahmenUmsetzung.P_UMSETZUNG_ENTBEHRLICH }, Hibernate.STRING);
+					.setParameterList("mupvalues", new Object[] { MassnahmenUmsetzung.P_UMSETZUNG_JA, MassnahmenUmsetzung.P_UMSETZUNG_ENTBEHRLICH }, StringType.INSTANCE);
 			
 			if (LOG.isDebugEnabled()){
 				LOG.debug("generated query:" + query.getQueryString());

@@ -73,7 +73,8 @@ public class LoadReportISASpecificMeasures extends GenericCommand implements ICa
             results = new ArrayList<List<String>>(0);
             StringBuilder measureText = new StringBuilder();
             Level tLevel = Logger.getLogger("org.hibernate.engine.StatefulPersistenceContext").getLevel();
-            Logger.getLogger("org.hibernate.engine.StatefulPersistenceContext").setLevel(Level.OFF);
+            // TODO : fix me 
+//            Logger.getLogger("org.hibernate.engine.StatefulPersistenceContext").setLevel(Level.OFF);
             try{
                 //load samtTopic from rootElmt (needs to be a samtTopic)
                 SamtTopic st = (SamtTopic)getDaoFactory().getDAO(SamtTopic.TYPE_ID).findById(rootElmt);
@@ -149,7 +150,8 @@ public class LoadReportISASpecificMeasures extends GenericCommand implements ICa
             ArrayList<String> nList = new ArrayList<String>(0);
             nList.add(measureText.toString());
             results.add(nList);
-            Logger.getLogger("org.hibernate.engine.StatefulPersistenceContext").setLevel(tLevel);
+            // TODO: fix me
+//            Logger.getLogger("org.hibernate.engine.StatefulPersistenceContext").setLevel(tLevel);
         }
     }
         

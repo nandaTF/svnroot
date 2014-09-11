@@ -21,7 +21,6 @@ package sernet.verinice.hibernate;
 
 import java.sql.Types;
 
-import org.hibernate.Hibernate;
 import org.hibernate.dialect.Oracle10gDialect;
 
 /**
@@ -32,7 +31,9 @@ public class Oracle10gNclobDialect extends Oracle10gDialect {
 
     public Oracle10gNclobDialect() {
         super();
-        registerHibernateType( Types.NCLOB, Hibernate.CLOB.getName() );
+     // TODO: adjust this to hibernate 4.1
+//        registerHibernateType( Types.NCLOB, Hibernate.CLOB.getName() );
+        registerHibernateType( Types.NCLOB, org.hibernate.type.ClobType.class.getName() );
     }
 
     protected void registerLargeObjectTypeMappings() {

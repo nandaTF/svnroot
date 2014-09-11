@@ -17,12 +17,6 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main;
 
-import java.io.IOException;
-
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.xml.DOMConfigurator;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.swt.widgets.Display;
@@ -59,9 +53,16 @@ public class Application implements IApplication {
                 return IApplication.EXIT_RESTART;
             }
             return IApplication.EXIT_OK;
+        }    catch(Throwable t) {
+            System.out.println("Error:\t" +t.getLocalizedMessage());
+            return IApplication.EXIT_OK;
         } finally {
-            ConfigurationLogger.logStop();
-            display.dispose();
+            try{
+                ConfigurationLogger.logStop();
+                display.dispose();
+            } catch (Throwable t){
+                System.out.println("Error:\t" +t.getLocalizedMessage());
+            }
         }
     }
 

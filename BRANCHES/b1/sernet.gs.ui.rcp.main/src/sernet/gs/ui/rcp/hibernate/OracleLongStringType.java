@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.usertype.UserType;
 
 /**
@@ -52,40 +53,40 @@ public class OracleLongStringType implements UserType {
         return (x == y) || (x != null && y != null && (x.equals(y)));
     }
 
-    public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws HibernateException, SQLException {
-        Object out = "";
-        try {
-            InputStream stream = rs.getAsciiStream(names[0]);
-            byte[] buff = new byte[1024];
-            int len = 0;
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            while ((len = stream.read(buff, 0, 1024)) > -1) {
-                bos.write(buff, 0, len);
-            }
-            out = bos.toString();
-        } catch (IOException ex) {
-            // worth printing b/c this means a failure occurred reading from
-            // stream
-            ex.printStackTrace();
-        } catch (Exception t) {
-            // eat this exception b/c it is of no interest (i.e. stream is null
-            // for null attribute value)
-        }
-        return out;
-    }
-
-    public void nullSafeSet(PreparedStatement st, Object value, int index) throws HibernateException, SQLException {
-
-        try {
-            String s = (String) value;
-            if (s == null)
-                s = "";
-            InputStream is = new ByteArrayInputStream(s.getBytes());
-            st.setAsciiStream(index, is, s.length());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+//    public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws HibernateException, SQLException {
+//        Object out = "";
+//        try {
+//            InputStream stream = rs.getAsciiStream(names[0]);
+//            byte[] buff = new byte[1024];
+//            int len = 0;
+//            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//            while ((len = stream.read(buff, 0, 1024)) > -1) {
+//                bos.write(buff, 0, len);
+//            }
+//            out = bos.toString();
+//        } catch (IOException ex) {
+//            // worth printing b/c this means a failure occurred reading from
+//            // stream
+//            ex.printStackTrace();
+//        } catch (Exception t) {
+//            // eat this exception b/c it is of no interest (i.e. stream is null
+//            // for null attribute value)
+//        }
+//        return out;
+//    }
+//
+//    public void nullSafeSet(PreparedStatement st, Object value, int index) throws HibernateException, SQLException {
+//
+//        try {
+//            String s = (String) value;
+//            if (s == null)
+//                s = "";
+//            InputStream is = new ByteArrayInputStream(s.getBytes());
+//            st.setAsciiStream(index, is, s.length());
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//    }
 
     public Object deepCopy(Object value) throws HibernateException {
         if (value == null) {
@@ -129,5 +130,49 @@ public class OracleLongStringType implements UserType {
     public Object replace(Object original, Object target, Object owner) throws HibernateException {
         return original;
     }
+
+    /* (non-Javadoc)
+     * @see org.hibernate.usertype.UserType#nullSafeGet(java.sql.ResultSet, java.lang.String[], org.hibernate.engine.spi.SessionImplementor, java.lang.Object)
+     */
+    @Override
+    public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor arg2, Object arg3) throws HibernateException, SQLException {
+        Object out = "";
+        try {
+            InputStream stream = rs.getAsciiStream(names[0]);
+            byte[] buff = new byte[1024];
+            int len = 0;
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            while ((len = stream.read(buff, 0, 1024)) > -1) {
+                bos.write(buff, 0, len);
+            }
+            out = bos.toString();
+        } catch (IOException ex) {
+            // worth printing b/c this means a failure occurred reading from
+            // stream
+            ex.printStackTrace();
+        } catch (Exception t) {
+            // eat this exception b/c it is of no interest (i.e. stream is null
+            // for null attribute value)
+        }
+        return out;
+    }
+
+    /* (non-Javadoc)
+     * @see org.hibernate.usertype.UserType#nullSafeSet(java.sql.PreparedStatement, java.lang.Object, int, org.hibernate.engine.spi.SessionImplementor)
+     */
+    @Override
+    public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor arg3) throws HibernateException, SQLException {
+        try {
+            String s = (String) value;
+            if (s == null)
+                s = "";
+            InputStream is = new ByteArrayInputStream(s.getBytes());
+            st.setAsciiStream(index, is, s.length());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
 
 }

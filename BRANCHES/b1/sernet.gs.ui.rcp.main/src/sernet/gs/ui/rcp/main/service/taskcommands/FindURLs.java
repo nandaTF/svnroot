@@ -27,10 +27,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.type.StringType;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.gs.common.ApplicationRoles;
@@ -186,7 +186,8 @@ public class FindURLs extends GenericCommand {
 			sb.append("AND NULLIF(p.propertyValue, '') IS NOT NULL");
 			final String hql = sb.toString();
 			Query hqlQuery = session.createQuery(hql);
-			hqlQuery.setParameterList("types", types, Hibernate.STRING);
+//			hqlQuery.setParameterList("types", types, Hibernate.STRING);
+			hqlQuery.setParameterList("types", types, StringType.INSTANCE);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("QueryString:\t"+ hqlQuery.getQueryString());
 			}

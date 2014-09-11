@@ -136,6 +136,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     private OpenViewAction openRelationViewAction;
     
     private OpenViewAction openValidationViewAction;
+    
+//    private OpenViewAction openE4ExampleViewAction;
 
     private OpenMultipleViewAction openCatalogAction;
     
@@ -222,6 +224,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         openAuditViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_12, AuditView.ID, ImageCache.VIEW_AUDIT, ActionRightIDs.AUDITVIEW);
         openTaskViewAction = new OpenTaskViewAction(window, ActionRightIDs.TASKVIEW);
         openValidationViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_35, CnAValidationView.ID, ImageCache.VIEW_VALIDATION, ActionRightIDs.CNAVALIDATION);
+//        openE4ExampleViewAction = new OpenViewAction(window, "E4View", E4ExampleViewWrapper.ID, ImageCache.VIEW_VALIDATION, ActionRightIDs.CNAVALIDATION);
         reloadAction = new ReloadAction(window, Messages.ApplicationActionBarAdvisor_14);
         importGstoolAction = new ImportGstoolAction(window, Messages.ApplicationActionBarAdvisor_15);
         importCSVAction = new ImportCSVAction(window, Messages.ApplicationActionBarAdvisor_30);
@@ -378,6 +381,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         viewsMenu.add(openFileAction);
         viewsMenu.add(openRelationViewAction);
         viewsMenu.add(openValidationViewAction);
+//        viewsMenu.add(openE4ExampleViewAction);
+        
         
         viewsMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
         
@@ -444,6 +449,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         myToolbar.add(openFileAction);
         myToolbar.add(openRelationViewAction);
         myToolbar.add(openValidationViewAction);
+//        myToolbar.add(openE4ExampleViewAction);
     }
 
     /**

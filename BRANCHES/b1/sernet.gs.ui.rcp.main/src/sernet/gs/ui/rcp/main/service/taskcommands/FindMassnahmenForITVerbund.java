@@ -27,12 +27,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.sql.rowset.serial.SerialClob;
+
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.lob.SerializableClob;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.gs.service.RuntimeCommandException;
@@ -296,8 +297,10 @@ public class FindMassnahmenForITVerbund extends FindMassnahmenAbstract {
          */
         private boolean checkSiegelFilter(Object prop, Object filter) {
             // for Oracle prop is SerializableClob (bug 165)
-            if(prop instanceof SerializableClob) {
-                SerializableClob clob = (SerializableClob) prop;
+//            if(prop instanceof SerializableClob) {
+            if(prop instanceof SerialClob){
+//                SerializableClob clob = (SerializableClob) prop;
+                SerialClob clob = (SerialClob) prop;
                 try {
                     prop = clob.getSubString(Long.valueOf(1).longValue(), Long.valueOf(clob.length()).intValue());
                 } catch (SQLException e) {
@@ -315,8 +318,10 @@ public class FindMassnahmenForITVerbund extends FindMassnahmenAbstract {
         private boolean checkUmsetzungFilter(Object prop, Object filter) {
             String value = null;
             // for Oracle prop is SerializableClob (bug 165)
-            if(prop instanceof SerializableClob) {
-                SerializableClob clob = (SerializableClob) prop;
+//            if(prop instanceof SerializableClob) {
+//                SerializableClob clob = (SerializableClob) prop;
+            if(prop instanceof SerialClob){
+                SerialClob clob = (SerialClob) prop;
                 try {
                     value = clob.getSubString(Long.valueOf(1).longValue(), Long.valueOf(clob.length()).intValue());
                 } catch (SQLException e) {

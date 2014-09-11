@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.type.StringType;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.hui.common.connect.HuiUrl;
@@ -102,8 +102,10 @@ public class FindHuiUrls extends GenericCommand {
 					"select propertyValue "
 					+ "from properties "
 					+ "where propertytype in (:types)")
-					.addScalar("propertyvalue", Hibernate.STRING)
-					.setParameterList("types", allIDs, Hibernate.STRING);
+//					.addScalar("propertyvalue", Hibernate.STRING)
+					.addScalar("propertyvalue", StringType.INSTANCE)
+//					.setParameterList("types", allIDs, Hibernate.STRING);
+					.setParameterList("types", allIDs, StringType.INSTANCE);
 
 			if (LOG.isDebugEnabled()){
 				LOG.debug("created statement: " + query.getQueryString());

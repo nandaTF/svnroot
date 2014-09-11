@@ -20,8 +20,8 @@ package sernet.gs.ui.rcp.main.connect;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hibernate.event.EventSource;
-import org.hibernate.event.def.DefaultDeleteEventListener;
+import org.hibernate.event.internal.DefaultDeleteEventListener;
+import org.hibernate.event.spi.EventSource;
 import org.hibernate.persister.entity.EntityPersister;
 
 /**

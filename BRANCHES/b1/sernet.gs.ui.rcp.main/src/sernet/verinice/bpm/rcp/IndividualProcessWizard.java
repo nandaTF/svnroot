@@ -42,9 +42,9 @@ import sernet.verinice.interfaces.bpm.IndividualServiceParameter;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.PersonIso;
 import sernet.verinice.service.commands.LoadPersonForLogin;
-
-import com.sun.xml.messaging.saaj.packaging.mime.util.BASE64DecoderStream;
-import com.sun.xml.messaging.saaj.packaging.mime.util.BASE64EncoderStream;
+//import com.sun.xml.messaging.saaj.packaging.mime.util.BASE64DecoderStream;
+//import com.sun.xml.messaging.saaj.packaging.mime.util.BASE64EncoderStream;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * Wizard to start jBPM process "individual-task" defined in individual-task.jpdl.xml
@@ -257,13 +257,15 @@ public class IndividualProcessWizard extends Wizard {
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(o);
         oos.close();
-        return new String(BASE64EncoderStream.encode(baos.toByteArray()));
+//        return new String(BASE64EncoderStream.encode(baos.toByteArray()));
+        return new String(Base64.encodeBase64(baos.toByteArray()));
     }
 
     static Object fromString(String s) {
         Object o = null;
         try {
-            byte[] data = BASE64DecoderStream.decode(s.getBytes());
+            byte[] data = Base64.decodeBase64(s.getBytes());
+//            byte[] data = BASE64DecoderStream.decode(s.getBytes());
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
             o = ois.readObject();
             ois.close();

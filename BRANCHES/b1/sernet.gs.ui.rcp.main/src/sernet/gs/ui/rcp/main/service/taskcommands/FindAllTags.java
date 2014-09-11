@@ -25,9 +25,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.type.StringType;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.verinice.interfaces.GenericCommand;
@@ -83,7 +83,8 @@ public class FindAllTags extends GenericCommand {
 					"select propertyValue " +
 					"from properties " +
 					"where propertytype like '%_tag'")
-			.addScalar("propertyValue", Hibernate.STRING)
+//			.addScalar("propertyValue", Hibernate.STRING)
+			.addScalar("propertyValue", StringType.INSTANCE)
 			.list();
 		}
 		

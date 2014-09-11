@@ -24,10 +24,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.StringType;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 import sernet.gs.model.Baustein;
@@ -103,8 +104,10 @@ public class LayerSummary extends CompletedLayerSummary {
 					+ "and bu.dbid = buc.entity_id "
 					+ "and buc.dbid = muc.parent "
 					+ "group by p.propertyvalue")
-					.addScalar("pv", Hibernate.STRING)
-					.addScalar("amount", Hibernate.INTEGER)
+//					.addScalar("pv", Hibernate.STRING)
+					.addScalar("pv", StringType.INSTANCE)
+//					.addScalar("amount", Hibernate.INTEGER)
+					.addScalar("amount", IntegerType.INSTANCE)
 					.setString("type", BausteinUmsetzung.P_NR);
 			
 			if (LOG.isDebugEnabled()){

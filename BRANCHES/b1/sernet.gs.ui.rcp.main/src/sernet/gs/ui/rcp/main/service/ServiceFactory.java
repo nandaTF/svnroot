@@ -20,6 +20,7 @@ package sernet.gs.ui.rcp.main.service;
 import java.net.MalformedURLException;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.BeanFactory;
 
 import sernet.hui.common.VeriniceContext;
 import sernet.springclient.SpringClientPlugin;
@@ -147,6 +148,8 @@ public abstract class ServiceFactory {
 	 */
 	public static VeriniceContext.State getClientWorkObjects()
 	{
+	    // test using files from https://maven.java.net/content/repositories/releases/com/sun/xml/messaging/saaj/saaj-impl/1.3.23/
+	    
 		return (VeriniceContext.State) SpringClientPlugin.getDefault()
 				.getBeanFactory()
 				.getBean(WORK_OBJECTS);

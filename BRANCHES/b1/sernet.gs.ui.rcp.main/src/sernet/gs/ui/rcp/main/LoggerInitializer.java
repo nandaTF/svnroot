@@ -19,8 +19,9 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main;
 
-import java.io.File;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.logging.LogManager;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Appender;
@@ -56,8 +57,6 @@ public class LoggerInitializer implements ILogPathService {
     protected static final String LOG_FOLDER = "log/";
     private static final String DEFAULT_VERINICE_LOG = "verinice-client.log";
     private static final String WORKSPACE_PROPERTY_KEY = "osgi.instance.area";
-    
-    private String loggingPath = "";
 
     /**
      * Checks if the -Dlog4j.configuration system property is set and if so it
@@ -89,7 +88,8 @@ public class LoggerInitializer implements ILogPathService {
 
     private static void configureWithCustomLog4jFile() {
 
-        Logger.getRootLogger().getLoggerRepository().resetConfiguration();
+        LogManager.getLogManager().reset();
+//        Logger.getRootLogger().getLoggerRepository().resetConfiguration();
         String config = System.getProperty(LOG4J_CONFIGURATION_JVM_ENV_KEY);
         String extension = FilenameUtils.getExtension(config);
 
@@ -102,10 +102,14 @@ public class LoggerInitializer implements ILogPathService {
         }
     }
 
+    @SuppressWarnings({"restriction"})
     private static void configureAllFileAppender(String p) {
 
         Logger log = Logger.getRootLogger();
-        Enumeration<Appender> appenders = log.getAllAppenders();
+        // TODO : FIX ME :
+//        Enumeration<Appender> appenders = log.getAllAppenders();
+        Enumeration<Appender> appenders = Collections.emptyEnumeration();
+        
 
         while (appenders.hasMoreElements()) {
             Appender appender = appenders.nextElement();
@@ -113,7 +117,9 @@ public class LoggerInitializer implements ILogPathService {
 
                 FileAppender fileAppender = (FileAppender) appender;
                 if (!isFilePathConfigured(fileAppender) || isConfiguredInVeriniceIniFile()) {
-                    fileAppender.setFile(p);
+                    
+//                    fileAppender.setFile(p);
+                    // TODO: find fix for this
 
                     // without this call, the changes does have no effect
                     fileAppender.activateOptions();
@@ -127,30 +133,31 @@ public class LoggerInitializer implements ILogPathService {
     }
 
     private static boolean isFilePathConfigured(FileAppender fileAppender) {
-        return fileAppender.getFile() != null;
+//        return fileAppender.getFile() != null;
+        // TODO: fix this
+        return false;
     }
 
     private static String getLoggingPathPrefix() {
 
-        if (isConfiguredInVeriniceIniFile())
-        {
+        if (isConfiguredInVeriniceIniFile()) {
             return readFromVeriniceIniFile();
-        } else if (existsFilePathInRootLogger())
-        {
+        } else if (existsFilePathInRootLogger()) {
             return getPathFromRootLogger();
         } else {
             return getStandardPath();
-        }        
+        }
     }
 
     private static String getStandardPath() {
-       return appendSlash(System.getProperty(WORKSPACE_PROPERTY_KEY)) + LOG_FOLDER;
+        return appendSlash(System.getProperty(WORKSPACE_PROPERTY_KEY)) + LOG_FOLDER;
     }
 
-    private static boolean existsFilePathInRootLogger()
-    {
+    private static boolean existsFilePathInRootLogger() {
         Logger log = Logger.getRootLogger();
-        Enumeration<Appender> appenders = log.getAllAppenders();
+//        Enumeration<Appender> appenders = log.getAllAppenders();
+        // TODO : FIX ME 
+        Enumeration<Appender> appenders = Collections.emptyEnumeration();
 
         while (appenders.hasMoreElements()) {
             Appender appender = appenders.nextElement();
@@ -160,23 +167,28 @@ public class LoggerInitializer implements ILogPathService {
                 return isFilePathConfigured(fileAppender);
             }
         }
-        
+
         return false;
     }
-    
+
     private static String getPathFromRootLogger() {
         Logger log = Logger.getRootLogger();
-        Enumeration<Appender> appenders = log.getAllAppenders();
+//        Enumeration<Appender> appenders = log.getAllAppenders();
+        // FIX ME
+        Enumeration<Appender> appenders = Collections.emptyEnumeration();
+        
 
         while (appenders.hasMoreElements()) {
             Appender appender = appenders.nextElement();
             if (appender instanceof FileAppender) {
 
                 FileAppender fileAppender = (FileAppender) appender;
-                return fileAppender.getFile();
+//                return fileAppender.getFile();
+                // TODO : fix this
+                return null;
             }
         }
-        
+
         return null;
     }
 
