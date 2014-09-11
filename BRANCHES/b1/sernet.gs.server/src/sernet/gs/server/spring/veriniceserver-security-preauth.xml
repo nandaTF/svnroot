@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:security="http://www.springframework.org/schema/security" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd 
-	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
     
 	<!-- BEGIN Security configuration ============================================================================ -->
 
@@ -34,7 +34,7 @@
     	<property name="authenticationManager" ref="authenticationManager" />
   	</bean>
   	
-  	<bean id="preauthAuthProvider" class="org.springframework.security.providers.preauth.PreAuthenticatedAuthenticationProvider">
+  	<bean id="preauthAuthProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
     	<security:custom-authentication-provider />      
     	<property name="preAuthenticatedUserDetailsService">
       		<bean id="userDetailsServiceWrapper" class="org.springframework.security.userdetails.UserDetailsByNameServiceWrapper">

@@ -16,10 +16,13 @@
  * 
  * Contributors:
  *     Daniel Murygin <dm[at]sernet[dot]de> - initial API and implementation
+ *     Sebastian Hagedorn <sh[at]sernet[dot]de> - grouping by title for non-audit tasks
  ******************************************************************************/
 package sernet.verinice.bpm;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -59,8 +62,10 @@ import sernet.verinice.interfaces.bpm.KeyValue;
 import sernet.verinice.model.bpm.Messages;
 import sernet.verinice.model.bpm.TaskInformation;
 import sernet.verinice.model.bpm.TaskParameter;
+import sernet.verinice.model.bsi.ITVerbund;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.Audit;
+import sernet.verinice.model.iso27k.Organization;
 import sernet.verinice.model.samt.SamtTopic;
 import sernet.verinice.service.IConfigurationService;
 
@@ -339,9 +344,8 @@ public class TaskService implements ITaskService {
         taskInformation.setType(task.getName());
         taskInformation.setCreateDate(task.getCreateTime()); 
         taskInformation.setAssignee(getConfigurationService().getName(task.getAssignee()));
-        if (log.isDebugEnabled()) {
-            log.debug("map, setting read status..."); //$NON-NLS-1$
-        }          
+      
+        log.debug("map, setting read status..."); //$NON-NLS-1$             
         
         Map<String, Object> varMap = loadVariables(task);  
         taskInformation.setName(loadTaskTitle(task.getName(), varMap));
@@ -360,8 +364,8 @@ public class TaskService implements ITaskService {
             taskInformation.setProperties((Set<String>) value);
         }
         
-        mapElement(taskInformation, varMap);       
-        mapAudit(taskInformation, varMap);
+        taskInformation = mapElement(taskInformation, varMap);       
+        taskInformation = mapAudit(taskInformation, varMap);
         
         if (log.isDebugEnabled()) {
             log.debug("map, loading type..."); //$NON-NLS-1$
@@ -376,10 +380,6 @@ public class TaskService implements ITaskService {
         return taskInformation;
     }
 
-    /**
-     * @param task
-     * @return
-     */
     private String getProcessName(Task task) {
         String executionId = task.getExecutionId();
         String processKey = executionId.substring(0,executionId.indexOf('.'));        
@@ -404,10 +404,6 @@ public class TaskService implements ITaskService {
         return handler.loadTitle(taskId, varMap);
     }
 
-    /**
-     * @param task
-     * @return
-     */
     private Map<String, Object> loadVariables(Task task) {
         if (log.isDebugEnabled()) {
             log.debug("map, loading element..."); //$NON-NLS-1$
@@ -416,53 +412,111 @@ public class TaskService implements ITaskService {
         return loadVariablesForProcess(executionId);
     }
 
-    /**
-     * @param executionId
-     * @return
-     */
     private Map<String, Object> loadVariablesForProcess(String executionId) {
-        Set<String> varNameSet = getExecutionService().getVariableNames(executionId);      
+        Set<String> varNameSet = getExecutionService().getVariableNames(executionId);  
         return getExecutionService().getVariables(executionId,varNameSet);
     }
 
-    /**
-     * @param taskInformation
-     * @param varMap
-     */
-    private void mapAudit(TaskInformation taskInformation, Map<String, Object> varMap) {
-        if (log.isDebugEnabled()) {
-            log.debug("map, loading audit..."); //$NON-NLS-1$
-        }
+    private TaskInformation mapAudit(TaskInformation taskInformation, Map<String, Object> varMap) {
+        
+        log.debug("map, loading audit..."); //$NON-NLS-1$
+                
         CnATreeElement audit = null;
-        String uuidAudit = (String) varMap.get(IIsaExecutionProcess.VAR_AUDIT_UUID);     
-        if(uuidAudit!=null) {
-            taskInformation.setUuidAudit(uuidAudit);
-            RetrieveInfo ri = new RetrieveInfo();
-            ri.setProperties(true);
-            audit = getElementDao().findByUuid(uuidAudit, ri);           
-        } 
-        if(audit!=null) {
-            taskInformation.setAuditTitle(audit.getTitle());
-        } else {
-            taskInformation.setAuditTitle(Messages.getString("TaskService.0")); //$NON-NLS-1$
+        String uuidAudit = (String) varMap.get(IIsaExecutionProcess.VAR_AUDIT_UUID); 
+        String elementUuid = (String) varMap.get(IIsaExecutionProcess.VAR_UUID);
+        
+        if(uuidAudit!=null) {// task references child of Audit
+            return handleAuditElement(taskInformation, uuidAudit, elementUuid); 
+        } else { // task references child of ITVerbund or Organization
+            return handleNonAuditElement(taskInformation, elementUuid);
         }
     }
 
-    /**
-     * @param taskInformation
-     * @param varMap
-     * @return
-     */
-    private void mapElement(TaskInformation taskInformation, Map<String, Object> varMap) {
+    private TaskInformation handleNonAuditElement(TaskInformation taskInformation, String elementUuid) {
+
+        String[] dbResult = getTitlefromDB(elementUuid);
+        String title = dbResult[0];
+        String uuid = dbResult[1];
+        
+        if(title == null || title.equals("")){
+            taskInformation.setAuditTitle(Messages.getString("TaskService.0")); //$NON-NLS-1$
+        } else {
+            taskInformation.setAuditTitle(title);
+            taskInformation.setUuidAudit(uuid);
+        }
+        
+        return taskInformation;
+    }
+
+    private TaskInformation handleAuditElement(TaskInformation taskInformation, String uuidAudit, String elementUuid) {
+        CnATreeElement audit;
+        taskInformation.setUuidAudit(uuidAudit);
+        RetrieveInfo ri = new RetrieveInfo();
+        ri.setProperties(true);
+        audit = getElementDao().findByUuid(uuidAudit, ri);
+        
+        if(audit!=null) { 
+            taskInformation.setAuditTitle(audit.getTitle());
+        }
+        
+        return taskInformation;
+    }
+    
+    private String[] getTitlefromDB(String elementUuid){
+        String[] results = null;
+        String hql = "select distinct props.propertyValue, elmt.uuid from CnATreeElement elmt " +
+                "inner join elmt.entity as entity " + 
+                "inner join entity.typedPropertyLists as propertyList " + 
+                "inner join propertyList.properties as props " +
+                "where  elmt.dbId = (" +
+                "select scopeId from CnATreeElement element2 where element2.uuid = :uuid " +
+                ") " +
+                "AND props.propertyType IN (:titleProperties)";
+        List hqlResult = getElementDao().findByQuery(hql, new String[]{"uuid", "titleProperties"}, new Object[]{
+                elementUuid, Arrays.asList(new String[]{ITVerbund.PROP_NAME, Organization.PROP_NAME})});
+        if(hqlResult instanceof Collection && hqlResult.size() == 1){
+            results = getValuesFromHQLResult(hqlResult);
+        }
+        if(results != null 
+                && results.length == 2 
+                && results[0] != null 
+                && results[1] != null){
+            return results;
+        } else {
+            return new String[]{"", ""};
+        }
+    }
+
+    private String[] getValuesFromHQLResult(List hqlResult) {
+        String[] results = new String[2];
+        if(hqlResult.get(0) instanceof Object[]){
+            Object[] hqlResultArr = (Object[])hqlResult.get(0);
+            if(hqlResultArr.length == 2){
+                if(hqlResultArr[0] instanceof String){
+                    results[0] = (String)hqlResultArr[0];
+                }
+                if(hqlResultArr[1] instanceof String){
+                    results[1] = (String)hqlResultArr[1];
+                }
+            }
+        }
+        return results;
+    }
+    
+    private TaskInformation mapElement(TaskInformation taskInformation, Map<String, Object> varMap) {
+        
         String uuid = (String) varMap.get(IGenericProcess.VAR_UUID);       
         taskInformation.setUuid(uuid);
         taskInformation.setControlTitle("no object");
+    
         if(uuid==null) {
-            return;
+            return taskInformation;
         }
+        
         RetrieveInfo ri = new RetrieveInfo();
         ri.setProperties(true);
         CnATreeElement element = getElementDao().findByUuid(uuid, ri);
+        
         if(element!=null) {
             taskInformation.setControlTitle(element.getTitle());
             taskInformation.setSortValue(createSortableString(taskInformation.getControlTitle()));
@@ -473,6 +527,8 @@ public class TaskService implements ITaskService {
             // uuid exits, but no element found
             throw new ElementNotFoundException(uuid);
         }
+        
+        return taskInformation;
     }
     
     private String createSortableString(String text) {

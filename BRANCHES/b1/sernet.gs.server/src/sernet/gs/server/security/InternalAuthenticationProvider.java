@@ -17,18 +17,20 @@
  ******************************************************************************/
 package sernet.gs.server.security;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Set;
 
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
-import org.springframework.security.context.SecurityContext;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.providers.AuthenticationProvider;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import sernet.gs.common.ApplicationRoles;
 import sernet.verinice.interfaces.ICommand;
@@ -60,11 +62,11 @@ public final class InternalAuthenticationProvider implements AuthenticationProvi
 	private InternalAuthentication authentication = new InternalAuthentication(
 			"$internaluser$", //$NON-NLS-1$
 			"$notused$",//$NON-NLS-1$
-			new GrantedAuthority[] { 
+			Arrays.asList(new GrantedAuthority[] { 
 			        new GrantedAuthorityImpl(ApplicationRoles.ROLE_USER),
 			        new GrantedAuthorityImpl(ApplicationRoles.ROLE_WEB),
 					new GrantedAuthorityImpl(ApplicationRoles.ROLE_ADMIN)
-			});
+			}));
 	
 	public InternalAuthenticationProvider()
 	{
@@ -95,8 +97,8 @@ public final class InternalAuthenticationProvider implements AuthenticationProvi
 	private final class InternalAuthentication extends
 			UsernamePasswordAuthenticationToken {
 		private InternalAuthentication(Object principal, Object credentials,
-				GrantedAuthority[] authorities) {
-			super(principal, credentials, authorities);
+				Collection<? extends GrantedAuthority> grantedAuthorities) {
+			super(principal, credentials, grantedAuthorities);
 		}
 
 		public void setAuthenticated(boolean b) {

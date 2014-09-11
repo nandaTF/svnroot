@@ -36,7 +36,7 @@ public class RemindServiceDummy implements IRemindService {
      * @see sernet.verinice.bpm.IRemindService#loadUserData(java.lang.String)
      */
     @Override
-    public Map<String, String> loadUserData(String name) {
+    public Map<String, Object> loadUserData(String name) {
         return Collections.emptyMap();
     }
 
@@ -44,7 +44,7 @@ public class RemindServiceDummy implements IRemindService {
      * @see sernet.verinice.bpm.IRemindService#sendEmail(java.util.Map)
      */
     @Override
-    public void sendEmail(Map<String, String> model, boolean html) {
+    public void sendEmail(Map<String, Object> model, boolean html) {
     }
 
     /* (non-Javadoc)

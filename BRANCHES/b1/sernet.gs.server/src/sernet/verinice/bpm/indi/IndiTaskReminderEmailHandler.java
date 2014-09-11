@@ -46,7 +46,7 @@ public class IndiTaskReminderEmailHandler extends TaskReminderEmailHandler {
      * @see sernet.verinice.bpm.GenericEmailHandler#validate(java.util.Map, java.util.Map)
      */
     @Override
-    public void validate(Map<String,Object> processVariables, Map<String,String> userParameter) throws AbortException {
+    public void validate(Map<String,Object> processVariables, Map<String,Object> userParameter) throws AbortException {
         final Date dueDate = (Date) processVariables.get(IGenericProcess.VAR_DUEDATE);
         final int reminderDays = (Integer) processVariables.get(IIndividualProcess.VAR_REMINDER_DAYS);
         final Date reminderDate = getReminderDate(dueDate, reminderDays);

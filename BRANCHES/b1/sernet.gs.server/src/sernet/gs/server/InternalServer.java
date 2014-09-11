@@ -39,7 +39,7 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.springframework.osgi.web.context.support.OsgiBundleXmlWebApplicationContext;
 import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.ContextLoaderServlet;
+//import org.springframework.web.context.ContextLoaderServlet;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import sernet.verinice.interfaces.IInternalServer;
@@ -63,7 +63,8 @@ public class InternalServer implements IInternalServer {
 	
 	private boolean running = false;
 
-	private ContextLoaderServlet contextLoaderServlet;
+	// contextLoading is now(in Spring >= 3) done via ContextLoaderListener via web.xml
+//	private ContextLoaderServlet contextLoaderServlet;
 
 	private DispatcherServlet dispatcherServlet;
 
@@ -253,8 +254,8 @@ public class InternalServer implements IInternalServer {
 	    Dictionary<String, String> dict = new Hashtable<String, String>();
 		dict.put(SERVLET_NAME, "context"); //$NON-NLS-1$ //$NON-NLS-2$
 		dict.put(ContextLoader.CONTEXT_CLASS_PARAM, OsgiBundleXmlWebApplicationContext.class.getName());
-		contextLoaderServlet = new ContextLoaderServlet();
-		wc.registerServlet("/context", contextLoaderServlet, dict, ctx); //$NON-NLS-1$
+//		contextLoaderServlet = new ContextLoaderServlet();
+//		wc.registerServlet("/context", contextLoaderServlet, dict, ctx); //$NON-NLS-1$
 
 		dict = new Hashtable<String, String>();
 		dict.put(SERVLET_NAME, "springDispatcher"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -275,7 +276,7 @@ public class InternalServer implements IInternalServer {
 	 */
 	private void teardownSpringServlets() {
 		wc.unregisterServlet(dispatcherServlet);
-		wc.unregisterServlet(contextLoaderServlet);
+//		wc.unregisterServlet(contextLoaderServlet);
 	}
 
 	/**

@@ -19,8 +19,9 @@
  ******************************************************************************/
 package sernet.gs.server.security;
 
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
-import org.springframework.security.ui.digestauth.DigestProcessingFilter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
+import sernet.gs.service.SpringSecurityUtil;
 
 /**
  *
@@ -36,7 +37,7 @@ public class HashToken extends UsernamePasswordAuthenticationToken {
      */
     public HashToken(String name, Object password, String realmName) {     
         super(name,
-              DigestProcessingFilter.encodePasswordInA1Format(name, realmName, (String) password));
+              SpringSecurityUtil.encodePasswordInA1Format(name, realmName, (String) password));
         setAuthenticated(false);
     }
 

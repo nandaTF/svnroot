@@ -19,10 +19,10 @@
  ******************************************************************************/
 package sernet.gs.server.security;
 
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
-import org.springframework.security.providers.dao.DaoAuthenticationProvider;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  *

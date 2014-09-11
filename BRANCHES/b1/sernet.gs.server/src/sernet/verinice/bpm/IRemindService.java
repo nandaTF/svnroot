@@ -42,9 +42,10 @@ public interface IRemindService {
     String TEMPLATE_SUBJECT = "subject"; //$NON-NLS-1$
     String TEMPLATE_PATH = "path"; //$NON-NLS-1$
     
-    Map<String,String> loadUserData(String name) throws MissingParameterException;
+    Map<String,Object> loadUserData(String name) throws MissingParameterException;
     
-    void sendEmail(final Map<String,String> model, boolean html);
+//    void sendEmail(final Map<String,String> model, boolean html);
+    void sendEmail(final Map<String,Object> model, boolean html);
     
     CnATreeElement retrieveElement(String uuid, RetrieveInfo ri);
 }

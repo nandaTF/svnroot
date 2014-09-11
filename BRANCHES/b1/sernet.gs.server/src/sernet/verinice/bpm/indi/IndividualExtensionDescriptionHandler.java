@@ -64,11 +64,11 @@ public class IndividualExtensionDescriptionHandler extends IndividualTaskDescrip
         String address = "";
         String name = "";
         
-        Map<String, String> assigneeData;
+        Map<String, Object> assigneeData;
         try {
             assigneeData = getRemindService().loadUserData(assignee);
-            address = assigneeData.get(IRemindService.TEMPLATE_ADDRESS);
-            name = assigneeData.get(IRemindService.TEMPLATE_NAME);
+            address = (String)assigneeData.get(IRemindService.TEMPLATE_ADDRESS);
+            name = (String)assigneeData.get(IRemindService.TEMPLATE_NAME);
         } catch (MissingParameterException e) {
             LOG.error("Error while loading data for assignee: " + assignee, e);
         }

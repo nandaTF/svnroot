@@ -23,15 +23,15 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.ldap.core.DirContextAdapter;
 import org.springframework.ldap.core.DirContextOperations;
-import org.springframework.security.Authentication;
-import org.springframework.security.BadCredentialsException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
-import org.springframework.security.providers.ldap.LdapAuthenticator;
-import org.springframework.security.ui.digestauth.DigestProcessingFilter;
-import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.ldap.authentication.LdapAuthenticator;
 
 import sernet.gs.common.ApplicationRoles;
 import sernet.gs.service.ServerInitializer;
+import sernet.gs.service.SpringSecurityUtil;
 import sernet.hui.common.connect.Entity;
 import sernet.verinice.model.common.configuration.Configuration;
 
@@ -116,7 +116,8 @@ public class LdapAuthenticatorImpl extends UserLoader implements LdapAuthenticat
                 LOG.debug("Authenticating against AD or LDAP, user-dn: \"" + principal + "\"");
             }
             try {
-                contextFactory.getReadWriteContext(principal, password);
+//                contextFactory.getReadWriteContext(principal, password);
+                contextFactory.getReadWriteContext();
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("AD or LDAP authentication was successful");
                 }
@@ -253,7 +254,7 @@ public class LdapAuthenticatorImpl extends UserLoader implements LdapAuthenticat
      * @param password
      */
     private void checkAdminPassword(String username, String password) {
-        String hash = DigestProcessingFilter.encodePasswordInA1Format(username,
+        String hash = SpringSecurityUtil.encodePasswordInA1Format(username,
                 passwordRealm, password);
         if (hash.equals(adminpass)){
             return;

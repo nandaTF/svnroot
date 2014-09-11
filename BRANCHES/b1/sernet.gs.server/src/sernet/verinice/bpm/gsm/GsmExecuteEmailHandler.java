@@ -46,7 +46,7 @@ public class GsmExecuteEmailHandler extends GenericEmailHandler implements IEmai
      * @see sernet.verinice.bpm.IEmailHandler#addParameter(java.lang.String, java.util.Map, java.lang.String, java.util.Map)
      */
     @Override
-    public void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, String> emailParameter) throws MissingParameterException {
+    public void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, Object> emailParameter) throws MissingParameterException {
         String taskTitle = getTaskService().loadTaskTitle(type, processVariables);
         emailParameter.put(TEMPLATE_TASK_TITLE, taskTitle);
         emailParameter.put(IRemindService.TEMPLATE_SUBJECT, Messages.getString("GsmExecuteEmailHandler.3",taskTitle)); //$NON-NLS-1$

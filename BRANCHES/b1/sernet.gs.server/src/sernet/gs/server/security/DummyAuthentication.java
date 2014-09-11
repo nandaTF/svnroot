@@ -19,9 +19,11 @@
  ******************************************************************************/
 package sernet.gs.server.security;
 
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import java.util.Arrays;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
 import sernet.gs.common.ApplicationRoles;
 
@@ -33,20 +35,20 @@ public final class DummyAuthentication extends UsernamePasswordAuthenticationTok
         super(
                 new VeriniceUserDetails(username, "$dummypwd$"), 
                 "$notused$", 
-                new GrantedAuthority[] { 
+                Arrays.asList(new GrantedAuthority[] { 
                         new GrantedAuthorityImpl(ApplicationRoles.ROLE_USER), 
                         new GrantedAuthorityImpl(ApplicationRoles.ROLE_WEB),
-                        new GrantedAuthorityImpl(ApplicationRoles.ROLE_ADMIN)});
+                        new GrantedAuthorityImpl(ApplicationRoles.ROLE_ADMIN)}));
     }
     
     public DummyAuthentication() {
         super(
                 new VeriniceUserDetails("$internaluser$", "$dummypwd$"), 
                 "$notused$", 
-                new GrantedAuthority[] { 
+                Arrays.asList(new GrantedAuthority[] { 
                         new GrantedAuthorityImpl(ApplicationRoles.ROLE_USER), 
                         new GrantedAuthorityImpl(ApplicationRoles.ROLE_WEB),
-                        new GrantedAuthorityImpl(ApplicationRoles.ROLE_ADMIN)});
+                        new GrantedAuthorityImpl(ApplicationRoles.ROLE_ADMIN)}));
     }
 
     @Override

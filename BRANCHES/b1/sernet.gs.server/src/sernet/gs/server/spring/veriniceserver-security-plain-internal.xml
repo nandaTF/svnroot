@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:security="http://www.springframework.org/schema/security" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd 
-	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
 
 
     <!-- 
@@ -25,13 +25,29 @@
      algorithm for passwords so there would be no way to compare the A1 hash against the directory. Basic authentication transmits the password in clear text over HTTP, so make sure to
      use HTTPS when switching to LDAP / AD authentication too!
      -->
+     
+	<bean id="digestProcessingFilerEntryPoint" class=
+    	"org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
+		<property name="realmName" value=="${veriniceserver.realm}"/>
+		<property name="key" value="${veriniceserver.key}"/>
+		<property name="nonceValiditySeconds" value="${veriniceserver.nonceValiditySeconds}"/>
+	</bean>
     
-    <bean id="digestProcessingFilterEntryPoint" class="org.springframework.security.ui.digestauth.DigestProcessingFilterEntryPoint">
+    <!-- not used anymore, since this is deprecated in spring3 -->
+    <!-- <bean id="digestProcessingFilterEntryPoint" class="org.springframework.security.ui.digestauth.DigestProcessingFilterEntryPoint">
         <property name="realmName" value="${veriniceserver.realm}" />
         <property name="key" value="${veriniceserver.key}" />
         <property name="nonceValiditySeconds" value="${veriniceserver.nonceValiditySeconds}" />
-    </bean>
+    </bean>  -->
+
+	<bean id="digestProcessingFilter" class=
+    	"org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+		<property name="userDetailsService" ref="uds"/>
+		<property name="authenticationEntryPoint" ref="digestEntryPoint"/>
+		<property name="passwordAlreadyEncoded" value="true" />
+	</bean>
 	
+	<!-- not used anymore, since this is deprecated in spring3 -->
     <bean id="digestProcessingFilter" class="org.springframework.security.ui.digestauth.DigestProcessingFilter">
 		<property name="userDetailsService" ref="uds" />
 		<property name="authenticationEntryPoint" ref="digestProcessingFilterEntryPoint" />

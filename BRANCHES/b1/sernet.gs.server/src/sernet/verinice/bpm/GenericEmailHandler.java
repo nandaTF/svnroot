@@ -71,7 +71,7 @@ public abstract class GenericEmailHandler implements IEmailHandler {
     public void send(String assignee, String type, Map<String, Object> processVariables, String uuid) {
         try { 
             ServerInitializer.inheritVeriniceContextState();        
-            Map<String , String> userParameter = getRemindService().loadUserData(assignee);
+            Map<String , Object> userParameter = getRemindService().loadUserData(assignee);
             userParameter.put(IRemindService.TEMPLATE_PATH, getTemplatePath());
             addParameter(type, processVariables, uuid, userParameter);  
             validate(processVariables, userParameter); // throws AbortException if it fails
@@ -155,7 +155,7 @@ public abstract class GenericEmailHandler implements IEmailHandler {
     }
     
     @Override
-    public void validate(Map<String, Object> processVariables, Map<String, String> userParameter) throws AbortException {
+    public void validate(Map<String, Object> processVariables, Map<String, Object> userParameter) throws AbortException {
         // nothing means validate success
     }
 

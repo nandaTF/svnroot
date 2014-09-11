@@ -18,14 +18,15 @@
 package sernet.gs.server.security;
 
 import org.apache.log4j.Logger;
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.context.SecurityContext;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.ui.digestauth.DigestProcessingFilter;
-import org.springframework.security.ui.digestauth.DigestProcessingFilterEntryPoint;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint;
 
 import sernet.gs.service.SecurityException;
+import sernet.gs.service.SpringSecurityUtil;
 import sernet.hui.common.VeriniceContext;
 import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.IAuthService;
@@ -44,14 +45,17 @@ public final class DigestAuthenticationService implements IAuthService {
 
     private final Logger log = Logger.getLogger(DigestAuthenticationService.class);
     
-	private DigestProcessingFilterEntryPoint entryPoint;
+//	private DigestProcessingFilterEntryPoint entryPoint;
+    private DigestAuthenticationEntryPoint entryPoint;
     private String adminUsername;
 	
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
 	public String[] getRoles() {
 	    if (log.isDebugEnabled()) {
 	        log.debug("getRoles()...");
         }
-		 GrantedAuthority[] authority = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+		 GrantedAuthority[] authority = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toArray(
+		         new GrantedAuthority[SecurityContextHolder.getContext().getAuthentication().getAuthorities().size()]);
 		 String[] roles = new String[authority.length];
 		 for (int i=0;i<authority.length; i++) {
 			 roles[i] = authority[i].getAuthority();
@@ -71,11 +75,12 @@ public final class DigestAuthenticationService implements IAuthService {
 	 * Create a password hash for given user and password string.
 	 * Protected by Spring's security config, must have ROLE_ADMIN to use.
 	 */
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
 	public String hashPassword(String username, String pass) {
 	    if(!getRightsServerHandler().isEnabled(getUsername(), ActionRightIDs.ACCOUNTSETTINGS)) {
 	        throw new SecurityException("Action is not allowed for the current user");
 	    }
-		return DigestProcessingFilter.encodePasswordInA1Format(username,
+		return SpringSecurityUtil.encodePasswordInA1Format(username,
 		        entryPoint.getRealmName(), pass);
 	}
 
@@ -94,11 +99,11 @@ public final class DigestAuthenticationService implements IAuthService {
 	        throw new SecurityException(Messages.getString("AuthenticationService.0")); //$NON-NLS-1$
 	    }
 	    
-        return DigestProcessingFilter.encodePasswordInA1Format(username,
+        return SpringSecurityUtil.encodePasswordInA1Format(username,
                 entryPoint.getRealmName(), pass);
     }
 	
-	public void setEntryPoint(DigestProcessingFilterEntryPoint entryPoint) {
+	public void setEntryPoint(DigestAuthenticationEntryPoint entryPoint) {
 		this.entryPoint = entryPoint;
 	}
 

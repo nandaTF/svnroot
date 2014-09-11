@@ -52,7 +52,7 @@ public class IndividualDeadlineAdminEmailHandler extends GenericEmailHandler imp
      * @see sernet.verinice.bpm.IEmailHandler#addParameter(java.lang.String, java.util.Map, java.lang.String, java.util.Map)
      */
     @Override
-    public void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, String> emailParameter) throws MissingParameterException {
+    public void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, Object> emailParameter) throws MissingParameterException {
         CnATreeElement element = getRemindService().retrieveElement(uuidElement, RetrieveInfo.getPropertyInstance());
         if(element==null) {
             throw new MissingParameterException("Obejct was not found, UUID is: " + uuidElement);
@@ -71,7 +71,7 @@ public class IndividualDeadlineAdminEmailHandler extends GenericEmailHandler imp
         emailParameter.put(IRemindService.TEMPLATE_SUBJECT, Messages.getString("IndividualDeadlineAdminEmailHandler.1",taskTitle));
         
         String assignee = (String) processVariables.get(IGenericProcess.VAR_ASSIGNEE_NAME);
-        Map<String, String> assigneeData = getRemindService().loadUserData(assignee);
+        Map<String, Object> assigneeData = getRemindService().loadUserData(assignee);
         emailParameter.put(TEMPLATE_ASSIGNEE_ADDRESS, assigneeData.get(IRemindService.TEMPLATE_ADDRESS));
         emailParameter.put(TEMPLATE_ASSIGNEE_NAME, assigneeData.get(IRemindService.TEMPLATE_NAME));
     }
@@ -80,7 +80,7 @@ public class IndividualDeadlineAdminEmailHandler extends GenericEmailHandler imp
      * @see sernet.verinice.bpm.GenericEmailHandler#validate(java.util.Map, java.util.Map)
      */
     @Override
-    public void validate(Map<String, Object> processVariables, Map<String, String> userParameter) throws AbortException {
+    public void validate(Map<String, Object> processVariables, Map<String, Object> userParameter) throws AbortException {
         final Date dueDate = (Date) processVariables.get(IGenericProcess.VAR_DUEDATE);
         final Calendar now = Calendar.getInstance();
         if(dueDate.after(now.getTime())) {

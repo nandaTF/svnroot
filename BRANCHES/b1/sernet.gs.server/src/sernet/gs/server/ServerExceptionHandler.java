@@ -17,8 +17,6 @@
  ******************************************************************************/
 package sernet.gs.server;
 
-import org.springframework.security.SpringSecurityException;
-
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.service.BaseExceptionHandler;
 
@@ -37,7 +35,8 @@ public class ServerExceptionHandler extends BaseExceptionHandler {
 	@Override
 	public void handle(Exception e) throws CommandException {
 		// logging is done in HibernateCommandService
-		if (e instanceof SpringSecurityException) {
+//		if (e instanceof SpringSecurityException) {
+	    if(e instanceof RuntimeException){
 			throw new CommandException("Sicherheitsverstoß.", new Exception("Sicherheitsüberprüfung fehlgeschlagen. Prüfen Sie, ob Benutzername und Passwort " +
 					"korrekt sind und Sie über die nötige Berechtigung für die Operation verfügen. Details: " + e.getMessage()));
 		}

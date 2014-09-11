@@ -38,7 +38,7 @@ public class AuditEmailHandler extends GenericEmailHandler implements IEmailHand
     
     private static final String TEMPLATE_ELEMENT_TITLE = "elementTitle";
   
-    public void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, String> emailParameter) {
+    public void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, Object> emailParameter) {
         CnATreeElement element = getRemindService().retrieveElement(uuidElement, RetrieveInfo.getPropertyInstance());
         String title = element.getTitle();
         emailParameter.put(TEMPLATE_ELEMENT_TITLE, title);

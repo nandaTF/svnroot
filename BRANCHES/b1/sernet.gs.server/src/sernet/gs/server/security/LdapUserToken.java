@@ -19,12 +19,13 @@ package sernet.gs.server.security;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
-import org.springframework.security.providers.AbstractAuthenticationToken;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
 @SuppressWarnings("serial")
 public class LdapUserToken extends AbstractAuthenticationToken {
@@ -40,14 +41,26 @@ public class LdapUserToken extends AbstractAuthenticationToken {
      * @param defaultAuthority
      */
     public LdapUserToken(Authentication auth, GrantedAuthority defaultAuthority) {
+        super(join(auth.getAuthorities(), defaultAuthority));
         this.auth = auth;
         if (auth.getAuthorities() != null) {
-            this.authorities.addAll(Arrays.asList(auth.getAuthorities()));
+            this.authorities.addAll((Collection<? extends GrantedAuthority>) Arrays.asList(auth.getAuthorities()));
         }
         if (defaultAuthority != null) {
             this.authorities.add(defaultAuthority);
         }
         super.setAuthenticated(true);
+    }
+    
+    public LdapUserToken(Collection<? extends GrantedAuthority> authorities){
+        super(authorities);
+    }
+    
+    private static List<? extends GrantedAuthority> join(Collection<? extends GrantedAuthority> collection, GrantedAuthority object){
+        ArrayList<GrantedAuthority> list = new ArrayList<GrantedAuthority>(collection.size() + 1);
+        list.addAll(collection);
+        list.add(object);
+        return list;
     }
 
     /**
@@ -61,8 +74,8 @@ public class LdapUserToken extends AbstractAuthenticationToken {
         this(auth, new GrantedAuthorityImpl(defaultAuthority));
     }
 
-    public GrantedAuthority[] getAuthorities() {
-        return this.authorities.toArray(new GrantedAuthority[0]);
+    public Collection<GrantedAuthority> getAuthorities() {
+        return this.authorities;//.toArray(new GrantedAuthority[0]);
     }
 
     public void addAuthority(GrantedAuthority authority) {

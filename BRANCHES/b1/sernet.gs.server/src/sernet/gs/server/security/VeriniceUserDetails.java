@@ -18,11 +18,12 @@
 package sernet.gs.server.security;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @SuppressWarnings("serial")
 public class VeriniceUserDetails implements UserDetails {
@@ -50,8 +51,8 @@ public class VeriniceUserDetails implements UserDetails {
 	    this.accountDeactivated = deactivated;
 	}
 	
-	public GrantedAuthority[] getAuthorities() {
-		return (GrantedAuthority[]) roles.toArray(new GrantedAuthority[roles.size()]);
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return this.roles;
 	}
 
 	public String getPassword() {

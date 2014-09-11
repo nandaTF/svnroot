@@ -25,6 +25,7 @@ import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import sernet.gs.service.RetrieveInfo;
 import sernet.verinice.interfaces.IBaseDao;
@@ -34,6 +35,13 @@ import sernet.verinice.model.common.CnALink;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.iso27k.InheritLogger;
 
+/**
+ * @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')") is new in Spring-Security 3.0
+ * since xml-config <security:intercept-methods> is not available anymore
+ *
+ * @param <T>
+ * @param <ID>
+ */
 public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, ID> implements IBaseDao<T, ID> {
 
     private static final Logger LOG = Logger.getLogger(TreeElementDao.class);
@@ -77,7 +85,8 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
      * delete method. All cnaTreeElement daos must be changed to this type in
      * spring configuration.
      */
-
+    
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
     public void saveOrUpdate(T entity) { 
         if(LOG_INHERIT.isDebug()) {
             LOG_INHERIT.debug("saveOrUpdate...");
@@ -89,6 +98,7 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
     public List findAll(IRetrieveInfo ri) {
         // this could be used to limit result size:
         // DetachedCriteria criteria = DetachedCriteria.forClass(type);
@@ -101,6 +111,7 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
         return findByCriteria(criteria);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
     public T findById(ID id) {
         // NEVER use load() because it does not use the filter used to restrict
         // read access!
@@ -108,6 +119,7 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
         return retrieve(id, (new RetrieveInfo()).setProperties(true));
     }
     
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
     public T findByUuid(String uuid, IRetrieveInfo ri) {
         IRetrieveInfo ri0 = (ri == null) ? new RetrieveInfo() : ri;
         DetachedCriteria criteria = DetachedCriteria.forClass(type);
@@ -116,6 +128,7 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
         return loadByCriteria(criteria);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
     public T retrieve(ID id, IRetrieveInfo ri) {
         IRetrieveInfo ri0 = null;
         if(LOG.isDebugEnabled()) {
@@ -221,6 +234,7 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
         return result;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
     public T merge(T entity, boolean fireChange) {
         if(LOG_INHERIT.isDebug()) {
             LOG_INHERIT.debug("merge...");
@@ -248,6 +262,7 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
      *            the element that had its protection level or protection level
      *            description changed.
      */
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
     protected void fireChange(CnATreeElement elmt) {  
         if(LOG_INHERIT.isDebug()) {
             LOG_INHERIT.debug("fireChange...");
@@ -257,6 +272,7 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
         elmt.fireVertraulichkeitChanged(new CascadingTransaction());   
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
     public Class<T> getType() {
         return this.type;
     }
@@ -267,11 +283,13 @@ public class TreeElementDao<T, ID extends Serializable> extends HibernateDao<T, 
      * 
      * @see sernet.verinice.interfaces.IBaseDao#checkRights(java.lang.Object)
      */
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
     @Override
     public void checkRights(T entity) /*throws SecurityException*/ {
         // empty    
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_WEB')")
     @Override
     public void checkRights(T entity, String username) {
         // empty

@@ -21,9 +21,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.userdetails.UserDetails;
-import org.springframework.security.userdetails.UserDetailsService;
-import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import sernet.gs.common.ApplicationRoles;
 import sernet.gs.service.ServerInitializer;

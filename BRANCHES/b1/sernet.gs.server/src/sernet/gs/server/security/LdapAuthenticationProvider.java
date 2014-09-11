@@ -18,11 +18,11 @@
 package sernet.gs.server.security;
 
 import org.springframework.ldap.core.DirContextOperations;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.providers.AuthenticationProvider;
-import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
-import org.springframework.security.providers.ldap.LdapAuthenticator;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.ldap.authentication.LdapAuthenticator;
 
 import sernet.gs.common.ApplicationRoles;
 

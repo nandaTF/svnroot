@@ -21,11 +21,11 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.context.SecurityContext;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.ui.basicauth.BasicProcessingFilterEntryPoint;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 
 import sernet.gs.common.ApplicationRoles;
 import sernet.verinice.interfaces.IAuthService;
@@ -44,7 +44,8 @@ import sernet.verinice.model.common.configuration.Configuration;
  */
 public class BasicAuthenticationService implements IAuthService {
     
-    private BasicProcessingFilterEntryPoint entryPoint;
+//    private BasicProcessingFilterEntryPoint entryPoint;
+    private BasicAuthenticationEntryPoint entryPoint;
     private String guestUser = "";
     private String adminUsername;
     private IBaseDao<Configuration, Serializable> configurationDao;
@@ -71,7 +72,7 @@ public class BasicAuthenticationService implements IAuthService {
     /**
      * @param entryPoint the entryPoint to set
      */
-    public void setEntryPoint(BasicProcessingFilterEntryPoint entryPoint) {
+    public void setEntryPoint(BasicAuthenticationEntryPoint entryPoint) {
         this.entryPoint = entryPoint;
     }
 
@@ -80,7 +81,8 @@ public class BasicAuthenticationService implements IAuthService {
      */
     @Override
     public String[] getRoles() {
-        GrantedAuthority[] authority = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+        GrantedAuthority[] authority = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toArray(
+                new GrantedAuthority[SecurityContextHolder.getContext().getAuthentication().getAuthorities().size()]);
         String[] roles = new String[authority.length];
         for (int i=0;i<authority.length; i++) {
             roles[i] = authority[i].getAuthority();
@@ -96,7 +98,7 @@ public class BasicAuthenticationService implements IAuthService {
         try {
             SecurityContext context = SecurityContextHolder.getContext();
             Authentication authentication = context.getAuthentication();
-            GrantedAuthority[] authorities = authentication.getAuthorities();
+            GrantedAuthority[] authorities = authentication.getAuthorities().toArray(new GrantedAuthority[authentication.getAuthorities().size()]);
             if (guestUser != null && guestUser.length()>0 && isGuestUser(authorities)){
                 return guestUser;
             } else {

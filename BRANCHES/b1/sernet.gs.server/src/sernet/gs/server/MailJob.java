@@ -37,8 +37,8 @@ import org.quartz.StatefulJob;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.springframework.security.context.SecurityContext;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import sernet.gs.server.commands.NotificationInfo;
 import sernet.gs.server.commands.PrepareNotificationInfo;

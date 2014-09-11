@@ -39,8 +39,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.springframework.security.context.SecurityContext;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import sernet.gs.server.security.DummyAuthentication;
@@ -109,7 +109,8 @@ public class NotificationJob extends QuartzJobBean implements StatefulJob {
     
     private String url;
 
-    private Map<String,String> model = new HashMap<String,String>();
+//    private Map<String,String> model = new HashMap<String,String>();
+    private Map<String,Object> model = new HashMap<String,Object>();
     
     // NotificationJob can not do a real login
     // authentication is a fake instance to run secured commands and dao actions
@@ -333,7 +334,7 @@ public class NotificationJob extends QuartzJobBean implements StatefulJob {
     }
     
     public String getEmail() {
-        return (model!=null) ? model.get(TEMPLATE_EMAIL) : null;
+        return (model!=null) ? (String)model.get(TEMPLATE_EMAIL) : null;
     }
 
     public void setWorkObjects(VeriniceContext.State workObjects) {

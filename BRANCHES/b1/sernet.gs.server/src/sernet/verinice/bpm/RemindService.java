@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.apache.log4j.Logger;
@@ -85,13 +86,14 @@ public class RemindService implements IRemindService {
      */
     @Override
     @SuppressWarnings("restriction")
-    public void sendEmail(final Map<String,String> parameter, final boolean html) {
+//    public void sendEmail(final Map<String,String> parameter, final boolean html) {
+    public void sendEmail(final Map<String,Object> parameter, final boolean html) {
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
             @Override
             public void prepare(MimeMessage mimeMessage) throws MessagingException {
                parameter.put(TEMPLATE_URL, getUrl());
                MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
-               message.setTo(parameter.get(TEMPLATE_EMAIL));         
+               message.setTo((InternetAddress)parameter.get(TEMPLATE_EMAIL));         
                message.setFrom(getEmailFrom());
                if(getEmailCc()!=null) {
                    message.setCc(getEmailCc());
@@ -103,10 +105,10 @@ public class RemindService implements IRemindService {
                if(replyTo0!=null && !replyTo0.isEmpty()) {
                    message.setReplyTo(replyTo0);
                }
-               message.setSubject(parameter.get(TEMPLATE_SUBJECT)); //$NON-NLS-1$
+               message.setSubject((String)parameter.get(TEMPLATE_SUBJECT)); //$NON-NLS-1$
                String text = VelocityEngineUtils.mergeTemplateIntoString(
                        getVelocityEngine(), 
-                       parameter.get(TEMPLATE_PATH), 
+                       (String)parameter.get(TEMPLATE_PATH), 
                        VeriniceCharset.CHARSET_UTF_8.name(), 
                        parameter);
                message.setText(text, html);
@@ -136,8 +138,8 @@ public class RemindService implements IRemindService {
      * @see sernet.verinice.bpm.IRemindService#loadUserData(java.lang.String)
      */
     @Override
-    public Map<String,String> loadUserData(String name) throws MissingParameterException {
-        Map<String,String> model = new HashMap<String,String>();
+    public Map<String,Object> loadUserData(String name) throws MissingParameterException {
+        Map<String,Object> model = new HashMap<String,Object>();
         if (name != null) {
             String hql = "select conf.dbId,emailprops.propertyValue from Configuration as conf " + //$NON-NLS-1$
             "inner join conf.entity as entity " + //$NON-NLS-1$
@@ -167,7 +169,7 @@ public class RemindService implements IRemindService {
         return model;
     }
 
-    private void loadPerson(Integer dbId, Map<String,String> model) {
+    private void loadPerson(Integer dbId, Map<String,Object> model) {
         if(dbId!=null) {
             String hql = "from Configuration as conf " + //$NON-NLS-1$
             "inner join fetch conf.person as person " + //$NON-NLS-1$

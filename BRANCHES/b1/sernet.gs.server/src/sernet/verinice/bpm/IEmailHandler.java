@@ -49,7 +49,7 @@ public interface IEmailHandler {
      * @param parameter Parameter for the email template
      * @throws MissingParameterException 
      */
-    void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, String> emailParameter) throws MissingParameterException;
+    void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, Object> emailParameter) throws MissingParameterException;
     
     /**
      * This method must return the name of the template file without path, locale and file extensions.
@@ -65,6 +65,6 @@ public interface IEmailHandler {
     
     boolean isHtml();
     
-    void validate(Map<String, Object> processVariables, Map<String, String> userParameter) throws AbortException;
+    void validate(Map<String, Object> processVariables, Map<String, Object> userParameter) throws AbortException;
 
 }

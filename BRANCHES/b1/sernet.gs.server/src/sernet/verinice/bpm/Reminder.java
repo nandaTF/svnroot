@@ -28,8 +28,8 @@ import org.jbpm.api.ExecutionService;
 import org.jbpm.api.ProcessEngine;
 import org.jbpm.api.listener.EventListener;
 import org.jbpm.api.listener.EventListenerExecution;
-import org.springframework.security.context.SecurityContext;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import sernet.gs.server.security.DummyAuthentication;
 import sernet.gs.service.ServerInitializer;

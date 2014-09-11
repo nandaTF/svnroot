@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:security="http://www.springframework.org/schema/security" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd 
-	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
 
     <!--
     The complex security configuration is only needed for the plain server that runs in a servlet container.
@@ -63,12 +63,12 @@
     
     <bean id="httpSessionContextIntegrationFilter" class="org.springframework.security.context.HttpSessionContextIntegrationFilter" />
 
-    <bean id="anonymousAuthFilter" class="org.springframework.security.providers.anonymous.AnonymousProcessingFilter">
+    <bean id="anonymousAuthFilter" class="org.springframework.security.securtiy.web.authentication.AnonymousAuthenticationFilter">
         <property name="key" value="foobar" />
         <property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS" />
     </bean>
 
-    <bean id="anonymousAuthenticationProvider" class="org.springframework.security.providers.anonymous.AnonymousAuthenticationProvider">
+    <bean id="anonymousAuthenticationProvider" class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
         <property name="key" value="foobar" />
     </bean>
     
@@ -80,7 +80,8 @@
     </bean>
 
     <!-- HTTP basic auth: -->
-    <bean id="basicProcessingFilter" class="org.springframework.security.ui.basicauth.BasicProcessingFilter">
+    <!-- <bean id="basicProcessingFilter" class="org.springframework.security.ui.basicauth.BasicProcessingFilter"> -->
+	<bean id="basicProcessingFilter" class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">    
         <property name="authenticationManager">
             <ref bean="authenticationManager" />
         </property>
@@ -90,7 +91,8 @@
     </bean>
 
     <!-- The basic auth entry point that stores credentials, defines the real etc.: -->
-    <bean id="basicProcessingFilterEntryPoint" class="org.springframework.security.ui.basicauth.BasicProcessingFilterEntryPoint">
+    <!-- <bean id="basicProcessingFilterEntryPoint" class="org.springframework.security.ui.basicauth.BasicProcessingFilterEntryPoint"> -->
+	<bean id="basicProcessingFilterEntryPoint" class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">    
         <property name="realmName">
             <value>${veriniceserver.realm}</value>
         </property>

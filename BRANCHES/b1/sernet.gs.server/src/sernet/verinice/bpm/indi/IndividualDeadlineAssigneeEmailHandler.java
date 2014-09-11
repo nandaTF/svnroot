@@ -49,7 +49,7 @@ public class IndividualDeadlineAssigneeEmailHandler extends GenericEmailHandler 
      * @see sernet.verinice.bpm.IEmailHandler#addParameter(java.lang.String, java.util.Map, java.lang.String, java.util.Map)
      */
     @Override
-    public void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, String> emailParameter) throws MissingParameterException {
+    public void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, Object> emailParameter) throws MissingParameterException {
         CnATreeElement element = getRemindService().retrieveElement(uuidElement, RetrieveInfo.getPropertyInstance());
         if(element==null) {
             throw new MissingParameterException("Obejct was not found, UUID is: " + uuidElement); //$NON-NLS-1$
@@ -74,7 +74,7 @@ public class IndividualDeadlineAssigneeEmailHandler extends GenericEmailHandler 
      * @see sernet.verinice.bpm.GenericEmailHandler#validate(java.util.Map, java.util.Map)
      */
     @Override
-    public void validate(Map<String, Object> processVariables, Map<String, String> userParameter) throws AbortException {
+    public void validate(Map<String, Object> processVariables, Map<String, Object> userParameter) throws AbortException {
         final Date dueDate = (Date) processVariables.get(IGenericProcess.VAR_DUEDATE);
         final Calendar now = Calendar.getInstance();
         if(dueDate.after(now.getTime())) {

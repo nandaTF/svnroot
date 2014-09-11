@@ -45,7 +45,7 @@ public class NotResponsibleEmailHandler extends GenericEmailHandler implements I
      * @see sernet.verinice.bpm.IEmailHandler#addParameter(java.lang.String, java.util.Map)
      */
     @Override
-    public void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, String> emailParameter) {
+    public void addParameter(String type, Map<String, Object> processVariables, String uuidElement, Map<String, Object> emailParameter) {
         CnATreeElement element = getRemindService().retrieveElement(uuidElement, RetrieveInfo.getPropertyInstance());
         String title = element.getTitle();
         emailParameter.put(TEMPLATE_ELEMENT_TITLE, title);
