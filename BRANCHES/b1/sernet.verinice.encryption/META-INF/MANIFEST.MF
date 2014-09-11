@@ -14,7 +14,7 @@ Require-Bundle: bouncycastle;bundle-version="1.46.0",
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  bin
-Export-Package: sernet.verinice.encryption
+Export-Package: sernet.verinice.encryption;uses:="org.eclipse.core.runtime,org.osgi.framework"
 Service-Component: OSGI-INF/component.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: org.apache.commons.lang;version="2.4.0",
