@@ -1,8 +1,5 @@
 package sernet.gs.reveng.importData;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -14,22 +11,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.rtf.RTFEditorKit;
-
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
-import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.Transaction;
+import org.hibernate.type.StringType;
 
 import sernet.gs.reveng.HibernateSessionFactory;
 import sernet.gs.reveng.MSchutzbedarfkategTxt;
 import sernet.gs.reveng.MSchutzbedarfkategTxtDAO;
 import sernet.gs.reveng.MUmsetzStatTxt;
 import sernet.gs.reveng.MbBaust;
-import sernet.gs.reveng.MbDringlichkeitDAO;
 import sernet.gs.reveng.MbDringlichkeitTxt;
 import sernet.gs.reveng.MbDringlichkeitTxtDAO;
 import sernet.gs.reveng.MbMassn;
@@ -40,7 +31,6 @@ import sernet.gs.reveng.ModZobjBst;
 import sernet.gs.reveng.ModZobjBstId;
 import sernet.gs.reveng.ModZobjBstMass;
 import sernet.gs.reveng.ModZobjBstMassId;
-import sernet.gs.reveng.ModZobjBstMassMitarb;
 import sernet.gs.reveng.NZielobjekt;
 import sernet.gs.reveng.NZielobjektDAO;
 import sernet.gs.reveng.NZobSb;
@@ -213,7 +203,8 @@ public class GSVampire {
 		// get notes for massnahmen:
 		Query query = dao.getSession().createQuery(
 				QUERY_NOTIZEN_FOR_ZIELOBJEKT_NAME);
-		query.setParameter("name", name, Hibernate.STRING);
+//		query.setParameter("name", name, Hibernate.STRING);
+		query.setParameter("name", name, StringType.INSTANCE);
 		Iterator iterate = query.iterate();
 		while (iterate.hasNext()) {
 				Object[] next = (Object[]) iterate.next();
@@ -226,7 +217,8 @@ public class GSVampire {
 		// get notes for bausteine (bst, zo_bst, notiz)
 		query = dao.getSession().createQuery(
                 QUERY_BAUSTEIN_NOTIZEN_FOR_ZIELOBJEKT_NAME);
-        query.setParameter("name", name, Hibernate.STRING);
+//        query.setParameter("name", name, Hibernate.STRING);
+		query.setParameter("name", name, StringType.INSTANCE);
         iterate = query.iterate();
         while (iterate.hasNext()) {
                 Object[] next = (Object[]) iterate.next();
