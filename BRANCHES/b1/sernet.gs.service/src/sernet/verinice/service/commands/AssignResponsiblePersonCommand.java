@@ -95,7 +95,6 @@ public class AssignResponsiblePersonCommand extends GenericCommand {
     	try {
     		List<Person> personenUmsetzungDurch = getPersonsbyProperty(massnahme);
     		Set<Property> rolesToSearch = findRole(massnahme);
-
     		if (personenUmsetzungDurch != null && !personenUmsetzungDurch.isEmpty()) {
     			for (Person person : personenUmsetzungDurch) {
     				controlExistsLinks(massnahme, linkedPersons, rolesToSearch, person);
@@ -105,7 +104,7 @@ public class AssignResponsiblePersonCommand extends GenericCommand {
     			findLinkedPersonsUpTree(massnahme, linkedPersonsWithRole, rolesToSearch);
     			if (!linkedPersonsWithRole.isEmpty() && linkedPersonsWithRole != null) {
     				for (Person person : linkedPersonsWithRole) {
-    					createLinkCommand(massnahme, person, MassnahmenUmsetzung.MNUMS_RELATION_ID);
+    					createLink(massnahme, person);
     				}
     			}
     		}
@@ -122,7 +121,7 @@ public class AssignResponsiblePersonCommand extends GenericCommand {
      * @throws CommandException
      */
     private void controlExistsLinks(MassnahmenUmsetzung massnahme, Set<CnALink> linkedPersons, Set<Property> rolesToSearch, Person person) throws CommandException {
-    	Set<CnALink> allLinks = massnahme.getLinksUp();
+        Set<CnALink> allLinks = massnahme.getLinksUp();
     	for (CnALink link : allLinks) {
     		if (link.getId().getTypeId().equals(MassnahmenUmsetzung.MNUMS_RELATION_ID)) {
     			linkedPersons.add(link);
@@ -131,7 +130,7 @@ public class AssignResponsiblePersonCommand extends GenericCommand {
     	}
     	for (Property role : rolesToSearch) {
     		if (person.hasRole(role)) {
-    			sortLinks(massnahme, linkedPersons, person);
+    			checkCreateLink(massnahme, linkedPersons, person);
     		}
     	}
     }
@@ -153,19 +152,22 @@ public class AssignResponsiblePersonCommand extends GenericCommand {
      * @param linkedPersons
      * @throws CommandException
      */
-    private void sortLinks(MassnahmenUmsetzung massnahme, Set<CnALink> linkedPersons, Person person) throws CommandException {
-    	boolean linkExists;
-    	linkExists = true;
+    private void checkCreateLink(MassnahmenUmsetzung massnahme, Set<CnALink> linkedPersons, Person person) throws CommandException {
+    	boolean linkExists = false;
     	for (CnALink link :linkedPersons  ) {
     		// ist der link schon vorhanden ?
-    		Integer dependantId = link.getDependant().getDbId();
-    		if (person.getDbId() == dependantId) {
-    			linkExists = false;
-    			break;
-    		}
+    	    if(link.getDependant().equals(person)){
+    	        linkExists = true;
+    	        break;
+    	    }
+//    		Integer dependantId = link.getDependant().getDbId();
+//    		if (person.getDbId().equals(dependantId)) {
+//    			linkExists = true;
+//    			break;
+//    		}
     	}
     	if (!linkExists) {
-    		createLinkCommand(massnahme, person, MassnahmenUmsetzung.MNUMS_RELATION_ID);
+    		createLink(massnahme, person);
     	}
     }
 
@@ -174,9 +176,8 @@ public class AssignResponsiblePersonCommand extends GenericCommand {
      * @param person
      * @throws CommandException
      */
-    private CnALink createLinkCommand(MassnahmenUmsetzung massnahme, Person person, String typeId) throws CommandException {
-        @SuppressWarnings("unchecked")
-        CreateLink command = new CreateLink(person, massnahme, MassnahmenUmsetzung.MNUMS_RELATION_ID);
+    private CnALink createLink(MassnahmenUmsetzung massnahme, Person person) throws CommandException {
+        CreateLink<CnALink, CnATreeElement, CnATreeElement> command = new CreateLink<CnALink, CnATreeElement, CnATreeElement>(person, massnahme, MassnahmenUmsetzung.MNUMS_RELATION_ID);
         getCommandService().executeCommand(command);
         changedElements.add(command.getLink());
         return command.getLink();
@@ -213,14 +214,10 @@ public class AssignResponsiblePersonCommand extends GenericCommand {
     private void findLinkedPersonsUpTree(CnATreeElement currentElement, Set<Person> linkedPersons, Set<Property> rolesToSearch) {
     	IBaseDao<Person, Serializable> personDAO = getDaoFactory().getDAO(Person.class);
     	try {
-    		Set<CnALink> allLinks = currentElement.getLinksUp();
-    		if(!allLinks.isEmpty()){
-    			for (CnALink link : allLinks) {
-    				CnATreeElement target = link.getDependency();
-    				if(target.equals(currentElement)) {
-    					target = link.getDependant();
-    					if (target.getTypeId().equals(Person.TYPE_ID)) {
-    						Person person = personDAO.findById(target.getDbId());
+    			for (CnALink link : currentElement.getLinksUp()) {
+    				if(currentElement.equals(link.getDependency()) &&
+    				   link.getDependant().getTypeId().equals(Person.TYPE_ID)) {
+    						Person person = personDAO.findById(link.getDependant().getDbId());
     						for (Property role : rolesToSearch) {
     							if(person.hasRole(role)){
     								linkedPersons.add(person);
@@ -228,12 +225,9 @@ public class AssignResponsiblePersonCommand extends GenericCommand {
     						}
     					}
     				}
-    			}
-    		}
     		if (!ITVerbund.TYPE_ID.equals(currentElement.getTypeId()) && !Organization.TYPE_ID.equals(currentElement.getTypeId()) && currentElement.getParent() != null && linkedPersons.isEmpty()) {
     			findLinkedPersonsUpTree(currentElement.getParent(), linkedPersons, rolesToSearch);
     		}
-
     	} catch (Exception e) {
     		log.error("Error while searching relations", e);
     	}
