@@ -4,10 +4,26 @@ Bundle-Name: Swtclient
 Bundle-SymbolicName: sernet.hui.swtclient
 Bundle-Version: 1.1.2.qualifier
 Bundle-Localization: plugin
-Export-Package: sernet.hui.swt.dialogs,
- sernet.hui.swt.widgets,
- sernet.hui.swt.widgets.URL,
- sernet.hui.swt.widgets.multiselectionlist
+Export-Package: sernet.hui.swt.dialogs;uses:="org.eclipse.swt.widgets",
+ sernet.hui.swt.widgets;
+  uses:="org.eclipse.swt.events,
+   sernet.hui.common.connect,
+   org.eclipse.swt.custom,
+   org.eclipse.swt.graphics,
+   org.eclipse.swt.widgets,
+   sernet.hui.common.multiselectionlist",
+ sernet.hui.swt.widgets.URL;
+  uses:="sernet.hui.common.connect,
+   org.eclipse.swt.widgets,
+   sernet.hui.swt.widgets,
+   org.eclipse.jface.dialogs",
+ sernet.hui.swt.widgets.multiselectionlist;
+  uses:="org.eclipse.osgi.util,
+   sernet.hui.common.connect,
+   org.eclipse.swt.widgets,
+   sernet.hui.swt.widgets,
+   org.eclipse.swt.layout,
+   sernet.hui.common.multiselectionlist"
 Bundle-ClassPath: .,
  lib/swtcalendar.jar
 Bundle-ActivationPolicy: lazy
@@ -16,5 +32,5 @@ Require-Bundle: org.eclipse.core.commands;bundle-version="3.5.0",
  org.eclipse.jface;bundle-version="3.5.2",
  sernet.hui.common,
  org.eclipse.ui.forms;bundle-version="3.4.1",
- com.springsource.org.apache.log4j;bundle-version="1.2.15"
+ com.springsource.slf4j.org.apache.log4j;bundle-version="1.6.1"
 Import-Package: org.eclipse.osgi.util
