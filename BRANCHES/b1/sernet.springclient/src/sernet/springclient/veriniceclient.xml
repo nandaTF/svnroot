@@ -231,12 +231,8 @@ ZO RELAXEN UND WATSCHEN DER BLINKENLIGHTS.
 			</bean>
 		</property>
 	</bean>
-	 <bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory"/> 
- 	
-
+	 <bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory"/>
 	
-	<!--<bean id="messageFactory" class="org.springframework.ws.server.endpoint.mapping.PayloadRootQNameEndpointMapping"/> -->
-
 	<bean id="webServiceTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
 		<constructor-arg ref="messageFactory" />
 		<property name="messageSender">
