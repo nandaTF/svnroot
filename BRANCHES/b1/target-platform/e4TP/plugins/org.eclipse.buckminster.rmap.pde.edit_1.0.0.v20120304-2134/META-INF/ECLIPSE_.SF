@@ -1,0 +1,67 @@
+Signature-Version: 1.0
+SHA1-Digest-Manifest: QPk2AhFFi3eOCwRghpB9c37xfI4=
+Created-By: 1.6.0 (IBM Corporation)
+SHA1-Digest-Manifest-Main-Attributes: kND33+0yesb5yXoKpwQ2DhTH8tg=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeEditPlugin.class
+SHA1-Digest: p4l32xMopRWR2kzvNxbVL+bFe3s=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeItemProviderAdapter
+ Factory.class
+SHA1-Digest: xZoo89RYVZpPnfyQhQ+2ZDilMJ0=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PDEMapProviderItemProv
+ ider.class
+SHA1-Digest: +0jNoXAlCwbacGsDVsHeVJNmvmE=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: SAqY+5ITAL0mkdYeijlSRhyIaZk=
+
+Name: icons/full/ctool16/CreateResourceMap_matchers_PDEMapProvider.gif
+SHA1-Digest: HoA6+CoE0HRvsm4LL5qFQA9vI4I=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeEditPlugin$Implemen
+ tation.class
+SHA1-Digest: 62NPmxvi7u9faOSyDOlOVIv/sa0=
+
+Name: icons/full/ctool16/CreateSearchPath_providers_PDEMapProvider.gif
+SHA1-Digest: X5kc3PY4XPAL+obzasTxLqR0lSs=
+
+Name: about.html
+SHA1-Digest: RFnFY5i6hK2a00zCI4wbOCjJRx4=
+
+Name: plugin.properties
+SHA1-Digest: kHDKlEHpiip99dN8epWWUSFLeX8=
+
+Name: icons/full/obj16/PDEMapProvider.gif
+SHA1-Digest: 6FR4TYKKxDapfJ/Sm0E0/ZgAXeA=
+
+Name: icons/full/ctool16/CreatePDEMapProvider_replace_Replace.gif
+SHA1-Digest: 1WuJGIQovJ/Ew4VvXcM08tghvuQ=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeItemProviderAdapter
+ Factory$CommonChildCreationExtender.class
+SHA1-Digest: kcWHyykJWtcAEVGcN/WsbNn0xn0=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeItemProviderAdapter
+ Factory$RmapChildCreationExtender$CreationSwitch.class
+SHA1-Digest: lgeCwWdgTzeaqqWPqYb0f3dXMow=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeItemProviderAdapter
+ Factory$CommonChildCreationExtender$CreationSwitch.class
+SHA1-Digest: WPZjQOl7B3NLAJEnF3Xk4qcHmdk=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeItemProviderAdapter
+ Factory$RmapChildCreationExtender.class
+SHA1-Digest: 29J74Q5tonwpMCXN5ewe1ZCKqc8=
+
+Name: icons/full/ctool16/CreatePDEMapProvider_replacements_Replace.gif
+SHA1-Digest: clDLcCivMNHf52tu3kxTVOSTj6o=
+
+Name: icons/full/ctool16/CreateDocumentRoot_providers_PDEMapProvider.g
+ if
+SHA1-Digest: FTAGTpCkmromeshHOzh41m6VTos=
+
+Name: plugin.xml
+SHA1-Digest: oD5QP4tPCmc5dZ69x5Tm2iZt1dA=
+

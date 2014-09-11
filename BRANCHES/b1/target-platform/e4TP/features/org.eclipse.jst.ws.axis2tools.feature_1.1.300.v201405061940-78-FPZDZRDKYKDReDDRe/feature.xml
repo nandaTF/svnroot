@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.jst.ws.axis2tools.feature"
+      label="%featureName"
+      version="1.1.300.v201405061940-78-FPZDZRDKYKDReDDRe"
+      provider-name="%providerName"
+      plugin="org.eclipse.jst.ws.axis2.ui"
+      
+      >
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %feature.copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <plugin
+         id="org.eclipse.jst.ws.axis2.core"
+         download-size="0"
+         install-size="0"
+         version="1.0.300.v201310240024"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jst.ws.axis2.ui"
+         download-size="0"
+         install-size="0"
+         version="1.0.400.v201310240024"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jst.ws.axis2.consumption.core"
+         download-size="0"
+         install-size="0"
+         version="1.0.200.v201310240024"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jst.ws.axis2.consumption.ui"
+         download-size="0"
+         install-size="0"
+         version="1.0.200.v201310240024"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jst.ws.axis2.creation.core"
+         download-size="0"
+         install-size="0"
+         version="1.0.200.v201310240024"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jst.ws.axis2.creation.ui"
+         download-size="0"
+         install-size="0"
+         version="1.0.200.v201310240024"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jst.ws.axis2.ui.doc.user"
+         download-size="0"
+         install-size="0"
+         version="1.0.200.v201310240024"
+         unpack="false"/>
+
+</feature>

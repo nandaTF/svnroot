@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.jst.server_adapters.ext.feature"
+      label="%featureName"
+      version="3.3.300.v20140501_1027-46FKs9oB58F6KBJl8JA8"
+      provider-name="%providerName"
+      
+      >
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <plugin
+         id="org.eclipse.jst.server.tomcat.core"
+         download-size="0"
+         install-size="0"
+         version="1.1.600.v20140525_1310"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jst.server.tomcat.ui"
+         download-size="0"
+         install-size="0"
+         version="1.1.400.v20131130_1502"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jst.server.generic.jonas"
+         download-size="0"
+         install-size="0"
+         version="1.5.400.v20130918_1641"/>
+
+</feature>

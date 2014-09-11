@@ -1,0 +1,29 @@
+Signature-Version: 1.0
+SHA1-Digest-Manifest: gx3VGPM3r//IKpgs6gel1q/6SPc=
+Created-By: 1.6.0 (IBM Corporation)
+SHA1-Digest-Manifest-Main-Attributes: c4RQSUKvXMjqa4uW60vM8IpHuFA=
+
+Name: .options
+SHA1-Digest: G1XbJ/CbyIRpRCWJUaHayqNB9/g=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: uk4t1kMMWZihbe+dOa9l8Z4yJw8=
+
+Name: drivers/readme.txt
+SHA1-Digest: Ad8TLpXkErunayuXVW2UR0Ekcc8=
+
+Name: oda-jdbc.jar
+SHA1-Digest: Ju209FI5LGP9Matlhi2GOoR/flk=
+
+Name: about.html
+SHA1-Digest: sp+MJJREp1IOiZdau8mgdyqxZuo=
+
+Name: plugin.xml
+SHA1-Digest: 67BWdhZU5Y9fLi0xvxj2ZvEFQw8=
+
+Name: plugin.properties
+SHA1-Digest: FAakK0K0nRkVozhT2ZsYNAXmoa0=
+
+Name: schema/driverinfo.exsd
+SHA1-Digest: fG4oyDjNo79dcchQhWaH4EymdI0=
+

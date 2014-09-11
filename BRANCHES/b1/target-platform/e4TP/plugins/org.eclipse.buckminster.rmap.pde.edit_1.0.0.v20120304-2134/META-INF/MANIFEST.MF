@@ -1,0 +1,85 @@
+Manifest-Version: 1.0
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6,J2SE-1.5
+Bundle-SymbolicName: org.eclipse.buckminster.rmap.pde.edit;singleton:=
+ true
+Eclipse-SourceReferences: scm:git:git://git.eclipse.org/gitroot/buckmi
+ nster/buckminster.git
+Bundle-Activator: org.eclipse.buckminster.rmap.pde.provider.PdeEditPlu
+ gin$Implementation
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.8.0,4.0.0)
+ ",org.eclipse.buckminster.rmap.pde;visibility:="reexport";bundle-vers
+ ion="[1.0.0,2.0.0)",org.eclipse.buckminster.rmap.edit;visibility:="re
+ export";bundle-version="[1.1.0,2.0.0)"
+Bundle-Version: 1.0.0.v20120304-2134
+Export-Package: org.eclipse.buckminster.rmap.pde.provider
+Ant-Version: Apache Ant 1.8.3
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: %providerName
+Bundle-Name: %pluginName
+Created-By: 1.6.0_21-b06 (Sun Microsystems Inc.)
+Bundle-ManifestVersion: 2
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeEditPlugin.class
+SHA1-Digest: Pjl1Z9kLwWpSFVvrTFgk9la/YvI=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeItemProviderAdapter
+ Factory.class
+SHA1-Digest: iMhYf7FVkIHSMBwlXWBeGL2ElTA=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PDEMapProviderItemProv
+ ider.class
+SHA1-Digest: Pa+mUDfvq/gRv4bV/V435asyO1M=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: KyT9FF7C7t86NoBoa2kZT3ZJBfw=
+
+Name: icons/full/ctool16/CreateResourceMap_matchers_PDEMapProvider.gif
+SHA1-Digest: 1ogPvGJ2iVQvIW+1tu/X1YrbtCk=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeEditPlugin$Implemen
+ tation.class
+SHA1-Digest: X9Yvda+qUHwDGnpErkZ7jz6V/44=
+
+Name: icons/full/ctool16/CreateSearchPath_providers_PDEMapProvider.gif
+SHA1-Digest: Gc9vFg4Bk0MWZwRmsMnerZwLf5U=
+
+Name: about.html
+SHA1-Digest: HtHd2CPqSsvfOuKdgMJ606/cdso=
+
+Name: plugin.properties
+SHA1-Digest: LAUZQVT6oi7ysy23ruD458LaSIU=
+
+Name: icons/full/obj16/PDEMapProvider.gif
+SHA1-Digest: 0gvIhMSrhltUsML916LcDVM3JLc=
+
+Name: icons/full/ctool16/CreatePDEMapProvider_replace_Replace.gif
+SHA1-Digest: P7FBGRoG1JRJGe7qn1nPbLueDRE=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeItemProviderAdapter
+ Factory$RmapChildCreationExtender$CreationSwitch.class
+SHA1-Digest: qz/PjfN1v4bG8CUKw7ldTMPeOe0=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeItemProviderAdapter
+ Factory$CommonChildCreationExtender.class
+SHA1-Digest: P47Ece0P6CfpuH5sFP9B8AVAE3c=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeItemProviderAdapter
+ Factory$RmapChildCreationExtender.class
+SHA1-Digest: xWD8yyLU0aBwKv+C85Rof07l444=
+
+Name: org/eclipse/buckminster/rmap/pde/provider/PdeItemProviderAdapter
+ Factory$CommonChildCreationExtender$CreationSwitch.class
+SHA1-Digest: 8H5lLmMCbC9K0FiScgCbKiiLqyU=
+
+Name: icons/full/ctool16/CreatePDEMapProvider_replacements_Replace.gif
+SHA1-Digest: P7FBGRoG1JRJGe7qn1nPbLueDRE=
+
+Name: icons/full/ctool16/CreateDocumentRoot_providers_PDEMapProvider.g
+ if
+SHA1-Digest: Z3n3B3dbmO3xZ0sRsKbJ70ApXME=
+
+Name: plugin.xml
+SHA1-Digest: lN0UGP4Hrd3Bb8qcFE8ioCzIlCo=
+

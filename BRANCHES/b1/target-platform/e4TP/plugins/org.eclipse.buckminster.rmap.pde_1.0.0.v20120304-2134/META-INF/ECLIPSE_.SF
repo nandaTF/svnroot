@@ -1,0 +1,68 @@
+Signature-Version: 1.0
+SHA1-Digest-Manifest: FjquKS2gcQNU0qkvJ3SSk5Rkz/4=
+Created-By: 1.6.0 (IBM Corporation)
+SHA1-Digest-Manifest-Main-Attributes: Mlx7vxc0hl5SvSEv02pXvG0/p6M=
+
+Name: model/pde.ecore
+SHA1-Digest: 0AL6b1o1iGLsoA/lem1l/unMJrQ=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: SAqY+5ITAL0mkdYeijlSRhyIaZk=
+
+Name: org/eclipse/buckminster/rmap/pde/PdePackage.class
+SHA1-Digest: seOqz3od4YxunTTzK/81SgZ0nRc=
+
+Name: model/pde.xsd
+SHA1-Digest: uYm5maSSwN9K8tgkVN5+n+8gYbU=
+
+Name: org/eclipse/buckminster/rmap/pde/util/PdeSwitch.class
+SHA1-Digest: IP93l0FilN2WuiL0nwx8qq/Flkw=
+
+Name: org/eclipse/buckminster/rmap/pde/impl/PdePackageImpl.class
+SHA1-Digest: WFEcEsve/YbXkfCPPKhlJvOBwSg=
+
+Name: org/eclipse/buckminster/rmap/pde/PdeFactory.class
+SHA1-Digest: BQpXLCxHVOFz27bR63ytA4ePiZI=
+
+Name: org/eclipse/buckminster/rmap/pde/util/MapFileEntry.class
+SHA1-Digest: klYlB8y7IofOs4xQH68eJ2vWGTg=
+
+Name: org/eclipse/buckminster/rmap/pde/impl/PdeFactoryImpl.class
+SHA1-Digest: x9bn0gry2xJJhk/+rzI7NHIYuv0=
+
+Name: about.html
+SHA1-Digest: RFnFY5i6hK2a00zCI4wbOCjJRx4=
+
+Name: org/eclipse/buckminster/rmap/pde/PDEMapProvider.class
+SHA1-Digest: 6yTGKV6TFwJenIpX6/hve6SCEUc=
+
+Name: plugin.properties
+SHA1-Digest: Xw9OfYHinrbzDG0ei53nLIO/I84=
+
+Name: org/eclipse/buckminster/rmap/pde/impl/PDEMapProviderImpl.class
+SHA1-Digest: ZJamVRjzEQT1Cr1JEGd4OiBsuqI=
+
+Name: org/eclipse/buckminster/rmap/pde/messages.properties
+SHA1-Digest: FG7SG/S1YCcdggMwr/oB616wvW0=
+
+Name: org/eclipse/buckminster/rmap/pde/util/PdeAdapterFactory.class
+SHA1-Digest: yVYHJr8fZs0aCzUWu4175RuA9Uk=
+
+Name: org/eclipse/buckminster/rmap/pde/PdePackage$Literals.class
+SHA1-Digest: aRc1KI6ZKWrajHuQ8JTyjkZ2SlY=
+
+Name: org/eclipse/buckminster/rmap/pde/util/MapFile.class
+SHA1-Digest: 8bNmhFLEntr246H5rQQZVKRMyx4=
+
+Name: org/eclipse/buckminster/rmap/pde/Messages.class
+SHA1-Digest: 16bfKdjRQ0DTZjNJ2U3o9LqiRMA=
+
+Name: plugin.xml
+SHA1-Digest: 2Oc18xwzqPRGKllZkNuwnacD1/Y=
+
+Name: model/pde.genmodel
+SHA1-Digest: a9AqQHjV2jXA+dZYX9c33KWfLhk=
+
+Name: org/eclipse/buckminster/rmap/pde/util/PdeAdapterFactory$1.class
+SHA1-Digest: HLzhw3xrkKhd5ourv7Z0ppMrt24=
+

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- contextQualifierLength=14 -->
+<!-- contextQualifierLength=14 -->
+<feature
+      id="org.eclipse.buckminster.core.feature"
+      label="%featureName"
+      version="1.5.0.v20130207-0721"
+      provider-name="%providerName"
+      plugin="org.eclipse.buckminster.ui">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <plugin
+         id="org.eclipse.buckminster.ui"
+         download-size="0"
+         install-size="0"
+         version="1.4.0.v20120823-1443"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.cmdline"
+         download-size="0"
+         install-size="0"
+         version="1.0.350.v20120405-0431"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.installer"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.runtime"
+         download-size="0"
+         install-size="0"
+         version="1.3.0.v20121128-1216"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.ant"
+         download-size="0"
+         install-size="0"
+         version="1.2.360.v20120304-2134"/>
+
+   <plugin
+         id="org.eclipse.buckminster.model.common"
+         download-size="0"
+         install-size="0"
+         version="1.1.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.model.common.edit"
+         download-size="0"
+         install-size="0"
+         version="1.1.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.rmap"
+         download-size="0"
+         install-size="0"
+         version="1.1.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.rmap.edit"
+         download-size="0"
+         install-size="0"
+         version="1.1.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.rmap.editor"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.mspec"
+         download-size="0"
+         install-size="0"
+         version="1.1.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.mspec.edit"
+         download-size="0"
+         install-size="0"
+         version="1.1.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.mspec.editor"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.core"
+         download-size="0"
+         install-size="0"
+         version="1.3.0.v20130207-0721"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.sax"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.download"
+         download-size="0"
+         install-size="0"
+         version="1.1.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.generic"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.generic.ui"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.v20120904-1512"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.executor"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.fetcher"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.osgi.filter"
+         download-size="0"
+         install-size="0"
+         version="1.1.0.v20120304-2134"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.buckminster.ui.dependency.visualizer"
+         download-size="0"
+         install-size="0"
+         version="1.1.1.v20120308-0830"
+         unpack="false"/>
+
+</feature>

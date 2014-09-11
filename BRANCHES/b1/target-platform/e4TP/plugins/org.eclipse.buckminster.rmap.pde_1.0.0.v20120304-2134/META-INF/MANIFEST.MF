@@ -1,0 +1,83 @@
+Manifest-Version: 1.0
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6,J2SE-1.5
+Bundle-SymbolicName: org.eclipse.buckminster.rmap.pde;singleton:=true
+Eclipse-SourceReferences: scm:git:git://git.eclipse.org/gitroot/buckmi
+ nster/buckminster.git
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.8.0,4.0.0)
+ ",org.eclipse.buckminster.rmap;visibility:="reexport";bundle-version=
+ "[1.1.0,2.0.0)",org.eclipse.pde.build;bundle-version="[3.8.0,4.0.0)"
+Bundle-Version: 1.0.0.v20120304-2134
+Export-Package: org.eclipse.buckminster.rmap.pde,org.eclipse.buckminst
+ er.rmap.pde.impl,org.eclipse.buckminster.rmap.pde.util
+Ant-Version: Apache Ant 1.8.3
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: %providerName
+Bundle-Name: %pluginName
+Created-By: 1.6.0_21-b06 (Sun Microsystems Inc.)
+Bundle-ManifestVersion: 2
+
+Name: model/pde.ecore
+SHA1-Digest: tBipKfSfHyM+2f+DodPLEtgyt9U=
+
+Name: META-INF/eclipse.inf
+SHA1-Digest: KyT9FF7C7t86NoBoa2kZT3ZJBfw=
+
+Name: org/eclipse/buckminster/rmap/pde/PdePackage.class
+SHA1-Digest: Qcf09bXp8DOfQZO9OgKMMpbdJAQ=
+
+Name: model/pde.xsd
+SHA1-Digest: K+2OW0NPV/MSKWk9soXpQoQJxow=
+
+Name: org/eclipse/buckminster/rmap/pde/util/PdeSwitch.class
+SHA1-Digest: cNIeo1YS2NbtH/DbLEscUvZSPT8=
+
+Name: org/eclipse/buckminster/rmap/pde/impl/PdePackageImpl.class
+SHA1-Digest: glyjhQpGkfwMa3Lzj6QzZHwJhLA=
+
+Name: org/eclipse/buckminster/rmap/pde/PdeFactory.class
+SHA1-Digest: aJUjzC5QB9a6UwY0ByPxMhzpiK4=
+
+Name: org/eclipse/buckminster/rmap/pde/util/MapFileEntry.class
+SHA1-Digest: 2oZBdHhlyI9ujnRlY+d0gEPWSs4=
+
+Name: org/eclipse/buckminster/rmap/pde/impl/PdeFactoryImpl.class
+SHA1-Digest: BYMOX+wOS7o4DBLL/8YzMO8/0eQ=
+
+Name: about.html
+SHA1-Digest: HtHd2CPqSsvfOuKdgMJ606/cdso=
+
+Name: org/eclipse/buckminster/rmap/pde/PDEMapProvider.class
+SHA1-Digest: 7Jj8lZzkd61ypKpDy9fTjT1xKs8=
+
+Name: plugin.properties
+SHA1-Digest: riKphAJNzBAw6DkMIzfEf6l4sNA=
+
+Name: org/eclipse/buckminster/rmap/pde/util/PdeAdapterFactory.class
+SHA1-Digest: h40dFs3rqR5zuXcwLfj/relSTM8=
+
+Name: org/eclipse/buckminster/rmap/pde/messages.properties
+SHA1-Digest: X2iHZdIXRoic6a661iVn1700IfQ=
+
+Name: org/eclipse/buckminster/rmap/pde/impl/PDEMapProviderImpl.class
+SHA1-Digest: aENrZfB3HujGAmbGhPRgJa5Gs1M=
+
+Name: org/eclipse/buckminster/rmap/pde/PdePackage$Literals.class
+SHA1-Digest: xxM4EPn6eWCQUm0QtiZ7ZlepojI=
+
+Name: org/eclipse/buckminster/rmap/pde/util/MapFile.class
+SHA1-Digest: uCtKYthdkDlocxD1tWfyu0TGwV4=
+
+Name: org/eclipse/buckminster/rmap/pde/util/PdeAdapterFactory$1.class
+SHA1-Digest: AgsPzcKhsYQeQMZqJmD4MbFiYbw=
+
+Name: model/pde.genmodel
+SHA1-Digest: 7pN8VIIF9H+8biy0N2tntcWT/4Y=
+
+Name: plugin.xml
+SHA1-Digest: utuBZ/XT1u9zR99m0FZTcOHlk6s=
+
+Name: org/eclipse/buckminster/rmap/pde/Messages.class
+SHA1-Digest: Mqawc/kqRYcqCwOIyGwPvP/ZLZY=
+
