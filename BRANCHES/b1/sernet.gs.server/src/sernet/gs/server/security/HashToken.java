@@ -37,7 +37,7 @@ public class HashToken extends UsernamePasswordAuthenticationToken {
      */
     public HashToken(String name, Object password, String realmName) {     
         super(name,
-              SpringSecurityUtil.encodePasswordInA1Format(name, realmName, (String) password));
+              SpringSecurityUtil.getInstance().encodePasswordInA1Format(name, realmName, (String) password));
         setAuthenticated(false);
     }
 

@@ -1,0 +1,619 @@
+
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>SpringSource Enterprise Bundle Repository</title>
+		
+		<link rel="stylesheet" href="/repository/resources/dijit/themes/tundra/tundra.css" type="text/css" />
+		
+		<link rel="stylesheet" href="/repository/resources/styles/main.css" type="text/css"/>
+		
+		<link rel="stylesheet" href="/repository/resources/styles/colors.css" type="text/css"/>
+		
+		<link rel="stylesheet" href="/repository/resources/styles/local.css" type="text/css"/>
+		
+		<link rel="stylesheet" href="/repository/resources/styles/print.css" type="text/css" media="print"/>
+		
+		<script type="text/javascript" src="/repository/resources/dojo/dojo.js"></script>
+		
+		<script type="text/javascript" src="/repository/resources/spring/Spring.js"></script>
+		
+		<script type="text/javascript" src="/repository/resources/spring/Spring-Dojo.js"></script>
+		
+			<!-- google analytics -->
+			<script type="text/javascript">
+				var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+				document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+			</script>
+			<script type="text/javascript">
+				var pageTracker = _gat._getTracker("UA-537741-4");
+				pageTracker._initData();
+				pageTracker._trackPageview();
+			</script>
+		
+		
+
+
+
+
+<link rel="alternate" type="application/atom+xml" href="/repository/app/bundle/version/detail/atom?name=org.springframework.aspects&amp;version=3.2.5.RELEASE" />
+
+<!-- 
+Some icons from Silk icon set 1.3 by Mark James, http://www.famfamfam.com/lab/icons/silk/
+ -->
+	</head>
+	<body class="main tundra">
+		<div id="page">
+			
+
+
+
+<div id="header">
+	<div id="name-and-company">
+		<div id='site-name'>
+			
+			<a href="/repository/" title="Site Name" rel="home">
+				SpringSource Enterprise Bundle Repository
+			</a>
+		</div>
+		<div id='company-name'>
+			<a href="http://www.springsource.com/" title="SpringSource">
+				SpringSource
+			</a>
+		</div>         
+	</div> <!-- /name-and-company -->
+</div> <!-- /header -->
+
+			
+
+<div id="primary-navigation">
+	<div id="primary-left"></div>
+	<div id="primary-right">
+		<ul>
+			<li><a href="http://www.springsource.com/products/suite/dmserver">SpringSource dm Server</a></li>
+			<li><a href="http://www.springframework.org/osgi">Spring Dynamic Modules</a></li>
+		</ul>
+	</div>
+</div><!-- /primary-navigation -->
+			<div id="container">
+				<div id="secondary-navigation">
+					
+
+
+
+<ul>
+    <li>
+    	
+    	<a href="/repository/app/">Home</a>
+    </li>
+    <li>
+    	
+    	<a href="/repository/app/search">Advanced Search</a>
+    </li>
+	<li>
+		
+		<a href="/repository/app/bundle">Browse by Bundle</a>
+	</li>
+	<li>
+		
+		<a href="/repository/app/library">Browse by Library</a>
+	</li>
+	<li>
+		
+		<a href="/repository/app/faq">FAQ</a>
+	</li>
+	
+	
+</ul>
+
+				</div><!-- /secondary-navigation -->
+				<div id="content">
+					
+
+
+
+<form id="quick-search" action="/repository/app/search" method="get">
+	<fieldset>
+		<input type="text" name="query" />
+		<input type="submit" name="submit" value="Search" />
+	</fieldset>
+	<script type="text/javascript">
+		dojo.addOnLoad(function(){
+			var defaultQuery = 'Quick Search';
+			var form = dojo.byId("quick-search");
+			var submit = form.elements['submit'];
+			var input =  form.elements['query'];
+			submit.parentNode.removeChild(submit);
+			input.value = defaultQuery;
+			input.onfocus = function() { if (this.value == defaultQuery) this.value = ''; };
+			input.onblur = function() { if (this.value == '') this.value = defaultQuery; };
+		});
+	</script>
+</form>
+
+					<div id="breadcrumb">
+						
+
+
+
+<a href="/repository/app/">Home</a>
+&gt;
+
+<a href="/repository/app/bundle">Bundles</a>
+
+	&gt;
+	
+	<a href="/repository/app/bundle/detail?name=org.springframework.aspects">Spring Aspects</a>
+	
+		&gt;
+		
+		<a href="/repository/app/bundle/version/detail?name=org.springframework.aspects&amp;version=3.2.5.RELEASE">3.2.5.RELEASE</a>
+	
+
+
+					</div>
+					
+
+
+
+
+
+<h1>Spring Aspects 3.2.5.RELEASE</h1>
+			
+<div class="report-issue">
+	
+	<a href="/repository/app/issues" target="_blank">
+		Report issues with this bundle
+	</a>
+</div>
+
+<div>org.springframework</div>
+<div>Added: 2013-12-02</div>
+
+
+
+
+	<div id="matching-package" class="spring-titlePane-open">
+	    <h2>Packages matching: 'aspect'</h2>
+	    
+
+
+<ul id="matching-package-list">
+	
+		
+	 		
+				<li>org.springframework.beans.factory.aspectj</li>
+			
+			
+		
+	
+		
+	 		
+				<li>org.springframework.cache.aspectj</li>
+			
+			
+		
+	
+		
+	 		
+				<li>org.springframework.context.annotation.aspectj</li>
+			
+			
+		
+	
+		
+	 		
+				<li>org.springframework.orm.jpa.aspectj</li>
+			
+			
+		
+	
+		
+	 		
+				<li>org.springframework.scheduling.aspectj</li>
+			
+			
+		
+	
+		
+	 		
+				<li>org.springframework.transaction.aspectj</li>
+			
+			
+		
+	
+</ul>
+
+
+
+	</div>
+
+
+
+
+
+
+<h2>Download:</h2>
+<ul>
+	<li class="license">
+		
+		<a href="/repository/app/bundle/version/download?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;type=license">License</a>
+	</li>
+	<li class="binary">
+		
+		<a href="/repository/app/bundle/version/download?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;type=binary">Binary Jar</a>
+		
+		[<a href="/repository/app/bundle/version/download?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;type=binary-hash">SHA1</a>]
+	</li>
+	
+		<li class="source">
+			
+			<a href="/repository/app/bundle/version/download?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;type=source">Source Jar</a>
+			
+			[<a href="/repository/app/bundle/version/download?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;type=source-hash">SHA1</a>]
+		</li>
+	
+</ul>
+
+<h2>Ivy:</h2>
+<code class="block">&lt;dependency org="org.springframework" name="org.springframework.aspects" rev="3.2.5.RELEASE" /&gt;</code>
+
+<h2>Maven:</h2>
+<code class="block">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;org.springframework.aspects&lt;/artifactId&gt;
+    &lt;version&gt;3.2.5.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;</code>
+
+<h2>MANIFEST.MF</h2>
+<code class="block">Import-Bundle: org.springframework.aspects;version="[3.2.5.RELEASE,3.2.5.RELEASE]"</code>
+
+
+
+<div id="libraries" class="spring-titlePane-open">
+	<h2>Libraries (1)</h2>
+	
+	
+		<ul>
+			
+				<li>
+					
+					<a href="/repository/app/library/version/detail?name=org.springframework.spring&amp;version=3.2.5.RELEASE">Spring Framework</a>
+					3.2.5.RELEASE
+				</li>
+			
+		</ul>
+	
+</div>
+
+<div id="dependencies" class="spring-titlePane">
+	<h2>Required Dependencies (6)</h2>
+	
+	<p><a href="/repository/app/bundle/version/dependencies?name=org.springframework.aspects&amp;version=3.2.5.RELEASE"><em>Detailed dependency analysis</em></a></p>
+	
+	
+		<table class="bordered-table">
+			<tr>
+				<th>Bundle Name</th>
+				<th>Bundle Symbolic Name</th>
+				<th>Version</th>
+			</tr>
+			
+				
+				<tr>
+					<td><a href="/repository/app/bundle/version/detail?name=org.springframework.aop&amp;version=3.2.5.RELEASE">Spring AOP</a></td>
+					<td><a href="/repository/app/bundle/version/detail?name=org.springframework.aop&amp;version=3.2.5.RELEASE">org.springframework.aop</a></td>
+					<td>3.2.5.RELEASE</td>
+				</tr>
+			
+				
+				<tr>
+					<td><a href="/repository/app/bundle/version/detail?name=com.springsource.org.aopalliance&amp;version=1.0.0">AOP Alliance API</a></td>
+					<td><a href="/repository/app/bundle/version/detail?name=com.springsource.org.aopalliance&amp;version=1.0.0">com.springsource.org.aopalliance</a></td>
+					<td>1.0.0</td>
+				</tr>
+			
+				
+				<tr>
+					<td><a href="/repository/app/bundle/version/detail?name=com.springsource.org.apache.commons.logging&amp;version=1.1.1">Apache Commons Logging</a></td>
+					<td><a href="/repository/app/bundle/version/detail?name=com.springsource.org.apache.commons.logging&amp;version=1.1.1">com.springsource.org.apache.commons.logging</a></td>
+					<td>1.1.1</td>
+				</tr>
+			
+				
+				<tr>
+					<td><a href="/repository/app/bundle/version/detail?name=org.springframework.core&amp;version=3.2.5.RELEASE">Spring Core</a></td>
+					<td><a href="/repository/app/bundle/version/detail?name=org.springframework.core&amp;version=3.2.5.RELEASE">org.springframework.core</a></td>
+					<td>3.2.5.RELEASE</td>
+				</tr>
+			
+				
+				<tr>
+					<td><a href="/repository/app/bundle/version/detail?name=com.springsource.javax.xml.stream&amp;version=1.0.1">Java XML Stream API (StAX)</a></td>
+					<td><a href="/repository/app/bundle/version/detail?name=com.springsource.javax.xml.stream&amp;version=1.0.1">com.springsource.javax.xml.stream</a></td>
+					<td>1.0.1</td>
+				</tr>
+			
+				
+				<tr>
+					<td><a href="/repository/app/bundle/version/detail?name=org.springframework.beans&amp;version=3.2.5.RELEASE">Spring Beans</a></td>
+					<td><a href="/repository/app/bundle/version/detail?name=org.springframework.beans&amp;version=3.2.5.RELEASE">org.springframework.beans</a></td>
+					<td>3.2.5.RELEASE</td>
+				</tr>
+			
+		</table>
+	
+</div>
+
+<div id="exports" class="spring-titlePane">
+	<h2>Exported Packages (7)</h2>
+	<div id="export-fragment"></div>
+	
+	
+		<ul>
+			
+				<li>
+					
+					<a id="export-org.springframework.beans.factory.aspectj" href="/repository/app/bundle/version/export?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;package=org.springframework.beans.factory.aspectj">org.springframework.beans.factory.aspectj</a>
+				</li>
+			
+				<li>
+					
+					<a id="export-org.springframework.cache.aspectj" href="/repository/app/bundle/version/export?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;package=org.springframework.cache.aspectj">org.springframework.cache.aspectj</a>
+				</li>
+			
+				<li>
+					
+					<a id="export-org.springframework.context.annotation.aspectj" href="/repository/app/bundle/version/export?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;package=org.springframework.context.annotation.aspectj">org.springframework.context.annotation.aspectj</a>
+				</li>
+			
+				<li>
+					
+					<a id="export-org.springframework.mock.staticmock" href="/repository/app/bundle/version/export?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;package=org.springframework.mock.staticmock">org.springframework.mock.staticmock</a>
+				</li>
+			
+				<li>
+					
+					<a id="export-org.springframework.orm.jpa.aspectj" href="/repository/app/bundle/version/export?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;package=org.springframework.orm.jpa.aspectj">org.springframework.orm.jpa.aspectj</a>
+				</li>
+			
+				<li>
+					
+					<a id="export-org.springframework.scheduling.aspectj" href="/repository/app/bundle/version/export?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;package=org.springframework.scheduling.aspectj">org.springframework.scheduling.aspectj</a>
+				</li>
+			
+				<li>
+					
+					<a id="export-org.springframework.transaction.aspectj" href="/repository/app/bundle/version/export?name=org.springframework.aspects&amp;version=3.2.5.RELEASE&amp;package=org.springframework.transaction.aspectj">org.springframework.transaction.aspectj</a>
+				</li>
+			
+		</ul>
+	
+</div>
+
+<div id="imports" class="spring-titlePane">
+	<h2>Imported Packages (21)</h2>
+	
+	
+		<table class="bordered-table">
+		<tr>
+			<th>Package Name</th>
+			<th>Version Range</th>
+			<th>Optional?</th>
+		</tr>
+			
+				<tr>
+					<td>org.aspectj.internal.lang.annotation</td>
+					<td>[1.7.1, 2.0.0)</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.aspectj.lang</td>
+					<td>[1.7.1, 2.0.0)</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.aspectj.lang.annotation</td>
+					<td>[1.7.1, 2.0.0)</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.aspectj.lang.reflect</td>
+					<td>[1.7.1, 2.0.0)</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.aspectj.runtime.internal</td>
+					<td>[1.7.1, 2.0.0)</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.aop.interceptor</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>false
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.beans</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>false
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.beans.factory</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>false
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.beans.factory.annotation</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>false
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.beans.factory.wiring</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>false
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.cache</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.cache.annotation</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.cache.interceptor</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.core.annotation</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>false
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.core.task</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>false
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.dao</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.orm.jpa</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.scheduling.annotation</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.transaction</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.transaction.annotation</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>true
+					</td>
+				</tr>
+			
+				<tr>
+					<td>org.springframework.transaction.interceptor</td>
+					<td>[3.2.5.RELEASE, 3.2.5.RELEASE]</td>
+					<td>true
+					</td>
+				</tr>
+			
+		</table>
+	
+</div>
+
+
+
+<script type="text/javascript">
+	dojo.query('.spring-titlePane-open > h2').forEach(function(titleElement){
+		Spring.addDecoration(new Spring.ElementDecoration({
+			elementId : titleElement.parentNode.id,
+			widgetType : 'dijit.TitlePane',
+			widgetAttrs : { title : titleElement.innerHTML, open : true }}));
+	}).style('display','none');
+	
+	dojo.query('.spring-titlePane > h2').forEach(function(titleElement){
+		Spring.addDecoration(new Spring.ElementDecoration({
+			elementId : titleElement.parentNode.id,
+			widgetType : 'dijit.TitlePane',
+			widgetAttrs : { title : titleElement.innerHTML, open : false }}));
+	}).style('display','none');
+	
+	dojo.query('#exports a').forEach(function(element){
+		Spring.addDecoration(new Spring.AjaxEventDecoration({
+			elementId : element.id,
+			event : 'onclick',
+			params : {fragments : 'export-fragment'}
+		}));
+	});
+	
+	dojo.query('.spring-titlePane table.bordered-table, .spring-titlePane-open table.bordered-table').removeClass('bordered-table');
+</script>
+
+				</div> <!-- /content -->
+			</div> <!-- /container -->
+			
+
+<div id="footer-wrapper">
+	<div id="footer-left">
+		&copy; Copyright 2008 SpringSource. All Rights Reserved.
+	</div>
+	<div id="footer-right">
+		<a href="http://www.springsource.com/web/guest/contact">Contact SpringSource</a>
+	</div> 
+</div> <!-- /footer-wrapper -->
+
+		</div> <!-- /page -->
+		<script type="text/javascript">
+			dojo.require("dojo.NodeList-fx");
+			dojo.addOnLoad(function(){
+				var loadingImg = "<img id='loading_indicator' src='/repository/resources/images/ajax-loader.gif' alt='Loading...' />";
+				var parentNode = dojo.query("#content h1").slice(0,1);
+				parentNode.addClass('loading_indicator_parent');
+				parentNode.addContent(loadingImg);
+				var loadingNode = dojo.query('#loading_indicator');
+				var fadeInAnimation = loadingNode.fadeIn();
+				var fadeOutAnimation = loadingNode.fadeOut();
+				dojo.connect(Spring.remoting, "getResource", fadeInAnimation, "play");
+				dojo.connect(Spring.remoting, "submitForm", fadeInAnimation, "play");
+				dojo.connect(Spring.remoting, "handleResponse", fadeOutAnimation, "play");
+				dojo.connect(Spring.remoting, "handleError", fadeOutAnimation, "play");
+			});
+		</script>
+	</body>
+</html>

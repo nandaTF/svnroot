@@ -28,13 +28,17 @@ import org.springframework.security.crypto.codec.Hex;
  */
 public class SpringSecurityUtil {
     
-    public static String encodePasswordInA1Format(String username, String realm, String password) {
+    private SpringSecurityUtil() {};
+    
+    private static SpringSecurityUtil instance;
+    
+    public String encodePasswordInA1Format(String username, String realm, String password) {
         String a1 = username + ":" + realm + ":" + password;
 
         return md5Hex(a1);
     }
 
-    public static String md5Hex(String data) {
+    public String md5Hex(String data) {
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");
@@ -45,4 +49,10 @@ public class SpringSecurityUtil {
         return new String(Hex.encode(digest.digest(data.getBytes())));
     }
     
+    public static SpringSecurityUtil getInstance(){
+        if(instance == null){
+            instance = new SpringSecurityUtil();
+        }
+        return instance;
+    }
 }

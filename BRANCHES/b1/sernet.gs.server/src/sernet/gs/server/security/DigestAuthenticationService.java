@@ -80,7 +80,7 @@ public final class DigestAuthenticationService implements IAuthService {
 	    if(!getRightsServerHandler().isEnabled(getUsername(), ActionRightIDs.ACCOUNTSETTINGS)) {
 	        throw new SecurityException("Action is not allowed for the current user");
 	    }
-		return SpringSecurityUtil.encodePasswordInA1Format(username,
+		return SpringSecurityUtil.getInstance().encodePasswordInA1Format(username,
 		        entryPoint.getRealmName(), pass);
 	}
 
@@ -99,7 +99,7 @@ public final class DigestAuthenticationService implements IAuthService {
 	        throw new SecurityException(Messages.getString("AuthenticationService.0")); //$NON-NLS-1$
 	    }
 	    
-        return SpringSecurityUtil.encodePasswordInA1Format(username,
+        return SpringSecurityUtil.getInstance().encodePasswordInA1Format(username,
                 entryPoint.getRealmName(), pass);
     }
 	

@@ -254,7 +254,7 @@ public class LdapAuthenticatorImpl extends UserLoader implements LdapAuthenticat
      * @param password
      */
     private void checkAdminPassword(String username, String password) {
-        String hash = SpringSecurityUtil.encodePasswordInA1Format(username,
+        String hash = SpringSecurityUtil.getInstance().encodePasswordInA1Format(username,
                 passwordRealm, password);
         if (hash.equals(adminpass)){
             return;

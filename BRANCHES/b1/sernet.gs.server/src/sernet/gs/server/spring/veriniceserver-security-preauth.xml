@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:security="http://www.springframework.org/schema/security" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd 
 	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
     
 	<!-- BEGIN Security configuration ============================================================================ -->
@@ -27,7 +27,8 @@
     <!-- ATTENTION: verinice performs no authentication checks at all and it is extremely important -->
     <!-- that the external system is configured properly and protects all access to the application. -->
     
-    <bean id="preAuthFilter" class="org.springframework.security.ui.preauth.header.RequestHeaderPreAuthenticatedProcessingFilter">
+    <bean id="preAuthFilter" class="sernet.gs.server.security.PreAuthenticationProcessingFilter.java">
+    <!--  <bean id="preAuthFilter" class="org.springframework.security.ui.preauth.header.RequestHeaderPreAuthenticatedProcessingFilter"> -->
     	<security:custom-filter position="PRE_AUTH_FILTER" />
     	<!-- Name of HTTP-header containing the user name -->
     	<property name="principalRequestHeader" value="iv-user"/>

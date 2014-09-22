@@ -4,7 +4,7 @@
 <!-- http://docs.jboss.com/jbpm/v4/devguide/html_single/#springIntegration                     -->
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
     <bean id="springHelper" class="org.jbpm.pvm.internal.processengine.SpringHelper">
         <property name="jbpmCfg" value="sernet/verinice/bpm/jbpm.cfg.xml" />
