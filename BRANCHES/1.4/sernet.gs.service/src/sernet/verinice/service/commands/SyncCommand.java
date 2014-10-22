@@ -71,7 +71,7 @@ public class SyncCommand extends ChangeLoggingCommand implements IChangeLoggingC
 
     private SyncParameter parameter;
 
-    private int inserted, updated, deleted;
+    private int inserted, potentiallyUpdated, deleted;
 
     private List<String> errors = new ArrayList<String>();
 
@@ -135,8 +135,9 @@ public class SyncCommand extends ChangeLoggingCommand implements IChangeLoggingC
      * Called by soap web-service
      * 
      * @param sr SyncRequest
+     * @throws SyncParameterException 
      */
-    public SyncCommand(SyncRequest sr) {
+    public SyncCommand(SyncRequest sr) throws SyncParameterException {
         veriniceArchive = new PureXml();
         this.veriniceArchive.setSourceId(sr.getSourceId());
         this.veriniceArchive.setSyncData(sr.getSyncData());
@@ -196,7 +197,7 @@ public class SyncCommand extends ChangeLoggingCommand implements IChangeLoggingC
         elementSet = cmdInsertUpdate.getElementSet();
    
         inserted += cmdInsertUpdate.getInserted();
-        updated += cmdInsertUpdate.getUpdated();
+        potentiallyUpdated += cmdInsertUpdate.getUpdated();
     }
     
     private void doDelete() throws CommandException {
@@ -240,8 +241,8 @@ public class SyncCommand extends ChangeLoggingCommand implements IChangeLoggingC
         return inserted;
     }
 
-    public int getUpdated() {
-        return updated;
+    public int getPotentiallyUpdated() {
+        return potentiallyUpdated;
     }
 
     public int getDeleted() {

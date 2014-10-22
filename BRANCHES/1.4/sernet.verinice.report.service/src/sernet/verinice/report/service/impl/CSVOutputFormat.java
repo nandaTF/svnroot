@@ -20,7 +20,9 @@ package sernet.verinice.report.service.impl;
 import org.eclipse.birt.report.engine.api.DataExtractionOption;
 import org.eclipse.birt.report.engine.api.IDataExtractionOption;
 
+import sernet.verinice.model.report.AbstractOutputFormat;
 
+@Deprecated
 class CSVOutputFormat extends AbstractOutputFormat {
 
 	@Override
@@ -39,7 +41,7 @@ class CSVOutputFormat extends AbstractOutputFormat {
 	}
 	
 	@Override
-	IDataExtractionOption createBIRTExtractionOptions()
+	public IDataExtractionOption createBIRTExtractionOptions()
 	{
 		DataExtractionOption options = new DataExtractionOption();
 		options.setOutputFormat("csv");
@@ -48,7 +50,7 @@ class CSVOutputFormat extends AbstractOutputFormat {
 	}
 
 	@Override
-	boolean isRenderOutput() {
+	public boolean isRenderOutput() {
 		return false;
 	}
 

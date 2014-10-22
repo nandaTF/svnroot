@@ -17,18 +17,16 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main.actions;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.osgi.util.NLS;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
@@ -37,12 +35,10 @@ import org.eclipse.ui.PlatformUI;
 
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
+import sernet.gs.ui.rcp.main.actions.helper.UpdateConfigurationHelper;
 import sernet.gs.ui.rcp.main.bsi.dialogs.AccountDialog;
 import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
-import sernet.gs.ui.rcp.main.service.commands.PasswordException;
-import sernet.gs.ui.rcp.main.service.commands.UsernameExistsException;
-import sernet.gs.ui.rcp.main.service.crudcommands.LoadConfiguration;
 import sernet.hui.common.VeriniceContext;
 import sernet.hui.common.connect.EntityType;
 import sernet.hui.common.connect.HitroUtil;
@@ -55,7 +51,9 @@ import sernet.verinice.interfaces.IRightsServiceClient;
 import sernet.verinice.interfaces.RightEnabledUserInteraction;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.configuration.Configuration;
-import sernet.verinice.service.commands.CreateConfiguration;
+import sernet.verinice.rcp.NonModalWizardDialog;
+import sernet.verinice.rcp.account.AccountWizard;
+import sernet.verinice.service.commands.LoadConfiguration;
 import sernet.verinice.service.commands.SaveConfiguration;
 
 /**
@@ -67,13 +65,13 @@ import sernet.verinice.service.commands.SaveConfiguration;
  * 
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
-public class ConfigurationAction implements IObjectActionDelegate,  RightEnabledUserInteraction{
+public class ConfigurationAction extends Action implements IObjectActionDelegate,  RightEnabledUserInteraction{
 
-	private static final Logger LOG = Logger.getLogger(ConfigurationAction.class);
+	static final Logger LOG = Logger.getLogger(ConfigurationAction.class);
 	
 	public static final String ID = "sernet.gs.ui.rcp.main.personconfiguration"; //$NON-NLS-1$
 
-	private Configuration configuration;
+	Configuration configuration;
 
 	private IWorkbenchPart targetPart;
 	
@@ -81,151 +79,112 @@ public class ConfigurationAction implements IObjectActionDelegate,  RightEnabled
 	
 	private IRightsServiceClient rightsService;
 
-	@Override
+	public ConfigurationAction() {
+        super();
+    }
+	
+	public ConfigurationAction(Configuration configuration) {
+        super();
+        this.configuration = configuration;
+    }
+
+
+    @Override
     public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 		this.targetPart = targetPart;
 	}
 	
 
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.action.Action#run()
+     */
+    public void run() {
+        if(!checkRights()) {
+            configuration = null;
+            return;
+        }
+        
+        Activator.inheritVeriniceContextState();
+
+        if(configuration==null) {
+            loadConfiguration();
+        }
+        if(configuration==null) {
+            return;
+        }
+
+        //final TitleAreaDialog dialog = createDialog();
+        final TitleAreaDialog dialog = createWizard();
+        if (dialog.open() != Window.OK) {
+            configuration = null;
+            return;
+        }
+
+        try {
+            PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new UpdateConfigurationHelper(configuration));
+        } catch (Exception e) {
+            LOG.error("Error while saving configuration.", e); //$NON-NLS-1$
+            ExceptionUtil.log(e, Messages.ConfigurationAction_5);
+        } finally {
+            configuration = null;
+        }
+    }
+
+    private TitleAreaDialog createDialog() {
+        IWorkbenchWindow window2 = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        EntityType entType = HitroUtil.getInstance().getTypeFactory().getEntityType(Configuration.TYPE_ID);     
+        final TitleAreaDialog dialog = new AccountDialog(window2.getShell(), entType, Messages.ConfigurationAction_4, configuration.getEntity());
+        return dialog;
+    }
+    
+    private TitleAreaDialog createWizard() {
+        AccountWizard wizard = new AccountWizard(configuration);                 
+        WizardDialog wizardDialog = new NonModalWizardDialog(Display.getCurrent().getActiveShell(),wizard);
+        return wizardDialog;
+    }
+    
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
+	 */
 	@Override
     @SuppressWarnings("unchecked")
 	public void run(IAction action) {
-	    if(!checkRights()) {
-	        return;
-	    }
-	    
-		Activator.inheritVeriniceContextState();
+	    run();
+	}
 
-		IWorkbenchWindow window = targetPart.getSite().getWorkbenchWindow();
-		IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
+
+    private void loadConfiguration() {
+        IWorkbenchWindow window1 = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IStructuredSelection selection = (IStructuredSelection) window1.getSelectionService().getSelection();
 		if (selection == null) {
 			return;
 		}
-		EntityType entType = null;
 		for (Iterator iter = selection.iterator(); iter.hasNext();) {
 			try {
 				Object o = iter.next();
 				if( o instanceof CnATreeElement) {
 
-    				CnATreeElement elmt = (CnATreeElement) o;
+    				CnATreeElement person = (CnATreeElement) o;
     
-    				LOG.debug("Loading configuration for user " + elmt.getTitle()); //$NON-NLS-1$
-    				LoadConfiguration command = new LoadConfiguration(elmt);
+    				LOG.debug("Loading configuration for user " + person.getTitle()); //$NON-NLS-1$
+    				LoadConfiguration command = new LoadConfiguration(person);
     				command = ServiceFactory.lookupCommandService().executeCommand(command);
     				configuration = command.getConfiguration();
     
     				if (configuration == null) {
     					// create new configuration
-    					LOG.debug("No config found, creating new configuration object."); //$NON-NLS-1$
-    					CreateConfiguration command2 = new CreateConfiguration(elmt);
-    					command2 = ServiceFactory.lookupCommandService().executeCommand(command2);
-    					configuration = command2.getConfiguration();
+    				    configuration = new Configuration();
+    				    configuration.setPerson(person);
     				}
     
-    				entType = HitroUtil.getInstance().getTypeFactory().getEntityType(configuration.getEntity().getEntityType());
-				}
+    			}
 			} catch (CommandException e) {
 				ExceptionUtil.log(e, Messages.ConfigurationAction_2);
 			} catch (RuntimeException e) {
 				ExceptionUtil.log(e, Messages.ConfigurationAction_3);
 			}
 		}
-
-		final AccountDialog dialog = new AccountDialog(window.getShell(), entType, Messages.ConfigurationAction_4, configuration.getEntity());
-		if (dialog.open() != Window.OK) {
-			return;
-		}
-
-		try {
-			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
-				@Override
-                public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					Activator.inheritVeriniceContextState();
-					try {
-						final boolean updatePassword = updateNameAndPassword(dialog.getUserName(), dialog.getPassword(),dialog.getPassword2());
-						// save configuration:
-						SaveConfiguration<Configuration> command = new SaveConfiguration<Configuration>(configuration, updatePassword);			
-						command = getCommandService().executeCommand(command);
-						getRightService().reload();
-					} catch (final UsernameExistsException e) {
-						final String logMessage = "Configuration can not be saved. Username exists: " + e.getUsername(); //$NON-NLS-1$
-						final String messageTitle = Messages.ConfigurationAction_7; 
-						final String userMessage = NLS.bind(Messages.ConfigurationAction_7, e.getUsername());		
-						handleException(e, logMessage, messageTitle, userMessage);	
-					} catch (final PasswordException e) {
-						final String logMessage = "Configuration can not be saved. " + e.getMessage(); //$NON-NLS-1$
-						final String messageTitle = Messages.ConfigurationAction_6; 
-						final String userMessage = e.getMessage();		
-						handleException(e, logMessage, messageTitle, userMessage);	
-					} catch (Exception e) {
-						LOG.error("Error while saving configuration.", e); //$NON-NLS-1$
-						ExceptionUtil.log(e, Messages.ConfigurationAction_5);
-					}
-				}
-
-				private void handleException(final Exception e, final String logMessage, final String messageTitle, final String userMessage) {
-					LOG.info(logMessage);
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("stacktrace: ", e); //$NON-NLS-1$
-					}
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-                        public void run() {
-							MessageDialog.openError(Display.getDefault().getActiveShell(),messageTitle, userMessage);
-						}
-					});
-				}
-
-			});
-		} catch (Exception e) {
-			LOG.error("Error while saving configuration.", e); //$NON-NLS-1$
-			ExceptionUtil.log(e, Messages.ConfigurationAction_5);
-		} 
-	}
-
-	/**
-	 * Checks if the user has entered a new password. If so, the cleartext password is
-	 * saved.
-	 * @param string 
-	 * 
-	 * @param entity
-	 *            the entity containing the users input
-	 * @param string 
-	 * @return true if a new cleartext password was saved, that needs to be
-	 *         hashed.
-	 */
-	private boolean updateNameAndPassword(String name, String newPassword, String newPassword2) {
-		boolean updated = false;
-		final String oldName = configuration.getUser();
-		if(isNewName(oldName,name) && (newPassword==null || newPassword.isEmpty())) {
-		    if(getAuthService().isHandlingPasswords()) {	    
-		        throw new PasswordException(Messages.ConfigurationAction_9);
-		    }
-		}	
-		configuration.setUser(name);
-		if(newPassword!=null && !newPassword.isEmpty()) {
-			if(!newPassword.equals(newPassword2)) {
-				throw new PasswordException(Messages.ConfigurationAction_10);
-			}
-			configuration.setPass(newPassword);
-			updated=true;
-		}
-		return updated;
-	}
-
-	private boolean isNewName(String oldName, String name) {
-		boolean result=false;
-		if(oldName!=null) {
-			if(name==null) {
-				result=true;
-			} else {
-				result = !oldName.equals(name);
-			}
-		} else {
-			result = name!=null;
-		}
-		return result;
-	}
+    }
 
     public IAuthService getAuthService() {
         return (IAuthService) VeriniceContext.get(VeriniceContext.AUTH_SERVICE);
@@ -247,7 +206,17 @@ public class ConfigurationAction implements IObjectActionDelegate,  RightEnabled
 		}
 	}
 	
-	public ICommandService getCommandService() {
+	public Configuration getConfiguration() {
+        return configuration;
+    }
+
+
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
+
+
+    public ICommandService getCommandService() {
 		if (commandService == null) {
 			commandService = createCommandServive();
 		}
@@ -258,31 +227,24 @@ public class ConfigurationAction implements IObjectActionDelegate,  RightEnabled
 		return ServiceFactory.lookupCommandService();
 	}
 
-    /* (non-Javadoc)
-     * @see sernet.verinice.interfaces.RightEnabledUserInteraction#checkRights()
-     */
     @Override
     public boolean checkRights() {
         return ((RightsServiceClient)VeriniceContext.get(VeriniceContext.RIGHTS_SERVICE)).isEnabled(getRightID());
     }
 
-    /* (non-Javadoc)
-     * @see sernet.verinice.interfaces.RightEnabledUserInteraction#getRightID()
-     */
+
     @Override
     public String getRightID() {
         return ActionRightIDs.ACCOUNTSETTINGS;
     }
 
-    /* (non-Javadoc)
-     * @see sernet.verinice.interfaces.RightEnabledUserInteraction#setRightID(java.lang.String)
-     */
+
     @Override
     public void setRightID(String rightID) {
         // DO nothing
     }
     
-    private IRightsServiceClient getRightService() {
+    IRightsServiceClient getRightService() {
         if (rightsService == null) {
             rightsService = (IRightsServiceClient) VeriniceContext.get(VeriniceContext.RIGHTS_SERVICE);
         }

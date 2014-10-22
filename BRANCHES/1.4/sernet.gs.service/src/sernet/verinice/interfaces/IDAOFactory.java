@@ -124,6 +124,8 @@ public interface IDAOFactory {
 	 * Setter method used by spring to inject DAO.
 	 */
 	void setConfigurationDao(IBaseDao<Gefaehrdung, Integer> dao);
+	
+	void setAccountGroupDao(IBaseDao<Gefaehrdung, Integer> dao);
 
 	void setchangeLogEntryDAO(
 			IBaseDao<ChangeLogEntry, Integer> dao);

@@ -19,17 +19,30 @@
  ******************************************************************************/
 package sernet.gs.ui.rcp.main;
 
+import static org.apache.commons.io.FilenameUtils.concat;
+import static org.apache.commons.io.FilenameUtils.getFullPath;
+import static sernet.gs.ui.rcp.main.logging.LogDirectoryProvider.DEFAULT_VERINICE_LOG;
+import static sernet.gs.ui.rcp.main.logging.LogDirectoryProvider.LOGGING_PATH_KEY;
+import static sernet.gs.ui.rcp.main.logging.LogDirectoryProvider.LOG_FOLDER;
+import static sernet.gs.ui.rcp.main.logging.LogDirectoryProvider.WORKSPACE_PROPERTY_KEY;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.UUID;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.Appender;
+import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -37,61 +50,119 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import sernet.gs.ui.rcp.main.logging.LogDirectoryProvider;
+import sernet.gs.ui.rcp.main.logging.LoggerInitializer;
+import sernet.gs.ui.rcp.main.logging.WindowsLogDirectory;
+
 /**
  * @author Benjamin Weißenfels <bw[at]sernet[dot]de>
  * 
  */
-public class LoggerInitializerTest extends LoggerInitializer {
+public class LoggerInitializerTest {
+
+    private static final String WITHOUT_FILE_PATH_LOG4J_XML = "without_file_path_log4j.xml";
 
     private static final String CUSTOM_LOG4J_XML = "custom_log4j.xml";
+
     Logger LOG = Logger.getLogger(LoggerInitializerTest.class.getName());
 
-    @Test
-    public void getLogPathTest() {
+    @Before
+    public void setUp() {
         clearEnvironment();
-        String logFileWithUuid = "/tmp/verinice-" + UUID.randomUUID();
+        System.setProperty("osgi.instance.area", System.getProperty("java.io.tmpdir"));
+    }
+
+    @Test
+    public void getLogDirectoryTest() {
+        String directory = System.getProperty("java.io.tmpdir") + "/";
+        String logFileWithUuid = directory + UUID.randomUUID().toString();
         System.setProperty(LOGGING_PATH_KEY, logFileWithUuid);
-        Assert.assertEquals(logFileWithUuid, new LoggerInitializer().getLogPath());
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+
+        Assert.assertEquals(directory, loggerInit.getLogDirectory());
     }
 
     @Test
-    public void getDefaultLogPath() {
-        clearEnvironment();
-        System.setProperty("osgi.instance.area",  System.getProperty("java.io.tmpdir"));
-        
-        LoggerInitializer.tryReadingCustomLog4jFile();
-        LoggerInitializer.tryConfiguringLoggingPath();
-        
-        Assert.assertEquals(System.getProperty("osgi.instance.area") + "/" + LOG_FOLDER, new LoggerInitializer().getLogPath());
+    public void getLogInvalidDirectoryTest() {
+        String directory = "";
+        String logFileWithUuid = directory + UUID.randomUUID().toString();
+        System.setProperty(LOGGING_PATH_KEY, logFileWithUuid);
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+
+        Assert.assertEquals(directory, loggerInit.getLogDirectory());
     }
 
     @Test
-    public void testCustomLog4jFile() throws IOException, SAXException, ParserConfigurationException {
-        
-        clearEnvironment();
-        System.setProperty(LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(CUSTOM_LOG4J_XML).getPath());
+    public void getDefaultLogDirectory() {
+
+        System.setProperty("osgi.instance.area", System.getProperty("java.io.tmpdir"));
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(WITHOUT_FILE_PATH_LOG4J_XML).getPath());
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+
+        Assert.assertEquals(System.getProperty("osgi.instance.area") + "/" + LOG_FOLDER, loggerInit.getLogDirectory());
+    }
+
+    @Test
+    public void getDefaultLogFilePath() {
+
+        System.setProperty("osgi.instance.area", System.getProperty("java.io.tmpdir"));
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(WITHOUT_FILE_PATH_LOG4J_XML).getPath());
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+
+        Assert.assertEquals(System.getProperty("osgi.instance.area") + "/" + LOG_FOLDER + DEFAULT_VERINICE_LOG, getPathFromRootLogger());
+    }
+
+    @Test
+    public void testCustomLog4jFile() throws SAXException, ParserConfigurationException, IOException {
+
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(CUSTOM_LOG4J_XML).getPath());
         String path = extractLoggingPath(CUSTOM_LOG4J_XML);
-        
-        LoggerInitializer.tryReadingCustomLog4jFile();
-        LoggerInitializer.tryConfiguringLoggingPath();
-        
-        Assert.assertEquals(path.replaceFirst("\\$\\{java.io.tmpdir\\}", System.getProperty("java.io.tmpdir")), getLogPath());
-    }
-    
-    @Test
-    public void pathFromVeriniceIniOverride()
-    {
-        clearEnvironment();
-        String uuidLogFile = System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + ".log";
-        System.setProperty(LOGGING_PATH_KEY,  uuidLogFile);
-        System.setProperty(LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(CUSTOM_LOG4J_XML).getPath());
-        
-        LoggerInitializer.tryReadingCustomLog4jFile();
-        LoggerInitializer.tryConfiguringLoggingPath();
-        
-        Assert.assertEquals(uuidLogFile, getLogPath()); 
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+
+        Assert.assertEquals(path.replaceFirst("\\$\\{java.io.tmpdir\\}", System.getProperty("java.io.tmpdir")), getPathFromRootLogger());
     }
 
+    @Test
+    public void testGetDirectoryWithCustomLog4jFile() throws SAXException, ParserConfigurationException, IOException {
+
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(CUSTOM_LOG4J_XML).getPath());
+        String path = extractLoggingPath(CUSTOM_LOG4J_XML);
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+
+        String expected = path.replaceFirst("\\$\\{java.io.tmpdir\\}", System.getProperty("java.io.tmpdir"));
+        // expected = expected.replace(DEFAULT_VERINICE_LOG, "");
+        Assert.assertEquals(expected, getPathFromRootLogger());
+    }
+
+    @Test
+    public void filePathFromVeriniceIniOverride() {
+
+        String uuidLogFile = System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + ".log";
+        System.setProperty(LOGGING_PATH_KEY, uuidLogFile);
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(CUSTOM_LOG4J_XML).getPath());
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+
+        Assert.assertEquals(uuidLogFile, getPathFromRootLogger());
+    }
+
+    @Test
+    public void testGetDirectoryWithVeriniceIniOverride() {
+
+        String uuidLogFile = System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + ".log";
+        System.setProperty(LOGGING_PATH_KEY, uuidLogFile);
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(CUSTOM_LOG4J_XML).getPath());
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+
+        Assert.assertEquals(System.getProperty("java.io.tmpdir") + "/", loggerInit.getLogDirectory());
+    }
 
     @Test
     public void parseLog4jFile() throws ParserConfigurationException, SAXException, IOException {
@@ -100,16 +171,73 @@ public class LoggerInitializerTest extends LoggerInitializer {
         Assert.assertTrue("could not parse custom_log4j.xml", customLog4jConfig != null);
     }
 
+    @Test
+    public void removeInvalidPrefixes() {
+
+        System.setProperty(LOGGING_PATH_KEY, "file:/tmp/" + DEFAULT_VERINICE_LOG);
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(CUSTOM_LOG4J_XML).getPath());
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+
+        Assert.assertEquals("/tmp/", loggerInit.getLogDirectory());
+
+    }
+
+    @Test
+    public void removeInvalidWindowsPrefix() {
+
+        System.setProperty(LOGGING_PATH_KEY, "file:\\C:\\tmp\\" + DEFAULT_VERINICE_LOG);
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(CUSTOM_LOG4J_XML).getPath());
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+        loggerInit.setLogDirectoryProvider(new WindowsLogDirectory("file:\\C:\\tmp\\" + DEFAULT_VERINICE_LOG));
+
+        Assert.assertEquals("C:/tmp/", loggerInit.getLogDirectory());
+    }
+
+    @Test
+    public void writeToForbiddenPath() {
+
+        System.setProperty(LOGGING_PATH_KEY, FilenameUtils.concat(File.separator + "root" + File.separator, "verinice-client.log"));
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(WITHOUT_FILE_PATH_LOG4J_XML).getPath());
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+
+        Assert.assertEquals(FilenameUtils.concat(System.getProperty("user.home"), "verinice" + File.separator), loggerInit.getLogDirectory());
+
+    }
+
+    @Test
+    public void writeToNonExistingPath() {
+
+        String uuid = concat(concat(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString()), "verinice-client.log");
+        System.setProperty(LOGGING_PATH_KEY, uuid);
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(WITHOUT_FILE_PATH_LOG4J_XML).getPath());
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+        Assert.assertEquals(getFullPath(uuid), loggerInit.getLogDirectory());
+    }
+
+    @Test
+    public void writeToDirectory() {
+
+        System.setProperty(LOGGING_PATH_KEY, System.getProperty("java.io.tmpdir"));
+        System.setProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY, getClass().getResource(WITHOUT_FILE_PATH_LOG4J_XML).getPath());
+
+        LoggerInitializer loggerInit = LoggerInitializer.setupLogFilePath();
+        Assert.assertEquals(FilenameUtils.concat(System.getProperty("user.home"), "verinice" + File.separator), loggerInit.getLogDirectory());
+    }
+
     @After
     public void clearEnvironment() {
         System.clearProperty(LOGGING_PATH_KEY);
-        System.clearProperty(LOG4J_CONFIGURATION_JVM_ENV_KEY);
+        System.clearProperty(LogDirectoryProvider.LOG4J_CONFIGURATION_JVM_ENV_KEY);
         System.clearProperty(WORKSPACE_PROPERTY_KEY);
         Logger.getRootLogger().getLoggerRepository().resetConfiguration();
     }
 
     private String extractLoggingPath(String customLog4jXml) throws ParserConfigurationException, SAXException, IOException {
-        
+
         Document document = loadLog4jFile(customLog4jXml);
         NodeList nodes = document.getElementsByTagName("appender");
 
@@ -174,6 +302,22 @@ public class LoggerInitializerTest extends LoggerInitializer {
                 if (name.equals(nodeMap.item(j).getNodeName())) {
                     return nodeMap.item(j).getNodeValue();
                 }
+            }
+        }
+
+        return null;
+    }
+
+    public String getPathFromRootLogger() {
+        Logger log = Logger.getRootLogger();
+        Enumeration<Appender> appenders = log.getAllAppenders();
+
+        while (appenders.hasMoreElements()) {
+            Appender appender = appenders.nextElement();
+            if (appender instanceof FileAppender) {
+
+                FileAppender fileAppender = (FileAppender) appender;
+                return fileAppender.getFile();
             }
         }
 

@@ -118,6 +118,12 @@ public final class ImageCache {
 	
 	public static final String TOOL= "24-tool-a.png";
 
+	public static final String GROUP_ADD = "group_add.png";
+
+	public static final String GROUP_EDIT = "group_edit.png";
+
+	public static final String GROUP_DEL = "group_delete.png";
+
 	public static final String WRENCH= "wrench.png";
 	
 	public static final String EXPLORER = "tree_explorer.gif";
@@ -227,6 +233,8 @@ public final class ImageCache {
 	public static final String MIME_XML = "mime-xml.png";
 	public static final String MIME_IMAGE = "mime-image.png";
 	
+	public static final String GROUP_VIEW = "group.png";
+
 	public static final String LINKED = "linked.gif";
 	
 	public static final String UNLINKED = "unlinked.gif";
@@ -240,6 +248,8 @@ public final class ImageCache {
     public static final String PRIORITY_NORMAL = "priority-2.gif";
     
     public static final String PRIORITY_HIGH = "priority-1.gif";
+    
+    public static final String SEARCH = "search.png";
 
 	/* ************************************************************************************************** */
 	// ISO 27000 icons - ISM Tree View:
@@ -273,6 +283,8 @@ public final class ImageCache {
 	
 	public static final String ISA_TOPIC		        = "isa-topic.png";
 	
+	public static final String REPORT_DEPOSIT           = "folder_table.png";
+	
 	// ISO 27k icons - other:
 	public static final String ISO27K_RISK = "sweetie-verinice/png/16-paper-calculate-percent.png";
 	/* ************************************************************************************************** */
@@ -285,7 +297,11 @@ public final class ImageCache {
 	
 	public static final String PROFILE = "profile.png";
     
-    public static final String PROFILE_64 = "profile_64.png";
+    public static final String PROFILE_64 = "profile_64.png";   
+    public static final String USER_ADD = "user_add.png";   
+    public static final String USER_DISABLED = "user_disabled.png";
+
+    public static final String OK_DISABLED = "ok-disabled.png";
 	
 	private static ImageCache instance;
 

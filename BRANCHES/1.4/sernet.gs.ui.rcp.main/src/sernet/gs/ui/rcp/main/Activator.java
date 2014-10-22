@@ -57,6 +57,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
 import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
 import sernet.gs.ui.rcp.main.common.model.ProgressAdapter;
+import sernet.gs.ui.rcp.main.logging.LoggerInitializer;
 import sernet.gs.ui.rcp.main.preferences.PreferenceConstants;
 import sernet.gs.ui.rcp.main.security.VeriniceSecurityProvider;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
@@ -66,11 +67,14 @@ import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ICommandService;
 import sernet.verinice.interfaces.IInternalServer;
 import sernet.verinice.interfaces.IInternalServerStartListener;
-import sernet.verinice.interfaces.IMain;
-import sernet.verinice.interfaces.IVersionConstants;
 import sernet.verinice.interfaces.ILogPathService;
+import sernet.verinice.interfaces.IMain;
+import sernet.verinice.interfaces.IReportLocalTemplateDirectoryService;
+import sernet.verinice.interfaces.IVersionConstants;
 import sernet.verinice.interfaces.oda.IVeriniceOdaDriver;
+import sernet.verinice.interfaces.report.IReportService;
 import sernet.verinice.iso27k.rcp.JobScheduler;
+import sernet.verinice.rcp.ReportTemplateSync;
 import sernet.verinice.rcp.StartupImporter;
 import sernet.verinice.rcp.StatusResult;
 
@@ -114,6 +118,8 @@ public class Activator extends AbstractUIPlugin implements IMain {
 
     private boolean standalone = false;
 
+    private ServiceTracker templateDirTracker;
+
     /**
      * The constructor
      */
@@ -152,7 +158,10 @@ public class Activator extends AbstractUIPlugin implements IMain {
 
         // Makes a representation of this bundle as a service available.
         context.registerService(IMain.class.getName(), this, null);
-        context.registerService(ILogPathService.class.getName(), new LoggerInitializer(), null);
+        context.registerService(ILogPathService.class.getName(), LoggerInitializer.setupLogFilePath(), null);
+
+        templateDirTracker = new ServiceTracker(context, IReportLocalTemplateDirectoryService.class.getName(), null);
+        templateDirTracker.open();
     }
 
     /**
@@ -185,6 +194,9 @@ public class Activator extends AbstractUIPlugin implements IMain {
 
         // set workdir preference:
         CnAWorkspace.getInstance().prepareWorkDir();
+        if (!prepareReportDirs()) {
+            LOG.warn("ReportDirs are not created correclty");
+        }
         setProxy();
 
         Preferences prefs = getPluginPreferences();
@@ -248,10 +260,13 @@ public class Activator extends AbstractUIPlugin implements IMain {
 
         StartupImporter.importVna();
 
+        ReportTemplateSync.sync();
+
         // Log the system and application configuration
         ConfigurationLogger.logSystemProperties();
         ConfigurationLogger.logApplicationProperties();
         ConfigurationLogger.logProxyPreferences();
+
     }
 
     private void checkPKCS11Support(Preferences prefs) {
@@ -811,4 +826,11 @@ public class Activator extends AbstractUIPlugin implements IMain {
         return proxyTracker;
     }
 
+    private boolean prepareReportDirs() {
+        return CnAWorkspace.getInstance().createLocalReportTemplateDir(IReportService.VERINICE_REPORTS_LOCAL) && CnAWorkspace.getInstance().createReportTemplateDir(IReportService.VERINICE_REPORTS_REMOTE);
+    }
+
+    public IReportLocalTemplateDirectoryService getIReportTemplateDirectoryService(){
+        return (IReportLocalTemplateDirectoryService) templateDirTracker.getService();
+    }
 }

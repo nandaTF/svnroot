@@ -54,6 +54,14 @@
             name="%view.name.0">
       </view>
       <view
+	    allowMultiple="false"
+            category="sernet.verinice.rcp.accountgroup"
+            class="sernet.verinice.rcp.accountgroup.GroupView"
+            icon="icons/group.png"
+            id="sernet.verinice.rcp.accountgroup.GroupView"
+            name="%view.name.14">
+      </view>
+      <view
             allowMultiple="false"
             category="sernet.gs.ui.rcp.main.views"
             class="sernet.gs.ui.rcp.main.bsi.views.BSIMassnahmenView"
@@ -153,7 +161,25 @@
             id="sernet.verinice.validation.CnAValidationView"
             name="%view.name.13"
             restorable="true">
+      </view>    
+      <view
+            allowMultiple="false"
+            category="sernet.gs.ui.rcp.main.views"
+            class="sernet.verinice.rcp.account.AccountView"
+            icon="icons/user.png"
+            id="sernet.verinice.rcp.account.AccountView"
+            name="%view.name.15"
+            restorable="true">
       </view> 
+      <view
+      		allowMultiple="false"
+      		category="sernet.gs.ui.rcp.main.views"
+      		class="sernet.verinice.report.rcp.ReportDepositView"
+      		icon="icons/folder_table.png"
+      		id="sernet.verinice.report.rcp.ReportDepositView"
+      		name="%view.name.16"
+      		restorable="true">
+      </view>
    </extension>
    <extension point="org.eclipse.ui.commands">
       <command
@@ -302,7 +328,26 @@
             name="verinice">
          <property
                name="aboutText"
-               value="SerNet verinice 1.8 - Codename 'Florianópolis' &#x0A;&#x0A;(c) SerNet Service Network GmbH and others 1996-2014&#x0A;&#x0A;Visit our homepage: http://www.verinice.org&#x0A;Contact the authors: verinice@sernet.de&#x0A;&#x0A;Contributors:&#x0A;Alexander Koderman 		&lt;ak@sernet.de&gt;&#x0A;Anne Hanekop 			&lt;ah@sernet.de&gt;&#x0A;Marek Seeger			&lt;ms@sernet.de&gt;&#x0A;Andreas Becker			&lt;andreas.r.becker@ruhr-uni-bochum.de&gt;&#x0A;Robert Schuster			&lt;r.schuster@tarent.de&gt;&#x0A;Daniel Murygin			&lt;dm@sernet.de&gt;&#x0A;Sebastian Engel 			&lt;s.engel@tarent.de&gt;&#x0A;Markus Joos				&lt;markus.joos@t-online.de&gt;&#x0A;Gregorio Levano			&lt;GregorioMagno.LevanoHuaman@hs-furtwangen.de&gt;&#x0A;Christian Ganzmann 		&lt;christian.ganzmann@hs-furtwangen.de&gt;&#x0A;Carmen Probst 			&lt;carmen.probst@hs-furtwangen.de&gt;&#x0A;Sebastian Hagedorn 			&lt;sh@sernet.de&gt;&#x0A;Johannes Stillig 			&lt;js@sernet.de&gt;&#x0A;Christian Eschenlohr 			&lt;christian.eschenlohr@leoni.com&gt;&#x0A;Julia Haas 			&lt;jh@sernet.de&gt;&#x0A;&#x0A;Artwork:&#x0A;Blackbit						http://www.blackbit.de&#x0A;Icons by Axialis Team						http://www.axialis.com&#x0A;Icons by Yusuke Kamiyamane      http://p.yusukekamiyamane.com&#x0A;Icons by FAMFAMFAM              http://www.famfamfam.com&#x0A;Joseph North				&lt;north@sublink.ca&gt;&#x0A;Agentur Roeder				http://www.agentur-roeder.de&#x0A;&#x0A;&#x0A;This program comes with ABSOLUTELY NO WARRANTY.&#x0A;This is free software, and you are welcome to redistribute it under certain conditions.&#x0A;Verinice is licensed to you under the conditions of the GPLv3, the Apache license, the Eclipse Public License and others.&#x0A;See the LICENSE.txt contained in the program folder, the verinice Plugin-Details in the help menu and the copyright and license header in each source file for details.&#x0A;&#x0A;VDA Information Security Assessment&#x0A;(c) Arbeitskreis Informationsschutz des Verband der Automobilindustrie e. V. (VDA)&#x0A;Lizenz: http://creativecommons.org/licenses/by-nd/3.0/de/&#x0A;VDA und das VDA Logo sind eingetragene Markenzeichen des Verband der Automobilindustrie e. V. (VDA), die zur Nutzung in verinice lizenziert sind. Alle Rechte vorbehalten."/>
+               value="SerNet verinice 1.9 - Codename 'Constructa' - (c) SerNet Service Network GmbH and others 1996-2014&#x0A;&#x0A;Visit our homepage: http://www.verinice.org - Contact the authors: verinice@sernet.de&#x0A;&#x0A;Contributors:&#x0A;
+Alexander Koderman &lt;ak@sernet.de&gt;&#x0A;
+Anne Hanekop &lt;ah@sernet.de&gt;&#x0A;
+Marek Seeger &lt;ms@sernet.de&gt;&#x0A;
+Andreas Becker &lt;andreas.r.becker@ruhr-uni-bochum.de&gt;&#x0A;
+Robert Schuster &lt;r.schuster@tarent.de&gt;&#x0A;
+Daniel Murygin &lt;dm@sernet.de&gt;&#x0A;
+Sebastian Engel &lt;s.engel@tarent.de&gt;&#x0A;
+Markus Joos &lt;markus.joos@t-online.de&gt;&#x0A;
+Gregorio Levano &lt;GregorioMagno.LevanoHuaman@hs-furtwangen.de&gt;&#x0A;
+Christian Ganzmann &lt;christian.ganzmann@hs-furtwangen.de&gt;&#x0A;
+Carmen Probst &lt;carmen.probst@hs-furtwangen.de&gt;&#x0A;
+Sebastian Hagedorn &lt;sh@sernet.de&gt;&#x0A;
+Johannes Stillig &lt;js@sernet.de&gt;&#x0A;
+Christian Eschenlohr &lt;christian.eschenlohr@leoni.com&gt;&#x0A;
+Julia Haas &lt;jh@sernet.de&gt;&#x0A;
+Sirin Torun &lt;st@sernet.de&gt;&#x0A;
+Benjamin Weißenfels &lt;bw@sernet.de&gt;&#x0A;
+Stanislav Strigunov &lt;sstrigunov@sernet.de&gt;&#x0A;&#x0A;
+Artwork:&#x0A;Blackbit http://www.blackbit.de - Icons by Axialis Team http://www.axialis.com&#x0A;Icons by Yusuke Kamiyamane http://p.yusukekamiyamane.com - Icons by FAMFAMFAM http://www.famfamfam.com&#x0A;Joseph North &lt;north@sublink.ca&gt; - Agentur Roeder http://www.agentur-roeder.de&#x0A;&#x0A;This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome &#x0A;to redistribute it under certain conditions. Verinice is licensed to you under the conditions of the GPLv3, &#x0A;the Apache license, the Eclipse Public License and others. See the LICENSE.txt contained in the program folder, &#x0A;the verinice Plugin-Details in the help menu and the copyright and license header in each source file for details.&#x0A;&#x0A;VDA Information Security Assessment (c) Arbeitskreis Informationsschutz des Verband der Automobilindustrie e. V. (VDA)&#x0A;Lizenz: http://creativecommons.org/licenses/by-nd/3.0/de/&#x0A;VDA und das VDA Logo sind eingetragene Markenzeichen des Verband der Automobilindustrie e.V. (VDA), &#x0A;die zur Nutzung in verinice lizenziert sind. Alle Rechte vorbehalten."/>
          <property
                name="windowImages"
                value="icons/window16.gif,icons/window32.gif"/>
@@ -709,7 +754,7 @@
             id="sernet.gs.ui.rcp.main.itverbundreport"
             objectClass="sernet.verinice.model.bsi.ITVerbund">
          <action
-               class="sernet.verinice.report.rcp.GenerateSpecificReportAction"
+               class="sernet.verinice.report.actions.GenerateSpecificReportAction"
                enablesFor="+"
                icon="icons/report.png"
                id="sernet.verinice.report.rcp.GenerateITVerbundReportAction.action"
@@ -724,7 +769,7 @@
             id="sernet.gs.ui.rcp.main.organisationreport"
             objectClass="sernet.verinice.model.iso27k.Organization">
          <action
-               class="sernet.verinice.report.rcp.GenerateSpecificReportAction"
+               class="sernet.verinice.report.actions.GenerateSpecificReportAction"
                enablesFor="+"
                icon="icons/report.png"
                id="sernet.verinice.report.rcp.GenerateOrganisationReportAction.action"
@@ -1373,7 +1418,7 @@
             label="%actionSet.label"
             visible="true">
          <action
-               class="sernet.verinice.report.rcp.GenerateGenericReportAction"
+               class="sernet.verinice.report.actions.GenerateGenericReportAction"
                icon="icons/report.png"
                id="sernet.verinice.report.rcp.GenerateReportAction"
                label="%action.label.25"

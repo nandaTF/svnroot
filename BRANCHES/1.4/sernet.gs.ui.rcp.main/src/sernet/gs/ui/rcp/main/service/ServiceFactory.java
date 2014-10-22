@@ -23,8 +23,10 @@ import org.apache.log4j.Logger;
 
 import sernet.hui.common.VeriniceContext;
 import sernet.springclient.SpringClientPlugin;
+import sernet.verinice.interfaces.IAccountService;
 import sernet.verinice.interfaces.IAuthService;
 import sernet.verinice.interfaces.ICommandService;
+import sernet.verinice.interfaces.IReportDepositService;
 import sernet.verinice.interfaces.bpm.IGsmService;
 import sernet.verinice.interfaces.bpm.IIndividualService;
 import sernet.verinice.interfaces.bpm.IIsaControlFlowService;
@@ -127,6 +129,10 @@ public abstract class ServiceFactory {
     public static IGsmService lookupGsmService() {
         return (IGsmService) VeriniceContext.get(VeriniceContext.GSM_SERVICE);
     }
+    
+    public static IAccountService lookupAccountService() {
+        return (IAccountService) VeriniceContext.get(VeriniceContext.ACCOUNT_SERVICE);
+    }
 	
 	public static boolean isPermissionHandlingNeeded() {
 		if (permissionHandlingNeeded == null){
@@ -137,6 +143,10 @@ public abstract class ServiceFactory {
 	
 	public static IValidationService lookupValidationService(){
 	    return (IValidationService)VeriniceContext.get(VeriniceContext.VALIDATION_SERVICE);
+	}
+	
+	public static IReportDepositService lookupReportDepositService(){
+	    return (IReportDepositService)VeriniceContext.get(VeriniceContext.REPORT_DEPOSIT_SERVICE);
 	}
 	
 	/**

@@ -80,6 +80,9 @@ import sernet.verinice.iso27k.rcp.Iso27kPerspective;
 import sernet.verinice.iso27k.rcp.action.ImportPersonFromLdap;
 import sernet.verinice.rcp.ProfileEditAction;
 import sernet.verinice.rcp.ServerConnectionToggleAction;
+import sernet.verinice.rcp.account.AccountView;
+import sernet.verinice.rcp.accountgroup.GroupView;
+import sernet.verinice.report.rcp.ReportDepositView;
 import sernet.verinice.validation.CnAValidationView;
 
 /**
@@ -91,7 +94,7 @@ import sernet.verinice.validation.CnAValidationView;
  */
 public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     
-    private static final String WARNING_RESTRICTION = "restriction";
+    private static final String WARNING_RESTRICTION = "restriction"; //$NON-NLS-1$
 
     // Actions - important to allocate these only in makeActions, and then use
     // them
@@ -136,10 +139,16 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     private OpenViewAction openRelationViewAction;
     
     private OpenViewAction openValidationViewAction;
+    
+    private OpenViewAction openGroupViewAction;
 
     private OpenMultipleViewAction openCatalogAction;
     
     private OpenTaskViewAction openTaskViewAction;
+    
+    private OpenViewAction openAccountViewAction;
+    
+    private OpenViewAction openReportdepositViewAction;
 
     private IWorkbenchAction copyAction;
 
@@ -208,6 +217,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         closeAllAction = ActionFactory.CLOSE_ALL.create(window);
         closeOthersAction = ActionFactory.CLOSE_OTHERS.create(window);
         deleteAction = ActionFactory.DELETE.create(window);
+        openGroupViewAction = new OpenViewAction(window,Messages.ApplicationActionBarAdvisor_36, GroupView.ID, ImageCache.GROUP_VIEW, ActionRightIDs.ACCOUNTSETTINGS); //$NON-NLS-1$
         openBSIBrowserAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_0, BrowserView.ID, ImageCache.VIEW_BROWSER, ActionRightIDs.BSIBROWSER);
         openNoteAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_1, NoteView.ID, ImageCache.VIEW_NOTE, ActionRightIDs.NOTES);
         openFileAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_2, FileView.ID, ImageCache.ATTACH, ActionRightIDs.FILES);
@@ -222,6 +232,9 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         openAuditViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_12, AuditView.ID, ImageCache.VIEW_AUDIT, ActionRightIDs.AUDITVIEW);
         openTaskViewAction = new OpenTaskViewAction(window, ActionRightIDs.TASKVIEW);
         openValidationViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_35, CnAValidationView.ID, ImageCache.VIEW_VALIDATION, ActionRightIDs.CNAVALIDATION);
+        openAccountViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_38, AccountView.ID, ImageCache.PERSON, ActionRightIDs.ACCOUNTSETTINGS);
+        openReportdepositViewAction = new OpenViewAction(window, Messages.ApplicationActionBarAdvisor_41, ReportDepositView.ID, ImageCache.REPORT_DEPOSIT, ActionRightIDs.REPORTDEPOSIT);
+        
         reloadAction = new ReloadAction(window, Messages.ApplicationActionBarAdvisor_14);
         importGstoolAction = new ImportGstoolAction(window, Messages.ApplicationActionBarAdvisor_15);
         importCSVAction = new ImportCSVAction(window, Messages.ApplicationActionBarAdvisor_30);
@@ -257,7 +270,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
                 accessControlEditAction, profileEditAction, konsolidatorAction,
                 gsmbasicsecuritycheckAction,bausteinZuordnungAction,
                 gsmbausteinZuordnungAction, openDocumentViewAction,
-                introAction
+                introAction, openGroupViewAction, openReportdepositViewAction
         };
         registerActions(actions);
 
@@ -284,8 +297,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     protected void fillStatusLine(IStatusLineManager statusLine) {
         final int statusItemCharWidth = 100;
         if(isServerMode()) {
-            StatusLineContributionItem statusItem = new StatusLineContributionItem("server-url",statusItemCharWidth);
-            statusItem.setText("Server: " + getShortServerUrl());
+            StatusLineContributionItem statusItem = new StatusLineContributionItem("server-url",statusItemCharWidth); //$NON-NLS-1$
+            statusItem.setText(Messages.ApplicationActionBarAdvisor_40 + getShortServerUrl());
             statusLine.add(statusItem);
         }       
     }
@@ -295,10 +308,10 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         final int httpsURLLength = 8;
         String url = getServerUrlPreference();
         if(url!=null && !url.isEmpty()) {
-           if(url.startsWith("http://")) {
+           if(url.startsWith("http://")) { //$NON-NLS-1$
                url = url.substring(httpURLLength);
            }
-           if(url.startsWith("https://")) {
+           if(url.startsWith("https://")) { //$NON-NLS-1$
                url = url.substring(httpsURLLength);
            }
         }
@@ -370,6 +383,9 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         
         viewsMenu.add(openISMViewAction);
         viewsMenu.add(openCatalogAction);
+        viewsMenu.add(openAccountViewAction);
+        viewsMenu.add(openGroupViewAction);
+        viewsMenu.add(openReportdepositViewAction);
         viewsMenu.add(openTaskViewAction);
         viewsMenu.add(new Separator());
 
@@ -380,7 +396,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         viewsMenu.add(openValidationViewAction);
         
         viewsMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-        
+
         MenuManager perspectivesMenu = new MenuManager(Messages.ApplicationActionBarAdvisor_26, VeriniceActionConstants.MENU_PERSPECTIVES);
         addPerspectiveMenu(window, perspectivesMenu, Iso27kPerspective.ID);
         addPerspectiveMenu(window, perspectivesMenu, Perspective.ID);
@@ -439,6 +455,9 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
         myToolbar.add(new Separator());
         // common items
+        myToolbar.add(openAccountViewAction);
+        myToolbar.add(openGroupViewAction);
+        myToolbar.add(openReportdepositViewAction);
         myToolbar.add(openBSIBrowserAction);
         myToolbar.add(openNoteAction);
         myToolbar.add(openFileAction);
