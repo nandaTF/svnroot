@@ -76,6 +76,8 @@ This variant:
                 <entry key="gsmService" value-ref="gsmService" />
                 <entry key="processEngine" value-ref="processEngine" />
                 <entry key="validationService" value-ref="validationService" />
+                <entry key="accountService" value-ref="accountService" />
+                <entry key="reportdepositService" value-ref="reportdepositService" />
 			</map>
 		</property>
 	</bean>
@@ -299,8 +301,17 @@ This variant:
         <property name="cnaTreeElementDao" ref="cnaTreeElementDao" />
         <property name="cnaLinkDao" ref="cnaLinkDao" />
     </bean>
-
+    
+    <!-- A service to handle user accounts and groups -->
+	<bean id="accountService" class="sernet.verinice.service.AccountService">
+	    <property name="accountGroupDao" ref="accountGroupDao" />
+		<property name="configurationDao" ref="configurationDao" />
+    	<property name="commandService" ref="commandService" />
+    	<property name="configurationService" ref="configurationService" />
+    	<property name="rightsServerHandler" ref="rightsServerHandler" />
+	    <property name="permissionDao" ref="permissionDAO" />
+    </bean>
 	<!-- uncomment to activate runtime logging of methods defined in veriniceserver-debug.xml -->
-	<!--<import resource="veriniceserver-debug.xml"/>-->
+	<!--<import resource="veriniceserver-debug.xml"/> -->
 
 </beans>

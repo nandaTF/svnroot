@@ -19,8 +19,8 @@
         
         <profile name="admin-default-profile" origin="default">
             <!-- missing actions:
-            	"accountsettings"
-            	"accesscontrol"
+		"accountsettings"
+		"accesscontrol"
                 "creategreenbonetasks"
                 "createindividualtasks"
                 "createisatasks"
@@ -29,7 +29,11 @@
                 "taskchangeduedate"
 	            "taskdelete" 
 	            "taskshowall" 
-                "importldap" -->
+                "importldap"
+                "reportdeposit"
+                "reportdepositadd"
+                "reportdepositdelete"
+                "reportdepositedit" -->
 	        <action id="addbsielement" />
 	        <action id="addcatalog" />
 	        <action id="addfile" />
