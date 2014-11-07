@@ -32,8 +32,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -41,7 +41,6 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -58,12 +57,15 @@ import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.gs.ui.rcp.main.actions.helper.UpdateConfigurationHelper;
 import sernet.gs.ui.rcp.main.bsi.views.Messages;
+import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
+import sernet.gs.ui.rcp.main.common.model.IModelLoadListener;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.IAccountService;
 import sernet.verinice.iso27k.rcp.JobScheduler;
+import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.common.configuration.Configuration;
-import sernet.verinice.rcp.NonModalWizardDialog;
+import sernet.verinice.model.iso27k.ISO27KModel;
 import sernet.verinice.rcp.RightsEnabledView;
 import sernet.verinice.rcp.account.AccountWizard;
 
@@ -71,7 +73,7 @@ import sernet.verinice.rcp.account.AccountWizard;
  * @author Benjamin Weißenfels <bw[at]sernet[dot]de>
  * 
  */
-public class GroupView extends RightsEnabledView implements SelectionListener, KeyListener, MouseListener {
+public class GroupView extends RightsEnabledView implements SelectionListener, KeyListener, MouseListener, IModelLoadListener {
 
     public static final String ID = "sernet.verinice.rcp.accountgroup.GroupView";
 
@@ -120,6 +122,12 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         makeActions();
         fillLocalToolBar();
         initData();
+
+        if (CnAElementFactory.isModelLoaded()) {
+            initData();
+        } else{
+            CnAElementFactory.getInstance().addLoadListener((IModelLoadListener) this);
+        }
     }
 
     void initData() {
@@ -597,7 +605,7 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         if (!"".equals(selectedAccountName)) {
 
             Configuration configuration = accountService.getAccountByName(getSelectedAccount());
-            TitleAreaDialog accountDialog = createWizard(configuration);
+            WizardDialog accountDialog = createWizard(configuration);
 
             if (accountDialog.open() != Window.OK) {
                 return;
@@ -616,9 +624,9 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         }
     }
 
-    private TitleAreaDialog createWizard(Configuration configuration) {
-        AccountWizard wizard = new AccountWizard(configuration);
-        return new NonModalWizardDialog(Display.getCurrent().getActiveShell(), wizard);
+    private WizardDialog createWizard(Configuration configuration) {
+       AccountWizard wizard = new AccountWizard(configuration);
+       return new WizardDialog(getDisplay().getActiveShell(), wizard);
     }
 
     private String getSelectedAccount() {
@@ -646,5 +654,20 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
 
     private void initDataService() {
         accountGroupDataService = new AccountGroupDataService();
+    }
+
+
+    @Override
+    public void loaded(BSIModel model) {
+    }
+
+    @Override
+    public void loaded(ISO27KModel model) {
+        initData();
+    }
+
+    @Override
+    public void closed(BSIModel model) {
+
     }
 }

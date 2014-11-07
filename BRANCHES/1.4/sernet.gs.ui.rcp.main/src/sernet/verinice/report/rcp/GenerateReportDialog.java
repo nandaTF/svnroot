@@ -132,9 +132,9 @@ public class GenerateReportDialog extends TitleAreaDialog {
         reportTypes = ServiceComponent.getDefault().getReportService().getReportTypes();
         try{
             // adding the server templates
-            List<ReportTemplateMetaData> list = getSupplier().getReportTemplates(Locale.getDefault().toString());
+            List<ReportTemplateMetaData> list = getSupplier().getReportTemplates(Locale.getDefault().getLanguage());
             if(LOG.isDebugEnabled()){
-                LOG.debug("Locale used on system (client):\t" + Locale.getDefault().toString());
+                LOG.debug("Locale used on system (client):\t" + Locale.getDefault().getLanguage());
                 LOG.debug(list.size() + " Reporttemplates loaded from deposit folders");
             }
             sortList(list);
@@ -625,7 +625,7 @@ public class GenerateReportDialog extends TitleAreaDialog {
         } else {
             sb.append(".pdf");
         }
-        return sb.toString();
+        return convertToFileName(sb.toString());
     }
 
     @Deprecated

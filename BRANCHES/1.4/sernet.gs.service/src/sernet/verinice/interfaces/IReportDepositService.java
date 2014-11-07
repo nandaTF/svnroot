@@ -17,18 +17,23 @@
  ******************************************************************************/
 package sernet.verinice.interfaces;
 
-import java.io.IOException;
-
 import sernet.verinice.model.report.ReportTemplateMetaData;
 
+/**
+ * Provides some methods to upload and editing customer report templates. For
+ * retrieving reports look at {@link IReportTemplateService}.
+ *
+ * @author Benjamin Weißenfels <bw[at]sernet[dot]de>
+ *
+ */
 public interface IReportDepositService extends IReportTemplateService {
 
-    void addToServerDeposit(ReportTemplateMetaData metadata, byte[] file, String locale) throws IOException;
+    void add(ReportTemplateMetaData metadata, byte[] file, String locale) throws ReportDepositException;
 
-    void removeFromServer(ReportTemplateMetaData metadata, String locale) throws IOException;
+    void remove(ReportTemplateMetaData metadata, String locale) throws ReportDepositException;
 
-    void updateInServerDeposit(ReportTemplateMetaData metadata, String locale) throws IOException;
+    void update(ReportTemplateMetaData metadata, String locale) throws ReportDepositException;
 
-    String getDepositLocation() throws IOException;
+    String getDepositLocation() throws ReportDepositException;
 
 }

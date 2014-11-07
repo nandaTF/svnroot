@@ -27,6 +27,7 @@ import org.eclipse.osgi.util.NLS;
  */
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "sernet.verinice.report.rcp.messages"; //$NON-NLS-1$
+    public static String AddReportToDepositDialog_3;
     public static String GenerateReportAction_1;
     public static String GenerateReportDialog_0;
     public static String GenerateReportDialog_1;
@@ -76,7 +77,6 @@ public class Messages extends NLS {
     public static String ReportDepositView_3;
     public static String ReportDepositView_4;
     public static String ReportDepositView_5;
-    public static String ReportDepositView_6;
     public static String ReportDepositView_7;
     public static String ReportDepositView_8;
     public static String ReportDepositView_9;

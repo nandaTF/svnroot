@@ -20,19 +20,27 @@
 package sernet.verinice.interfaces;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 
+import sernet.gs.service.AbstractReportTemplateService;
 import sernet.verinice.interfaces.report.IOutputFormat;
-import sernet.verinice.model.report.PropertyFileExistsException;
-import sernet.verinice.model.report.ReportMetaDataException;
 import sernet.verinice.model.report.ReportTemplate;
 import sernet.verinice.model.report.ReportTemplateMetaData;
 
 /**
+ * Provides an interfaces for report metadata and retrieving full template
+ * together with their report property files. A full report template is
+ * represented {@link ReportTemplate}.
+ *
+ * <p>
+ * There exists in abstract Implementation which is files system based:
+ * {@link AbstractReportTemplateService}
+ * </p>
+ *
+ * @see AbstractReportTemplateService
  *
  *
  * @author Benjamin Weißenfels <bw[at]sernet[dot]de>
@@ -58,19 +66,18 @@ public interface IReportTemplateService {
 
     IOutputFormat[] getOutputFormats(OutputFormat[] format);
 
+    public ReportTemplate getReportTemplate(ReportTemplateMetaData metadata, String locale) throws ReportTemplateServiceException;
 
-    public ReportTemplate getReportTemplate(ReportTemplateMetaData metadata, String locale) throws IOException;
+    public Set<ReportTemplateMetaData> getServerReportTemplates(String locale) throws ReportTemplateServiceException;
 
-    public Set<ReportTemplateMetaData> getServerReportTemplates(String locale) throws IOException, ReportMetaDataException, PropertyFileExistsException;
+    public Set<ReportTemplateMetaData> getReportTemplateMetaData(String[] rptDesignFiles, String locale) throws ReportTemplateServiceException;
 
-    public Set<ReportTemplateMetaData> getReportTemplateMetaData(String[] rptDesignFiles, String locale) throws IOException, ReportMetaDataException, PropertyFileExistsException;
+    public Set<ReportTemplateMetaData> getReportTemplates(String[] rptDesignFiles, String locale) throws ReportTemplateServiceException;
 
-    public Set<ReportTemplateMetaData> getReportTemplates(String[] rptDesignFiles, String locale) throws IOException, ReportMetaDataException, PropertyFileExistsException;
-
-    public Set<ReportTemplateMetaData> getReportTemplates(String locale) throws IOException, ReportMetaDataException, PropertyFileExistsException;
+    public Set<ReportTemplateMetaData> getReportTemplates(String locale) throws ReportTemplateServiceException;
 
     public Iterator<File> listPropertiesFiles(String fileName);
 
     @Deprecated
-    ReportTemplateMetaData getMetaData(File rptDesign, String locale) throws IOException, ReportMetaDataException, PropertyFileExistsException;
+    ReportTemplateMetaData getMetaData(File rptDesign, String locale) throws ReportTemplateServiceException;
 }

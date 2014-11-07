@@ -46,6 +46,7 @@ import org.apache.log4j.Logger;
 
 import sernet.verinice.interfaces.IReportDepositService;
 import sernet.verinice.interfaces.IReportTemplateService;
+import sernet.verinice.interfaces.ReportTemplateServiceException;
 import sernet.verinice.interfaces.report.IOutputFormat;
 import sernet.verinice.model.report.ExcelOutputFormat;
 import sernet.verinice.model.report.HTMLOutputFormat;
@@ -53,12 +54,24 @@ import sernet.verinice.model.report.ODSOutputFormat;
 import sernet.verinice.model.report.ODTOutputFormat;
 import sernet.verinice.model.report.PDFOutputFormat;
 import sernet.verinice.model.report.PropertyFileExistsException;
-import sernet.verinice.model.report.ReportMetaDataException;
 import sernet.verinice.model.report.ReportTemplate;
 import sernet.verinice.model.report.ReportTemplateMetaData;
 import sernet.verinice.model.report.WordOutputFormat;
 
 /**
+ * Provides report template metadata and report templates.
+ *
+ * <p>
+ * The implementation is file based, thus it can run on server side and on
+ * client side. The user of this class must provide the report directory path
+ * and if this directory is handled by the {@link IReportDepositService}.
+ * </p>
+ *
+ * <p>
+ * As a side effect, this implementation creates default properties for all
+ * rptdesign files without a properties file automatically, if they don't exist.
+ * <p>
+ *
  * @author Benjamin Weißenfels <bw[at]sernet[dot]de>
  *
  */
@@ -66,18 +79,31 @@ abstract public class AbstractReportTemplateService implements IReportTemplateSe
 
     private final Logger LOG = Logger.getLogger(AbstractReportTemplateService.class);
 
-    abstract public boolean isServerSide();
+    abstract public boolean isHandeledByReportDeposit();
 
     abstract public String getTemplateDirectory();
 
-    public ReportTemplateMetaData getMetaData(File rptDesign, String locale) throws IOException, ReportMetaDataException, PropertyFileExistsException {
-        Properties props = null;
-        if (checkReportMetaDataFile(rptDesign, locale)) {
-            props = parseAndExtendMetaData(rptDesign, locale);
-        } else {
-            props = createDefaultProperties(rptDesign.getPath(), rptDesign.getName(), locale);
+    public ReportTemplateMetaData getMetaData(File rptDesign, String locale) throws ReportTemplateServiceException {
+        try {
+            Properties props = null;
+            if (checkReportMetaDataFile(rptDesign, locale)) {
+                props = parseAndExtendMetaData(rptDesign, locale);
+            } else {
+                props = createDefaultProperties(rptDesign.getPath(), rptDesign.getName(), locale);
+            }
+            return createReportMetaData(props);
+        } catch (IOException ex) {
+            handleException("error while fetching/generating metadata", ex);
+        } catch (PropertyFileExistsException ex) {
+            handleException("error while fetching/generating metadata", ex);
         }
-        return createReportMetaData(props);
+
+        return null;
+    }
+
+    protected void handleException(String msg, Exception ex) throws ReportTemplateServiceException {
+        LOG.error(msg, ex);
+        throw new ReportTemplateServiceException(ex);
     }
 
     public boolean checkReportMetaDataFile(File rptDesign, String locale) {
@@ -131,19 +157,53 @@ abstract public class AbstractReportTemplateService implements IReportTemplateSe
     }
 
     protected File getPropertiesFile(String path, String locale) {
-        if (locale.length() > 2 && locale.contains(String.valueOf('_'))) {
-            // as we do not deal with dialects like en_UK here, we just take the
-            // leftside locale (e.g. "en")
-            locale = locale.substring(0, locale.indexOf(String.valueOf('_')));
-        }
-        if ("en".equals(locale.toLowerCase()) || path.contains("_" + locale + IReportDepositService.EXTENSION_SEPARATOR_CHAR + IReportDepositService.PROPERTIES_FILE_EXTENSION)) {
-            locale = "";
-        } else {
-            locale = "_" + locale.toLowerCase();
-        }
+
+        locale = sanitizeLocale(locale, path);
         path = removeSuffix(path);
+        String templateDir = getTemplateDirectory();
+        if (!templateDir.endsWith(String.valueOf(File.separatorChar))) {
+            templateDir = templateDir + File.separatorChar;
+        }
+        if (!path.contains(templateDir)) {
+            path = templateDir + templateDir;
+        }
         File propFile = new File(path + locale + IReportDepositService.EXTENSION_SEPARATOR_CHAR + IReportDepositService.PROPERTIES_FILE_EXTENSION);
         return propFile;
+    }
+
+    /**
+     * Generates a properties file suffix. It does not take into account
+     * regions, so the string is empty, when it is the default english or the
+     * default is already in the properties path.
+     *
+     * <p>Examples</p>
+     *
+     * sanitizeLocale(de_DE, "path/report_de.properties") -> ""
+     * sanitizeLocale(de, "path/report_de.properties") -> ""
+     * sanitizeLocale(DE, "path/report_de.properties") -> ""
+     * sanitizeLocale(DE, "path/report.properties") -> "_de"
+     * sanitizeLocale(en_UK, "path/report.properties") -> ""
+     *
+     * As we do not deal with dialects like en_UK here, we just take the
+     * leftside locale (e.g. "en")
+     *
+     *
+     */
+    private String sanitizeLocale(String locale, String path) {
+
+        if (locale.length() > 2 && locale.contains(String.valueOf('_'))) {
+            locale = locale.substring(0, locale.indexOf(String.valueOf('_')));
+        }
+
+        if (!"".equals(locale)) {
+            if ("en".equals(locale.toLowerCase()) || path.contains("_" + locale + IReportDepositService.EXTENSION_SEPARATOR_CHAR + IReportDepositService.PROPERTIES_FILE_EXTENSION)) {
+                locale = "";
+            } else {
+                locale = "_" + locale.toLowerCase();
+            }
+        }
+
+        return locale;
     }
 
     private Properties createDefaultProperties(String path, String name, String locale) throws IOException, PropertyFileExistsException {
@@ -183,7 +243,7 @@ abstract public class AbstractReportTemplateService implements IReportTemplateSe
         OutputFormat[] outputFormats = formats.toArray(new OutputFormat[formats.size()]);
         String[] md5CheckSums = getCheckSums(fileName);
 
-        return new ReportTemplateMetaData(fileName, outputName, outputFormats, isServerSide(), md5CheckSums);
+        return new ReportTemplateMetaData(fileName, outputName, outputFormats, isHandeledByReportDeposit(), md5CheckSums);
     }
 
     protected Map<String, byte[]> getPropertiesFiles(String fileName) throws IOException {
@@ -225,7 +285,7 @@ abstract public class AbstractReportTemplateService implements IReportTemplateSe
         return md5CheckSums.toArray(new String[md5CheckSums.size()]);
     }
 
-    public Set<ReportTemplateMetaData> getReportTemplates(String[] rptDesignFiles, String locale) throws IOException, ReportMetaDataException, PropertyFileExistsException {
+    public Set<ReportTemplateMetaData> getReportTemplates(String[] rptDesignFiles, String locale) throws ReportTemplateServiceException {
         Set<ReportTemplateMetaData> set = new HashSet<ReportTemplateMetaData>();
 
         for (String designFilePath : rptDesignFiles) {
@@ -234,7 +294,7 @@ abstract public class AbstractReportTemplateService implements IReportTemplateSe
         return set;
     }
 
-    public Set<ReportTemplateMetaData> getReportTemplates(String locale) throws IOException, ReportMetaDataException, PropertyFileExistsException {
+    public Set<ReportTemplateMetaData> getReportTemplates(String locale) throws ReportTemplateServiceException {
         return getReportTemplates(getReportTemplateFileNames(), locale);
     }
 
@@ -283,26 +343,34 @@ abstract public class AbstractReportTemplateService implements IReportTemplateSe
     }
 
     @Override
-    public ReportTemplate getReportTemplate(ReportTemplateMetaData metadata, String locale) throws IOException {
-        String filePath = getTemplateDirectory() + File.separatorChar + metadata.getFilename();
-        byte[] rptdesign = FileUtils.readFileToByteArray(new File(filePath));
+    public ReportTemplate getReportTemplate(ReportTemplateMetaData metadata, String locale) throws ReportTemplateServiceException {
+        try {
 
-        Map<String, byte[]> propertiesFile = getPropertiesFiles(metadata.getFilename());
-        return new ReportTemplate(metadata, rptdesign, propertiesFile);
+            String filePath = getTemplateDirectory() + File.separatorChar + metadata.getFilename();
+            byte[] rptdesign = FileUtils.readFileToByteArray(new File(filePath));
+
+            Map<String, byte[]> propertiesFile = getPropertiesFiles(metadata.getFilename());
+
+            return new ReportTemplate(metadata, rptdesign, propertiesFile);
+        } catch (IOException ex) {
+            handleException("error while fetching template", ex);
+        }
+
+        return null;
     }
 
     @Override
-    public Set<ReportTemplateMetaData> getServerReportTemplates(String locale) throws IOException, ReportMetaDataException, PropertyFileExistsException {
+    public Set<ReportTemplateMetaData> getServerReportTemplates(String locale) throws ReportTemplateServiceException {
         return getReportTemplateMetaData(getServerRptDesigns(), locale);
     }
 
     @Override
-    public Set<ReportTemplateMetaData> getReportTemplateMetaData(String[] rptDesignFiles, String locale) throws IOException, ReportMetaDataException, PropertyFileExistsException {
+    public Set<ReportTemplateMetaData> getReportTemplateMetaData(String[] rptDesignFiles, String locale) throws ReportTemplateServiceException {
         return getReportTemplates(rptDesignFiles, locale);
     }
 
     @SuppressWarnings("unchecked")
-    private String[] getServerRptDesigns() throws IOException {
+    private String[] getServerRptDesigns() throws ReportTemplateServiceException {
         List<String> list = new ArrayList<String>(0);
         // // DirFilter = null means no subdirectories
         IOFileFilter filter = new SuffixFileFilter("rptdesign", IOCase.INSENSITIVE);
