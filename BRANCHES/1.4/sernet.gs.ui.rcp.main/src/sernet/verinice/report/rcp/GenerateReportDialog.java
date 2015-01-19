@@ -2,6 +2,7 @@ package sernet.verinice.report.rcp;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -63,6 +64,8 @@ public class GenerateReportDialog extends TitleAreaDialog {
     
     private static final String REPORT_LOCAL_DECORATOR = "(L)";
     private static final String REPORT_SERVER_DECORATOR = "(S)";
+    
+    private static final NumericStringComparator comparator = new NumericStringComparator();
 
     private Combo comboReportType;
 
@@ -242,16 +245,9 @@ public class GenerateReportDialog extends TitleAreaDialog {
 
         comboReportType = new Combo(reportGroup, SWT.READ_ONLY);
         comboReportType.setLayoutData(gridDataCombo);
-
-        for(ReportTemplateMetaData data : reportTemplates){
-            String name = data.getOutputname();
-            if(data.isServer()){
-                name = name + " " + REPORT_SERVER_DECORATOR;
-            } else {
-                name = name + " " + REPORT_LOCAL_DECORATOR;
-            }
-            comboReportType.add(name);
-        }
+        
+        reportTemplates = fillReportCombo();
+        
         comboReportType.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -378,6 +374,37 @@ public class GenerateReportDialog extends TitleAreaDialog {
 
         composite.pack();
         return composite;
+    }
+
+    /**
+     * adds decorators ( "(L)" or "(S)" ) as a prefix to the report names, 
+     * sorts alphabetically: (locally stored templates before server-sided templates)
+     * adds sorted name list to the reportCombo
+     * @return sorted Array (for access later on)
+     */
+    private ReportTemplateMetaData[] fillReportCombo() {
+        for(ReportTemplateMetaData data : reportTemplates){
+            String name = data.getOutputname();
+            
+            if(data.isServer()){
+                data.setOutputname( REPORT_SERVER_DECORATOR + " " + name);
+            } else {
+                data.setOutputname(REPORT_LOCAL_DECORATOR + " " + name);
+            }
+        }
+        
+        Arrays.sort(reportTemplates, new Comparator() {
+            @Override
+            public int compare(Object template1, Object template2) {
+                return comparator.compare(((ReportTemplateMetaData)template1).getOutputname(), ((ReportTemplateMetaData)template2).getOutputname());
+            }
+        });
+        
+        for(ReportTemplateMetaData data : reportTemplates){
+            comboReportType.add(data.getOutputname());
+        }
+        
+        return reportTemplates;
     }
 
     protected GridData createTextGridData() {

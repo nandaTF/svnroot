@@ -19,12 +19,14 @@
 package sernet.gs.ui.rcp.main.bsi.dialogs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -37,6 +39,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -58,15 +62,12 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
-import sernet.gs.service.NumericStringComparator;
 import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.gs.ui.rcp.main.service.crudcommands.LoadPermissions;
 import sernet.verinice.interfaces.CommandException;
-import sernet.verinice.interfaces.IAccountService;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.Permission;
-import sernet.verinice.model.common.accountgroup.AccountGroup;
 import sernet.verinice.rcp.ImageColumnProvider;
 import sernet.verinice.rcp.account.AccountLoader;
 
@@ -99,6 +100,7 @@ public class AccessControlEditDialog extends TitleAreaDialog {
     private Button buttonRead;
     private Button buttonWrite;
     private Button buttonInherit;
+    private Button buttonAdd;
     private Button[] radioButtonMode = new Button[2];
 
     public AccessControlEditDialog(Shell parent, IStructuredSelection selection) {
@@ -184,11 +186,37 @@ public class AccessControlEditDialog extends TitleAreaDialog {
         filter.addKeyListener(new KeyListener() {
             @Override
             public void keyPressed(KeyEvent e) {
+                // do nothing
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
                 filterRoleCombo();
+                switchButtons(comboRole.getText() != null && !comboRole.getText().isEmpty());
+            }
+        });
+        
+        filter.addFocusListener(new FocusListener() {
+            
+            @Override
+            public void focusLost(FocusEvent e) {
+                String filterText = filter.getText();
+                if(filterText == null || filterText.isEmpty()){
+                    String tableText = ((Permission)
+                            ((StructuredSelection)
+                                    viewer.getSelection()).getFirstElement()).getRole();
+                    comboRole.setItems(getRoles());
+                    if(ArrayUtils.contains(getRoles(), tableText)){
+                        syncCombo(tableText);
+                    }
+                } 
+                String comboText = comboRole.getText();
+                switchButtons(comboText != null && !comboText.isEmpty());
+            }
+            
+            @Override
+            public void focusGained(FocusEvent e) {
+                // do nothing
             }
         });
 
@@ -197,12 +225,16 @@ public class AccessControlEditDialog extends TitleAreaDialog {
         comboRole.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+                String text = comboRole.getText();
                 syncTable(comboRole.getText());
+                switchButtons(text != null && !(text.trim().isEmpty()));
             }
         });
 
         buttonRead = generateButton(containerRoles, Integer.valueOf(SWT.CHECK), Messages.AccessControlEditDialog_13, Boolean.FALSE, null);
         buttonWrite = generateButton(containerRoles, Integer.valueOf(SWT.CHECK), Messages.AccessControlEditDialog_14, Boolean.FALSE, null);
+        buttonRead.setEnabled(false);
+        buttonWrite.setEnabled(false);
         SelectionListener addListener = new SelectionListener() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -213,8 +245,8 @@ public class AccessControlEditDialog extends TitleAreaDialog {
             public void widgetDefaultSelected(SelectionEvent e) {
             }
         };
-        Button buttonAdd = generateButton(containerRoles, Integer.valueOf(SWT.PUSH), Messages.AccessControlEditDialog_15, null, addListener);
-
+        buttonAdd = generateButton(containerRoles, Integer.valueOf(SWT.PUSH), Messages.AccessControlEditDialog_15, null, addListener);
+        buttonAdd.setEnabled(false);
         gridData = generateGridData(null, Boolean.TRUE, null, Integer.valueOf(SWT.RIGHT), null, null);
         buttonAdd.setLayoutData(gridData);
 
@@ -226,6 +258,14 @@ public class AccessControlEditDialog extends TitleAreaDialog {
 
         return containerRoles;
     }
+    
+    private void switchButtons(boolean enabled){
+        buttonRead.setEnabled(enabled);
+        buttonWrite.setEnabled(enabled);
+        buttonAdd.setEnabled(enabled);
+        
+    }
+
 
     private TableViewer createViewer(Composite parent) {
         final int gridDataHorizontalSpan = 5;
@@ -325,9 +365,28 @@ public class AccessControlEditDialog extends TitleAreaDialog {
             i++;
             p = (Permission) viewer.getElementAt(i);
         }
-        ;
 
     }
+    
+    private void syncCombo(String tableRole){
+        int i = 0;
+        try{
+            String cRole = comboRole.getItem(i);
+            while(cRole != null){
+                if(cRole.equals(tableRole)){
+                    comboRole.select(i);
+                    break;
+                }
+                i++;
+                cRole = comboRole.getItem(i);
+            }
+        }catch (IllegalArgumentException e){
+            // no Element found, dont change selection
+        }
+        String selection = comboRole.getText();
+        switchButtons(selection != null && !selection.isEmpty());
+    }
+    
 
     protected void syncComboAndCheckboxes(Permission permission) {
         setPermissionInCombo(permission);
@@ -341,14 +400,36 @@ public class AccessControlEditDialog extends TitleAreaDialog {
 
     private void selectCombo(String role) {
         String[] items = comboRole.getItems();
+        boolean set = false;
         for (int i = 0; i < items.length; i++) {
             if (items[i].equals(role)) {
                 comboRole.select(i);
+                set = true;
             }
         }
+        // if role is not element of combobox, select empty entry
+        if(!set){
+            List<String> list = new ArrayList(0);
+            list.add("");
+            list.addAll(removeEmptyEntries(Arrays.asList(comboRole.getItems())));
+            comboRole.setItems(list.toArray(new String[list.size()]));
+            comboRole.select(0);
+        }
+        
+    }
+    
+    private List<String> removeEmptyEntries(List<String> list){
+        List<String> filteredList = new ArrayList(0);
+        for(String s : list){
+            if(!s.isEmpty()){
+                filteredList.add(s);
+            }
+        }
+        return filteredList;
     }
 
     protected void setPermissionInCheckboxes(Permission permission) {
+        switchButtons(comboRole.getText() != null && !comboRole.getText().isEmpty());
         buttonRead.setSelection(permission.isReadAllowed());
         buttonWrite.setSelection(permission.isWriteAllowed());
 

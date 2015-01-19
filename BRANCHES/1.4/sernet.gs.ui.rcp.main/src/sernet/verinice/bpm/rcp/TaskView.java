@@ -25,9 +25,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,9 +47,9 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -60,37 +57,29 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
 
-import sernet.gs.service.IThreadCompleteListener;
 import sernet.gs.service.NumericStringComparator;
 import sernet.gs.service.RetrieveInfo;
-import sernet.gs.service.RuntimeCommandException;
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.ExceptionUtil;
 import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.gs.ui.rcp.main.bsi.editors.EditorFactory;
 import sernet.gs.ui.rcp.main.bsi.views.HtmlWriter;
-import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
-import sernet.gs.ui.rcp.main.common.model.IModelLoadListener;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.hui.common.VeriniceContext;
 import sernet.springclient.RightsServiceClient;
 import sernet.verinice.bpm.TaskLoader;
 import sernet.verinice.interfaces.ActionRightIDs;
-import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.ICommandService;
 import sernet.verinice.interfaces.IInternalServerStartListener;
 import sernet.verinice.interfaces.InternalServerEvent;
@@ -103,19 +92,11 @@ import sernet.verinice.iso27k.rcp.ComboModel;
 import sernet.verinice.iso27k.rcp.ComboModelLabelProvider;
 import sernet.verinice.iso27k.rcp.Iso27kPerspective;
 import sernet.verinice.model.bpm.TaskInformation;
-import sernet.verinice.model.bpm.TaskParameter;
-import sernet.verinice.model.bsi.BSIModel;
-import sernet.verinice.model.bsi.ITVerbund;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.configuration.Configuration;
-import sernet.verinice.model.iso27k.Audit;
-import sernet.verinice.model.iso27k.ISO27KModel;
-import sernet.verinice.model.iso27k.Organization;
 import sernet.verinice.rcp.IAttachedToPerspective;
 import sernet.verinice.rcp.RightsEnabledView;
-import sernet.verinice.rcp.account.AccountLoader;
 import sernet.verinice.service.commands.LoadAncestors;
-import sernet.verinice.service.commands.LoadCnAElementByEntityTypeId;
 
 /**
  * RCP view to show task loaded by instances of {@link ITaskService}.
@@ -126,70 +107,72 @@ import sernet.verinice.service.commands.LoadCnAElementByEntityTypeId;
  * Double clicking a task opens {@link CnATreeElement} in an editor. View
  * toolbar provides a button to complete tasks.
  * 
+ * @see TaskViewDataLoader
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
 public class TaskView extends RightsEnabledView implements IAttachedToPerspective, IPartListener2 {
     
     private static final Logger LOG = Logger.getLogger(TaskView.class);
-    private static final NumericStringComparator NSC = new NumericStringComparator();
+    static final NumericStringComparator NSC = new NumericStringComparator();
     
     public static final String ID = "sernet.verinice.bpm.rcp.TaskView"; //$NON-NLS-1$
     
-    private static final int WEIGHT_50 = 50;
-    private static final int WEIGHT_75 = 75;
-    private static final int WEIGHT_25 = 25;
-    private static final int WIDTH_4 = 4;
+    private static final int WEIGHT_40 = 40;
+    private static final int WEIGHT_60 = 60;
     
-    private CnATreeElement selectedGroup;
-    private String selectedAssignee;
-    private KeyMessage selectedProcessType;
-    private KeyMessage selectedTaskType;
+    private static final int WIDTH_SEARCH_FORM = 1060;
+    private static final int HEIGHT_SEARCH_FORM = 60;
+    
+    CnATreeElement selectedGroup;
+    String selectedAssignee;
+    KeyMessage selectedProcessType;
+    KeyMessage selectedTaskType;
     
     private TableViewer tableViewer;
     private TaskTableSorter tableSorter = new TaskTableSorter();
     private TaskLabelProvider labelProvider;
     private TaskContentProvider contentProvider;    
+    private Listener collapseAndExpandListener = new TableCollapseAndExpandListener();
     private Browser textPanel;
-    private Date dueDateFrom = null;
-    private Date dueDateTo = null;
-    private Button searchButton;
+    Label labelDateFrom;
+    Date dueDateFrom = null;
+    Date dueDateTo = null;
+    Button searchButton;
 
-    private ComboModel<CnATreeElement> comboModelGroup;
-    private Combo comboGroup;    
-    private ComboModel<Configuration> comboModelAccount;
-    private Combo comboAccount;
+    private TaskViewDataLoader dataLoader;
     
-    private ComboModel<KeyMessage> comboModelProcessType;
-    private Combo comboProcessType;
-    private ComboModelTaskType comboModelTaskType;
-    private Combo comboTaskType;
+    ComboModel<CnATreeElement> comboModelGroup;
+    Combo comboGroup;    
+    ComboModel<Configuration> comboModelAccount;
+    Combo comboAccount;
+    
+    ComboModel<KeyMessage> comboModelProcessType;
+    Combo comboProcessType;
+    ComboModelTaskType comboModelTaskType;
+    Combo comboTaskType;
+    
+    DateTime dateTimeFrom; 
+    Button disableDateButtonFrom;
+    DateTime dateTimeTo; 
+    Button disableDateButtonTo;
     
     private Action refreshAction;
     private Action doubleClickAction;
     private Action cancelTaskAction;
-    private LoadTaskJob job;
     
     private ICommandService commandService;
     private RightsServiceClient rightsService;
-    private IModelLoadListener modelLoadListener;
     private ITaskListener taskListener;
-    private ExecutorService executer = Executors.newFixedThreadPool(1);
 
     public TaskView() {
         super();
-        job = new LoadTaskJob();
-        IThreadCompleteListener listener = new RefreshListener(job);
-        job.addListener(listener);
+        dataLoader = new TaskViewDataLoader(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets
-     * .Composite)
+    /* (non-Javadoc)
+     * @see sernet.verinice.rcp.RightsEnabledView#createPartControl(org.eclipse.swt.widgets.Composite)
      */
-    @Override
+    @Override   
     public void createPartControl(Composite parent) {
         try {
             super.createPartControl(parent);
@@ -202,28 +185,99 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
 
     private void initView(Composite parent) {
         createRootComposite(parent);
-
-        initData();
+        dataLoader.initData();
         makeActions();
         addActions();
         addListener();
     }
+    
+    public void loadTasks() {
+        dataLoader.loadTasks();
+    }
 
     private void createRootComposite(Composite parent) {
-        SashForm rootSashComposite = createSashComposite(parent, SWT.VERTICAL);      
-        SashForm upperSashComposite = createSashComposite(rootSashComposite, SWT.HORIZONTAL);   
-        createTablePanel(rootSashComposite);
+        Composite rootComposite = CompositeCreator.create1ColumnComposite(parent, 0, 0);
+        Composite topComposite =  CompositeCreator.create2ColumnComposite(rootComposite);
         
-        createInfoPanel(upperSashComposite);
-        Composite searchComposite = createSearchComposite(upperSashComposite);
-        createSearchForm(searchComposite);
-   
-        rootSashComposite.setWeights(new int[] { WEIGHT_50, WEIGHT_50 });
-        upperSashComposite.setWeights(new int[] { WEIGHT_75, WEIGHT_25 });
+        createSearchComposite(topComposite);
+           
+        SashForm splitComposite = CompositeCreator.createSplitComposite(rootComposite, SWT.VERTICAL);   
+        createInfoComposite(splitComposite);
+        createTableComposite(splitComposite);
+        splitComposite.setWeights(new int[] { WEIGHT_40, WEIGHT_60 });
     }
     
-    private void createTablePanel(Composite parent) {
-        this.tableViewer = new TableViewer(parent);
+    private void createSearchComposite(Composite composite) {  
+        ScrolledComposite scrolledComposite = CompositeCreator.createScrolledComposite(composite);
+        
+        Composite formComposite = createSearchFormComposite(scrolledComposite);    
+                
+        scrolledComposite.setContent(formComposite); 
+        scrolledComposite.setVisible(true);
+        scrolledComposite.setMinSize(WIDTH_SEARCH_FORM,HEIGHT_SEARCH_FORM);
+        
+        createLoadButtonComposite(composite);     
+    }
+
+    private void createLoadButtonComposite(Composite parent) {
+        // Load button
+        Composite buttonComposite = CompositeCreator.create1ColumnComposite(parent, 4, 4, true, true); 
+        GridData gridData = (GridData) buttonComposite.getLayoutData();
+        gridData.minimumWidth = 75;
+        buttonComposite.setLayoutData(gridData);
+        // create a dummy label
+        new Label(buttonComposite, SWT.WRAP);  
+        createButtonControls(buttonComposite);
+    }
+
+    private Composite createSearchFormComposite(Composite parent) {
+        Composite formComposite = createInnerFormComposite(parent);
+        
+        // Group
+        Label label = new Label(formComposite, SWT.WRAP);
+        label.setText(Messages.TaskView_11);
+        // Assignee
+        label = new Label(formComposite, SWT.WRAP);
+        label.setText(Messages.TaskView_12);
+        // Process
+        label = new Label(formComposite, SWT.WRAP);
+        label.setText(Messages.TaskView_13); 
+        // Task type
+        label = new Label(formComposite, SWT.WRAP);
+        label.setText(Messages.TaskView_14);    
+        // Due date
+        labelDateFrom = new Label(formComposite, SWT.WRAP);
+        labelDateFrom.setText(Messages.TaskView_15);
+        label = new Label(formComposite, SWT.WRAP);
+        label.setText(Messages.TaskView_1);   
+             
+        // Group
+        createGroupControls(formComposite);      
+        // Assignee
+        createAssigneeControls(formComposite);           
+        // Process
+        createProcessTypeControls(formComposite);        
+        // Task type
+        createTaskTypeControls(formComposite);      
+        // Due date
+        createDateFromControls(formComposite); 
+        createDateToControls(formComposite);
+        return formComposite;
+    }
+    
+    public static Composite createInnerFormComposite(Composite parentComposite) {
+        Composite composite = new Composite(parentComposite, SWT.NONE);
+        GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+        composite.setLayoutData(gridData);
+        GridLayout gridLayout = new GridLayout(6, true);
+        gridLayout.marginHeight = 4;
+        gridLayout.marginWidth = 4;
+        composite.setLayout(gridLayout);
+        return composite;
+    }
+
+    private void createTableComposite(Composite parent) {
+        this.tableViewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
         final GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
         this.tableViewer.getControl().setLayoutData(gridData);
         this.tableViewer.setUseHashlookup(true);
@@ -255,8 +309,8 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
             tc.pack();
         }
 
-        getTable().addListener(SWT.Expand, getCollapseExpandListener());
-        getTable().addListener(SWT.Collapse, getCollapseExpandListener());
+        getTable().addListener(SWT.Expand, collapseAndExpandListener);
+        getTable().addListener(SWT.Collapse, collapseAndExpandListener);
 
         this.contentProvider = new TaskContentProvider(tableViewer);
         this.tableViewer.setContentProvider(this.contentProvider);
@@ -265,38 +319,16 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
         this.tableViewer.setSorter(tableSorter);
     }
 
-    private void createInfoPanel(Composite container) {
+    private void createInfoComposite(Composite container) {
         final int gridDataHeight = 80;
         textPanel = new Browser(container, SWT.NONE);
         textPanel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
-        final GridData gridData = new GridData(SWT.FILL, SWT.TOP, true, false);
+        final GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
         gridData.heightHint = gridDataHeight;
         textPanel.setLayoutData(gridData);
     }
-    
-    private void createSearchForm(Composite searchComposite) {
-        // Group
-        createGroupControls(searchComposite);
-        
-        // Assignee
-        createAssigneeControls(searchComposite);    
-        
-        // Process
-        createProcessTypeControls(searchComposite);
-        
-        // Task type
-        createTaskTypeControls(searchComposite);
-        
-        // Due date
-        createDueDateControls(searchComposite);
-        
-        // Load button
-        createButtonControls(searchComposite);
-    }
 
-    private void createGroupControls(Composite searchComposite) {
-        Label label = new Label(searchComposite, SWT.WRAP);
-        label.setText(Messages.TaskView_11);      
+    private void createGroupControls(Composite searchComposite) {     
         comboModelGroup = new ComboModel<CnATreeElement>(new GroupLabelProvider());       
         comboGroup = createComboBox(searchComposite);      
         comboGroup.addSelectionListener(new SelectionAdapter() {
@@ -308,10 +340,7 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
         });
     }
 
-    private void createAssigneeControls(Composite searchComposite) {
-        Label label;
-        label = new Label(searchComposite, SWT.WRAP);
-        label.setText(Messages.TaskView_12);      
+    private void createAssigneeControls(Composite searchComposite) {      
         comboModelAccount = new ComboModel<Configuration>(new ComboModelLabelProvider<Configuration>() {
             @Override
             public String getLabel(Configuration account) {
@@ -333,10 +362,7 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
         });
     }
 
-    private void createProcessTypeControls(Composite searchComposite) {
-        Label label;
-        label = new Label(searchComposite, SWT.WRAP);
-        label.setText(Messages.TaskView_13);       
+    private void createProcessTypeControls(Composite searchComposite) {      
         comboModelProcessType = new ComboModel<KeyMessage>(new ComboModelLabelProvider<KeyMessage>() {
             @Override
             public String getLabel(KeyMessage object) {
@@ -353,10 +379,7 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
         });
     }
 
-    private void createTaskTypeControls(Composite searchComposite) {
-        Label label;
-        label = new Label(searchComposite, SWT.WRAP);
-        label.setText(Messages.TaskView_14);       
+    private void createTaskTypeControls(Composite searchComposite) {   
         comboModelTaskType = new ComboModelTaskType();     
         comboTaskType = createComboBox(searchComposite);        
         comboTaskType.addSelectionListener(new SelectionAdapter() {
@@ -368,75 +391,85 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
         });
     }
 
-    private void createDueDateControls(Composite searchComposite) {
-        Label label = new Label(searchComposite, SWT.WRAP);
-        label.setText(Messages.TaskView_15);       
-        Composite dateComposite = create2ColumnComposite(searchComposite);      
-        final DateTime dueDate = new DateTime(dateComposite, SWT.DATE | SWT.DROP_DOWN);
-        dueDate.addSelectionListener (new SelectionAdapter () {
+    private void createDateFromControls(Composite searchComposite) {                   
+        Composite dateFromComposite = CompositeCreator.create2ColumnComposite(searchComposite); 
+        dateTimeFrom = new DateTime(dateFromComposite, SWT.DATE | SWT.DROP_DOWN);
+        dateTimeFrom.setEnabled(false);  
+        dateTimeFrom.addSelectionListener (new SelectionAdapter () {
             @Override
             public void widgetSelected (SelectionEvent e) {
-                dueDateFrom = extractDateFrom(dueDate);
-                dueDateTo = extractDateTo(dueDate);
+                dueDateFrom = extractDateFrom(dateTimeFrom);
+                dueDateTo = extractDateTo(dateTimeFrom);
             }
         });
-        dueDate.setEnabled(false);
-        final Button enableDateButton = new Button(dateComposite, SWT.TOGGLE);
-        enableDateButton.setText("< X"); //$NON-NLS-1$
-        enableDateButton.setSelection(true);
-        enableDateButton.addSelectionListener(new SelectionAdapter() {
+        
+        disableDateButtonFrom = new Button(dateFromComposite, SWT.TOGGLE);
+        disableDateButtonFrom.setText("< X"); //$NON-NLS-1$
+        disableDateButtonFrom.setSelection(true);     
+        disableDateButtonFrom.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                dueDate.setEnabled(!dueDate.isEnabled());
-                if(!dueDate.isEnabled()) {
-                    dueDateFrom = null;
-                    dueDateTo = null;
-                } else {
-                    dueDateFrom = extractDateFrom(dueDate);
-                    dueDateTo = extractDateTo(dueDate);
-                }
-                enableDateButton.setSelection(!dueDate.isEnabled());
+                dateTimeFrom.setEnabled(!dateTimeFrom.isEnabled());
+                disableDateButtonFrom.setSelection(!dateTimeFrom.isEnabled());
+                setDuedateFromLabel();
+                extractDates();           
             }
         });
+    }
+    
+    private void createDateToControls(Composite searchComposite) {               
+        Composite dateToComposite = CompositeCreator.create2ColumnComposite(searchComposite);      
+        dateTimeTo = new DateTime(dateToComposite, SWT.DATE | SWT.DROP_DOWN);
+        dateTimeTo.setEnabled(false);
+        dateTimeTo.addSelectionListener (new SelectionAdapter () {
+            @Override
+            public void widgetSelected (SelectionEvent e) {
+                dueDateTo = extractDateTo(dateTimeTo);
+            }
+        });       
+        disableDateButtonTo = new Button(dateToComposite, SWT.TOGGLE);
+        disableDateButtonTo.setText("< X"); //$NON-NLS-1$
+        disableDateButtonTo.setSelection(true);
+        disableDateButtonTo.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                dateTimeTo.setEnabled(!dateTimeTo.isEnabled());
+                disableDateButtonTo.setSelection(!dateTimeTo.isEnabled());
+                setDuedateFromLabel();
+                extractDates(); 
+            }      
+        });
+    }
+    
+    private void setDuedateFromLabel() {
+        if(disableDateButtonTo.getSelection()) {
+            labelDateFrom.setText(Messages.TaskView_16);
+        } else {
+            labelDateFrom.setText(Messages.TaskView_18);
+        }
+    }
+    
+    private void extractDates() {
+        if(!dateTimeFrom.isEnabled()) {
+            dueDateFrom = null;
+            dueDateTo = null;
+        } else {
+            dueDateFrom = extractDateFrom(dateTimeFrom);
+            if(!dateTimeTo.isEnabled()) {
+                dueDateTo = extractDateTo(dateTimeFrom);
+            } else {
+                dueDateTo = extractDateTo(dateTimeTo);
+            }
+        }
     }
 
     private void createButtonControls(Composite searchComposite) {
-        Composite buttonComposite = create2ColumnComposite(searchComposite);
-        searchButton = new Button(buttonComposite, SWT.NONE);
+        searchButton = new Button(searchComposite, SWT.NONE);
         searchButton.setText(Messages.TaskView_17);
         searchButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
-                loadTasks();
+                dataLoader.loadTasks();
             }
         });
     } 
-
-    private SashForm createSashComposite(Composite parent, int orientation) {
-        SashForm container = new SashForm(parent, orientation);
-        
-        container.setSashWidth(WIDTH_4);
-        container.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_GRAY));
-        return container;
-    }
-    
-    private Composite createSearchComposite(Composite composite) {
-        Composite comboComposite = new Composite(composite, SWT.NONE);
-        GridData gridData = new GridData(SWT.FILL, SWT.NONE, true, false);
-        comboComposite.setLayoutData(gridData);
-        GridLayout gridLayout = new GridLayout(1, true);
-        gridLayout.marginHeight = 5;
-        gridLayout.marginWidth = 5;
-        comboComposite.setLayout(gridLayout);
-        return comboComposite;
-    }
-    
-    private Composite create2ColumnComposite(Composite composite) {
-        Composite comboComposite = new Composite(composite, SWT.NONE);
-        GridData gridData = new GridData(SWT.FILL, SWT.NONE, true, false);
-        comboComposite.setLayoutData(gridData);
-        GridLayout gridLayout = new GridLayout(2, true);
-        comboComposite.setLayout(gridLayout);
-        return comboComposite;
-    }
 
     private Date extractDateFrom(DateTime dueDate) {
         Calendar cal = getDateWithoutTime(dueDate);
@@ -462,202 +495,11 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
         return cal;
     }
 
-    private void initData() {
-        if (CnAElementFactory.isModelLoaded()) {  
-            loadGroups();         
-            loadAssignees();
-            loadProcessTypes();
-            loadTaskTypes();
-            loadTasks();
-        } else if (modelLoadListener == null) {
-            // model is not loaded yet: add a listener to load data when it's
-            // laoded
-            modelLoadListener = new IModelLoadListener() {
-                @Override
-                public void closed(BSIModel model) {
-                    // nothing to do
-                }
-
-                @Override
-                public void loaded(BSIModel model) {
-                    Display.getDefault().syncExec(new Runnable() {
-                        @Override
-                        public void run() {
-                            initData();
-                        }
-                    });
-                }
-
-                @Override
-                public void loaded(ISO27KModel model) {
-                    // work is done in loaded(BSIModel model)
-                }
-            };
-            CnAElementFactory.getInstance().addLoadListener(modelLoadListener);
-        }
-    }
-    
-    public void loadTasks() {
-        TaskParameter param = new TaskParameter();        
-        param.setUsername(selectedAssignee);
-        if(selectedAssignee!=null) {           
-            param.setAllUser(false);
-        } else {
-            param.setAllUser(true);
-        }       
-        if(selectedGroup!=null) {
-            param.setAuditUuid(selectedGroup.getUuid());
-        }       
-        if(selectedProcessType!=null) {
-            param.setProcessKey(selectedProcessType.getKey());
-        }      
-        if(selectedTaskType!=null) {
-            param.setTaskId(selectedTaskType.getKey());
-        }
-        if(dueDateFrom!=null) {
-            param.setDueDateFrom(dueDateFrom);
-        }
-        if(dueDateTo!=null) {
-            param.setDueDateTo(dueDateTo);
-        }
-        job.setParam(param);
-        loadTasksInBackground(job);
-
-        Display.getDefault().syncExec(new Runnable() {
-            @Override
-            public void run() {
-                getInfoPanel().setText(""); //$NON-NLS-1$
-            }
-        });
-    }
-    
-    private void loadTasksInBackground(final LoadTaskJob job) {
-        searchButton.setText(Messages.TaskView_19);
-        searchButton.setEnabled(false);
-        executer.execute(job);
-    }
-    
-    private void loadAssignees() {
-        comboModelAccount.addAll(AccountLoader.loadAccounts());
-        comboModelAccount.addNoSelectionObject(Messages.TaskView_20);
-        getDisplay().syncExec(new Runnable(){
-            @Override
-            public void run() {
-                comboAccount.setItems(comboModelAccount.getLabelArray());
-                selectDefaultAssignee(); 
-            }
-        });
-    }
-    
-    private void selectDefaultAssignee() {
-        String logedInUserName = ServiceFactory.lookupAuthService().getUsername();
-        List<Configuration> allAccounts = comboModelAccount.getObjectList();
-        for (Configuration account : allAccounts) {
-            if(account!=null) {
-                if(logedInUserName.equals(account.getUser())) {             
-                    comboModelAccount.setSelectedObject(account);
-                    comboAccount.select(comboModelAccount.getSelectedIndex());
-                    selectedAssignee = account.getUser();
-                }  
-            }
-        }       
-    }
-    
-    private void loadGroups()  {
-        try {
-            comboModelGroup.clear();
-            LoadCnAElementByEntityTypeId command = new LoadCnAElementByEntityTypeId(Organization.TYPE_ID);
-            command = getCommandService().executeCommand(command);
-            comboModelGroup.addAll(command.getElements());
-            command = new LoadCnAElementByEntityTypeId(ITVerbund.TYPE_ID_HIBERNATE);      
-            command = getCommandService().executeCommand(command); 
-            comboModelGroup.addAll(command.getElements());
-            command = new LoadCnAElementByEntityTypeId(Audit.TYPE_ID);      
-            command = getCommandService().executeCommand(command); 
-            comboModelGroup.addAll(command.getElements());
-            comboModelGroup.sort(NSC);
-            comboModelGroup.addNoSelectionObject(Messages.TaskView_21);
-            getDisplay().syncExec(new Runnable(){
-                @Override
-                public void run() {
-                    comboGroup.setItems(comboModelGroup.getLabelArray());
-                    selectDefaultGroup();               
-                }  
-            });
-        } catch (CommandException e) {
-            // exception is not logged here, but in createPartControl
-            throw new RuntimeCommandException("Error while loading organizations, it-verbunds or audits", e); //$NON-NLS-1$
-        }
-    }
-    
-    private void selectDefaultGroup() {
-        comboGroup.select(0);
-        comboModelGroup.setSelectedIndex(comboGroup.getSelectionIndex());
-        selectedGroup = comboModelGroup.getSelectedObject();
-    }
-    
-    private void loadProcessTypes() {
-        comboModelProcessType.clear();
-        // you can use an arbitrary process service here
-        List<KeyMessage> processDefinitionList =  ServiceFactory.lookupIndividualService().findAllProcessDefinitions();
-        comboModelProcessType.addAll(processDefinitionList);
-        comboModelProcessType.sort(NSC);
-        comboModelProcessType.addNoSelectionObject(Messages.TaskView_23);
-        getDisplay().syncExec(new Runnable(){
-            @Override
-            public void run() {
-                comboProcessType.setItems(comboModelProcessType.getLabelArray());    
-                selectDefaultProcessType();
-            }  
-        });
-    }
-    
-    private void selectDefaultProcessType() {
-        comboProcessType.select(0);
-        comboModelProcessType.setSelectedIndex(comboProcessType.getSelectionIndex());
-        selectedProcessType = comboModelProcessType.getSelectedObject();
-    }
-    
-    private void loadTaskTypes() {
-        getDisplay().syncExec(new Runnable(){
-            @Override
-            public void run() {
-                comboTaskType.setItems(comboModelTaskType.getLabelArray());      
-                selectDefaultTaskType();
-            }  
-        });
-    }
-    
-    private void selectDefaultTaskType() {
-        comboTaskType.select(0);
-        comboModelTaskType.setSelectedIndex(comboTaskType.getSelectionIndex());
-        selectedTaskType = comboModelTaskType.getSelectedObject();
-    }
-
-    private Listener getCollapseExpandListener() {
-        Listener listener = new Listener() {
-
-            @Override
-            public void handleEvent(Event e) {
-                final TreeItem treeItem = (TreeItem) e.item;
-                Display.getDefault().asyncExec(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (TreeColumn tc : treeItem.getParent().getColumns()) {
-                            tc.pack();
-                        }
-                    }
-                });
-            }
-        };
-        return listener;
-    }
-
     private void makeActions() {
         refreshAction = new Action() {
             @Override
             public void run() {
-                loadTasks();
+                dataLoader.loadTasks();
             }
         };
         refreshAction.setText(Messages.ButtonRefresh);
@@ -683,8 +525,7 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
                 }
             }
         };
-        
-       
+           
         cancelTaskAction = new Action(Messages.ButtonCancel, SWT.TOGGLE) {
             @Override
             public void run() {
@@ -708,7 +549,6 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
                         configureActions();
                     }
                 }
-
             };
             Activator.getDefault().getInternalServer().addInternalServerStatusListener(listener);
         } else {
@@ -759,7 +599,7 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
                 Display.getDefault().syncExec(new Runnable() {
                     @Override
                     public void run() {
-                        loadTasks();
+                        dataLoader.loadTasks();
                     }
                 });
             }
@@ -792,47 +632,19 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
         tableViewer.getTable().setMenu(menu);
         getSite().registerContextMenu(menuManager, tableViewer);
         // Make the selection available
-        getSite().setSelectionProvider(tableViewer);
-        
-        
+        getSite().setSelectionProvider(tableViewer);   
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /* (non-Javadoc)
      * @see org.eclipse.ui.part.WorkbenchPart#dispose()
      */
-    @Override
+    @Override  
     public void dispose() {
-        CnAElementFactory.getInstance().removeLoadListener(modelLoadListener);
         TaskChangeRegistry.removeTaskChangeListener(taskListener);
-        job.removeAllListener();
-        shutdownAndAwaitTermination(executer);
+        dataLoader.dispose();
         super.dispose();
     }
 
-    private void shutdownAndAwaitTermination(ExecutorService executer) {
-        executer.shutdown(); // Disable new tasks from being submitted
-        try {
-            // Wait a while for existing tasks to terminate
-            if (!executer.awaitTermination(30, TimeUnit.SECONDS)) {
-                executer.shutdownNow(); // Cancel currently executing tasks
-                // Wait a while for tasks to respond to being cancelled
-                if (!executer.awaitTermination(30, TimeUnit.SECONDS)) {
-                    LOG.error("Task loader (ExecutorService) shutdown failed."); //$NON-NLS-1$
-                }
-            }
-        } catch (InterruptedException ie) {
-            // (Re-)Cancel if current thread also interrupted
-            executer.shutdownNow();
-            // Preserve interrupt status
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    /**
-     * @param manager
-     */
     private void taskSelected() {
         IToolBarManager manager = resetToolbar();
 
@@ -938,7 +750,7 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
         return tableSorter;
     }
 
-    private Browser getInfoPanel() {
+    Browser getInfoPanel() {
         return textPanel;
     }
 
@@ -964,7 +776,7 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
         });
     }
 
-    private static Display getDisplay() {
+    static Display getDisplay() {
         Display display = Display.getCurrent();
         // may be null if outside the UI thread
         if (display == null) {
@@ -998,13 +810,10 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
     public void setFocus() {
         // empty
     }
-
-    /*
-     * (non-Javadoc)
-     * 
+   
+    /* (non-Javadoc)
      * @see sernet.verinice.rcp.IAttachedToPerspective#getPerspectiveId()
      */
-    @Override
     public String getPerspectiveId() {
         return Iso27kPerspective.ID;
     }
@@ -1024,26 +833,5 @@ public class TaskView extends RightsEnabledView implements IAttachedToPerspectiv
     public String getViewId() {
         return ID;
     }
-    
-    private final class RefreshListener implements IThreadCompleteListener {
-        private final LoadTaskJob job;
-
-        private RefreshListener(LoadTaskJob job) {
-            this.job = job;
-        }
-
-        @Override
-        public void notifyOfThreadComplete(Thread thread) {
-            final RefreshTaskView refresh = new RefreshTaskView(job.getTaskList(), getViewer());
-            Display.getDefault().asyncExec(new Runnable() {
-                @Override
-                public void run() {
-                    refresh.refresh();
-                    searchButton.setText(Messages.TaskView_29);
-                    searchButton.setEnabled(true);
-                }
-            });
-        }
-    }
-    
+ 
 }
