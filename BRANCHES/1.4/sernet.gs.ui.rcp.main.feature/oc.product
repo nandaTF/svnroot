@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="verinice" uid="sernet.gs.ui.rcp.main.product" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.9.0.93" useFeatures="true" includeLaunchers="true">
+<product name="verinice" uid="sernet.gs.ui.rcp.main.product" id="sernet.gs.ui.rcp.main.product" application="sernet.gs.ui.rcp.main.application" version="1.9.0.94" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/sernet.gs.ui.rcp.main/icons/product_lg.gif"/>
@@ -774,9 +774,9 @@ Public License instead of this License.  But first, please read
    </license>
 
    <plugins>
-      <plugin id="SpringClient"/>
+      <plugin id="SpringClient" fragment=""/>
       <plugin id="com.ibm.icu"/>
-      <plugin id="com.ibm.icu.source"/>
+      <plugin id="com.ibm.icu.source" fragment=""/>
       <plugin id="org.apache.lucene"/>
       <plugin id="org.apache.lucene.analysis"/>
       <plugin id="org.eclipse.core.commands"/>
@@ -830,10 +830,10 @@ Public License instead of this License.  But first, please read
       <plugin id="org.eclipse.ui.win32" fragment="true"/>
       <plugin id="org.eclipse.ui.workbench"/>
       <plugin id="org.eclipse.ui.workbench.texteditor"/>
-      <plugin id="sernet.gs.log4j"/>
-      <plugin id="sernet.gs.saxon9"/>
+      <plugin id="sernet.gs.log4j" fragment=""/>
+      <plugin id="sernet.gs.saxon9" fragment=""/>
       <plugin id="sernet.gs.service"/>
-      <plugin id="sernet.gs.tagsoup_ak"/>
+      <plugin id="sernet.gs.tagsoup_ak" fragment=""/>
       <plugin id="sernet.gs.ui.rcp.main"/>
       <plugin id="verinice.nl1.org.eclipse.jface" fragment="true"/>
       <plugin id="verinice.nl1.org.eclipse.swt" fragment="true"/>
