@@ -19,7 +19,9 @@
  ******************************************************************************/
 package sernet.verinice.bpm.rcp;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -40,11 +42,11 @@ import sernet.verinice.interfaces.bpm.KeyMessage;
 import sernet.verinice.model.bpm.TaskParameter;
 import sernet.verinice.model.bsi.BSIModel;
 import sernet.verinice.model.bsi.ITVerbund;
+import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.configuration.Configuration;
 import sernet.verinice.model.iso27k.Audit;
 import sernet.verinice.model.iso27k.ISO27KModel;
 import sernet.verinice.model.iso27k.Organization;
-import sernet.verinice.rcp.account.AccountLoader;
 import sernet.verinice.service.commands.LoadCnAElementByEntityTypeId;
 import sernet.verinice.service.commands.LoadVisibleAccounts;
 
@@ -64,6 +66,9 @@ public class TaskViewDataLoader {
     private LoadTaskJob job;
     private ExecutorService executer = Executors.newFixedThreadPool(1);
     private ICommandService commandService;
+    
+    private List<CnATreeElement> auditList;
+    private List<CnATreeElement> filteredAuditList;
     
     
     public TaskViewDataLoader(TaskView taskView) {
@@ -117,9 +122,14 @@ public class TaskViewDataLoader {
         } else {
             param.setAllUser(true);
         }       
-        if(taskView.selectedGroup!=null) {
-            param.setAuditUuid(taskView.selectedGroup.getUuid());
-        }       
+        if(taskView.selectedScope!=null) {
+            param.setAuditUuid(taskView.selectedScope.getUuid());
+        }  
+        if(taskView.selectedAudit!=null) {
+            param.setAuditUuid(taskView.selectedAudit.getUuid());
+        } else if(taskView.selectedScope!=null && filteredAuditList!=null && !filteredAuditList.isEmpty()) {
+            param.setGroupIdList(getUuidList(filteredAuditList));
+        }
         if(taskView.selectedProcessType!=null) {
             param.setProcessKey(taskView.selectedProcessType.getKey());
         }      
@@ -143,6 +153,15 @@ public class TaskViewDataLoader {
         });
     }
     
+
+    private List<String> getUuidList(List<CnATreeElement> auditList) {
+        List<String> uuidList = new ArrayList<String>(auditList.size());
+        for (CnATreeElement audit : auditList) {
+            uuidList.add(audit.getUuid());
+        }
+        return uuidList;
+    }
+
     private void loadTasksInBackground(final LoadTaskJob job) {
         taskView.searchButton.setText(Messages.TaskView_19);
         taskView.searchButton.setEnabled(false);
@@ -151,40 +170,102 @@ public class TaskViewDataLoader {
     
     public void loadGroups()  {
         try {
-            taskView.comboModelGroup.clear();
+            taskView.comboModelScope.clear();
             LoadCnAElementByEntityTypeId command = new LoadCnAElementByEntityTypeId(Organization.TYPE_ID);
             command = taskView.getCommandService().executeCommand(command);
-            taskView.comboModelGroup.addAll(command.getElements());
+            taskView.comboModelScope.addAll(command.getElements());
             command = new LoadCnAElementByEntityTypeId(ITVerbund.TYPE_ID_HIBERNATE);      
             command = taskView.getCommandService().executeCommand(command); 
-            taskView.comboModelGroup.addAll(command.getElements());
-            command = new LoadCnAElementByEntityTypeId(Audit.TYPE_ID);      
-            command = taskView.getCommandService().executeCommand(command); 
-            taskView.comboModelGroup.addAll(command.getElements());
-            taskView.comboModelGroup.sort(TaskView.NSC);
-            taskView.comboModelGroup.addNoSelectionObject(Messages.TaskView_21);
+            taskView.comboModelScope.addAll(command.getElements());  
+            taskView.comboModelScope.sort(TaskView.NSC);
+            taskView.comboModelScope.addNoSelectionObject(Messages.TaskView_21);
             TaskView.getDisplay().syncExec(new Runnable(){
                 @Override
                 public void run() {
-                    taskView.comboGroup.setItems(taskView.comboModelGroup.getLabelArray());
+                    taskView.comboScope.setItems(taskView.comboModelScope.getLabelArray());
                     selectDefaultGroup();               
                 }  
             });
+            loadAudits();
         } catch (CommandException e) {
             // exception is not logged here, but in createPartControl
             throw new RuntimeCommandException("Error while loading organizations, it-verbunds or audits", e); //$NON-NLS-1$
         }
     }
     
+    public void loadAudits() {
+        try {
+            taskView.comboModelAudit.clear();
+            LoadCnAElementByEntityTypeId command = new LoadCnAElementByEntityTypeId(Audit.TYPE_ID);      
+            command = taskView.getCommandService().executeCommand(command); 
+            auditList = command.getElements();    
+            filteredAuditList = filterAudits();
+            taskView.comboModelAudit.addAll(filteredAuditList);
+            taskView.comboModelAudit.sort(TaskView.NSC);
+            if(filteredAuditList!=null && !filteredAuditList.isEmpty()) {
+                taskView.comboModelAudit.addNoSelectionObject(Messages.TaskView_21);
+            } else {
+                taskView.comboModelAudit.addNoSelectionObject(Messages.TaskViewDataLoader_0);
+            }
+            refreshAudits();
+        } catch (CommandException e) {
+            // exception is not logged here, but in createPartControl
+            throw new RuntimeCommandException("Error while loading organizations, it-verbunds or audits", e); //$NON-NLS-1$
+        }
+    }
+
+  
+    private List<CnATreeElement> filterAudits() {
+        List<CnATreeElement> filteredList = auditList;
+        if(taskView.selectedScope!=null) {
+            filteredList = new LinkedList<CnATreeElement>();
+            for (CnATreeElement audit : auditList) {
+                if(taskView.selectedScope.getDbId().equals(audit.getScopeId())) {
+                    filteredList.add(audit);
+                }
+            }
+        } else {
+            filteredList = auditList;
+        }
+        return filteredList;
+    }
+
+    private void refreshAudits() {     
+        TaskView.getDisplay().syncExec(new Runnable(){
+            @Override
+            public void run() {
+                taskView.comboAudit.setItems(taskView.comboModelAudit.getLabelArray());            
+                selectDefaultAudit();
+            }  
+        });
+    }
+    
+    public void refreshScopes() {     
+        TaskView.getDisplay().syncExec(new Runnable(){
+            @Override
+            public void run() {
+                taskView.comboScope.setItems(taskView.comboModelScope.getLabelArray());            
+                selectDefaultGroup();
+            }  
+        });
+    }
+    
     private void selectDefaultGroup() {
-        taskView.comboGroup.select(0);
-        taskView.comboModelGroup.setSelectedIndex(taskView.comboGroup.getSelectionIndex());
-        taskView.selectedGroup = taskView.comboModelGroup.getSelectedObject();
+        taskView.comboScope.select(0);
+        taskView.comboModelScope.setSelectedIndex(taskView.comboScope.getSelectionIndex());
+        taskView.selectedScope = taskView.comboModelScope.getSelectedObject();
+    }
+    
+    private void selectDefaultAudit() {
+        taskView.comboAudit.select(0);
+        taskView.comboModelAudit.setSelectedIndex(taskView.comboAudit.getSelectionIndex());
+        taskView.selectedAudit = taskView.comboModelAudit.getSelectedObject();
     }
     
     void loadAssignees() {
         taskView.comboModelAccount.clear();     
         taskView.comboModelAccount.addAll(loadAccounts());
+        taskView.comboModelAccount.sort(TaskView.NSC);
         taskView.comboModelAccount.addNoSelectionObject(Messages.TaskView_20);
         TaskView.getDisplay().syncExec(new Runnable(){
             @Override
@@ -202,7 +283,7 @@ public class TaskViewDataLoader {
             command = getCommandService().executeCommand(command);     
             return command.getAccountList();
         } catch (CommandException e) {
-            LOG.error("Error while loading accounts.", e);
+            LOG.error("Error while loading accounts.", e); //$NON-NLS-1$
             throw new RuntimeException(e);
         }
     }

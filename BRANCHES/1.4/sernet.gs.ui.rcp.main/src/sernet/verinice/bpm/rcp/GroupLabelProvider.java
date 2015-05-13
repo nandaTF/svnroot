@@ -22,10 +22,9 @@ package sernet.verinice.bpm.rcp;
 import java.util.Hashtable;
 import java.util.Map;
 
-import sernet.verinice.iso27k.rcp.ComboModelLabelProvider;
+import sernet.verinice.iso27k.rcp.IComboModelLabelProvider;
 import sernet.verinice.model.bsi.ITVerbund;
 import sernet.verinice.model.common.CnATreeElement;
-import sernet.verinice.model.iso27k.Audit;
 import sernet.verinice.model.iso27k.Organization;
 
 /**
@@ -35,13 +34,11 @@ import sernet.verinice.model.iso27k.Organization;
  * @see TaskView
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  */
-public class GroupLabelProvider extends ComboModelLabelProvider<CnATreeElement> {
+public class GroupLabelProvider implements IComboModelLabelProvider<CnATreeElement> {
     
-    static final Map<String, String> TYPE_SUFFIX_MAP = new Hashtable<String, String>();
-    
+    static final Map<String, String> TYPE_SUFFIX_MAP = new Hashtable<String, String>();   
     static {
         TYPE_SUFFIX_MAP.put(Organization.TYPE_ID, Messages.GroupLabelProvider_0);
-        TYPE_SUFFIX_MAP.put(Audit.TYPE_ID, Messages.GroupLabelProvider_1);
         TYPE_SUFFIX_MAP.put(ITVerbund.TYPE_ID, Messages.GroupLabelProvider_2);
     }
     
@@ -52,12 +49,15 @@ public class GroupLabelProvider extends ComboModelLabelProvider<CnATreeElement> 
 
     private String createTitel(CnATreeElement element) {
         StringBuilder sb = new StringBuilder();
-        sb.append(element.getTitle()).append(" "); //$NON-NLS-1$
-        sb.append(createSuffix(element));
+        sb.append(element.getTitle());
+        String suffix = createSuffix(element);
+        if(suffix!=null) {
+            sb.append(" ").append(suffix); //$NON-NLS-1$
+        }
         return sb.toString();
     }
 
-    private Object createSuffix(CnATreeElement element) {     
+    private String createSuffix(CnATreeElement element) {     
         return TYPE_SUFFIX_MAP.get(element.getTypeId());
     }
 }

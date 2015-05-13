@@ -206,7 +206,7 @@ public class CatalogView extends RightsEnabledView implements IAttachedToPerspec
 		    	  deleteCatalogAction.setEnabled(deleteCatalogAction.checkRights());
 		      }
 		    });
-		comboModel = new ComboModel<Attachment>(new ComboModelLabelProvider<Attachment>() {
+		comboModel = new ComboModel<Attachment>(new IComboModelLabelProvider<Attachment>() {
 			@Override
 			public String getLabel(Attachment attachment) {
 				StringBuilder sb = new StringBuilder();
@@ -313,6 +313,7 @@ public class CatalogView extends RightsEnabledView implements IAttachedToPerspec
 			attachment.setDate(now);
 			attachment.setFilePath(csvFile.getFilePath());
 			attachment.setTitel(attachment.getFileName());
+			attachment.setFileSize(String.valueOf(csvFile.getFileContent().length));
 			attachment.setText(Messages.CatalogView_10 + DateFormat.getDateTimeInstance().format(now));
 			SaveNote command = new SaveNote(attachment);	
 			command = getCommandService().executeCommand(command);

@@ -25,10 +25,14 @@ import org.apache.log4j.Logger;
 /**
  * List of all possible actions that should be controlable by right-management
  */
-public class ActionRightIDs {
+public final class ActionRightIDs {
     
-    private static Logger LOG = Logger.getLogger(ActionRightIDs.class);
-    
+    private static Logger log = Logger.getLogger(ActionRightIDs.class);
+
+    private ActionRightIDs() {
+        super();
+    }
+
     public static final String ACCESSCONTROL = "accesscontrol";
     public static final String ACCOUNTSETTINGS = "accountsettings";
     public static final String ADDBSIELEMENT = "addbsielement";
@@ -108,9 +112,9 @@ public class ActionRightIDs {
                     retVal.add((String)f.get(null));
                 }
             } catch (IllegalArgumentException e) {
-                LOG.error("Error while getting rightIDs", e);
+                log.error("Error while getting rightIDs", e);
             } catch (IllegalAccessException e) {
-                LOG.error("Error while getting rightIDs", e);
+                log.error("Error while getting rightIDs", e);
             }
         }
         return retVal.toArray(new String[retVal.size()]);

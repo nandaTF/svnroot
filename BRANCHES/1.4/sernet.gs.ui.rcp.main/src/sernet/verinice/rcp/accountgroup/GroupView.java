@@ -27,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.EventObject;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -42,7 +41,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -74,6 +72,7 @@ import sernet.gs.ui.rcp.main.actions.helper.UpdateConfigurationHelper;
 import sernet.gs.ui.rcp.main.bsi.views.Messages;
 import sernet.gs.ui.rcp.main.common.model.CnAElementFactory;
 import sernet.gs.ui.rcp.main.common.model.IModelLoadListener;
+import sernet.gs.ui.rcp.main.common.model.PlaceHolder;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.IAccountService;
@@ -117,6 +116,40 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
     private Button removeAllBtn;
     private Button editAccountBtn;
     private Text quickFilter;  
+    
+    private IModelLoadListener modelLoadListener;
+    private AccountLabelProvider accountLabelProvider;
+    private AccountLabelProvider groupLabelProvider;
+    
+    public GroupView(){
+        super();
+        if(CnAElementFactory.isIsoModelLoaded()) {  
+            initDataService();
+        } else if(modelLoadListener==null) {
+            createModelLoadListener();         
+        }      
+    }
+
+    
+    private void createModelLoadListener() {
+        // model is not loaded yet: add a listener to load data when it's loaded
+        modelLoadListener = new IModelLoadListener() {           
+            @Override
+            public void closed(BSIModel model) {
+                // nothing to do
+            }        
+            @Override
+            public void loaded(BSIModel model) {
+                // nothing to do
+            }         
+            @Override
+            public void loaded(ISO27KModel model) {
+                initDataService();
+                CnAElementFactory.getInstance().removeLoadListener(modelLoadListener);
+            }             
+        };
+        CnAElementFactory.getInstance().addLoadListener(modelLoadListener);
+    }
 
     @Override
     public void createPartControl(Composite parent) {
@@ -124,22 +157,9 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         super.createPartControl(parent);
         this.parent = parent;
         this.accountService = ServiceFactory.lookupAccountService();
-
         setupView();
         makeActions();
         fillLocalToolBar();
-        initData();
-
-        if (CnAElementFactory.isModelLoaded()) {
-            initData();
-        } else{
-            CnAElementFactory.getInstance().addLoadListener((IModelLoadListener) this);
-        }
-    }
-
-    void initData() {
-        WorkspaceJob initDataJob = new InitDataJob(Messages.GroupView_0);
-        JobScheduler.scheduleInitJob(initDataJob);
     }
 
     private void setupView() {
@@ -151,6 +171,10 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         initQuickFilter();
 
         initLists();
+        
+        switchButtons(false);
+        
+        updateAllLists();
     }
 
     private void initLabelForAccountGroupList() {
@@ -194,7 +218,7 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
     }
 
     private void initLists() {
-
+        
         initGroupList();
 
         initGroupToAccountList();
@@ -203,6 +227,7 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         initButtons(buttonGroupComposite);
 
         initAccountList();
+        
     }
 
     private void initAccountList() {
@@ -217,8 +242,8 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         
         tableAccounts = createTable(leftComposite, Messages.GroupView_4);
         
-        tableAccounts.setContentProvider(new ArrayContentProvider());
-        tableAccounts.setLabelProvider(new AccountLabelProvider());
+        tableAccounts.setContentProvider(new AccountContentProvider(tableAccounts));
+        tableAccounts.setLabelProvider(accountLabelProvider = new AccountLabelProvider());
         
         tableAccounts.refresh(true);
     }
@@ -235,8 +260,8 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         
         tableGroupToAccounts = createTable(leftComposite, Messages.GroupView_3);
         
-        tableGroupToAccounts.setContentProvider(new ArrayContentProvider());
-        tableGroupToAccounts.setLabelProvider(new AccountLabelProvider());
+        tableGroupToAccounts.setContentProvider(new AccountContentProvider(tableGroupToAccounts));
+        tableGroupToAccounts.setLabelProvider(groupLabelProvider = new AccountLabelProvider());
         
         tableGroupToAccounts.refresh(true);
         
@@ -254,8 +279,8 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         
         tableGroups = createTable(leftComposite, EMPTY_STRING);
         
-        tableGroups.setContentProvider(new ArrayContentProvider());
-        tableGroups.setLabelProvider(new AccountLabelProvider());
+        tableGroups.setContentProvider(new AccountContentProvider(tableGroups));
+        tableGroups.setLabelProvider(new AccountLabelProvider(null));
         
         tableGroups.addSelectionChangedListener(new ISelectionChangedListener() {
             
@@ -265,7 +290,7 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
                 h.handleSelection(e);
             }
         });
-        
+        tableGroups.setInput(new PlaceHolder(Messages.GroupView_41));
         tableGroups.refresh(true);
         
     }
@@ -393,7 +418,6 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
             try {
                 switchButtons(false);
                 handleSelection(e);
-
             } catch (RuntimeException ex) {
                 throw (RuntimeException) ex;
             } catch (Exception ex) {
@@ -405,7 +429,7 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
 
         private void handleSelection(final EventObject e) {
             if (isGroupSelected()) {
-
+                switchButtons(true);
                 if (e.getSource() == tableGroups) {
                     String[] accounts = accountGroupDataService.getAccountNamesForGroup(getSelectedGroup());
                     accountinGroupSet.clear();
@@ -439,6 +463,8 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
                     removeAllAccounts(Arrays.copyOf(set.toArray(), set.size(), String[].class));
                 }
                 updateAllLists();
+            } else {
+                switchButtons(false);
             }
 
             if (e.getSource() == editAccountBtn) {
@@ -480,85 +506,87 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         getDisplay().syncExec(new SelectionEventHandler(e));
     }
 
-    private void switchButtons(boolean enabled) {
+    void switchButtons(boolean enabled) {
         addBtn.setEnabled(enabled);
         addAllBtn.setEnabled(enabled);
         removeBtn.setEnabled(enabled);
         removeAllBtn.setEnabled(enabled);
         editAccountBtn.setEnabled(enabled);
     }
-
-    public final class InitDataJob extends WorkspaceJob {
-
-        public InitDataJob(String name) {
-            super(name);
-        }
-
-        @Override
-        public IStatus runInWorkspace(final IProgressMonitor monitor) {
-            IStatus status = Status.OK_STATUS;
-            try {
-                monitor.beginTask(Messages.GroupView_0, IProgressMonitor.UNKNOWN);
-                Activator.inheritVeriniceContextState();
-
-                initDataService();
-                updateAllLists();
-
-            } catch (Exception e) {
-                LOG.error(Messages.GroupView_1, e);
-                status = new Status(IStatus.ERROR, "sernet.gs.ui.rcp.main", Messages.GroupView_1, e);
-            } finally {
-                monitor.done();
-            }
-            return status;
-        }
-    }
-
-    private void updateAllLists() {
-        getDisplay().syncExec(new Runnable() {
-
-            @Override
-            public void run() {
-                updateAccountGroupList();
-
-                if (isGroupSelected()) {
-                    accountinGroupSet.clear();
-                    String group = getSelectedGroup();
-                    String[] names = accountGroupDataService.getAccountNamesForGroup(group);
-                    accountinGroupSet.addAll(Arrays.asList(names));                  
-                    tableGroupToAccounts.setInput(accountinGroupSet);
-                }
-				accountArray = accountGroupDataService.getAllAccounts();  
-				Arrays.sort(accountArray, COLLATOR);
-                tableAccounts.setInput(accountArray);
-            }
-        });
-        getDisplay().asyncExec(new Runnable() {
-            @Override
-            public void run() {
-                tableAccounts.refresh(true);
-                tableGroups.refresh(true);
-                tableGroupToAccounts.refresh(true);
-            }
-        });
-    }
     
-    private void updateAccountGroupList() {
-        String text = quickFilter.getText();
-        String[] allAccountGroups = accountGroupDataService.getAccountGroups();      
-        if (text==null || text.isEmpty()) {
-            accountGroupArray= allAccountGroups;
-        } else {
-            List<String> filteredList = new LinkedList<String>();
-            for (String group : allAccountGroups) {
-                if (group.toLowerCase().contains(text.toLowerCase())) {
-                    filteredList.add(group);
+    private void updateAllLists() {
+        try{
+            if(accountGroupDataService != null) {
+                updateGroupList();
+                updateGroupToAccountList();
+                updateAccountList();
+            } else {
+                if(LOG.isDebugEnabled()){
+                    LOG.debug("Dataservice not Initialized, cannot update lists");
                 }
             }
-            accountGroupArray =  filteredList.toArray(new String[filteredList.size()]);
-        }        
-        Arrays.sort(accountGroupArray, COLLATOR);
-        tableGroups.setInput(accountGroupArray);
+            tableAccounts.refresh(true);
+            tableGroups.refresh(true);
+            tableGroupToAccounts.refresh(true);
+        } catch(Exception e){
+            LOG.error("Error while setting data to ui widgets",e );
+        }
+    }
+
+
+    /**
+     * 
+     */
+    private void updateAccountList() {
+        if(accountGroupDataService != null && accountGroupDataService.getAllAccounts() != null){
+            accountArray = accountGroupDataService.getAllAccounts();
+            // remove accounts that are enlisted in tableToGroupAccounts
+            for(String account : accountinGroupSet){
+                if(ArrayUtils.contains(accountArray, account)){
+                    accountArray = (String[])ArrayUtils.remove(accountArray, ArrayUtils.indexOf(accountArray, account));
+                }
+            }
+            Arrays.sort(accountArray, COLLATOR);
+            tableAccounts.setInput(accountArray);
+        }
+    }
+
+
+    /**
+     * 
+     */
+    private void updateGroupToAccountList() {
+        if (isGroupSelected()) {
+            accountinGroupSet.clear();
+            String group = getSelectedGroup();
+            String[] names = accountGroupDataService.getAccountNamesForGroup(group);
+            accountinGroupSet.addAll(Arrays.asList(names));                  
+            tableGroupToAccounts.setInput(accountinGroupSet);
+        }
+    }
+
+    private void updateGroupList() {
+        String text = quickFilter.getText();
+        if(accountGroupDataService != null && accountGroupDataService.getAccountGroups() != null){
+            String[] allAccountGroups = accountGroupDataService.getAccountGroups();
+            if (text==null || text.isEmpty()) {
+                accountGroupArray= allAccountGroups;
+            } else {
+                List<String> filteredList = new LinkedList<String>();
+                for (String group : allAccountGroups) {
+                    if (group.toLowerCase().contains(text.toLowerCase())) {
+                        filteredList.add(group);
+                    }
+                }
+                accountGroupArray =  filteredList.toArray(new String[filteredList.size()]);
+            }        
+            Arrays.sort(accountGroupArray, COLLATOR);
+            tableGroups.setInput(accountGroupArray);
+        } else {
+            if(LOG.isDebugEnabled()){
+                LOG.debug("Dataservice not Initialized, cannot update group list");
+            }
+        }
     }
 
     private class NewGroupAction extends Action {
@@ -587,13 +615,17 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         return ((StructuredSelection)tableGroups.getSelection()).toList().size() > 0;
     }
     
+    private boolean isAccountSelected(){
+        return ((StructuredSelection)tableAccounts.getSelection()).toList().size() > 0;
+    }
+    
     String[] getAllGroupsFromTable(){
         return (String[]) tableGroups.getInput();
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        updateAccountGroupList();
+        updateGroupList();
     }
 
     @Override
@@ -630,7 +662,7 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
         @Override
         public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
             super.run(monitor);
-            initData();
+            refreshView();
         }
     }
 
@@ -656,7 +688,8 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
     boolean isStandardGroup() {
         return ArrayUtils.contains(STANDARD_GROUPS, getSelectedGroup());
     }
-
+    
+    
     @Override
     public void mouseDoubleClick(MouseEvent e) {
         if (e.getSource() == tableGroups) {
@@ -726,17 +759,36 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
     }
 
     private void initDataService() {
-        accountGroupDataService = new AccountGroupDataService();
+        if(accountGroupDataService == null && !Activator.getDefault().isStandalone()){
+            if(LOG.isDebugEnabled()){
+                LOG.debug("Initializing DataService");
+            }
+            accountGroupDataService = new AccountGroupDataService(this);
+        }
     }
 
 
+    /**
+     * 
+     */
+    void passServiceToLabelProvider() {
+        if(accountGroupDataService != null){
+            if(accountLabelProvider != null){
+                accountLabelProvider.setDataService(accountGroupDataService);
+            }
+            if(groupLabelProvider != null){
+                groupLabelProvider.setDataService(accountGroupDataService);
+            }
+        }
+    }
+    
     @Override
     public void loaded(BSIModel model) {
     }
 
     @Override
     public void loaded(ISO27KModel model) {
-        initData();
+        initDataService();
     }
 
     @Override
@@ -760,4 +812,9 @@ public class GroupView extends RightsEnabledView implements SelectionListener, K
 
         return internalTable;
     }
+    
+    void refreshView(){
+        updateAllLists();
+    }
+    
 }

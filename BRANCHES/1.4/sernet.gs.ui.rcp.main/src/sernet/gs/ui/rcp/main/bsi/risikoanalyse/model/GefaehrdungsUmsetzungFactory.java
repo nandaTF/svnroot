@@ -25,7 +25,7 @@ import sernet.verinice.model.common.CnATreeElement;
 public class GefaehrdungsUmsetzungFactory {
 
 	public static GefaehrdungsUmsetzung build(
-			CnATreeElement parent, Gefaehrdung source) {
+			CnATreeElement parent, Gefaehrdung source, String language) {
 		GefaehrdungsUmsetzung gefaehrdungsUmsetzung = new GefaehrdungsUmsetzung(parent);
 		
 		gefaehrdungsUmsetzung.setId(source.getId());
@@ -35,7 +35,7 @@ public class GefaehrdungsUmsetzungFactory {
 		gefaehrdungsUmsetzung.setUrl(source.getUrl());
 
 		
-		gefaehrdungsUmsetzung.setKategorie(source.getKategorieAsString());
+		gefaehrdungsUmsetzung.setKategorie(source.getKategorieAsString(language));
 		gefaehrdungsUmsetzung.setStand(source.getStand());
 
 		if (source instanceof OwnGefaehrdung) {

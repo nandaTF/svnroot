@@ -328,7 +328,7 @@
             name="verinice">
          <property
                name="aboutText"
-               value="SerNet verinice 1.9.1 - Codename 'Tavarua' - (c) SerNet Service Network GmbH and others 1996-2015&#x0A;&#x0A;Visit our homepage: http://www.verinice.org - Contact the authors: verinice@sernet.de&#x0A;&#x0A;Contributors:&#x0A;
+               value="SerNet verinice 1.10 - Codename 'Constructa' - (c) SerNet Service Network GmbH and others 1996-2015&#x0A;&#x0A;Visit our homepage: http://www.verinice.org - Contact the authors: verinice@sernet.de&#x0A;&#x0A;Contributors:&#x0A;
 Alexander Koderman &lt;ak@sernet.de&gt;&#x0A;
 Anne Hanekop &lt;ah@sernet.de&gt;&#x0A;
 Marek Seeger &lt;ms@sernet.de&gt;&#x0A;
@@ -346,7 +346,9 @@ Christian Eschenlohr &lt;christian.eschenlohr@leoni.com&gt;&#x0A;
 Julia Haas &lt;jh@sernet.de&gt;&#x0A;
 Sirin Torun &lt;st@sernet.de&gt;&#x0A;
 Benjamin Weißenfels &lt;bw@sernet.de&gt;&#x0A;
-Stanislav Strigunov &lt;sstrigunov@sernet.de&gt;&#x0A;&#x0A;
+Stanislav Strigunov &lt;sstrigunov@sernet.de&gt;&#x0A;
+Joachim Seifert	&lt;joachim.seifert@rbt-nbg.de&gt;&#x0A;&#x0A;
+Moritz Reiter &lt;mr@sernet.de&gt;&#x0A;
 Artwork:&#x0A;Blackbit http://www.blackbit.de - Icons by Axialis Team http://www.axialis.com&#x0A;Icons by Yusuke Kamiyamane http://p.yusukekamiyamane.com - Icons by FAMFAMFAM http://www.famfamfam.com&#x0A;Joseph North &lt;north@sublink.ca&gt; - Agentur Roeder http://www.agentur-roeder.de&#x0A;&#x0A;This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome &#x0A;to redistribute it under certain conditions. Verinice is licensed to you under the conditions of the GPLv3, &#x0A;the Apache license, the Eclipse Public License and others. See the LICENSE.txt contained in the program folder, &#x0A;the verinice Plugin-Details in the help menu and the copyright and license header in each source file for details.&#x0A;&#x0A;VDA Information Security Assessment (c) Arbeitskreis Informationsschutz des Verband der Automobilindustrie e. V. (VDA)&#x0A;Lizenz: http://creativecommons.org/licenses/by-nd/3.0/de/&#x0A;VDA und das VDA Logo sind eingetragene Markenzeichen des Verband der Automobilindustrie e.V. (VDA), &#x0A;die zur Nutzung in verinice lizenziert sind. Alle Rechte vorbehalten."/>
          <property
                name="windowImages"
@@ -1362,30 +1364,30 @@ Artwork:&#x0A;Blackbit http://www.blackbit.de - Icons by Axialis Team http://www
         </cheatsheet>
         <category
               id="sernet.gs.ui.rcp.main.cheatSheets2"
-              name="%cheatsheets.14">
+              name="%cheatsheets.11">
         </category>
         <cheatsheet
               category="sernet.gs.ui.rcp.main.cheatSheets2"
               composite="false"
-              contentFile="%cheatsheets.content.11"
+              contentFile="%cheatsheets.content.12"
               id="sernet.gs.ui.rcp.main.gstool1"
-              name="%cheatsheets.11">
+              name="%cheatsheets.12">
            <description>%cheatsheets.description.11</description>
         </cheatsheet>
         <cheatsheet
               category="sernet.gs.ui.rcp.main.cheatSheets2"
               composite="false"
-              contentFile="%cheatsheets.content.12"
+              contentFile="%cheatsheets.content.13"
               id="sernet.gs.ui.rcp.main.gstool2"
-              name="%cheatsheets.12">
+              name="%cheatsheets.13">
            <description>%cheatsheets.description.12</description>
         </cheatsheet>
         <cheatsheet
               category="sernet.gs.ui.rcp.main.cheatSheets2"
               composite="false"
-              contentFile="%cheatsheets.content.13"
+              contentFile="%cheatsheets.content.14"
               id="sernet.gs.ui.rcp.main.gstool3"
-              name="%cheatsheets.13">
+              name="%cheatsheets.14">
            <description>%cheatsheets.description.13</description>
         </cheatsheet>
         <category
@@ -1403,9 +1405,9 @@ Artwork:&#x0A;Blackbit http://www.blackbit.de - Icons by Axialis Team http://www
         <cheatsheet
               category="sernet.gs.ui.rcp.main.cheatSheets3"
               composite="false"
-              contentFile="%cheatsheets.content.19"
+              contentFile="%cheatsheets.content.17"
               id="sernet.verinice.iso27k.cheatsheet_27005"
-              name="Risk Management according to ISO 27005">
+              name="%cheatsheets.17">
            <description>
               This tutorial will show you how to accomplish a risk assessment based on the international standards ISO 27005 with verinice. Let's get started.
            </description>

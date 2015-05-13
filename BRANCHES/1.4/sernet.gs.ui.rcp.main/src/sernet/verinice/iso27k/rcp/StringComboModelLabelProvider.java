@@ -23,7 +23,7 @@ package sernet.verinice.iso27k.rcp;
  * @author Daniel Murygin <dm[at]sernet[dot]de>
  *
  */
-public class StringComboModelLabelProvider extends ComboModelLabelProvider<String> {
+public class StringComboModelLabelProvider implements IComboModelLabelProvider<String> {
 
     /* (non-Javadoc)
      * @see sernet.verinice.iso27k.rcp.ComboModelLabelProvider#getLabel(java.lang.Object)

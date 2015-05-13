@@ -19,10 +19,15 @@ package sernet.verinice.report.service.impl;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Locale;
 
 import org.apache.log4j.Logger;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
+import org.eclipse.core.runtime.URIUtil;
 
 import sernet.verinice.interfaces.IReportDepositService;
 import sernet.verinice.interfaces.report.IOutputFormat;
@@ -35,6 +40,7 @@ import sernet.verinice.model.report.ReportTemplateMetaData;
  */
 public class GenericReportType implements IReportType {
 
+    private final static Logger LOG = Logger.getLogger(GenericReportType.class);
     
     private IReportOptions options;
     
@@ -110,32 +116,44 @@ public class GenericReportType implements IReportType {
     public void createReport(ReportTemplateMetaData metadata) {
         BIRTReportService brs = new BIRTReportService();
         URL rptURL = null;
-        String locationConst;
-        if(metadata.isServer()){
-            locationConst = getDepositPath(IReportDepositService.REPORT_DEPOSIT_CLIENT_REMOTE);
-        } else {
-            locationConst = brs.getOdaDriver().getLocalReportLocation();
-            if(!locationConst.endsWith(String.valueOf(File.separatorChar))){
-                locationConst = locationConst + File.separatorChar;
-            }
-            if(!locationConst.startsWith("file://")){
-                locationConst = "file://" + locationConst; 
-            }
-        }
-        
-
-
         try {
-            rptURL = new URL(locationConst +
-                    metadata.getFilename());
+            if(metadata.isServer()){
+                rptURL = new URL(getDepositPath(IReportDepositService.REPORT_DEPOSIT_CLIENT_REMOTE) + metadata.getFilename());
+            } else {
+                URI locationConst = URIUtil.fromString(brs.getOdaDriver().getLocalReportLocation());
+
+                if(LOG.isDebugEnabled()){
+                    LOG.debug("determined value for \"locationConst\":\t" + locationConst);
+                    LOG.debug("File to open:\t" + metadata.getFilename());
+                }
+
+                URI u = URIUtil.append(locationConst, metadata.getFilename());
+                if(LOG.isDebugEnabled()){
+                    LOG.debug("URI generated:\t" + u.toString());
+                    LOG.debug("Unencoded URI:\t" + URIUtil.toUnencodedString(u));
+                    LOG.debug("Default Charset:\t" + Charset.defaultCharset().displayName(Locale.getDefault()));
+                    LOG.debug("Default Locale:\t" + Locale.getDefault().getLanguage());
+                }
+                File f1 = new File(URIUtil.toUnencodedString(u));
+
+                rptURL = f1.toURI().toURL();
+            }
         } catch (MalformedURLException e) {
-            Logger.getLogger(GenericReportType.class).error("Error reading" +
+            LOG.error("Error reading" +
                     " rptdesign", e);
+        } catch (URISyntaxException e) {
+            LOG.error("Unable to parse URL of template location", e);
         }
 
-        
+
+        if(LOG.isDebugEnabled()){
+            LOG.debug("Trying to open report from template at:\t" + rptURL.toString());
+        }
+
         IRunAndRenderTask task = brs.createTask(rptURL);
         brs.render(task, options);
+        // could be enhancement in logging
+        // List errors = task.getErrors(); // returns list of engineexceptions
     }
     
     /**
@@ -156,5 +174,6 @@ public class GenericReportType implements IReportType {
         }        
         return sb.toString();
     }
+    
 
 }

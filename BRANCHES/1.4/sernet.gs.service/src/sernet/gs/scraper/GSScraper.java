@@ -43,6 +43,7 @@ import net.sf.saxon.trans.XPathException;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import sernet.gs.model.Baustein;
 import sernet.gs.model.Gefaehrdung;
@@ -60,12 +61,29 @@ public class GSScraper {
 
 	private final Map<String, String[]> brokenRoles = new HashMap<String, String[]>();
 	
+	private static final Logger LOG = Logger.getLogger(GSScraper.class);
+	
 	private static final int GROUP3 = 3;
     private static final int GROUP4 = 4;
     private static final int GROUP5 = 5;
+    
+    // used when gs contant loaded from file
+    public static final String LANGUAGE_IDENTIFIER_GERMAN = "1 Übergreifende Aspekte";
+    public static final String LANGUAGE_IDENTIFIER_ENGLISH = "M 1 Common aspects";
+    
+    // used when gs content loaded from cache
+    public static final String TITLE_OF_FIRST_BAUSTEIN_GERMAN = "Sicherheitsmanagement";
+    public static final String TITLE_OF_FIRST_BAUSTEIN_ENGLISH = "Security management";
+    public static final String FIRST_BAUSTEIN_ID = "B 1.0";
+    
+    public static final String CATALOG_LANGUAGE_ENGLISH = "EN";
+    public static final String CATALOG_LANGUAGE_GERMAN = "DE";
+
 	
 
 	private IGSPatterns patterns;
+	
+	private String language = "";
 
 	public IGSPatterns getPatterns() {
 		return patterns;
@@ -166,7 +184,24 @@ public class GSScraper {
 		}
 		// else parse from HTML:
 		try {
+		    if(LOG.isDebugEnabled()){
+		        LOG.debug("Inspecting " + kapitel + " for parsing on ITGS-Bausteine");
+		    }
 			Node root = source.parseBausteinDocument(kapitel);
+			if("b01".equals(kapitel)){
+			    getLanguage(root);
+			    if("".equals(this.language)){
+			        // use default if nothing is set
+			        if(LOG.isDebugEnabled()){
+			            LOG.debug("Could not determine language of ITGS-Catalogue, using the default (german)");
+			        }
+			        this.language = CATALOG_LANGUAGE_GERMAN;
+			        
+			    }
+			    if(LOG.isDebugEnabled()){
+			        LOG.debug("Cataloglanguage determined:\t" + this.language);
+			    }
+			}
 			getStand(kapitel, root);
 
 			bausteinContext.setContextItem(new DocumentWrapper(root, kapitel,
@@ -322,7 +357,7 @@ public class GSScraper {
 			return result;
 		}
 		try {
-			Node root = source.parseBausteinDocument(baustein);
+		    Node root = source.parseBausteinDocument(baustein);
 			getStand(baustein, root);
 			massnahmenContext.setContextItem(new DocumentWrapper(root,
 					baustein, config));
@@ -336,7 +371,34 @@ public class GSScraper {
 		return result;
 
 	}
-
+	
+	public String getLanguage(String url){
+	    Node root;
+        try {
+            root = source.parseBausteinDocument(url);
+            getLanguage(root);
+            return this.language;
+        } catch (GSServiceException e) {
+            LOG.error("Error parsing GS-Catalogue Language", e);
+        }
+        // german is the default value
+        return CATALOG_LANGUAGE_GERMAN;
+	}
+	
+	private void getLanguage(Node node){
+	    if(LANGUAGE_IDENTIFIER_ENGLISH.equals(node.getTextContent())){
+	        this.language = CATALOG_LANGUAGE_ENGLISH;
+	    } else if(this.language.isEmpty()){
+	        NodeList list = node.getChildNodes();
+	        for(int i = 0; i < list.getLength(); i++){
+	            Node currentNode = list.item(i);
+	            if(currentNode.getNodeType() == Node.ELEMENT_NODE){
+	                getLanguage(currentNode);
+	            }
+	        }
+	    }
+	}
+	
     private ArrayList<Massnahme> fillResult(ArrayList<Massnahme> result) throws XPathException, GSServiceException {
         SequenceIterator iterator = getMassnahmenExp
         		.iterator(massnahmenContext);
@@ -574,5 +636,9 @@ public class GSScraper {
 	public void setCacheDir(String cacheDir) {
 		this.cacheDir = cacheDir;
 	}
+
+    public String getLanguage() {
+        return language;
+    }
 
 }

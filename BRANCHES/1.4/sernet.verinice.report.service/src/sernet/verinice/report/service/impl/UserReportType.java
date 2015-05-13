@@ -21,7 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.birt.report.engine.api.IDataExtractionTask;
@@ -190,6 +192,4 @@ public class UserReportType implements IReportType {
     public void createReport(ReportTemplateMetaData report) {
         // nothing here
     }
-
-
 }

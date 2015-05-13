@@ -168,6 +168,8 @@ public final class Messages extends NLS {
     public static String FileView_30;
 
     public static String FileView_34;
+    
+    public static String FileView_35;
 
     public static String FileView_4;
 
@@ -354,6 +356,12 @@ public final class Messages extends NLS {
     public static String GroupView_37;
     
     public static String GroupView_38;
+    
+    public static String GroupView_39;
+    
+    public static String GroupView_40;
+    
+    public static String GroupView_41;
 
     static {
         // initialize resource bundle

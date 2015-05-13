@@ -40,13 +40,13 @@ import sernet.gs.ui.rcp.main.ImageCache;
 import sernet.gs.ui.rcp.main.bsi.dialogs.AccessControlEditDialog;
 import sernet.gs.ui.rcp.main.common.model.CnAElementHome;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
-import sernet.gs.ui.rcp.main.service.crudcommands.UpdatePermissions;
 import sernet.verinice.interfaces.ActionRightIDs;
 import sernet.verinice.interfaces.CommandException;
 import sernet.verinice.interfaces.IInternalServerStartListener;
 import sernet.verinice.interfaces.InternalServerEvent;
 import sernet.verinice.model.common.CnATreeElement;
 import sernet.verinice.model.common.Permission;
+import sernet.verinice.service.commands.UpdatePermissions;
 
 /**
  * {@link Action} that creates a dialog to modify the access rights of a
@@ -56,6 +56,8 @@ import sernet.verinice.model.common.Permission;
  * 
  */
 public class ShowAccessControlEditAction extends RightsEnabledAction implements ISelectionListener {
+
+    private static final String ERROR_MESSAGE = "Error while setting access rights.";
 
     private static final Logger LOG = Logger.getLogger(ShowAccessControlEditAction.class);
     
@@ -124,8 +126,8 @@ public class ShowAccessControlEditAction extends RightsEnabledAction implements 
                         Activator.inheritVeriniceContextState();
                         updatePermissions();
                     } catch (CommandException e) {
-                        LOG.error("Error while setting access rights.", e); //$NON-NLS-1$
-                        throw new RuntimeException("Error while setting access rights.", e); //$NON-NLS-1$
+                        LOG.error(ERROR_MESSAGE, e); //$NON-NLS-1$
+                        throw new RuntimeException(ERROR_MESSAGE, e); //$NON-NLS-1$
                     } finally {
                         if(monitor!=null) {
                             monitor.done();
@@ -134,8 +136,8 @@ public class ShowAccessControlEditAction extends RightsEnabledAction implements 
                 }
             }); 
         } catch (Exception e) {
-            LOG.error("Error while setting access rights.", e); //$NON-NLS-1$
-            ExceptionUtil.log(e, "Error while setting access rights."); //$NON-NLS-1$
+            LOG.error(ERROR_MESSAGE, e); //$NON-NLS-1$
+            ExceptionUtil.log(e, ERROR_MESSAGE); //$NON-NLS-1$
         }       
     }
     

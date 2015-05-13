@@ -253,7 +253,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
                 if (!duplicate) {
                     MassnahmenUmsetzung massnahmeUmsetzung;
                     try {
-                        massnahmeUmsetzung = massnahmenFactory.createMassnahmenUmsetzung(massnahme);
+                        massnahmeUmsetzung = massnahmenFactory.createMassnahmenUmsetzung(massnahme, BSIKatalogInvisibleRoot.getInstance().getLanguage());
                         allMassnahmenUmsetzungen.add(massnahmeUmsetzung);
                     } catch (Exception e) {
                         Logger.getLogger(this.getClass()).error(Messages.RiskAnalysisWizard_4, e);
@@ -271,7 +271,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
      */
     private void loadAssociatedGefaehrdungen() {
         try {
-            LoadAssociatedGefaehrdungen command = new LoadAssociatedGefaehrdungen(cnaElement);
+            LoadAssociatedGefaehrdungen command = new LoadAssociatedGefaehrdungen(cnaElement, BSIKatalogInvisibleRoot.getInstance().getLanguage());
             command = ServiceFactory.lookupCommandService().executeCommand(command);
             List<GefaehrdungsUmsetzung> associatedGefaehrdungen = command.getAssociatedGefaehrdungen();
             for (GefaehrdungsUmsetzung gefaehrdung : associatedGefaehrdungen) {
@@ -471,7 +471,7 @@ public class RiskAnalysisWizard extends Wizard implements IExportWizard {
         try {
             if (!GefaehrdungsUtil.listContainsById(finishedRiskLists.getAssociatedGefaehrdungen(), currentGefaehrdung)) {
                 /* Add to List of Associated Gefaehrdungen */
-                AssociateGefaehrdungsUmsetzung command = new AssociateGefaehrdungsUmsetzung(finishedRiskLists.getDbId(), currentGefaehrdung, this.finishedRiskAnalysis.getDbId());
+                AssociateGefaehrdungsUmsetzung command = new AssociateGefaehrdungsUmsetzung(finishedRiskLists.getDbId(), currentGefaehrdung, this.finishedRiskAnalysis.getDbId(), BSIKatalogInvisibleRoot.getInstance().getLanguage());
                 command = ServiceFactory.lookupCommandService().executeCommand(command);
 
                 finishedRiskLists = command.getFinishedRiskLists();

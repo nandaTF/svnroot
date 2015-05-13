@@ -44,6 +44,8 @@ public class AssociateGefaehrdungsUmsetzung extends GenericCommand implements IA
 	private FinishedRiskAnalysisLists finishedRiskLists;
 	private Integer riskAnalysisDbId;
 	
+	private String language;
+	
 	private transient IAuthService authService;
 
 	
@@ -61,10 +63,11 @@ public class AssociateGefaehrdungsUmsetzung extends GenericCommand implements IA
 	 * @param integer 
 	 * @param finishedRiskAnalysis 
 	 */
-	public AssociateGefaehrdungsUmsetzung(Integer listDbId, Gefaehrdung currentGefaehrdung, Integer riskAnalysisDbId) {
+	public AssociateGefaehrdungsUmsetzung(Integer listDbId, Gefaehrdung currentGefaehrdung, Integer riskAnalysisDbId, String language) {
 		this.currentGefaehrdung = currentGefaehrdung;
 		this.listDbId = listDbId;
 		this.riskAnalysisDbId = riskAnalysisDbId;
+		this.language = language;
 	}
 
 	/* (non-Javadoc)
@@ -74,7 +77,7 @@ public class AssociateGefaehrdungsUmsetzung extends GenericCommand implements IA
 		FinishedRiskAnalysis riskAnalysis = getDaoFactory().getDAO(FinishedRiskAnalysis.class).findById(riskAnalysisDbId);
 		finishedRiskLists = getDaoFactory().getDAO(FinishedRiskAnalysisLists.class).findById(listDbId);
 		
-		gefaehrdungsUmsetzung = GefaehrdungsUmsetzungFactory.build(null, currentGefaehrdung);
+		gefaehrdungsUmsetzung = GefaehrdungsUmsetzungFactory.build(null, currentGefaehrdung, language);
 		getDaoFactory().getDAO(GefaehrdungsUmsetzung.class).saveOrUpdate(gefaehrdungsUmsetzung);
 		
 		if (authService.isPermissionHandlingNeeded())

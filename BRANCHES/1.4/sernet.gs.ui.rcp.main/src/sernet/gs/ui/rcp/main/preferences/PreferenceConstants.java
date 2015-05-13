@@ -41,10 +41,12 @@ public class PreferenceConstants {
 	public static final String INFO_CONTROLS_ADDED = "info_controls_added"; //$NON-NLS-1$
 	public static final String INFO_ELEMENTS_COPIED = "info_elements_copied"; //$NON-NLS-1$
 	public static final String INFO_ELEMENTS_CUT = "info_elements_cut";  //$NON-NLS-1$
-	public static final String INFO_IMPORT_LDAP = "info_import_ldap"; //$NON-NLS-1$
+	public static final String INFO_IMPORT_LDAP = "info_import_ldap"; //$NON-NLS-1$v
     public static final String INFO_PROCESSES_STARTED = "info_processes_started"; //$NON-NLS-1$
+    public static final String INFO_TASKS_COMPLETED = "info_tasks_completed"; //$NON-NLS-1$
     public static final String INFO_PROCESS_VALIDATE = "info_processes_validate"; //$NON-NLS-1$
     public static final String INFO_STATUS_DERIVED = "info_status_derived"; //$NON-NLS-1$
+    public static final String INFO_SEARCH_ELEMENT_NOT_FOUND = "search_element_not_found"; //$NON-NLS-1$
     public static final String SHOW_ALIEN_DECORATOR = "show_alien_decorator"; //$NON-NLS-1$
     public static final String SHOW_DBID_DECORATOR = "show_dbid_decorator"; //$NON-NLS-1$
     public static final String USE_AUTOMATIC_VALIDATION = "use_automatic_validation"; //$NON-NLS-1$
@@ -126,12 +128,14 @@ public class PreferenceConstants {
 	public static final String DEFAULT_FOLDER_IMPORT = "default_folder_import";
 	public static final String DEFAULT_FOLDER_EXPORT = "default_folder_export";
     public static final String DEFAULT_FOLDER_REPORT = "default_folder_report";
+    public static final String DEFAULT_FOLDER_CSV_EXPORT = "default_folder_csv_export";
     public static final String DEFAULT_TEMPLATE_FOLDER_REPORT = "default_template_folder_report";
 	
 	// additional gui preferences
 	public static final String SWITCH_PERSPECTIVE = "switch_perspective";
 	public static final String DONT_ASK_BEFORE_SWITCH_PERSPECTIVE = "switch_perspective_dont_ask";
     public static final String LINK_TO_EDITOR = "link_to_editor";
+    public static final String CUT_INHERIT_PERMISSIONS = "cut_inherit_permissions";
 	
 	
 	// catalog import preferences

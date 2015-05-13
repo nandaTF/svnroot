@@ -1366,6 +1366,31 @@ columns(newcols);</value>
                     <text-property name="displayName">auditUuid</text-property>
                     <text-property name="heading">auditUuid</text-property>
                 </structure>
+                <structure>
+                    <property name="columnName">organization</property>
+                    <text-property name="displayName">organization</text-property>
+                    <text-property name="heading">organization</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">finding</property>
+                    <text-property name="displayName">finding</text-property>
+                    <text-property name="heading">finding</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">measure</property>
+                    <text-property name="displayName">measure</text-property>
+                    <text-property name="heading">measure</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">MajurityLevel</property>
+                    <text-property name="displayName">MajurityLevel</text-property>
+                    <text-property name="heading">MajurityLevel</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">genericAuditTitle</property>
+                    <text-property name="displayName">genericAuditTitle</text-property>
+                    <text-property name="heading">genericAuditTitle</text-property>
+                </structure>
             </list-property>
             <list-property name="parameters">
                 <structure>
@@ -1446,6 +1471,31 @@ columns(newcols);</value>
                     <structure>
                         <property name="position">13</property>
                         <property name="name">auditUuid</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">14</property>
+                        <property name="name">organization</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">15</property>
+                        <property name="name">finding</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">16</property>
+                        <property name="name">measure</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">17</property>
+                        <property name="name">MajurityLevel</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">18</property>
+                        <property name="name">genericAuditTitle</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                 </list-property>
@@ -1543,6 +1593,41 @@ columns(newcols);</value>
                     <property name="dataType">javaObject</property>
                     <property name="nativeDataType">2000</property>
                 </structure>
+                <structure>
+                    <property name="position">14</property>
+                    <property name="name">organization</property>
+                    <property name="nativeName">organization</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">15</property>
+                    <property name="name">finding</property>
+                    <property name="nativeName">finding</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">16</property>
+                    <property name="name">measure</property>
+                    <property name="nativeName">measure</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">17</property>
+                    <property name="name">MajurityLevel</property>
+                    <property name="nativeName">MajurityLevel</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">18</property>
+                    <property name="name">genericAuditTitle</property>
+                    <property name="nativeName">genericAuditTitle</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[import sernet.hui.common.*;
 import sernet.gs.ui.rcp.main.service.crudcommands.*;
@@ -1550,7 +1635,7 @@ import sernet.verinice.report.service.commands.*;
 import java.util.*;
 import sernet.gs.ui.rcp.main.service.crudcommands.*;
 import sernet.verinice.model.iso27k.*;
-
+import sernet.verinice.service.commands.LoadAncestors;
 import sernet.gs.ui.rcp.main.Activator;
 import sernet.gs.ui.rcp.main.service.ServiceFactory;
 import sernet.verinice.interfaces.bpm.ITask;
@@ -1558,69 +1643,145 @@ import sernet.verinice.interfaces.bpm.ITaskParameter;
 import sernet.verinice.model.bpm.TaskParameter;
 import sernet.springclient.RightsServiceClient;
 import sernet.verinice.interfaces.ActionRightIDs;
-
+import sernet.verinice.model.samt.SamtTopic;
+import sernet.gs.service.RetrieveInfo;
+import sernet.verinice.model.common.CnATreeElement;
+import sernet.verinice.model.iso27k.Organization;
+import sernet.verinice.model.bsi.ITVerbund;
 import sernet.gs.service.NumericStringComparator;
-import sernet.verinice.report.service.impl.TocHelper2;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.text.SimpleDateFormat;
+import java.text.DateFormat;
+						  
 
-import sernet.verinice.report.service.impl;
-
+/** SamtTopics constants for backward compatibility */
+String SAMT_TOPIC_CONTROLNOTE = "samt_topic_controlnote";
+String PROP_AUDIT_FINDINGS = "samt_topic_audit_findings";
+String PROP_MATURITY = "samt_topic_maturity";
 	
 List sort(List list) {
-       Collections.sort(list, new Comparator() {
-	public int compare(Object o1, Object o2) {
+    Collections.sort(list, new Comparator() {
+	    public int compare(Object o1, Object o2) {
 		NumericStringComparator comp = new NumericStringComparator();
 		int compareresult =  comp.compare(o1.get(5), o2.get(5));
 		if(compareresult == 0){
-		return comp.compare(o1.get(6), o2.get(6));
-}else{
-	return comp.compare(o1.get(5),o2.get(5));
-}
-	}
-});
-        return list;
+		    return comp.compare(o1.get(6), o2.get(6));
+		}else{
+		    return comp.compare(o1.get(5),o2.get(5));
+		}
+	    }
+	});
+    return list;
 }
 
 
-        // set top level element for report:
-        root = helper.getRoot();
-        // try to get manual parameter if set:
-        myroot = _inpv.get("root_object");
-        if (myroot != null &amp;&amp; myroot != -1) {
-            root = myroot;
-        }
+CnATreeElement loadParentObject(ITask task){
+    RetrieveInfo ri = RetrieveInfo.getPropertyInstance();
+    LoadAncestors loadControl = new LoadAncestors(task.getElementType(), task.getUuid(), ri);
+    loadControl = helper.execute(loadControl);
+
+    return loadControl.getElement();
+}
+
+
+String getSamtTopicEntityProperty(CnATreeElement elem, String propertyKey){
+    return (elem instanceof SamtTopic) ? ((SamtTopic) elem).getEntity().getSimpleValue(propertyKey) : "-";
+}
+
+String getAuditTitle(CnATreeElement elem) {
+    Audit audit = getParentAudit(elem);
+    return audit != null ? audit.getTitle() : "-";
+}
+
+Audit getParentAudit(CnATreeElement elem){
+
+    if(elem == null) {
+	return null;
+    }
+    
+    if("audit".equals(elem.getTypeId())){
+	return (Audit) elem;
+    }
+
+    return getParentAudit(elem.getParent());
+}
+
+
+String loadOrganizationOrVerbund(CnATreeElement elem){
+    if (elem instanceof Organization ) {
+	return ((Organization) elem).getTitle();
+    }
+
+    if (elem instanceof ITVerbund) {
+	return ((ITVerbund) elem).getTitle();
+    }
+
+    return loadOrganizationOrVerbund(elem.getParent());
+}
+
+
+/** removes tags: <tag>hello</tag> -> hello */ 
+String removeHTMLTags(String description){
+    if(description == null)
+	return "";
+    else
+	return description.replaceAll("\\<[^>]*>", "");
+}
+
+// set top level element for report:
+root = helper.getRoot();
+// try to get manual parameter if set:
+myroot = _inpv.get("root_object");
+if (myroot != null &amp;&amp; myroot != -1) {
+    root = myroot;
+}
 
 TaskParameter param = new TaskParameter();
 rightsService = (RightsServiceClient) VeriniceContext.get(VeriniceContext.RIGHTS_SERVICE);
 boolean enabled =  rightsService.isEnabled(ActionRightIDs.TASKSHOWALL);
 if(enabled){
-param.setAllUser(true);
+    param.setAllUser(true);
 }
 
 Activator.inheritVeriniceContextState();
 taskList = ServiceFactory.lookupTaskService().getTaskList(param);
+
+
 List tasks = new ArrayList();
+DateFormat formatter = new SimpleDateFormat();
 
-        for (ITask task : taskList) {
+for (ITask task : taskList) {
 
-         List row = new ArrayList();
-            row.add(task.getAssignee());
-            row.add(task.getName());
-            row.add(task.getCreateDate());
-            row.add(task.getDueDate());
-            row.add(task.getUuid());
-	    row.add(task.getAuditTitle());
-            row.add(task.getControlTitle());
-            row.add(task.getDescription());
-            row.add(task.getElementType());
-            row.add(task.getIsRead());
-            row.add(task.getPriority());
-            row.add(task.getProcessName());
-            row.add(task.getUuidAudit());
-            tasks.add(row);
+    List row = new ArrayList();
+    CnATreeElement ancestor = loadParentObject(task);
+    
+    row.add(task.getAssignee());
+    row.add(task.getName());
+    row.add(formatter.format(task.getCreateDate()));
+    row.add(formatter.format(task.getDueDate()));
+    row.add(task.getUuid());
+    row.add(task.getGroupTitle());
+    row.add(task.getElementTitle());
+    row.add(removeHTMLTags(task.getDescription()));
+    row.add(task.getElementType());
+    row.add(task.getIsRead());
+    row.add(task.getPriority());
+    row.add(task.getProcessName());
+    row.add(task.getUuidGroup());
+    
+    row.add(loadOrganizationOrVerbund(ancestor));
+    row.add(getSamtTopicEntityProperty(ancestor, PROP_AUDIT_FINDINGS));
+    row.add(getSamtTopicEntityProperty(ancestor, SAMT_TOPIC_CONTROLNOTE));
+    row.add(getSamtTopicEntityProperty(ancestor, PROP_MATURITY));
+    row.add(getAuditTitle(ancestor));
+    
+    tasks.add(row);
+}
 
-        }
 sortedElements = sort(tasks);
-return sortedElements ;]]></xml-property>
+return sortedElements ;
+]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>2.0</Version>
@@ -1875,8 +2036,7 @@ return sortedElements ;]]></xml-property>
 inParameters(new String[] { "root_object" });
 
 String[] cols = new String[] {"Assignee", "Name", "CreateDate", "DueDate",
- "CnaUuid", "AuditTitle", "ControlTitle", "Description", "ElementType",
- "IsRead", "Priority", "ProcessName", "auditUuid"};
+ "CnaUuid", "AuditTitle", "ControlTitle", "Description", "ElementType", "IsRead", "Priority", "ProcessName", "auditUuid", "organization", "finding", "measure", "MajurityLevel" , "genericAuditTitle"};
 
 columns(cols);</value>
                 </ex-property>
@@ -2007,7 +2167,7 @@ columns(cols);</value>
     </page-setup>
     <body>
         <table id="3279">
-            <property name="width">11.427083333333334in</property>
+            <property name="width">11.177083333333334in</property>
             <property name="dataSet">Tasks</property>
             <list-property name="boundDataColumns">
                 <structure>
@@ -2053,12 +2213,6 @@ columns(cols);</value>
                     <property name="dataType">javaObject</property>
                 </structure>
                 <structure>
-                    <property name="name">Description</property>
-                    <text-property name="displayName">Description</text-property>
-                    <expression name="expression" type="javascript">dataSetRow["Description"]</expression>
-                    <property name="dataType">javaObject</property>
-                </structure>
-                <structure>
                     <property name="name">ElementType</property>
                     <text-property name="displayName">ElementType</text-property>
                     <expression name="expression" type="javascript">dataSetRow["ElementType"]</expression>
@@ -2077,79 +2231,121 @@ columns(cols);</value>
                     <property name="dataType">javaObject</property>
                 </structure>
                 <structure>
+                    <property name="name">auditUuid</property>
+                    <text-property name="displayName">auditUuid</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["auditUuid"]</expression>
+                    <property name="dataType">javaObject</property>
+                </structure>
+                <structure>
+                    <property name="name">finding</property>
+                    <text-property name="displayName">finding</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["finding"]</expression>
+                    <property name="dataType">javaObject</property>
+                </structure>
+                <structure>
+                    <property name="name">measure</property>
+                    <text-property name="displayName">measure</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["measure"]</expression>
+                    <property name="dataType">javaObject</property>
+                </structure>
+                <structure>
+                    <property name="name">Description</property>
+                    <text-property name="displayName">Description</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Description"]</expression>
+                    <property name="dataType">javaObject</property>
+                </structure>
+                <structure>
                     <property name="name">ProcessName</property>
                     <text-property name="displayName">ProcessName</text-property>
                     <expression name="expression" type="javascript">dataSetRow["ProcessName"]</expression>
                     <property name="dataType">javaObject</property>
                 </structure>
                 <structure>
-                    <property name="name">auditUuid</property>
-                    <text-property name="displayName">auditUuid</text-property>
-                    <expression name="expression" type="javascript">dataSetRow["auditUuid"]</expression>
+                    <property name="name">organization</property>
+                    <text-property name="displayName">organization</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["organization"]</expression>
+                    <property name="dataType">javaObject</property>
+                </structure>
+                <structure>
+                    <property name="name">MajurityLevel</property>
+                    <text-property name="displayName">MajurityLevel</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["MajurityLevel"]</expression>
+                    <property name="dataType">javaObject</property>
+                </structure>
+                <structure>
+                    <property name="name">genericAuditTitle</property>
+                    <text-property name="displayName">genericAuditTitle</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["genericAuditTitle"]</expression>
                     <property name="dataType">javaObject</property>
                 </structure>
             </list-property>
+            <structure name="toc"/>
+            <column id="3389">
+                <property name="width">1in</property>
+                <property name="repeat">1</property>
+            </column>
             <column id="3353">
-                <property name="width">0.9375in</property>
+                <property name="width">0.4270833333333333in</property>
                 <property name="repeat">1</property>
             </column>
             <column id="3354">
-                <property name="width">1.3229166666666667in</property>
+                <property name="width">0.9791666666666666in</property>
                 <property name="repeat">1</property>
             </column>
             <column id="3356">
-                <property name="width">0.6979166666666666in</property>
+                <property name="width">0.5104166666666666in</property>
                 <property name="repeat">1</property>
             </column>
             <column id="3349">
-                <property name="width">1.2395833333333333in</property>
+                <property name="width">0.9270833333333334in</property>
                 <property name="repeat">1</property>
             </column>
             <column id="3355">
-                <property name="width">1.3020833333333333in</property>
-                <property name="repeat">1</property>
-            </column>
-            <column id="3359">
-                <property name="width">0.7604166666666666in</property>
+                <property name="width">0.96875in</property>
                 <property name="repeat">1</property>
             </column>
             <column id="3348">
-                <property name="width">1in</property>
+                <property name="width">0.5729166666666666in</property>
             </column>
             <column id="3350">
-                <property name="width">0.78125in</property>
+                <property name="width">0.5833333333333334in</property>
                 <property name="textAlign">center</property>
             </column>
             <column id="3358">
-                <property name="width">0.78125in</property>
+                <property name="width">0.5833333333333334in</property>
                 <property name="textAlign">center</property>
             </column>
             <column id="3351">
-                <property name="width">0.8333333333333334in</property>
-                <property name="repeat">1</property>
-                <property name="textAlign">center</property>
-            </column>
-            <column id="3357">
                 <property name="width">0.625in</property>
                 <property name="repeat">1</property>
                 <property name="textAlign">center</property>
             </column>
+            <column id="3357">
+                <property name="width">0.46875in</property>
+                <property name="repeat">1</property>
+                <property name="textAlign">center</property>
+            </column>
             <column id="3360">
-                <property name="width">1.1458333333333333in</property>
+                <property name="width">0.8541666666666666in</property>
             </column>
             <header>
                 <row id="3280">
-                    <property name="height">100%</property>
+                    <property name="height">0.5520833333333334in</property>
                     <property name="backgroundColor">silver</property>
                     <property name="textAlign">left</property>
+                    <cell id="3387">
+                        <label id="3390">
+                            <text-property name="text">Organization / Scope</text-property>
+                        </label>
+                    </cell>
                     <cell id="3291">
                         <label id="3292">
-                            <text-property name="text">Audit Title</text-property>
+                            <text-property name="text">Audit Object</text-property>
                         </label>
                     </cell>
                     <cell id="3293">
                         <label id="3294">
-                            <text-property name="text">Objekt  Title</text-property>
+                            <text-property name="text">Object Title</text-property>
                         </label>
                     </cell>
                     <cell id="3297">
@@ -2167,11 +2363,6 @@ columns(cols);</value>
                             <property name="marginLeft">0pt</property>
                             <property name="textAlign">left</property>
                             <text-property name="text">Description</text-property>
-                        </label>
-                    </cell>
-                    <cell id="3303">
-                        <label id="3304">
-                            <text-property name="text">Process</text-property>
                         </label>
                     </cell>
                     <cell id="3281">
@@ -2205,19 +2396,22 @@ columns(cols);</value>
                     </cell>
                     <cell id="3305">
                         <label id="3306">
-                            <text-property name="text">Audit Uuid</text-property>
+                            <text-property name="text">Object Uuid</text-property>
                         </label>
                     </cell>
                 </row>
             </header>
             <detail>
                 <row id="3307">
-                    <property name="height">100%</property>
+                    <property name="height">0.53125in</property>
+                    <cell id="3388">
+                        <data id="3391">
+                            <property name="resultSetColumn">organization</property>
+                        </data>
+                    </cell>
                     <cell id="3318">
-                        <data id="3319">
-                            <property name="marginLeft">0pt</property>
-                            <property name="marginRight">0.5cm</property>
-                            <property name="resultSetColumn">AuditTitle</property>
+                        <data id="3397">
+                            <property name="resultSetColumn">genericAuditTitle</property>
                         </data>
                     </cell>
                     <cell id="3320">
@@ -2268,19 +2462,8 @@ columns(cols);</value>
                         </data>
                     </cell>
                     <cell id="3322">
-                        <text-data id="3361">
-                            <property name="marginLeft">0pt</property>
-                            <property name="marginRight">0pt</property>
-                            <property name="paddingRight">0.5cm</property>
-                            <structure name="toc"/>
-                            <expression name="valueExpr" type="javascript">row["Description"]</expression>
-                            <property name="contentType">html</property>
-                        </text-data>
-                    </cell>
-                    <cell id="3330">
-                        <data id="3331">
-                            <property name="marginRight">0.5cm</property>
-                            <property name="resultSetColumn">ProcessName</property>
+                        <data id="3386">
+                            <property name="resultSetColumn">Description</property>
                         </data>
                     </cell>
                     <cell id="3308">
@@ -2290,52 +2473,15 @@ columns(cols);</value>
                         </data>
                     </cell>
                     <cell id="3312">
-                        <text-data id="3363">
-                            <method name="onRender"><![CDATA[this.text = formatLongDate(row["CreateDate"]);
-
-function tryParseDate(inputDate){
-	importPackage(Packages.java.lang);
-	importPackage(Packages.java.util);
-	importPackage(Packages.java.text);
-	importPackage(Packages.sernet.verinice.report.service.impl);
-	var	patterns = new Array("EEE MMM dd HH:mm:ss z yyyy", "dd.MM.yyyy HH:mm","EEE MMM dd HH:mm:ss zzz yyyy");
-	var locales = new Array(Locale.GERMAN, Locale.ENGLISH);
-	for(var i = 0; i < patterns.length; i++){
-		for(var j = 0; j < locales.length; j++){
-			try{
-				formatter = new SimpleDateFormat(patterns[i], locales[j]);
-				formatter.setLenient(true);
-				return formatter.parse(inputDate);
-			} catch(e){
-				
-			}
-		}
-	}	
-	return null;
-}
-
-function formatLongDate(inputDate){
-	importPackage(Packages.java.lang);
-	importPackage(Packages.java.util);
-	importPackage(Packages.java.text);
-	importPackage(Packages.sernet.verinice.report.service.impl);
-		
-	fDate = tryParseDate(inputDate);
-	if(fDate != null){
-		destinationFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMAN);
-		retVal = destinationFormat.format(fDate);
-		sb = new StringBuilder();
-		tokens = retVal.split("\\s");
-		for(var i = 0; i < tokens.length; i++){
-			sb.append(tokens[i]);
-		}
-		return sb.toString().trim();
-	} else {
-		return null;
-}
-}]]></method>
-                            <property name="contentType">html</property>
-                        </text-data>
+                        <data id="3399">
+                            <structure name="dateTimeFormat">
+                                <property name="category">Unformatted</property>
+                            </structure>
+                            <structure name="stringFormat">
+                                <property name="category">Unformatted</property>
+                            </structure>
+                            <property name="resultSetColumn">CreateDate</property>
+                        </data>
                     </cell>
                     <cell id="3328">
                         <data id="3329">
@@ -2354,52 +2500,12 @@ function formatLongDate(inputDate){
                         </data>
                     </cell>
                     <cell id="3314">
-                        <text-data id="3364">
-                            <method name="onRender"><![CDATA[this.text = formatLongDate(row["DueDate"]);
-
-function tryParseDate(inputDate){
-	importPackage(Packages.java.lang);
-	importPackage(Packages.java.util);
-	importPackage(Packages.java.text);
-	importPackage(Packages.sernet.verinice.report.service.impl);
-	var	patterns = new Array("EEE MMM dd HH:mm:ss z yyyy", "dd.MM.yyyy HH:mm","EEE MMM dd HH:mm:ss zzz yyyy");
-	var locales = new Array(Locale.GERMAN, Locale.ENGLISH);
-	for(var i = 0; i < patterns.length; i++){
-		for(var j = 0; j < locales.length; j++){
-			try{
-				formatter = new SimpleDateFormat(patterns[i], locales[j]);
-				formatter.setLenient(true);
-				return formatter.parse(inputDate);
-			} catch(e){
-				
-			}
-		}
-	}	
-	return null;
-}
-
-function formatLongDate(inputDate){
-	importPackage(Packages.java.lang);
-	importPackage(Packages.java.util);
-	importPackage(Packages.java.text);
-	importPackage(Packages.sernet.verinice.report.service.impl);
-		
-	fDate = tryParseDate(inputDate);
-	if(fDate != null){
-		destinationFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMAN);
-		retVal = destinationFormat.format(fDate);
-		sb = new StringBuilder();
-		tokens = retVal.split("\\s");
-		for(var i = 0; i < tokens.length; i++){
-			sb.append(tokens[i]);
-		}
-		return sb.toString().trim();
-	} else {
-		return null;
-}
-}]]></method>
-                            <property name="contentType">html</property>
-                        </text-data>
+                        <data id="3400">
+                            <structure name="dateTimeFormat">
+                                <property name="category">Unformatted</property>
+                            </structure>
+                            <property name="resultSetColumn">DueDate</property>
+                        </data>
                     </cell>
                     <cell id="3326">
                         <data id="3327">
@@ -2420,9 +2526,8 @@ function formatLongDate(inputDate){
                         </data>
                     </cell>
                     <cell id="3332">
-                        <data id="3333">
-                            <property name="marginRight">0pt</property>
-                            <property name="resultSetColumn">auditUuid</property>
+                        <data id="3398">
+                            <property name="resultSetColumn">CnaUuid</property>
                         </data>
                     </cell>
                 </row>

@@ -35,10 +35,12 @@ import org.apache.log4j.Logger;
  * @author Daniel <dm[at]sernet[dot]de>
  * 
  */
-public class FileUtil {
+public final class FileUtil {
 
-    private static final Logger LOG = Logger.getLogger(FileUtil.class);
-    
+    private FileUtil() {
+        super();
+    }
+
     public static byte[] getBytesFromInputstream(InputStream is) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int nRead;

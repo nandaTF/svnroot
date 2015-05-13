@@ -41,7 +41,9 @@ public class LoadAssociatedGefaehrdungen extends GenericCommand {
 	private List<Baustein> alleBausteine;
 	private List<GefaehrdungsUmsetzung> associatedGefaehrdungen;
 
-	public LoadAssociatedGefaehrdungen(CnATreeElement cnaElement) {
+	private String language;
+
+	public LoadAssociatedGefaehrdungen(CnATreeElement cnaElement, String language) {
 		this.cnaElement = cnaElement;
 	}
 
@@ -65,7 +67,7 @@ public class LoadAssociatedGefaehrdungen extends GenericCommand {
 				if (!GefaehrdungsUtil.listContainsById(associatedGefaehrdungen, gefaehrdung)) {
 					associatedGefaehrdungen.add(
 							GefaehrdungsUmsetzungFactory.build(
-									null, gefaehrdung));
+									null, gefaehrdung, language));
 				}
 			}
 		}

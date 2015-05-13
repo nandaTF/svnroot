@@ -86,6 +86,64 @@ public class HuiProperty<K,V> implements Serializable{
         return type.isVisible();
     }
     
+    public boolean getIsURL(){
+        return type.isURL();
+    }
+    
+    public String getURLValue(){
+        if(getIsURL() && getValue() != null && !((String)getValue()).isEmpty()){
+            try{
+                int n = getIndexOf((String)getValue(), '"', 0);
+                String[] a = ((String)getValue()).substring(n).split(">");
+                return a[0].replaceAll("\"", "");
+            } catch (Exception e){
+                LOG.warn("Something went wrong on reading the URLValue", e);
+            }
+        }
+        return "";
+    }
+    
+    public String getURLText(){
+        if(getIsURL() && getValue() != null && !((String)getValue()).isEmpty()){
+            try{
+                int n = getIndexOf((String)getValue(), '"', 0);
+                String[] a = ((String)getValue()).substring(n).split(">");
+                String value = a[1].replaceAll("</a", "");
+                return value;
+            } catch (Exception e){
+                LOG.warn("Something went wrong on reading the URLText", e);
+            }
+    }
+    return "";
+    }
+    
+    public void setURLText(String urlText){
+        if(getIsURL()){
+            StringBuilder sb = new StringBuilder();
+            sb.append("<a href=\"").append(getURLValue()).append("\">").append(urlText).append("</a>");
+            setValue((V)(sb.toString()));
+        }
+    }
+    
+    public void setURLValue(String urlValue){
+        if(getIsURL()){
+            StringBuilder sb = new StringBuilder();
+            sb.append("<a href=\"").append(urlValue).append("\">").append(getURLText()).append("</a>");
+            setValue((V)(sb.toString()));
+        }
+        
+    }
+    
+    private static int getIndexOf(String str, char c, int n)
+    {
+      int pos = str.indexOf(c, 0);
+      while (n-- > 0 && pos != -1)
+      {
+        pos = str.indexOf(c, pos + 1);
+      }
+      return pos;
+    }
+    
     public boolean getIsVisible() {
         return isVisible();
     }
@@ -306,5 +364,6 @@ public class HuiProperty<K,V> implements Serializable{
         }
         return true;
     }
+
     
 }

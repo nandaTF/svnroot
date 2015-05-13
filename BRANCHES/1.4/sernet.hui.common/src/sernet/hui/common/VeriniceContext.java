@@ -116,7 +116,11 @@ public final class VeriniceContext {
     
     public static final String REPORT_DEPOSIT_SERVICE = "reportdepositService";
     
+    public static final String REPORT_HQL_SERVICE = "reportHQLService";
+    
     public static final String CONFIGURATION_SERVICE = "configurationService";
+    
+    public static final String SEARCH_SERVICE = "searchService";
     
     private static String serverUrl = null;
 
